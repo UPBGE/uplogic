@@ -7,7 +7,7 @@ def read_file(name):
         return f.read()
 
 
-version = 'v0.2'
+version = 'v0.2.1'
 shortdesc = "Uplogic utility for UPBGE."
 longdesc = '\n\n'.join([read_file(name) for name in [
     'README.md',
@@ -29,7 +29,7 @@ setup(
     keywords='Blender UPBGE logic',
     author='Leopold Auersperg-Castell',
     author_email='lauersperg@gmx.at',
-    url='https://github.com/IzaZed/Uchronian-Logic-UPBGE-Logic-Nodes',
+    url='https://github.com/UPBGE/uplogic',
     download_url='https://github.com/UPBGE/uplogic/archive/refs/tags/v1.0.tar.gz',
     license='GPLv2',
     packages=[
