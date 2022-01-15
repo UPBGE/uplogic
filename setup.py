@@ -7,7 +7,7 @@ def read_file(name):
         return f.read()
 
 
-version = 'v0.2.1'
+version = 'v1.0'
 shortdesc = "Uplogic utility for UPBGE."
 longdesc = '\n\n'.join([read_file(name) for name in [
     'README.md',
