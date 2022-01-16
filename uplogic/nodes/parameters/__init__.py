@@ -72,6 +72,7 @@ from .withinrange import ULWithinRange  # noqa
 from .worldposition import ULWorldPosition  # noqa
 
 from .getvsync import ULGetVSync  # noqa
+from .invertvalue import ULInvertValue  # noqa
 from .valueswitch import ULValueSwitch  # noqa
 from .getfullscreen import ULGetFullscreen  # noqa
 from .getresolution import ULGetResolution  # noqa
