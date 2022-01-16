@@ -37,7 +37,7 @@ from .timer import ULTimer  # noqa
 from .truefalse import ULTrueFalse  # noqa
 from .valuevalid import ULValueValid  # noqa
 
-from .controllerstatus import ULControllerStatus  # noqa
-from .pulsify import ULPulsify  # noqa
 from .barrier import ULBarrier
+from .controllerstatus import ULControllerStatus  # noqa
 from .delay import ULDelay
+from .pulsify import ULPulsify  # noqa

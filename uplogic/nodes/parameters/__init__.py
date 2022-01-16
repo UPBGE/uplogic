@@ -70,7 +70,6 @@ from .vectorxyz import ULVectorXYZ  # noqa
 from .vectorxyzw import ULVectorXYZW  # noqa
 from .withinrange import ULWithinRange  # noqa
 from .worldposition import ULWorldPosition  # noqa
-
 from .getvsync import ULGetVSync  # noqa
 from .invertvalue import ULInvertValue  # noqa
 from .valueswitch import ULValueSwitch  # noqa
@@ -79,9 +78,10 @@ from .getresolution import ULGetResolution  # noqa
 from .initemptydict import ULInitEmptyDict  # noqa
 from .initnewdict import ULInitNewDict  # noqa
 from .initemptylist import ULInitEmptyList  # noqa
-from .loadvariable import ULLoadVariable
-from .loadvariabledict import ULLoadVariableDict
-from .randomint import ULRandomInt
-from .randomvect import ULRandomVect
-from .getlightenergy import ULGetLightEnergy
-from .getlightcolor import ULGetLightColor
+from .loadvariable import ULLoadVariable  # noqa
+from .loadvariabledict import ULLoadVariableDict  # noqa
+from .randomint import ULRandomInt  # noqa
+from .randomvect import ULRandomVect  # noqa
+from .getlightenergy import ULGetLightEnergy  # noqa
+from .getlightcolor import ULGetLightColor  # noqa
+from .absolutevalue import ULAbsoluteValue  # noqa
