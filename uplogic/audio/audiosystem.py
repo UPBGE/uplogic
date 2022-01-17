@@ -34,7 +34,7 @@ class ULAudioSystem(object):
         self.device.doppler_factor = bpy.context.scene.audio_doppler_factor
         self.reverb_volumes = []
         for obj in scene.objects:
-            if obj.blenderObject.reverb_volume and not obj.blenderObject.data:
+            if getattr(obj.blenderObject, 'reverb_volume', False) and not obj.blenderObject.data:
                 self.reverb_volumes.append(obj)
         self.reverb = len(self.reverb_volumes) > 0
         GlobalDB.retrieve('uplogic.audio').put(name, self)
