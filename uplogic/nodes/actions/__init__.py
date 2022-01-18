@@ -81,7 +81,8 @@ from .removephysicsconstraint import ULRemovePhysicsConstraint  # noqa
 from .removevariable import ULRemoveVariable  # noqa
 from .replacemesh import ULReplaceMesh  # noqa
 from .resumesound import ULResumeSound  # noqa
-from .rotateto import ULRotateTo  # noqa
+# XXX. Rename Class to ULRotateTo
+from .rotateto import ULActionRotateTo  # noqa
 from .savevariable import ULSaveVariable  # noqa
 from .savevariabledict import ULSaveVariableDict  # noqa
 from .setactionframe import ULSetActionFrame  # noqa

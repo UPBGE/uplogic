@@ -7,7 +7,7 @@ from uplogic.utils import yrot_to
 from uplogic.utils import zrot_to
 
 
-class ULRotateTo(ULActionNode):
+class ULActionRotateTo(ULActionNode):
     def __init__(self):
         self.condition = None
         self.moving_object = None

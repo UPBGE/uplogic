@@ -51,7 +51,7 @@ class ULStartSound3D(ULActionNode):
         self.done = False
         self.on_finish = False
         volume = self.get_input(self.volume)
-        pitch = self.get_input(self.pitch) * logic.getTimeScale()
+        pitch = self.get_input(self.pitch)
         if self._handle:
             self._handle.volume = volume
             self._handle.pitch = pitch
@@ -75,7 +75,6 @@ class ULStartSound3D(ULActionNode):
 
         if is_invalid(file):
             return
-        print(reverb)
         self._handle = ULSound3D(
             speaker,
             file,
