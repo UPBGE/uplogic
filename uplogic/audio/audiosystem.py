@@ -25,8 +25,6 @@ class ULAudioSystem(object):
     def __init__(self, name: str):
         self.active_sounds = []
         self.name = name
-        self.listener = self.scene.active_camera
-        self.old_lis_pos = self.listener.worldPosition.copy()
         self.bounces = 0
         self.device = aud.Device()
         self.device.distance_model = aud.DISTANCE_MODEL_INVERSE_CLAMPED
@@ -34,6 +32,8 @@ class ULAudioSystem(object):
         self.device.doppler_factor = bpy.context.scene.audio_doppler_factor
         self.reverb_volumes = []
         self.scene = logic.getCurrentScene()
+        self.listener = self.scene.active_camera
+        self.old_lis_pos = self.listener.worldPosition.copy()
         self.setup(self.scene)
     
     def setup(self, scene=None):
