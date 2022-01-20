@@ -1,21 +1,26 @@
 '''TODO: Documentation
 '''
 
-from types import MethodType
 from bge import logic
 import time
 
 
-SCENE = logic.getCurrentScene()
+SCENE = None
 
 
-def get_event_manager(name: str = 'default'):
-    if not ULEventManager.initialized:
-        SCENE.pre_draw.append(ULEventManager.update)
-        ULEventManager.initialized = True
+def get_event_manager():
+    global SCENE
+    scene = logic.getCurrentScene()
+    if not ULEventManager.initialized or scene is not SCENE:
+        SCENE = scene
+        if ULEventManager not in SCENE.pre_draw:
+            SCENE.post_draw.append(ULEventManager.update)
+            ULEventManager.initialized = True
 
 
 class ULEventManager():
+    '''TODO: Documentation
+    '''
     events = {}
     callbacks = []
     initialized = False
@@ -25,13 +30,14 @@ class ULEventManager():
     def update(cls):
         for cb in cls.callbacks.copy():
             cb()
+        cls.log()
 
     @classmethod
     def log(cls):
         if cls.events:
             print('Events:')
             for evt in cls.events:
-                print(f'\t{evt}:\t{cls.events[evt]}')
+                print(f'\t{evt}:\t{cls.events[evt].content}')
 
     @classmethod
     def schedule(cls, cb):
@@ -53,7 +59,7 @@ class ULEventManager():
         cls.schedule(event.remove)
 
     @classmethod
-    def catch(cls, name):
+    def handle(cls, name):
         if not cls.initialized:
             get_event_manager()
         return cls.events.get(name, None)
@@ -93,7 +99,7 @@ def dispatch(name: str, content=None, messenger=None) -> None:
 def handle(name: str):
     '''TODO: Documentation
     '''
-    return ULEventManager.catch(name)
+    return ULEventManager.handle(name)
 
 
 def consume(name: str):
@@ -103,10 +109,14 @@ def consume(name: str):
 
 
 def schedule(name: str, content=None, messenger=None, delay=0.0):
+    '''TODO: Documentation
+    '''
     ScheduledEvent(delay, name, content, messenger)
 
 
 class ScheduledEvent():
+    '''TODO: Documentation
+    '''
 
     def __init__(self, delay, name, content, messenger):
         self.time = time.time()
@@ -114,22 +124,26 @@ class ScheduledEvent():
         self.name = name
         self.content = content
         self.messenger = messenger
-        ULEventManager.schedule(self.throw_scheduled)
+        ULEventManager.schedule(self.dispatch_scheduled)
 
-    def throw_scheduled(self):
+    def dispatch_scheduled(self):
         if time.time() >= self.delay:
-            ULEventManager.deschedule(self.throw_scheduled)
+            ULEventManager.deschedule(self.dispatch_scheduled)
             ULEvent(self.name, self.content, self.messenger)
 
 
 def schedule_callback(cb, delay=0.0, arg=None):
+    '''TODO: Documentation
+    '''
     ScheduledCallback(cb, delay, arg)
 
 
 class ScheduledCallback():
+    '''TODO: Documentation
+    '''
     delay: float = 0
     arg = None
-    callback: MethodType = None
+    callback = None
 
     def __init__(self, cb, delay=0.0, arg=None):
         ULEventManager.schedule(self.call_scheduled)

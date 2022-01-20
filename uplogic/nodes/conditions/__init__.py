@@ -39,5 +39,5 @@ from .valuevalid import ULValueValid  # noqa
 
 from .barrier import ULBarrier
 from .controllerstatus import ULControllerStatus  # noqa
-from .timedelay import ULTimeDelay
+from .timedelay import ULTimeDelay  # noqa
 from .pulsify import ULPulsify  # noqa

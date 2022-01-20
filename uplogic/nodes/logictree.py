@@ -1,5 +1,6 @@
 from bge import events
 from bge import logic
+from bge.types import KX_GameObject as GameObject
 from uplogic.audio import ULAudioSystem
 from uplogic.data import GlobalDB
 from uplogic.nodes import STATUS_READY
@@ -9,6 +10,8 @@ from uplogic.utils import debug
 from uplogic.utils import load_user_module
 from uplogic.utils import make_valid_name
 import bpy
+from bge.types import SCA_PythonKeyboard as Keyboard
+from bge.types import SCA_PythonMouse as Mouse
 import collections
 import time
 
@@ -16,14 +19,13 @@ import time
 class ULLogicTree(ULLogicContainer):
     def __init__(self):
         ULLogicContainer.__init__(self)
-        self._cells = []
+        self._cells: list = []
         self._iter = collections.deque()
-        self._lastuid = 0
-        self._owner = None
-        self._max_blocking_loop_count = 0
-        self._events = GlobalDB.retrieve('uplogic.events')
-        self.keyboard = None
-        self.mouse = None
+        self._lastuid: int = 0
+        self._owner: GameObject = None
+        self._max_blocking_loop_count: int = 0
+        self.keyboard: Keyboard = None
+        self.mouse: Mouse = None
         self.keyboard_events = None
         self.active_keyboard_events = None
         self.mouse_events = None
