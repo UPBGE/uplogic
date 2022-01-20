@@ -13,9 +13,8 @@ def get_event_manager():
     scene = logic.getCurrentScene()
     if not ULEventManager.initialized or scene is not SCENE:
         SCENE = scene
-        if ULEventManager not in SCENE.pre_draw:
-            SCENE.post_draw.append(ULEventManager.update)
-            ULEventManager.initialized = True
+        SCENE.post_draw.append(ULEventManager.update)
+        ULEventManager.initialized = True
 
 
 class ULEventManager():
@@ -30,7 +29,6 @@ class ULEventManager():
     def update(cls):
         for cb in cls.callbacks.copy():
             cb()
-        cls.log()
 
     @classmethod
     def log(cls):
@@ -59,7 +57,7 @@ class ULEventManager():
         cls.schedule(event.remove)
 
     @classmethod
-    def handle(cls, name):
+    def receive(cls, name):
         if not cls.initialized:
             get_event_manager()
         return cls.events.get(name, None)
@@ -90,16 +88,16 @@ class ULEvent():
         ULEventManager.deschedule(self.remove)
 
 
-def dispatch(name: str, content=None, messenger=None) -> None:
+def send(name: str, content=None, messenger=None) -> None:
     '''TODO: Documentation
     '''
     ULEvent(name, content, messenger)
 
 
-def handle(name: str):
+def receive(name: str):
     '''TODO: Documentation
     '''
-    return ULEventManager.handle(name)
+    return ULEventManager.receive(name)
 
 
 def consume(name: str):
@@ -124,11 +122,11 @@ class ScheduledEvent():
         self.name = name
         self.content = content
         self.messenger = messenger
-        ULEventManager.schedule(self.dispatch_scheduled)
+        ULEventManager.schedule(self.send_scheduled)
 
-    def dispatch_scheduled(self):
+    def send_scheduled(self):
         if time.time() >= self.delay:
-            ULEventManager.deschedule(self.dispatch_scheduled)
+            ULEventManager.deschedule(self.send_scheduled)
             ULEvent(self.name, self.content, self.messenger)
 
 

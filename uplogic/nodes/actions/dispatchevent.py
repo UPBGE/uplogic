@@ -1,4 +1,4 @@
-from uplogic.events import dispatch
+from uplogic.events import send
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
 from uplogic.utils import STATUS_INVALID
@@ -37,5 +37,5 @@ class ULDispatchEvent(ULActionNode):
         if is_invalid(subject):
             return
         self._set_ready()
-        dispatch(subject, body, target)
+        send(subject, body, target)
         self.done = True

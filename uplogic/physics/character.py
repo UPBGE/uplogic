@@ -10,7 +10,7 @@ class ULCharacter():
         self.character = getCharacter(owner)
         self.velocity = Vector((0, 0, 0))
         self.is_walking = False
-        logic.getCurrentScene().pre_draw.append(self.reset)
+        logic.getCurrentScene().post_draw.append(self.reset)
 
     def reset(self):
         if not self.is_walking:
@@ -18,7 +18,7 @@ class ULCharacter():
         self.is_walking = False
 
     def destroy(self):
-        logic.getCurrentScene().pre_draw.remove(self.reset)
+        logic.getCurrentScene().post_draw.remove(self.reset)
 
     @property
     def on_ground(self):

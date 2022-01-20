@@ -24,8 +24,8 @@ class ULAudioSystem(object):
     '''
     def __init__(self, name: str):
         self.active_sounds = []
-        scene = logic.getCurrentScene()
-        self.listener = scene.active_camera
+        self.name = name
+        self.listener = self.scene.active_camera
         self.old_lis_pos = self.listener.worldPosition.copy()
         self.bounces = 0
         self.device = aud.Device()
@@ -33,13 +33,21 @@ class ULAudioSystem(object):
         self.device.speed_of_sound = bpy.context.scene.audio_doppler_speed
         self.device.doppler_factor = bpy.context.scene.audio_doppler_factor
         self.reverb_volumes = []
-        for obj in scene.objects:
+        self.scene = logic.getCurrentScene()
+        self.setup(self.scene)
+    
+    def setup(self, scene=None):
+        if scene is None:
+            self.scene = logic.getCurrentScene()
+        else:
+            self.scene = scene
+        for obj in self.scene.objects:
             if getattr(obj.blenderObject, 'reverb_volume', False) and not obj.blenderObject.data:
                 self.reverb_volumes.append(obj)
         self.reverb = len(self.reverb_volumes) > 0
-        GlobalDB.retrieve('uplogic.audio').put(name, self)
+        GlobalDB.retrieve('uplogic.audio').put(self.name, self)
         bpy.app.handlers.game_post.append(self.shutdown)
-        scene.pre_draw.append(self.update)
+        self.scene.post_draw.append(self.update)
 
     def get_distance_model(self, name):
         return DISTANCE_MODELS.get(name, aud.DISTANCE_MODEL_INVERSE_CLAMPED)
@@ -55,7 +63,11 @@ class ULAudioSystem(object):
         self.old_lis_pos = wpos
         return vel
 
-    def update(self, cam):
+    def update(self):
+        scene = logic.getCurrentScene()
+        if scene is not self.scene:
+            self.setup(scene)
+        cam = scene.active_camera
         self.reverb = False
         self.listener = cam
         if not self.active_sounds:

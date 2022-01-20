@@ -31,7 +31,7 @@ class ULFloatsam(ULBuoy):
         self.height = height
         self.buoyancy = buoyancy
         self.align = align
-        logic.getCurrentScene().pre_draw.append(self.update)
+        logic.getCurrentScene().post_draw.append(self.update)
 
     def update(self):
         if not self._active:
@@ -63,7 +63,7 @@ class ULFloatsam(ULBuoy):
         floatsam.angularDamping = lindamp * .8
 
     def destroy(self):
-        logic.getCurrentScene().pre_draw.remove(self.update)
+        logic.getCurrentScene().post_draw.remove(self.update)
 
 
 class ULShip(ULBuoy):
@@ -77,7 +77,7 @@ class ULShip(ULBuoy):
         cs = sorted(game_object.childrenRecursive, key=lambda c: c.name)
         self.buoys = [c for c in cs if 'Buoy' in c.name]
         self.buoyancy = buoyancy
-        logic.getCurrentScene().pre_draw.append(self.update)
+        logic.getCurrentScene().post_draw.append(self.update)
 
     def update(self):
         if not self._active:
@@ -110,4 +110,4 @@ class ULShip(ULBuoy):
         ship.angularDamping = lindamp * .8
 
     def destroy(self):
-        logic.getCurrentScene().pre_draw.remove(self.update)
+        logic.getCurrentScene().post_draw.remove(self.update)

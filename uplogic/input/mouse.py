@@ -17,7 +17,7 @@ class ULMouseData():
         self.position = get_mouse_position()
         self.movement = (0, 0)
         self.wheel = mouse_wheel()
-        logic.getCurrentScene().pre_draw.append(self.update)
+        logic.getCurrentScene().post_draw.append(self.update)
 
     def update(self):
         old_pos = self.position
@@ -30,7 +30,7 @@ class ULMouseData():
         self.wheel = mouse_wheel()
 
     def destroy(self):
-        logic.getCurrentScene().pre_draw.remove(self.update)
+        logic.getCurrentScene().post_draw.remove(self.update)
 
 
 def set_mouse_position(x: int, y: int, absolute: bool = False):

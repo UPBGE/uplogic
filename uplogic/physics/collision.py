@@ -44,7 +44,7 @@ class ULCollision():
             self.callback(obj, point, normal)
             self.done_objs.append(obj)
 
-    def update(self, cam):
+    def update(self):
         self.done_objs = []
         if not self.consumed and self.active:
             self.consumed = True
@@ -55,11 +55,11 @@ class ULCollision():
     def register(self):
         if self.collision not in self.game_object.collisionCallbacks:
             self.game_object.collisionCallbacks.append(self.collision)
-        logic.getCurrentScene().pre_draw.append(self.update)
+        logic.getCurrentScene().post_draw.append(self.update)
 
     def unregister(self):
         self.game_object.collisionCallbacks.remove(self.collision)
-        logic.getCurrentScene().pre_draw.remove(self.update)
+        logic.getCurrentScene().post_draw.remove(self.update)
 
 
 def on_collision(obj, callback, prop='', material='', tap=False):

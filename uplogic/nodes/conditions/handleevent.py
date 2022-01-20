@@ -1,4 +1,4 @@
-from uplogic.events import handle
+from uplogic.events import receive
 from uplogic.events import ULEvent
 from uplogic.nodes import ULConditionNode
 from uplogic.nodes import ULOutSocket
@@ -30,4 +30,4 @@ class ULHandleEvent(ULConditionNode):
         if is_invalid(subject):
             return
         self._set_ready()
-        self.event = handle(subject)
+        self.event = receive(subject)

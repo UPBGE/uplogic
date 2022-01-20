@@ -15,7 +15,7 @@ class ULActionSystem():
         self.listener = scene.active_camera
         self.old_lis_pos = self.listener.worldPosition.copy()
         GlobalDB.retrieve('uplogic.animation').put(name, self)
-        scene.pre_draw.append(self.update)
+        scene.post_draw.append(self.update)
 
     @classmethod
     def lock_layer(cls, action):
@@ -42,7 +42,7 @@ class ULActionSystem():
         layers = cls.layers.get(action.game_object, [])
         return action.layer in layers
 
-    def update(self, cam):
+    def update(self):
         for action in self.actions:
             action.update()
 
