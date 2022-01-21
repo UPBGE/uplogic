@@ -255,22 +255,19 @@ class ULLogicTree(ULLogicContainer):
                 cells.append(cell)
         # pulse subnetworks
         for network in self.sub_networks:
+            # print(network.stopped)
             if network._owner.invalid:
                 self.sub_networks.remove(network)
-            elif not network.consumed:
-                network.update()
+            elif not network.stopped:
+                network.evaluate()
 
     def install_subnetwork(self, owner_object, node_tree_name, initial_status):
         # transform the tree name into a NL module name
         tree_name = make_valid_name(node_tree_name)
         mname = f'nl_{tree_name.lower()}'
-        if tree_name in owner_object:
-            if(initial_status is True):
-                owner_object[f'IGNLTree_{node_tree_name}'].stopped = False
-        else:
-            debug("Installing sub network...")
-            initial_status_key = f'NL__{node_tree_name}'
-            owner_object[initial_status_key] = initial_status
-            tree = load_user_module(mname, tree_name)
-            owner_object[f'IGNLTree_{node_tree_name}']
-            self.sub_networks.append(tree)
+        module = load_user_module(mname)
+        owner_object[f'NL__{tree_name}'] = initial_status
+        tree = module.get_tree(owner_object).network
+        owner_object[f'IGNLTree_{tree_name}'] = tree
+        self.sub_networks.append(tree)
+        return tree

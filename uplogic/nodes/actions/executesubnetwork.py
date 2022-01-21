@@ -27,18 +27,12 @@ class ULExecuteSubNetwork(ULActionNode):
         self._set_ready()
         if is_invalid(target_object):
             return
-        added_network = target_object.get(f'IGNLTree_{tree_name}', None)
-        if not added_network:
-            self._network.install_subnetwork(
+        network = target_object.get(f'IGNLTree_{tree_name}', None)
+        if network is None:
+            network = self._network.install_subnetwork(
                 target_object,
                 tree_name,
-                False
+                True
             )
-            added_network = target_object.get(f'IGNLTree_{tree_name}', None)
-        if condition:
-            added_network.stopped = False
-        else:
-            added_network.stop()
-            added_network.stopped = True
-            return
+        network.stopped = not condition
         self.done = True

@@ -170,16 +170,10 @@ def not_met(*conditions) -> bool:
     return False
 
 
-def load_user_module(module_name, clsname):
+def load_user_module(module_name):
     import sys
-    order = f'import {module_name}'
-    print(order)
-    exec(order)
-    print('#######################################################')
-    for t in globals():
-        print(t)
-    print('#######################################################')
-    print(sys.modules[module_name].globals())  # {clsname}']()
+    exec(f"import {module_name}")
+    return sys.modules[module_name]
 
 
 def unload_nodes(a, b):
