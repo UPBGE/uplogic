@@ -247,7 +247,8 @@ class ULLogicTree(ULLogicContainer):
             debug(
                 "Wrong sorting alghorithm!",
                 loop_index,
-                max_loop_count)
+                max_loop_count
+            )
         for cell in self._cells:
             cell.reset()
             if cell.has_status(STATUS_WAITING):

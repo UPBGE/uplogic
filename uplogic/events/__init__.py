@@ -94,7 +94,7 @@ def send(name: str, content=None, messenger=None) -> None:
     ULEvent(name, content, messenger)
 
 
-def receive(name: str):
+def receive(name: str) -> ULEvent:
     '''TODO: Documentation
     '''
     return ULEventManager.receive(name)
