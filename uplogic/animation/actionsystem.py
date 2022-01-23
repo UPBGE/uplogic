@@ -19,28 +19,31 @@ class ULActionSystem():
 
     @classmethod
     def lock_layer(cls, action):
-        layers = cls.layers.get(action.game_object, [])
-        layers.append(action.layer)
+        layers = cls.layers.get(action.game_object, {})
+        layers[action.layer] = action
         cls.layers[action.game_object] = layers
 
     @classmethod
     def free_layer(cls, action):
-        layers = cls.layers.get(action.game_object, [])
-        if action.layer in layers:
-            layers.remove(action.layer)
+        layers = cls.layers.get(action.game_object, {})
+        layers.pop(action.layer, None)
         cls.layers[action.game_object] = layers
 
     @classmethod
     def find_free_layer(cls, action):
-        layers = cls.layers.get(action.game_object, [])
+        layers = cls.layers.get(action.game_object, {})
         action.layer = 0
         while action.layer in layers:
             action.layer += 1
 
     @classmethod
     def check_layer(cls, action):
-        layers = cls.layers.get(action.game_object, [])
+        layers = cls.layers.get(action.game_object, {})
         return action.layer in layers
+    
+    @classmethod
+    def get_layer(cls, game_object, layer=0):
+        return cls.layers.get(game_object, {}).get(layer, None)
 
     def update(self):
         for action in self.actions:

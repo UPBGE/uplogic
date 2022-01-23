@@ -1,3 +1,6 @@
+from uplogic.animation import ULActionSystem
+from uplogic.animation.action import ULAction
+from uplogic.data import GlobalDB
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
 from uplogic.utils import is_invalid
@@ -14,9 +17,19 @@ class ULSetActionFrame(ULActionNode):
         self.game_object = None
         self.action_layer = None
         self.action_frame = None
+        self.action_name = None
+        self.layer_weight = None
         self.freeze = None
         self.done = None
+        self.act_system = self.get_act_system()
         self.OUT = ULOutSocket(self, self.get_done)
+        
+    def get_act_system(self):
+        act_systems = GlobalDB.retrieve('uplogic.animation')
+        if act_systems.check('default'):
+            return act_systems.get('default')
+        else:
+            return ULActionSystem('default')
 
     def get_done(self):
         return self.done
@@ -44,22 +57,23 @@ class ULSetActionFrame(ULActionNode):
             game_object,
         ):
             return
-        is_playing = game_object.isPlayingAction(action_layer)
-        same_action = game_object.getActionName(action_layer) == action_name
-        action = bpy.data.actions[action_name]
-        start_frame = action.frame_range[0]
-        end_frame = action.frame_range[1]
-        finished = game_object.getActionFrame(action_layer) >= end_frame
-        if not (is_playing or same_action) or finished:
-            game_object.stopAction(action_layer)
-            speed = .000000000000000001 if freeze else 1
-            game_object.playAction(
+
+        action = self.act_system.get_layer(game_object, action_layer)
+        same_action = action == action_name
+        if not same_action or action is None:
+            action = bpy.data.actions[action_name]
+            start_frame = action.frame_range[0]
+            end_frame = action.frame_range[1]
+            action = ULAction(
+                game_object,
                 action_name,
                 start_frame,
                 end_frame,
                 action_layer,
-                layer_weight=1-layer_weight,
-                speed=speed
+                layer_weight=layer_weight
             )
-        game_object.setActionFrame(action_frame, action_layer)
-        self.done = True
+
+        action.frame = action_frame
+        if freeze:
+            action.pause()
+        action.layer_weight = layer_weight

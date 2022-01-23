@@ -72,7 +72,6 @@ class ULShip(ULBuoy):
         super().__init__()
         self.game_object = game_object
         game_object[SHIP] = self
-        print(game_object)
         self.height = height
         cs = sorted(game_object.childrenRecursive, key=lambda c: c.name)
         self.buoys = [c for c in cs if 'Buoy' in c.name]

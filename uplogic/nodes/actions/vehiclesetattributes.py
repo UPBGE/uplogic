@@ -50,7 +50,6 @@ class ULVehicleSetAttributes(ULActionNode):
         if is_waiting(value_type, wheelcount):
             return
         if is_invalid(game_object):
-            print(game_object)
             return
         attrs_to_set = [
             self.get_input(self.set_suspension_compression),

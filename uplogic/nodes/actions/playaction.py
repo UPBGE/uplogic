@@ -1,4 +1,5 @@
-from bge import logic
+from uplogic.animation import ULActionSystem
+from uplogic.data import GlobalDB
 from uplogic.animation import ULAction
 from uplogic.animation import ACTION_STARTED
 from uplogic.animation import ACTION_FINISHED
@@ -34,10 +35,18 @@ class ULPlayAction(ULActionNode):
         self._running = False
         self._finished = False
         self._action = None
+        self.act_system = self.get_act_system()
         self.STARTED = ULOutSocket(self, self._get_started)
         self.FINISHED = ULOutSocket(self, self._get_finished)
         self.RUNNING = ULOutSocket(self, self._get_running)
         self.FRAME = ULOutSocket(self, self._get_frame)
+        
+    def get_act_system(self):
+        act_systems = GlobalDB.retrieve('uplogic.animation')
+        if act_systems.check('default'):
+            return act_systems.get('default')
+        else:
+            return ULActionSystem('default')
 
     def _get_started(self):
         if self.action_evt:
@@ -60,22 +69,38 @@ class ULPlayAction(ULActionNode):
         return STATUS_WAITING
 
     def evaluate(self):
+        action = self._action
+        has_action = action is not None
         condition = self.get_input(self.condition)
-        game_object = self.get_input(self.game_object)
-        action_name = self.get_input(self.action_name)
-        start_frame = self.get_input(self.start_frame)
-        end_frame = self.get_input(self.end_frame)
-        layer = self.get_input(self.layer)
-        priority = self.get_input(self.priority)
-        play_mode = self.get_input(self.play_mode)
         layer_weight = self.get_input(self.layer_weight)
         speed = self.get_input(self.speed)
+        layer = self.get_input(self.layer)
+        game_object = self.get_input(self.game_object)
+        play_mode = self.get_input(self.play_mode)
+        if not_met(condition):
+            self._set_ready()
+            if has_action:
+                action.speed = speed
+                action.layer_weight = layer_weight
+                if play_mode > 2:
+                    self._action.remove()
+                    self._action = None
+            return
+        layer_action = self.act_system.get_layer(game_object, layer) 
+        if layer_action is not self._action:
+            self._action = layer_action 
+        action_name = self.get_input(self.action_name)
+        if has_action and action.name == action_name:
+            return
+        if has_action and not action.is_playing:
+            self._action = None
+        start_frame = self.get_input(self.start_frame)
+        end_frame = self.get_input(self.end_frame)
+        priority = self.get_input(self.priority)
         blendin = self.get_input(self.blendin)
         blend_mode = self.get_input(self.blend_mode)
         self.action_evt = receive(self._action)
         self._set_ready()
-        if not_met(condition):
-            return
         if is_invalid(game_object):
             return
         if is_waiting(
@@ -100,7 +125,7 @@ class ULPlayAction(ULActionNode):
         if speed <= 0:
             speed = 0.01
         if is_invalid(game_object):  # can't play
-            self._action.remove()
+            self._action = None
 
         self._action = ULAction(
             game_object,

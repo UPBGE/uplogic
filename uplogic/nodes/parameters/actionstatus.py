@@ -1,3 +1,5 @@
+from uplogic.animation import ULActionSystem
+from uplogic.data import GlobalDB
 from uplogic.nodes import ULOutSocket
 from uplogic.nodes import ULParameterNode
 from uplogic.utils import STATUS_WAITING
@@ -12,18 +14,27 @@ class ULActionStatus(ULParameterNode):
         self.action_layer = None
         self._action_name = None
         self._action_frame = None
-        self.NOT_PLAYING = ULOutSocket(self, self.get_not_playing)
+        self.action = None
+        self.act_system = self.get_act_system()
         self.ACTION_NAME = ULOutSocket(self, self.get_action_name)
         self.ACTION_FRAME = ULOutSocket(self, self.get_action_frame)
+        
+    def get_act_system(self):
+        act_systems = GlobalDB.retrieve('uplogic.animation')
+        if act_systems.check('default'):
+            return act_systems.get('default')
+        else:
+            return ULActionSystem('default')
 
     def get_action_name(self):
-        return self._action_name
+        if self.action:
+            return self.action.name
+        return STATUS_WAITING
 
     def get_action_frame(self):
-        return self._action_frame
-
-    def get_not_playing(self):
-        return not self.get_value()
+        if self.action:
+            return self.action.frame
+        return STATUS_WAITING
 
     def evaluate(self):
         game_object = self.get_input(self.game_object)
@@ -31,11 +42,8 @@ class ULActionStatus(ULParameterNode):
         if is_waiting(game_object, action_layer):
             return
         self._set_ready()
-        if is_invalid(game_object):
-            self._action_name = STATUS_WAITING
-            self._action_frame = STATUS_WAITING
+        self.action = self.act_system.get_layer(game_object, action_layer)
+        if self.action is None:
             self._set_value(False)
-        else:
-            self._set_value(game_object.isPlayingAction(action_layer))
-            self._action_name = game_object.getActionName(action_layer)
-            self._action_frame = game_object.getActionFrame(action_layer)
+            return
+        self._set_value(self.action.is_playing)

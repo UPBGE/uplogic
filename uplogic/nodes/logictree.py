@@ -255,7 +255,6 @@ class ULLogicTree(ULLogicContainer):
                 cells.append(cell)
         # pulse subnetworks
         for network in self.sub_networks:
-            # print(network.stopped)
             if network._owner.invalid:
                 self.sub_networks.remove(network)
             elif not network.stopped:

@@ -39,21 +39,19 @@ class ULAction():
         speed: float = 1,
         layer_weight: float = 1,
         blend_mode: str = 'blend',
+        keep=False
     ):
         self._locked = False
         self._speed = speed
+        self._frozen_speed = 0
+        self.keep = keep
         self._layer_weight = layer_weight
         act_system = 'default'
         self.act_system = self.get_act_sys(act_system)
         self.layer = layer
         self.game_object = game_object
-        if self.layer == -1:
-            ULActionSystem.find_free_layer(self)
-        elif ULActionSystem.check_layer(self):
-            return
-        self.on_start()
+        self.name = action_name
         layer = self.layer
-        self.acion_name = action_name
         self.start_frame = start_frame
         self.end_frame = end_frame
         self.priority = priority
@@ -61,6 +59,11 @@ class ULAction():
         play_mode = self.play_mode = PLAY_MODES.get(play_mode, play_mode)
         blend_mode = self.blend_mode = BLEND_MODES.get(blend_mode, blend_mode)
         same_action = game_object.getActionName(layer) == action_name
+        if self.layer == -1:
+            ULActionSystem.find_free_layer(self)
+        elif ULActionSystem.check_layer(self):
+            return
+        self.on_start()
         if not same_action and self.is_playing:
             game_object.stopAction(layer)
         if not (self.is_playing or same_action):
@@ -104,7 +107,7 @@ class ULAction():
 
     @frame.setter
     def frame(self, value):
-        self.game_object.setActionFrame(self.layer, value)
+        self.game_object.setActionFrame(value, self.layer)
 
     @property
     def layer_weight(self) -> float:
@@ -134,7 +137,7 @@ class ULAction():
         self._locked = True
         layer = self.layer
         game_object = self.game_object
-        action_name = self.acion_name
+        action_name = self.name
         start_frame = self.start_frame
         end_frame = self.end_frame
         play_mode = self.play_mode
@@ -188,7 +191,7 @@ class ULAction():
         layer = self.layer
         start_frame = self.start_frame
         end_frame = self.end_frame
-        action_name = self.acion_name
+        action_name = self.name
         play_mode = self.play_mode
         playing_action = game_object.getActionName(layer)
         playing_frame = game_object.getActionFrame(layer)
@@ -207,11 +210,18 @@ class ULAction():
                     is_near_end = (playing_frame >= (end_frame - 0.5))
                 else:  # play 100 to 0
                     is_near_end = (playing_frame <= (end_frame + 0.5))
-                if is_near_end:
+                if is_near_end and not self.keep:
                     self.act_system.remove(self)
 
     def remove(self):
         self.act_system.remove(self)
+
+    def pause(self):
+        self._frozen_speed = self.speed
+        self.speed = 0
+
+    def unpause(self):
+        self.speed = self._frozen_speed
 
     def stop(self):
         self.on_finish()

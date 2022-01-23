@@ -30,5 +30,4 @@ class ULSetCameraFOV(ULActionNode):
         if is_invalid(camera):
             return
         camera.fov = fov
-        print(camera.fov)
         self.done = True
