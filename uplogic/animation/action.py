@@ -44,6 +44,7 @@ class ULAction():
         self._locked = False
         self._speed = speed
         self._frozen_speed = 0
+        self.finished = False
         self.keep = keep
         self._layer_weight = layer_weight
         act_system = 'default'
@@ -224,6 +225,7 @@ class ULAction():
         self.speed = self._frozen_speed
 
     def stop(self):
+        self.finished = True
         self.on_finish()
         self.game_object.stopAction(self.layer)
 
