@@ -21,6 +21,7 @@ class ULLoadVariable(ULParameterNode):
         socket = self.get_output('var')
         if socket is None:
             name = self.get_input(self.name)
+            print(name, 'Hooo')
             if is_waiting(name):
                 return self.set_output('var', STATUS_WAITING)
             cust_path = self.get_custom_path(self.path)
@@ -39,14 +40,13 @@ class ULLoadVariable(ULParameterNode):
         return socket
 
     def read_from_json(self, path, name):
-        self.done = False
         if not path.endswith('.json'):
             path = path + f'{self.file_name}.json'
         if path:
             f = open(path, 'r')
             data = json.load(f)
             if name not in data:
-                debug('"{}" is not a saved Variabe!')
+                debug(f'"{name}" is not a saved Variabe!')
             var = data[name]
             f.close()
             return var

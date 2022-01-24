@@ -208,9 +208,9 @@ class ULAction():
         ):
             if play_mode == logic.KX_ACTION_MODE_PLAY:
                 if end_frame > start_frame:  # play 0 to 100
-                    is_near_end = (playing_frame >= (end_frame - 0.5))
+                    is_near_end = (playing_frame >= (end_frame))
                 else:  # play 100 to 0
-                    is_near_end = (playing_frame <= (end_frame + 0.5))
+                    is_near_end = (playing_frame <= (end_frame))
                 if is_near_end and not self.keep:
                     self.act_system.remove(self)
 
