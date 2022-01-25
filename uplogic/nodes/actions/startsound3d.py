@@ -1,4 +1,3 @@
-from bge import logic
 from uplogic.audio import ULSound3D
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
@@ -40,12 +39,15 @@ class ULStartSound3D(ULActionNode):
         if not self._handle:
             return False
         if self._handle.finished:
-            self._handle = None
             return True
         return False
 
     def get_done(self):
         return self.done
+    
+    def reset(self):
+        if getattr(self._handle, 'finished'):
+            self._handle = None
 
     def evaluate(self):
         self.done = False
@@ -55,7 +57,6 @@ class ULStartSound3D(ULActionNode):
         if self._handle:
             self._handle.volume = volume
             self._handle.pitch = pitch
-            return
         condition = self.get_input(self.condition)
         if not_met(condition):
             self._set_ready()

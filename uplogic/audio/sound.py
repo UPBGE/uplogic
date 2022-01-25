@@ -136,6 +136,7 @@ class ULSound2D(ULSound):
         pitch: float = 1,
         loop_count: int = 1
     ):
+        self.finished = False
         if not (file and aud_system):
             return
         self.pitch = pitch
@@ -196,6 +197,7 @@ class ULSound3D(ULSound):
         cone_outer_volume: float = 0,
         aud_system: str = 'default'
     ):
+        self.finished = False
         if not (file and aud_system and speaker):
             return
         self._clear_sound = 1

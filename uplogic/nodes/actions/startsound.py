@@ -28,23 +28,29 @@ class ULStartSound(ULActionNode):
         if not self._handle:
             return False
         if self._handle.finished:
-            self._handle = None
             return True
         return False
 
     def get_done(self):
         return self.done
 
+    def reset(self):
+        if getattr(self._handle, 'finished'):
+            self._handle = None
+
     def evaluate(self):
         self.done = False
         self.on_finish = False
         self._set_ready()
+        pitch = self.get_input(self.pitch)
+        volume = self.get_input(self.volume)
+        if self._handle:
+            self._handle.pitch = pitch
+            self._handle.volume = volume
         condition = self.get_input(self.condition)
         if not_met(condition):
             self._set_ready()
             return
-        pitch = self.get_input(self.pitch)
-        volume = self.get_input(self.volume)
         file = self.get_input(self.sound)
         loop_count = self.get_input(self.loop_count)
 
