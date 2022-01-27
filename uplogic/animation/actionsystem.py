@@ -44,23 +44,18 @@ class ULActionSystem():
         return cls.layers.get(game_object, {}).get(layer, None)
 
     def update(self):
-        print(len(self.actions))
-        print([a.name for a in self.actions])
-        print(self.layers)
         for action in self.actions:
             action.update()
 
     def add(self, action):
         '''TODO: Documentation
         '''
-        # print(action.name)
         self.actions.append(action)
         ULActionSystem.lock_layer(action)
 
     def remove(self, action):
         '''TODO: Documentation
         '''
-        # print(action.name)
         action.stop()
         if action in self.actions:
             self.actions.remove(action)

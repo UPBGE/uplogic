@@ -60,7 +60,6 @@ class ULSetActionFrame(ULActionNode):
 
         action = self.act_system.get_layer(game_object, action_layer)
         same_action = action is not None and action.name == action_name
-        # print('same_action', same_action)
         if not same_action or action is None:
             action = bpy.data.actions[action_name]
             start_frame = action.frame_range[0]
@@ -73,9 +72,8 @@ class ULSetActionFrame(ULActionNode):
                 action_layer,
                 layer_weight=layer_weight
             )
-            print('FUCKING SET THE FUCKING FRAME YO!', action.name, action.frame)
 
-        action.frame = action_frame
+        game_object.setActionFrame(action_frame, action_layer)
         if freeze:
             action.speed = 0
         action.layer_weight = layer_weight
