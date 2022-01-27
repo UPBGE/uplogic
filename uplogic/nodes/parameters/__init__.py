@@ -73,6 +73,8 @@ from .worldposition import ULWorldPosition  # noqa
 from .getvsync import ULGetVSync  # noqa
 from .invertvalue import ULInvertValue  # noqa
 from .valueswitch import ULValueSwitch  # noqa
+from .valueswitch import ULValueSwitchList  # noqa
+from .valueswitch import ULValueSwitchListCompare  # noqa
 from .getfullscreen import ULGetFullscreen  # noqa
 from .getresolution import ULGetResolution  # noqa
 from .initemptydict import ULInitEmptyDict  # noqa
