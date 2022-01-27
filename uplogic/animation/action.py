@@ -1,6 +1,7 @@
 from bge import logic
-from random import randint, random
 from bge.types import KX_GameObject as GameObject
+from random import randint
+from random import random
 from uplogic.animation import ULActionSystem
 from uplogic.data import GlobalDB
 from uplogic.events import schedule
@@ -49,21 +50,22 @@ class ULAction():
         self._layer_weight = layer_weight
         act_system = 'default'
         self.act_system = self.get_act_sys(act_system)
-        self.layer = layer
         self.game_object = game_object
         self.name = action_name
-        layer = self.layer
         self.start_frame = start_frame
         self.end_frame = end_frame
         self.priority = priority
         self.blendin = blendin
+        self.layer = layer
         play_mode = self.play_mode = PLAY_MODES.get(play_mode, play_mode)
         blend_mode = self.blend_mode = BLEND_MODES.get(blend_mode, blend_mode)
-        same_action = game_object.getActionName(layer) == action_name
-        if self.layer == -1:
+        if layer == -1:
             ULActionSystem.find_free_layer(self)
         elif ULActionSystem.check_layer(self):
+            self.finished = True
             return
+        layer = self.layer
+        same_action = game_object.getActionName(layer) == action_name
         self.on_start()
         if not same_action and self.is_playing:
             game_object.stopAction(layer)
@@ -104,7 +106,7 @@ class ULAction():
     def frame(self) -> float:
         if self.is_playing:
             return self.game_object.getActionFrame(self.layer)
-        return 0
+        return -1
 
     @frame.setter
     def frame(self, value):

@@ -1,5 +1,5 @@
 from uplogic.nodes import ULConditionNode
-from uplogic.utils import is_waiting
+from uplogic.utils import STATUS_WAITING, is_waiting
 
 
 class ULOr(ULConditionNode):
@@ -35,6 +35,5 @@ class ULOrList(ULConditionNode):
         ce = self.get_input(self.ce)
         cf = self.get_input(self.cf)
         self._set_ready()
-        if is_waiting(ca, cb, cc, cd, ce, cf):
-            self._set_value(False)
-        self._set_value(ca or cb or cc or cd or ce or cf)
+        conds = [ca, cb, cc, cd, ce, cf]
+        self._set_value(True in conds)

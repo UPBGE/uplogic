@@ -21,7 +21,6 @@ class ULLoadVariable(ULParameterNode):
         socket = self.get_output('var')
         if socket is None:
             name = self.get_input(self.name)
-            print(name, 'Hooo')
             if is_waiting(name):
                 return self.set_output('var', STATUS_WAITING)
             cust_path = self.get_custom_path(self.path)

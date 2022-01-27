@@ -88,18 +88,20 @@ class ULPlayAction(ULActionNode):
                 if self._action.finished:
                     self._action = None
                     self.in_use = False
-                if play_mode > 2:
+                elif play_mode > 2:
                     self._action.remove()
                     self._action = None
                     self.in_use = False
-            return
-        if self.in_use:
             return
         layer_action = self.act_system.get_layer(game_object, layer) 
         if layer_action is not self._action:
             self._action = layer_action 
         action_name = self.get_input(self.action_name)
-        if has_action and action.name == action_name:
+        if layer_action and layer_action.name == action_name:
+            layer_action.speed = speed
+            layer_action.layer_weight = layer_weight
+            return
+        if self.in_use:
             return
         if has_action and action.finished:
             self._action = None

@@ -46,7 +46,8 @@ class ULStartSound3D(ULActionNode):
         return self.done
     
     def reset(self):
-        if getattr(self._handle, 'finished'):
+        ULActionNode.reset(self)
+        if self._handle and self._handle.finished:
             self._handle = None
 
     def evaluate(self):
