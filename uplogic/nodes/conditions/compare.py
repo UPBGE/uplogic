@@ -1,6 +1,7 @@
 from uplogic.nodes import ULConditionNode
 from uplogic.nodes import ULOutSocket
 from uplogic.utils import LOGIC_OPERATORS
+from uplogic.utils import STATUS_WAITING
 from uplogic.utils import is_waiting
 
 
@@ -21,7 +22,7 @@ class ULCompare(ULConditionNode):
             threshold = self.get_input(self.threshold)
             operator = self.get_input(self.operator)
             if is_waiting(a, b, threshold):
-                return
+                return STATUS_WAITING
             if operator > 1:  # eq and neq are valid for None
                 if a is None:
                     return
