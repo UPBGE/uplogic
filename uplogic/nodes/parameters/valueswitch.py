@@ -83,6 +83,7 @@ class ULValueSwitchListCompare(ULParameterNode):
         ULParameterNode.__init__(self)
         self.operator = operator
         self.p0 = None
+        self.val_default = None
         self.pa = None
         self.val_a = None
         self.pb = None
@@ -107,6 +108,7 @@ class ULValueSwitchListCompare(ULParameterNode):
 
     def get_result(self):
         p0 = self.get_input(self.p0)
+        val_default = self.get_input(self.val_default)
         pa = self.get_input(self.pa)
         val_a = self.get_input(self.val_a)
         pb = self.get_input(self.pb)
@@ -146,7 +148,8 @@ class ULValueSwitchListCompare(ULParameterNode):
             return
         if LOGIC_OPERATORS[operator](p0, pf):
             return val_f
-        return
+        else:
+            return val_default
 
     def evaluate(self):
         self._set_ready()
