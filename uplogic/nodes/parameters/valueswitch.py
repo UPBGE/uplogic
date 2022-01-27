@@ -1,6 +1,7 @@
 from uplogic.nodes import ULParameterNode
 from uplogic.nodes import ULOutSocket
 from uplogic.utils import LOGIC_OPERATORS
+from uplogic.utils import STATUS_WAITING
 from uplogic.utils import is_waiting
 
 
@@ -57,7 +58,7 @@ class ULValueSwitchList(ULParameterNode):
         cf = self.get_input(self.cf)
         val_f = self.get_input(self.val_f)
         if is_waiting(ca, cb, cc, cd, ce, cf):
-            return
+            return STATUS_WAITING
         if ca == True:
             return val_a
         elif cb == True:
@@ -120,7 +121,7 @@ class ULValueSwitchListCompare(ULParameterNode):
         val_f = self.get_input(self.val_f)
         operator = self.get_input(self.operator)
         if is_waiting(p0, pa, pb, pc, pd, pe, pf):
-            return
+            return STATUS_WAITING
         if self.is_none_if_not_eq_or_neq_operator(p0, pa):
             return
         if LOGIC_OPERATORS[operator](p0, pa):
