@@ -1,13 +1,14 @@
 '''TODO: Documentation
 '''
 
+from genericpath import isfile
 from bge import logic
 from bge.types import KX_GameObject as GameObject
 from mathutils import Vector
 from uplogic.audio import ULAudioSystem
 from uplogic.data import GlobalDB
 from uplogic.events import schedule_callback
-from uplogic.utils import interpolate
+from uplogic.utils import debug, interpolate
 import aud
 
 
@@ -143,6 +144,9 @@ class ULSound2D(ULSound):
         self.volume = volume
         self.aud_system = self.get_aud_sys(aud_system)
         soundfile = logic.expandPath(file)
+        if not isfile(soundfile):
+            debug(f'Soundfile {soundfile} could not be loaded!')
+            return
         sound = aud.Sound(soundfile)
         device = self.aud_system.device
         handle = self.sound = device.play(sound)
@@ -214,6 +218,9 @@ class ULSound3D(ULSound):
         self.cone_outer_volume = cone_outer_volume
         self.transition = transition_speed
         soundfile = logic.expandPath(file)
+        if not isfile(soundfile):
+            debug(f'Soundfile {soundfile} could not be loaded!')
+            return
         sound = self.soundpath = aud.Sound(soundfile)
         device = self.aud_system.device
         handle = device.play(sound)

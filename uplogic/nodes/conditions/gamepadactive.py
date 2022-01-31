@@ -22,6 +22,6 @@ class ULGamepadActive(ULConditionNode):
                 axis_active = True
                 break
         self._set_value(
-            joystick.activeButtons or
+            len(joystick.activeButtons) > 0 or
             axis_active
         )
