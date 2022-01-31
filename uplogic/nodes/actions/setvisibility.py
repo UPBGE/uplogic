@@ -1,3 +1,4 @@
+from pickle import TRUE
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
 from uplogic.utils import is_waiting
@@ -49,7 +50,6 @@ class ULSetCollectionVisibility(ULActionNode):
         self.condition = None
         self.collection = None
         self.visible: bool = None
-        self.recursive: bool = None
         self.done: bool = None
         self.OUT = ULOutSocket(self, self.get_done)
 
@@ -72,18 +72,16 @@ class ULSetCollectionVisibility(ULActionNode):
             self._set_ready()
             return STATUS_WAITING
         visible: bool = self.get_input(self.visible)
-        recursive: bool = self.get_input(self.recursive)
-        if is_waiting(visible, recursive):
+        if is_waiting(visible):
             return STATUS_WAITING
         self._set_ready()
         if visible is None:
-            return
-        if recursive is None:
             return
         collection = self.get_collection()
         if collection == STATUS_WAITING:
             return STATUS_WAITING
         objects = collection.objects
+        recursive = True
         for o in objects:
             gameObject = check_game_object(o.name)
             if not is_invalid(gameObject):
