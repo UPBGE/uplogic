@@ -5,16 +5,11 @@ from bge import logic
 import time
 
 
-SCENE = None
-
-
 def get_event_manager():
-    global SCENE
     scene = logic.getCurrentScene()
-    if not ULEventManager.initialized or scene is not SCENE:
-        SCENE = scene
-        SCENE.post_draw.append(ULEventManager.update)
-        ULEventManager.initialized = True
+    if ULEventManager.update not in scene.post_draw:
+        scene.post_draw.append(ULEventManager.update)
+        # ULEventManager.initialized = True
 
 
 class ULEventManager():
@@ -37,6 +32,7 @@ class ULEventManager():
             for evt in cls.events:
                 print(f'\t{evt}:\t{cls.events[evt].content}')
 
+
     @classmethod
     def schedule(cls, cb):
         if not cls.initialized:
@@ -55,6 +51,13 @@ class ULEventManager():
             get_event_manager()
         cls.events[event.name] = event
         cls.schedule(event.remove)
+
+    @classmethod
+    def send(cls, name, content, messenger) -> None:
+        if not cls.initialized:
+            get_event_manager()
+        ULEvent(name, content, messenger)
+
 
     @classmethod
     def receive(cls, name):
@@ -91,7 +94,7 @@ class ULEvent():
 def send(name: str, content=None, messenger=None) -> None:
     '''TODO: Documentation
     '''
-    ULEvent(name, content, messenger)
+    ULEventManager.send(name, content, messenger)
 
 
 def receive(name: str) -> ULEvent:
