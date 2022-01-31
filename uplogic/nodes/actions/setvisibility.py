@@ -1,8 +1,11 @@
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
 from uplogic.utils import is_waiting
+from uplogic.utils import STATUS_WAITING
 from uplogic.utils import is_invalid
 from uplogic.utils import not_met
+from uplogic.utils import check_game_object
+import bpy
 
 
 class ULSetVisibility(ULActionNode):
@@ -37,4 +40,52 @@ class ULSetVisibility(ULActionNode):
         if recursive is None:
             return
         game_object.setVisible(visible, recursive)
+        self.done = True
+
+
+class ULSetCollectionVisibility(ULActionNode):
+    def __init__(self):
+        ULActionNode.__init__(self)
+        self.condition = None
+        self.collection = None
+        self.visible: bool = None
+        self.recursive: bool = None
+        self.done: bool = None
+        self.OUT = ULOutSocket(self, self.get_done)
+
+    def get_done(self):
+        return self.done
+
+    def get_collection(self):
+        collection = self.get_input(self.collection)
+        if is_invalid(collection):
+            return STATUS_WAITING
+        col = bpy.data.collections.get(collection)
+        if not col:
+            return STATUS_WAITING
+        return col
+
+    def evaluate(self):
+        self.done = False
+        condition = self.get_input(self.condition)
+        if not_met(condition):
+            self._set_ready()
+            return STATUS_WAITING
+        visible: bool = self.get_input(self.visible)
+        recursive: bool = self.get_input(self.recursive)
+        if is_waiting(visible, recursive):
+            return STATUS_WAITING
+        self._set_ready()
+        if visible is None:
+            return
+        if recursive is None:
+            return
+        collection = self.get_collection()
+        if collection == STATUS_WAITING:
+            return STATUS_WAITING
+        objects = collection.objects
+        for o in objects:
+            gameObject = check_game_object(o.name)
+            if not is_invalid(gameObject):
+                gameObject.setVisible(visible, recursive)
         self.done = True
