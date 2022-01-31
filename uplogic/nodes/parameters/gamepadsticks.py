@@ -14,6 +14,7 @@ class ULGamepadSticks(ULParameterNode):
         self.threshold = None
         self._x_axis_values = None
         self._y_axis_values = None
+        self.raw_values = [0, 0]
         self.X = ULOutSocket(self, self.get_x_axis)
         self.Y = ULOutSocket(self, self.get_y_axis)
 
