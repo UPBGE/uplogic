@@ -1,4 +1,3 @@
-from pickle import TRUE
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
 from uplogic.utils import is_waiting
