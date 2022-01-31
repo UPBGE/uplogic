@@ -55,33 +55,21 @@ class ULSetCollectionVisibility(ULActionNode):
     def get_done(self):
         return self.done
 
-    def get_collection(self):
-        collection = self.get_input(self.collection)
-        if is_invalid(collection):
-            return STATUS_WAITING
-        col = bpy.data.collections.get(collection)
-        if not col:
-            return STATUS_WAITING
-        return col
-
     def evaluate(self):
         self.done = False
         condition = self.get_input(self.condition)
+        collection = self.get_input(self.collection)
         if not_met(condition):
             self._set_ready()
-            return STATUS_WAITING
         visible: bool = self.get_input(self.visible)
-        if is_waiting(visible):
+        if is_waiting(visible, collection):
             return STATUS_WAITING
         self._set_ready()
         if visible is None:
             return
-        collection = self.get_collection()
-        if collection == STATUS_WAITING:
-            return STATUS_WAITING
-        objects = collection.objects
         recursive = True
-        for o in objects:
+        col = bpy.data.collections.get(collection)
+        for o in col.objects:
             gameObject = check_game_object(o.name)
             if not is_invalid(gameObject):
                 gameObject.setVisible(visible, recursive)
