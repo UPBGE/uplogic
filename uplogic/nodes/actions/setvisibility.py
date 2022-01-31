@@ -3,6 +3,8 @@ from uplogic.nodes import ULOutSocket
 from uplogic.utils import is_waiting
 from uplogic.utils import is_invalid
 from uplogic.utils import not_met
+from uplogic.utils import check_game_object
+import bpy
 
 
 class ULSetVisibility(ULActionNode):
@@ -37,4 +39,37 @@ class ULSetVisibility(ULActionNode):
         if recursive is None:
             return
         game_object.setVisible(visible, recursive)
+        self.done = True
+
+
+class ULSetCollectionVisibility(ULActionNode):
+    def __init__(self):
+        ULActionNode.__init__(self)
+        self.condition = None
+        self.collection = None
+        self.visible: bool = None
+        self.done: bool = None
+        self.OUT = ULOutSocket(self, self.get_done)
+
+    def get_done(self):
+        return self.done
+
+    def evaluate(self):
+        self.done = False
+        condition = self.get_input(self.condition)
+        collection = self.get_input(self.collection)
+        if not_met(condition):
+            self._set_ready()
+        visible: bool = self.get_input(self.visible)
+        if is_waiting(visible, collection):
+            return
+        self._set_ready()
+        if visible is None:
+            return
+        recursive = True
+        col = bpy.data.collections.get(collection)
+        for o in col.objects:
+            gameObject = check_game_object(o.name)
+            if not is_invalid(gameObject):
+                gameObject.setVisible(visible, recursive)
         self.done = True
