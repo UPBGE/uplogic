@@ -3,7 +3,7 @@ from uplogic.nodes import ULOutSocket
 from uplogic.utils import is_waiting
 from uplogic.utils import is_invalid
 from uplogic.utils import not_met
-from uplogic.utils import check_game_object
+from uplogic.utils import logic
 import bpy
 
 
@@ -68,8 +68,9 @@ class ULSetCollectionVisibility(ULActionNode):
             return
         recursive = True
         col = bpy.data.collections.get(collection)
+        scene = logic.getCurrentScene()
         for o in col.objects:
-            gameObject = check_game_object(o.name)
+            gameObject = scene.getGameObjectFromObject(o)
             if not is_invalid(gameObject):
                 gameObject.setVisible(visible, recursive)
         self.done = True
