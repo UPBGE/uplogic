@@ -19,6 +19,10 @@ DISTANCE_MODELS = {
 }
 
 
+def set_master_volume(volume, aud_system='default') -> None:
+    GlobalDB.retrieve
+
+
 class ULAudioSystem(object):
     '''TODO: Documentation
     '''
@@ -26,6 +30,7 @@ class ULAudioSystem(object):
         self.active_sounds = []
         self.name = name
         self.bounces = 0
+        self.volume = 1.0
         self.device = aud.Device()
         self.device.distance_model = aud.DISTANCE_MODEL_INVERSE_CLAMPED
         self.device.speed_of_sound = bpy.context.scene.audio_doppler_speed

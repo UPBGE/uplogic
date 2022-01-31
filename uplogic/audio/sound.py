@@ -95,7 +95,7 @@ class ULReverb():
             sample.distance_maximum = handle.distance_maximum
             sample.cone_angle_inner = handle.cone_angle_inner
             sample.pitch = handle.pitch
-            sample.volume = (1-(handle.volume * (mult**2)))*.5 * self.volume
+            sample.volume = (1-(handle.volume * (mult**2)))*.5 * self.volume * self.aud_system.volume
             sample.cone_volume_outer = handle.cone_volume_outer
 
 
@@ -141,8 +141,8 @@ class ULSound2D(ULSound):
         if not (file and aud_system):
             return
         self.pitch = pitch
-        self.volume = volume
         self.aud_system = self.get_aud_sys(aud_system)
+        self.volume = volume
         soundfile = logic.expandPath(file)
         if not isfile(soundfile):
             debug(f'Soundfile {soundfile} could not be loaded!')
@@ -152,7 +152,7 @@ class ULSound2D(ULSound):
         handle = self.sound = device.play(sound)
         handle.relative = True
         handle.pitch = pitch
-        handle.volume = volume
+        handle.volume = volume * self.aud_system.volume
         handle.loop_count = loop_count
         self.aud_system.add(self)
 
@@ -165,7 +165,7 @@ class ULSound2D(ULSound):
             self.aud_system.remove(self)
             return
         handle.pitch = self.pitch * logic.getTimeScale()
-        handle.volume = self.volume
+        handle.volume = self.volume * self.aud_system.volume
 
 
 class ULSound3D(ULSound):
@@ -216,6 +216,7 @@ class ULSound3D(ULSound):
         self.volume = volume
         self.pitch = pitch
         self.cone_outer_volume = cone_outer_volume
+        master_volume = self.aud_system.volume
         self.transition = transition_speed
         soundfile = logic.expandPath(file)
         if not isfile(soundfile):
@@ -242,13 +243,13 @@ class ULSound3D(ULSound):
             handle.attenuation = attenuation
             handle.orientation = speaker.worldOrientation.to_quaternion()
             handle.pitch = pitch
-            handle.volume = volume
+            handle.volume = volume * master_volume
             handle.distance_reference = distance_ref
             handle.distance_maximum = 1000
             handle.cone_angle_inner = cone_angle[0]
             handle.cone_angle_outer = cone_angle[1]
             handle.loop_count = loop_count
-            handle.cone_volume_outer = cone_outer_volume * volume
+            handle.cone_volume_outer = cone_outer_volume * volume * master_volume
         if self.reverb:
             self.reverb_samples = ULReverb(
                 self,
@@ -331,11 +332,13 @@ class ULSound3D(ULSound):
                     if not i
                     else (1 - cs) * sustained
                 )
-                handle.volume = self.volume * mult
+                master_volume = self.aud_system.volume
+                handle.volume = self.volume * mult * master_volume
                 handle.cone_volume_outer = (
                     self.cone_outer_volume *
                     self.volume *
-                    mult
+                    mult *
+                    master_volume
                 )
         if self.reverb_samples:
             self.reverb_samples.update()
