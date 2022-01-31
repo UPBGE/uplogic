@@ -1,7 +1,6 @@
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
 from uplogic.utils import is_waiting
-from uplogic.utils import STATUS_WAITING
 from uplogic.utils import is_invalid
 from uplogic.utils import not_met
 from uplogic.utils import check_game_object
@@ -63,7 +62,7 @@ class ULSetCollectionVisibility(ULActionNode):
             self._set_ready()
         visible: bool = self.get_input(self.visible)
         if is_waiting(visible, collection):
-            return STATUS_WAITING
+            return
         self._set_ready()
         if visible is None:
             return
