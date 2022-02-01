@@ -49,10 +49,22 @@ class ULSetCollectionVisibility(ULActionNode):
         self.collection = None
         self.visible: bool = None
         self.done: bool = None
+        self.recursive: bool = None
         self.OUT = ULOutSocket(self, self.get_done)
 
     def get_done(self):
         return self.done
+
+    def set_collection_visible(self, visible, recursive, scene, collection):
+        for o in collection.objects:
+            gameObject = scene.getGameObjectFromObject(o)
+            if not is_invalid(gameObject):
+                gameObject.setVisible(visible, True)
+        if recursive:
+            if len(collection.children) <= 0:
+                return
+            for child in collection.children:
+                return self.set_collection_visible(visible, recursive, scene, child)
 
     def evaluate(self):
         self.done = False
@@ -61,16 +73,15 @@ class ULSetCollectionVisibility(ULActionNode):
         if not_met(condition):
             self._set_ready()
         visible: bool = self.get_input(self.visible)
+        recursive: bool = self.get_input(self.recursive)
         if is_waiting(visible, collection):
             return
         self._set_ready()
         if visible is None:
             return
-        recursive = True
+        if recursive is None:
+            return
         col = bpy.data.collections.get(collection)
         scene = logic.getCurrentScene()
-        for o in col.objects:
-            gameObject = scene.getGameObjectFromObject(o)
-            if not is_invalid(gameObject):
-                gameObject.setVisible(visible, recursive)
+        self.set_collection_visible(visible, recursive, scene, col)
         self.done = True
