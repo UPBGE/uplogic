@@ -117,11 +117,16 @@ class ULSound():
     def get_aud_sys(self, name: str):
         '''TODO: Documentation
         '''
+        scene = logic.getCurrentScene()
         aud_systems = GlobalDB.retrieve('uplogic.audio')
+        # print(scene.post_draw)
         if aud_systems.check(name):
-            return aud_systems.get(name)
+            aud_sys = aud_systems.get(name)
         else:
-            return ULAudioSystem(name)
+            aud_sys = ULAudioSystem(name)
+        if aud_sys.update not in scene.post_draw:
+            scene.post_draw.append(aud_sys.update)
+        return aud_sys
 
 
 class ULSound2D(ULSound):
@@ -142,6 +147,7 @@ class ULSound2D(ULSound):
             return
         self.pitch = pitch
         self.aud_system = self.get_aud_sys(aud_system)
+        # print(self.aud_system)
         self.volume = volume
         soundfile = logic.expandPath(file)
         if not isfile(soundfile):
@@ -210,6 +216,7 @@ class ULSound3D(ULSound):
         self.sounds = []
         self.reverb_samples = None
         self.aud_system = self.get_aud_sys(aud_system)
+        # print(self.aud_system)
         self.speaker = speaker
         self.reverb = reverb
         self.occlusion = occlusion

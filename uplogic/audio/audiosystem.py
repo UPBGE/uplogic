@@ -20,7 +20,9 @@ DISTANCE_MODELS = {
 
 
 def set_master_volume(volume, aud_system='default') -> None:
-    GlobalDB.retrieve
+    aud_system = GlobalDB.retrieve('uplogic.audio').get(aud_system)
+    if aud_system:
+        aud_system.volume = volume
 
 
 class ULAudioSystem(object):
