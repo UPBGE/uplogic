@@ -41,6 +41,7 @@ from .vehiclesetattributes import ULVehicleSetAttributes  # noqa
 from .setgameobjectattr import ULSetGameObjectAttribue  # noqa
 from .sendmessage import ULSendMessage  # noqa
 from .setvisibility import ULSetVisibility  # noqa
+from .setvisibility import ULSetCollectionVisibility  # noqa
 from .setcurvepoints import ULSetCurvePoints  # noqa
 from .raycast import ULRaycast  # noqa
 from .projectileraycast import ULProjectileRayCast  # noqa
