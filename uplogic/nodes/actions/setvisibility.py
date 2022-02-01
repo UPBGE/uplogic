@@ -64,7 +64,7 @@ class ULSetCollectionVisibility(ULActionNode):
             if len(collection.children) <= 0:
                 return
             for child in collection.children:
-                return self.set_collection_visible(visible, recursive, scene, child)
+                self.set_collection_visible(visible, recursive, scene, child)
 
     def evaluate(self):
         self.done = False
