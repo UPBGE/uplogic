@@ -72,6 +72,7 @@ class ULSetCollectionVisibility(ULActionNode):
         collection = self.get_input(self.collection)
         if not_met(condition):
             self._set_ready()
+            return
         visible: bool = self.get_input(self.visible)
         recursive: bool = self.get_input(self.recursive)
         if is_waiting(visible, collection):
