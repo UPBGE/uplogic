@@ -1,5 +1,5 @@
 from uplogic.nodes import ULActionNode
-from uplogic.utils import is_invalid
+from uplogic.utils import STATUS_WAITING, is_invalid
 from uplogic.utils import is_waiting
 from uplogic.utils import not_met
 from uplogic.utils import xrot_to
@@ -9,6 +9,7 @@ from uplogic.utils import zrot_to
 
 class ULActionRotateTo(ULActionNode):
     def __init__(self):
+        ULActionNode.__init__(self)
         self.condition = None
         self.moving_object = None
         self.target_point = None
@@ -24,8 +25,7 @@ class ULActionRotateTo(ULActionNode):
         moving_object = self.get_input(self.moving_object)
         target_point = self.get_input(self.target_point)
         speed = self.get_input(self.speed)
-        if hasattr(target_point, 'worldPosition'):
-            target_point = target_point.worldPosition
+        target_point = getattr(target_point, 'worldPosition', target_point)
         rot_axis = self.get_input(self.rot_axis)
         front_axis = self.get_input(self.front_axis)
         if is_invalid(moving_object):

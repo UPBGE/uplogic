@@ -10,7 +10,7 @@ class ULSetSensorValue(ULActionNode):
         ULActionNode.__init__(self)
         self.condition = None
         self.game_obj = None
-        self.act_name = None
+        self.sens_name = None
         self.field = None
         self.value = None
         self.done = None
@@ -22,10 +22,11 @@ class ULSetSensorValue(ULActionNode):
     def evaluate(self):
         self.done = False
         game_obj = self.get_input(self.game_obj)
-        sens_name = self.get_input(self.act_name)
+        sens_name = self.get_input(self.sens_name)
         condition = self.get_input(self.condition)
         if not_met(condition):
             return
+        # sensor = game_obj.blenderObject.game.sensors.get(sens_name)
         sensor = game_obj.sensors.get(sens_name)
         if not sensor:
             return

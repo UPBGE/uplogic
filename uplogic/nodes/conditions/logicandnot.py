@@ -10,9 +10,12 @@ class ULAndNot(ULConditionNode):
 
     def evaluate(self):
         ca = self.get_input(self.condition_a)
-        cb = not self.get_input(self.condition_b)
         self._set_ready()
-        if is_waiting(ca, cb):
+        if is_waiting(ca) or not ca:
             self._set_value(False)
             return
-        self._set_value(ca and cb)
+        cb = not self.get_input(self.condition_b)
+        if is_waiting(cb) or not cb:
+            self._set_value(False)
+            return
+        self._set_value(True)

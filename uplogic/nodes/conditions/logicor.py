@@ -12,8 +12,10 @@ class ULOr(ULConditionNode):
         ca = self.get_input(self.ca)
         cb = self.get_input(self.cb)
         self._set_ready()
-        if is_waiting(ca, cb):
-            self._set_value(False)
+        if is_waiting(ca):
+            ca = False
+        if is_waiting(cb):
+            cb = False
         self._set_value(ca or cb)
 
 

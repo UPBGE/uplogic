@@ -65,3 +65,4 @@ class ULStartSound(ULActionNode):
             pitch,
             loop_count
         )
+        self.done = True

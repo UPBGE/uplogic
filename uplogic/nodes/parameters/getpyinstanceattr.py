@@ -1,6 +1,6 @@
 from uplogic.nodes import ULParameterNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import STATUS_WAITING
+from uplogic.utils import STATUS_INVALID, STATUS_WAITING
 from uplogic.utils import is_waiting
 
 
@@ -15,8 +15,8 @@ class ULGetPyInstanceAttr(ULParameterNode):
         instance = self.get_input(self.instance)
         attr = self.get_input(self.attr)
         if is_waiting(instance, attr):
-            return
-        return getattr(instance, attr, STATUS_WAITING)
+            return STATUS_WAITING
+        return getattr(instance, attr, STATUS_INVALID)
 
     def evaluate(self):
         self._set_ready()

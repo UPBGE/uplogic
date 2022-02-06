@@ -10,12 +10,15 @@ class ULAnd(ULConditionNode):
 
     def evaluate(self):
         ca = self.get_input(self.ca)
-        cb = self.get_input(self.cb)
         self._set_ready()
-        if is_waiting(ca, cb):
+        if is_waiting(ca) or not ca:
             self._set_value(False)
             return
-        self._set_value(ca and cb)
+        cb = self.get_input(self.cb)
+        if is_waiting(cb) or not cb:
+            self._set_value(False)
+            return
+        self._set_value(True)
 
 
 class ULAndList(ULConditionNode):
@@ -30,14 +33,29 @@ class ULAndList(ULConditionNode):
         self.cf = True
 
     def evaluate(self):
-        ca = self.get_input(self.ca)
-        cb = self.get_input(self.cb)
-        cc = self.get_input(self.cc)
-        cd = self.get_input(self.cd)
-        ce = self.get_input(self.ce)
-        cf = self.get_input(self.cf)
         self._set_ready()
-        if is_waiting(ca, cb, cc, cd, ce, cf):
+        ca = self.get_input(self.ca)
+        if is_waiting(ca) or not ca:
             self._set_value(False)
             return
-        self._set_value(ca and cb and cc and cd and ce and cf)
+        cb = self.get_input(self.cb)
+        if is_waiting(cb) or not cb:
+            self._set_value(False)
+            return
+        cc = self.get_input(self.cc)
+        if is_waiting(cc) or not cc:
+            self._set_value(False)
+            return
+        cd = self.get_input(self.cd)
+        if is_waiting(cd) or not cd:
+            self._set_value(False)
+            return
+        ce = self.get_input(self.ce)
+        if is_waiting(ce) or not ce:
+            self._set_value(False)
+            return
+        cf = self.get_input(self.cf)
+        if is_waiting(cf) or not cf:
+            self._set_value(False)
+            return
+        self._set_value(True)
