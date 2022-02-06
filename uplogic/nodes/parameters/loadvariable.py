@@ -46,7 +46,8 @@ class ULLoadVariable(ULParameterNode):
             data = json.load(f)
             if name not in data:
                 debug(f'"{name}" is not a saved Variabe!')
-            var = data[name]
+                return
+            var = data.get(name)
             f.close()
             return var
         else:
