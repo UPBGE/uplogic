@@ -6,14 +6,6 @@ from uplogic.utils import not_met
 import bpy
 
 
-VOLUMETRIC_TILE_SIZES = {
-    0: '16',
-    1: '8',
-    2: '4',
-    3: '2'
-}
-
-
 class ULSetExposure(ULActionNode):
 
     def __init__(self):

@@ -1,3 +1,4 @@
+from mathutils import Vector
 from uplogic.nodes import ULConditionNode
 from uplogic.utils import LOGIC_OPERATORS
 from uplogic.utils import is_invalid
@@ -48,9 +49,9 @@ class ULCheckDistance(ULConditionNode):
         if is_waiting(a, b, op, dist, hyst):
             return
         self._set_ready()
-        if is_invalid(a):
+        if is_invalid(a) or not isinstance(a, Vector):
             return
-        if is_invalid(b):
+        if is_invalid(b) or not isinstance(b, Vector):
             return
         if op is None:
             return

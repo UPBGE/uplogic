@@ -14,7 +14,6 @@ class ULLoadVariable(ULParameterNode):
         self.name = None
         self.path = ''
         self.file_name = ''
-        self.var = None
         self.VAR = ULOutSocket(self, self.get_var)
 
     def get_var(self):
@@ -47,9 +46,8 @@ class ULLoadVariable(ULParameterNode):
             if name not in data:
                 debug(f'"{name}" is not a saved Variabe!')
                 return
-            var = data.get(name)
             f.close()
-            return var
+            return data.get(name)
         else:
             debug('No saved variables!')
 
