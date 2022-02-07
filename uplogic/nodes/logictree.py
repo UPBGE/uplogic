@@ -269,4 +269,5 @@ class ULLogicTree(ULLogicContainer):
         tree = module.get_tree(owner_object).network
         owner_object[f'IGNLTree_{tree_name}'] = tree
         self.sub_networks.append(tree)
+        tree.stopped = not initial_status
         return tree

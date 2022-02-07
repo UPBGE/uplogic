@@ -1,6 +1,6 @@
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_waiting
+from uplogic.utils import is_waiting, make_valid_name
 from uplogic.utils import is_invalid
 from uplogic.utils import not_met
 
@@ -29,6 +29,9 @@ class ULStopSubNetwork(ULActionNode):
         self._set_ready()
         if is_invalid(game_object):
             return
-        network = game_object.get(f'IGNLTree_{logic_network_name}')
+        tree_name = make_valid_name(logic_network_name)
+        network = game_object.get(f'IGNLTree_{tree_name}')
+        # if network is None:
+        #     return
         network.stop()
         self.done = True

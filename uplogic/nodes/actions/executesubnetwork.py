@@ -1,6 +1,6 @@
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_invalid
+from uplogic.utils import is_invalid, make_valid_name
 
 
 class ULExecuteSubNetwork(ULActionNode):
@@ -27,6 +27,7 @@ class ULExecuteSubNetwork(ULActionNode):
         self._set_ready()
         if is_invalid(target_object):
             return
+        tree_name = make_valid_name(tree_name)
         network = target_object.get(f'IGNLTree_{tree_name}', None)
         if network is None:
             network = self._network.install_subnetwork(
