@@ -225,9 +225,9 @@ def project_vector3(v, xi, yi):
 def xrot_to(
     rotating_object,
     target_pos,
-    front_axis_code,
-    speed,
-    time_per_frame
+    front_axis_code=0,
+    speed=0,
+    time_per_frame=1/60
 ):
     front_vector = LO_AXIS_TO_VECTOR[front_axis_code]
     vec = rotating_object.getVectTo(target_pos)[1]
@@ -262,9 +262,9 @@ def xrot_to(
 def yrot_to(
     rotating_object,
     target_pos,
-    front_axis_code,
-    speed,
-    time_per_frame
+    front_axis_code=0,
+    speed=0,
+    time_per_frame=1/60
 ):
     front_vector = LO_AXIS_TO_VECTOR[front_axis_code]
     vec = rotating_object.getVectTo(target_pos)[1]
@@ -299,9 +299,9 @@ def yrot_to(
 def zrot_to(
     rotating_object,
     target_pos,
-    front_axis_code,
-    speed,
-    time_per_frame
+    front_axis_code=0,
+    speed=0,
+    time_per_frame=1/60
 ):
     front_vector = LO_AXIS_TO_VECTOR[front_axis_code]
     vec = rotating_object.getVectTo(target_pos)[1]

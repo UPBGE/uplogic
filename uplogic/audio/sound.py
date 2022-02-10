@@ -270,11 +270,11 @@ class ULSound3D(ULSound):
         '''
         aud_system = self.aud_system
         speaker = self.speaker
-        location = speaker.worldPosition
-        if not speaker:
+        if not speaker or speaker.invalid:
             self.finished = True
             aud_system.remove(self)
             return
+        location = speaker.worldPosition
         for i, handle in enumerate(self.handles[1]):
             if not handle.status:
                 self.finished = True

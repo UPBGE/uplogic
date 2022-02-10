@@ -5,6 +5,7 @@ from uplogic.nodes import ULOutSocket
 from uplogic.utils import debug
 from uplogic.utils import is_waiting
 from uplogic.utils import not_met
+import bpy
 import json
 
 
@@ -33,6 +34,7 @@ class ULLoadGame(ULActionNode):
         condition = self.get_input(self.condition)
         if not_met(condition):
             return
+        print('Hello')
         self._set_ready()
         slot = self.get_input(self.slot)
         if is_waiting(slot):
@@ -53,24 +55,35 @@ class ULLoadGame(ULActionNode):
                 #     if obj.name not in data['objects']:
                 #         obj.endObject()
                 for obj in data['objects']:
+                    print(obj)
                     if obj['name'] in scene.objects:
                         game_obj = scene.objects[obj['name']]
                     else:
-                        debug(
-                            'Could not load Object {}: Not in active Scene!'
-                            .format(obj['name'])
-                        )
-                        continue
+                        game_obj = scene.convertBlenderObject(bpy.data.objects[obj['name']])
+                        # game_obj = scene.addObject(game_obj)
+                        # debug(
+                        #     'Could not load Object {}: Not in active Scene!'
+                        #     .format(obj['name'])
+                        # )
+                        # continue
+
+                    lPos = self.get_game_vec(obj['data']['localPosition'])
+                    lOri = self.get_game_vec(obj['data']['localOrientation'])
+                    lSca = self.get_game_vec(obj['data']['localScale'])
 
                     wPos = self.get_game_vec(obj['data']['worldPosition'])
                     wOri = self.get_game_vec(obj['data']['worldOrientation'])
                     wSca = self.get_game_vec(obj['data']['worldScale'])
 
+                    game_obj.localPosition = lPos
+                    game_obj.localOrientation = lOri.to_matrix()
+                    game_obj.localScale = lSca
+                    
                     game_obj.worldPosition = wPos
                     game_obj.worldOrientation = wOri.to_matrix()
                     game_obj.worldScale = wSca
 
-                    if obj['type'] == 'dynamic':
+                    if obj['type'] == 'rigid_body':
                         linVel = self.get_game_vec(
                             obj['data']['worldLinearVelocity']
                         )
@@ -94,10 +107,9 @@ class ULLoadGame(ULActionNode):
 
                     for prop in obj['data']['props']:
                         game_obj[prop['name']] = prop['value']
-        except Exception:
+        except Exception as e:
             debug(
-                'Load Game Node: Could Not Find Saved Game on Slot {}!'
-                .format(slot)
+                f'Load Game Node: Could not load saved game on slot {slot}!\n{e}'
             )
 
         self.done = True

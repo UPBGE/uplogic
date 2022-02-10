@@ -7,7 +7,7 @@ def read_file(name):
         return f.read()
 
 
-version = 'v1.4.6.6'
+version = 'v1.4.6.7'
 shortdesc = "Uplogic utility for UPBGE."
 longdesc = '\n\n'.join([read_file(name) for name in [
     'README.md',
@@ -30,7 +30,7 @@ setup(
     author='Leopold Auersperg-Castell',
     author_email='lauersperg@gmx.at',
     url='https://github.com/UPBGE/uplogic',
-    download_url='https://github.com/UPBGE/uplogic/archive/refs/tags/v1.4.6.6.tar.gz',
+    download_url='https://github.com/UPBGE/uplogic/archive/refs/tags/v1.4.6.7.tar.gz',
     license='GPLv2',
     packages=[
         'uplogic',

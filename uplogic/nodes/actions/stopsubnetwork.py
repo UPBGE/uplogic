@@ -31,7 +31,7 @@ class ULStopSubNetwork(ULActionNode):
             return
         tree_name = make_valid_name(logic_network_name)
         network = game_object.get(f'IGNLTree_{tree_name}')
-        # if network is None:
-        #     return
+        if network is None:
+            return
         network.stop()
         self.done = True

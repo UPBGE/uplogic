@@ -19,5 +19,6 @@ class ULRestartGame(ULActionNode):
         self._set_ready()
         condition = self.get_input(self.condition)
         if condition:
-            logic.restartGame()
+            logic.getCurrentScene().restart()
+            # logic.restartGame()
         self.done = True

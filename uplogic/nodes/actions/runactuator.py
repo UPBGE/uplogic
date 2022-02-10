@@ -32,7 +32,7 @@ class ULRunActuator(ULActionNode):
         condition = self.get_input(self.condition)
         self._set_ready()
         if not_met(condition):
-            controller.deactivate(actuator)
+            # controller.deactivate(actuator)
             return
         controller.activate(actuator)
         self.done = True

@@ -67,6 +67,11 @@ class ULSaveGame(ULActionNode):
                     prop_set['name'] = prop
                     prop_set['value'] = obj[prop]
                     prop_list.append(prop_set)
+            
+            locloc = obj.localPosition
+            locrot = obj.localOrientation.to_euler()
+            locsca = obj.localScale
+            
             loc = obj.worldPosition
             rot = obj.worldOrientation.to_euler()
             sca = obj.worldScale
@@ -74,12 +79,29 @@ class ULSaveGame(ULActionNode):
             if obj.mass:
                 lin_vel = obj.worldLinearVelocity
                 ang_vel = obj.worldAngularVelocity
+                loclin_vel = obj.localLinearVelocity
+                locang_vel = obj.localAngularVelocity
 
                 objs.append(
                     {
                         'name': obj.name,
-                        'type': 'dynamic',
+                        'type': 'rigid_body',
                         'data': {
+                            'localPosition': {
+                                'x': locloc.x,
+                                'y': locloc.y,
+                                'z': locloc.z
+                            },
+                            'localOrientation': {
+                                'x': locrot.x,
+                                'y': locrot.y,
+                                'z': locrot.z
+                            },
+                            'localScale': {
+                                'x': locsca.x,
+                                'y': locsca.y,
+                                'z': locsca.z
+                            },
                             'worldPosition': {
                                 'x': loc.x,
                                 'y': loc.y,
@@ -113,6 +135,21 @@ class ULSaveGame(ULActionNode):
                         'name': obj.name,
                         'type': 'character',
                         'data': {
+                            'localPosition': {
+                                'x': locloc.x,
+                                'y': locloc.y,
+                                'z': locloc.z
+                            },
+                            'localOrientation': {
+                                'x': locrot.x,
+                                'y': locrot.y,
+                                'z': locrot.z
+                            },
+                            'localScale': {
+                                'x': locsca.x,
+                                'y': locsca.y,
+                                'z': locsca.z
+                            },
                             'worldPosition': {
                                 'x': loc.x,
                                 'y': loc.y,
@@ -139,6 +176,21 @@ class ULSaveGame(ULActionNode):
                         'name': obj.name,
                         'type': 'static',
                         'data': {
+                            'localPosition': {
+                                'x': locloc.x,
+                                'y': locloc.y,
+                                'z': locloc.z
+                            },
+                            'localOrientation': {
+                                'x': locrot.x,
+                                'y': locrot.y,
+                                'z': locrot.z
+                            },
+                            'localScale': {
+                                'x': locsca.x,
+                                'y': locsca.y,
+                                'z': locsca.z
+                            },
                             'worldPosition': {
                                 'x': loc.x,
                                 'y': loc.y,
