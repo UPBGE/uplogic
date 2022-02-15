@@ -140,7 +140,7 @@ class ULSound2D(ULSound):
         aud_system: str = 'default',
         volume: float = 1,
         pitch: float = 1,
-        loop_count: int = 1
+        loop_count: int = 0
     ):
         self.finished = False
         if not (file and aud_system):
@@ -197,7 +197,7 @@ class ULSound3D(ULSound):
         occlusion: bool = False,
         transition_speed: float = .1,
         cutoff_frequency: float = .1,
-        loop_count: int = -1,
+        loop_count: int = 0,
         pitch: float = 1,
         volume: float = 1,
         reverb=False,

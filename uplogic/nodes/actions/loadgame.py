@@ -34,7 +34,6 @@ class ULLoadGame(ULActionNode):
         condition = self.get_input(self.condition)
         if not_met(condition):
             return
-        print('Hello')
         self._set_ready()
         slot = self.get_input(self.slot)
         if is_waiting(slot):
@@ -55,7 +54,7 @@ class ULLoadGame(ULActionNode):
                 #     if obj.name not in data['objects']:
                 #         obj.endObject()
                 for obj in data['objects']:
-                    print(obj)
+                    # print(obj)
                     if obj['name'] in scene.objects:
                         game_obj = scene.objects[obj['name']]
                     else:
