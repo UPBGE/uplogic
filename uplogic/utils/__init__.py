@@ -1,6 +1,10 @@
 '''TODO: Documentation
 '''
 
+from .curves import set_curve_points  # noqa
+from .raycasting import raycast
+from .raycasting import raycast_projectile
+
 from bge import logic, render
 from bge.types import KX_GameObject as GameObject
 from mathutils import Vector
@@ -519,7 +523,7 @@ def vec_clamp(vec: Vector, min: float = 0, max: float = 1) -> Vector:
     return vec
 
 
-def interpolate(a: float, b: float, fac: float) -> float:
+def interpolate(a: float, b: float, fac: float, threshold: float = 0.001) -> float:
     """Interpolate between 2 values using a factor.
 
     :param a: starting value
@@ -528,7 +532,7 @@ def interpolate(a: float, b: float, fac: float) -> float:
 
     :returns: calculated value as float
     """
-    if -.001 < a-b < .001:
+    if -threshold < a-b < threshold:
         return b
     return (fac * b) + ((1-fac) * a)
 
@@ -551,7 +555,7 @@ def vec_abs(vec):
     """Make every value of this vector positive.\n
     Only supports less than 4 Dimensions.
 
-    :param a: `Vector`
+    :param `a`: `Vector`
 
     :returns: positive vector
     """
@@ -565,9 +569,9 @@ def vec_abs(vec):
 def get_angle(a: Vector, b: Vector, up=Vector((0, 0, 1))) -> float:
     """Get the angle between the direction from a to b and up.
 
-    :param a: `Vector` a
-    :param b: `Vector` b
-    :param up: compare direction
+    :param `a`: `Vector` a
+    :param `b`: `Vector` b
+    :param `up`: compare direction
 
     :returns: calculated value as float
     """
@@ -577,12 +581,26 @@ def get_angle(a: Vector, b: Vector, up=Vector((0, 0, 1))) -> float:
     return deg
 
 
+def get_raw_angle(a: Vector, b: Vector) -> float:
+    """Get the angle between the direction from a to b and up.
+
+    :param `a`: `Vector` a
+    :param `b`: `Vector` b
+    :param `up`: compare direction
+
+    :returns: calculated value as float
+    """
+    rad: float = a.angle(b)
+    deg: float = rad * 180/math.pi
+    return deg
+
+
 def get_direction(a, b, local=False) -> Vector:
     """Get the direction from one vector to another.
 
-    :param a: `Vector` a
-    :param b: `Vector` b
-    :param local: use local space (position only)
+    :param `a`: `Vector` a
+    :param `b`: `Vector` b
+    :param `local`: use local space (position only)
 
     :returns: direction as `Vector`
     """
@@ -595,74 +613,3 @@ def get_direction(a, b, local=False) -> Vector:
     d.normalize()
     return d
 
-
-def ray_data(origin, dest, local, dist):
-    """Get necessary data to calculate the ray.\n
-    Not intended for manual use.
-    """
-    start = (
-        origin.worldPosition.copy()
-        if hasattr(origin, "worldPosition")
-        else origin
-    )
-    if hasattr(dest, "worldPosition"):
-        dest = dest.worldPosition.copy()
-    if local:
-        dest = start + dest
-    d = dest - start
-    d.normalize()
-    return d, dist if dist else (start - dest).length, dest
-
-
-def raycast(
-    caster,
-    origin,
-    dest,
-    distance=0,
-    property_name='',
-    xray=False,
-    local=False,
-    visualize=False
-):
-    """Raycast from any point to any target
-
-    :param caster: casting object, this object will be ignored by the ray.
-    :param origin: origin point; any vector or list.
-    :param dest: target point; any vector or list.
-    :param distance: distance the ray will be cast
-    (0 means the ray will only be cast to target).
-    :param property_name: look only for this property,
-    leave empty to look for all.
-    :param xray: look for objects behind others.
-    :param local: add the target vector to the origin.
-    :param visualize: show the raycast.
-
-    :returns: obj, point, normal, direction
-    """
-    direction, distance, dest = ray_data(origin, dest, local, distance)
-    obj, point, normal = caster.rayCast(
-        dest,
-        origin,
-        distance,
-        property_name,
-        xray=xray
-    )
-    if visualize:
-        origin = getattr(origin, 'worldPosition', origin)
-        line_dest: Vector = direction.copy()
-        line_dest.x *= distance
-        line_dest.y *= distance
-        line_dest.z *= distance
-        line_dest = line_dest + origin
-        render.drawLine(
-            origin,
-            line_dest,
-            [1, 0, 0, 1]
-        )
-        if obj:
-            render.drawLine(
-                origin,
-                point,
-                [0, 1, 0, 1]
-            )
-    return obj, point, normal, direction

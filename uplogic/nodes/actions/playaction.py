@@ -54,11 +54,12 @@ class ULPlayAction(ULActionNode):
         if self.action_evt:
             return self.action_evt.content == ACTION_STARTED
         return STATUS_WAITING
+    
+    def on_finish(self):
+        self._finished = True
 
     def _get_finished(self):
-        if self.action_evt:
-            return self.action_evt.content == ACTION_FINISHED
-        return STATUS_WAITING
+        return self._finished
 
     def _get_running(self):
         if self._action:
@@ -69,6 +70,10 @@ class ULPlayAction(ULActionNode):
         if self._action:
             return self._action.frame
         return STATUS_WAITING
+    
+    def reset(self):
+        self._finished = False
+        return super().reset()
 
     def evaluate(self):
         action = self._action
@@ -151,4 +156,5 @@ class ULPlayAction(ULActionNode):
             layer_weight,
             blend_mode
         )
+        self._action.on_finish = self.on_finish
         self.in_use = True
