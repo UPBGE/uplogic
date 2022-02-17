@@ -2,9 +2,10 @@ def set_curve_points(curve, points):
     bcurve = curve.blenderObject.data
     for spline in bcurve.splines:
         bcurve.splines.remove(spline)
-    spline = bcurve.splines.new('NURBS')
+    spline = bcurve.splines.new('POLY')
     pos = curve.worldPosition
-    spline.points.add(len(points))
+
+    spline.points.add(len(points)-1)
     for p, new_co in zip(spline.points, points):
         p.co = ([
             new_co[0] - pos.x,

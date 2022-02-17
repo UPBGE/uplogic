@@ -12,6 +12,7 @@ class ULLoadVariable(ULParameterNode):
     def __init__(self):
         ULParameterNode.__init__(self)
         self.name = None
+        self.default_value = None
         self.path = ''
         self.file_name = ''
         self.VAR = ULOutSocket(self, self.get_var)
@@ -45,11 +46,12 @@ class ULLoadVariable(ULParameterNode):
             data = json.load(f)
             if name not in data:
                 debug(f'"{name}" is not a saved Variabe!')
-                return
+                return self.get_input(self.default_value)
             f.close()
             return data.get(name)
         else:
             debug('No saved variables!')
+            return self.get_input(self.default_value)
 
     def get_custom_path(self, path):
         if not path.endswith('/') and not path.endswith('json'):

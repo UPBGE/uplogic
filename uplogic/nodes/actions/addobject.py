@@ -12,6 +12,7 @@ class ULAddObject(ULActionNode):
         self.name = None
         self.reference = None
         self.life = None
+        self.full_copy = False
         self.done = False
         self.obj = False
         self.OBJ = ULOutSocket(self, self._get_obj)
@@ -30,10 +31,11 @@ class ULAddObject(ULActionNode):
             return
         life = self.get_input(self.life)
         name = self.get_input(self.name)
+        full_copy = self.get_input(self.full_copy)
         self._set_ready()
         reference = self.get_input(self.reference)
         scene = logic.getCurrentScene()
         if is_waiting(life, name, reference):
             return
-        self.obj = scene.addObject(name, reference, life)
+        self.obj = scene.addObject(name, reference, life, full_copy)
         self.done = True

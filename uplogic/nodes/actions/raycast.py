@@ -1,9 +1,9 @@
-from bge import render
-from mathutils import Vector
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
 from uplogic.utils import is_waiting
 from uplogic.utils import not_met
+from uplogic.utils import raycast
+from uplogic.utils.raycasting import raycast_face
 
 
 class ULRaycast(ULActionNode):
@@ -15,22 +15,33 @@ class ULRaycast(ULActionNode):
         self.destination = None
         self.local: bool = None
         self.property_name: str = None
+        self.material: str = None
+        self.exclude: str = None
         self.xray: bool = None
         self.custom_dist: bool = None
         self.distance: float = None
         self.visualize: bool = None
+        self._result = None
         self._picked_object = None
         self._point = None
         self._normal = None
         self._direction = None
+        self._material = None
+        self._uv = None
+        self.RESULT = ULOutSocket(self, self.get_result)
         self.PICKED_OBJECT = ULOutSocket(self, self.get_picked_object)
         self.POINT = ULOutSocket(self, self.get_point)
         self.NORMAL = ULOutSocket(self, self.get_normal)
         self.DIRECTION = ULOutSocket(self, self.get_direction)
+        self.MATERIAL = ULOutSocket(self, self.get_material)
+        self.UV = ULOutSocket(self, self.get_uv)
         self.network = None
 
     def setup(self, network):
         self.network = network
+
+    def get_result(self):
+        return self._result
 
     def get_picked_object(self):
         return self._picked_object
@@ -43,6 +54,12 @@ class ULRaycast(ULActionNode):
 
     def get_direction(self):
         return self._direction
+
+    def get_material(self):
+        return self._material
+
+    def get_uv(self):
+        return self._uv
 
     def _compute_direction(self, origin, dest, local, dist):
         custom_dist = self.get_input(self.custom_dist)
@@ -70,6 +87,8 @@ class ULRaycast(ULActionNode):
         destination = self.get_input(self.destination)
         local: bool = self.get_input(self.local)
         property_name: str = self.get_input(self.property_name)
+        material: str = self.get_input(self.material)
+        exclude: str = self.get_input(self.exclude)
         xray: bool = self.get_input(self.xray)
         distance: float = self.get_input(self.distance)
         visualize: bool = self.get_input(self.visualize)
@@ -79,57 +98,22 @@ class ULRaycast(ULActionNode):
         self._set_ready()
         caster = self.network._owner
         obj, point, normal = None, None, None
-        direction, distance, destination = self._compute_direction(
+        obj, point, normal, direction, face, uv = raycast_face(
+            caster,
             origin,
             destination,
+            distance if self.get_input(self.custom_dist) else 0,
+            property_name,
+            material,
+            exclude,
+            xray,
             local,
-            distance
+            visualize,
         )
-        if not property_name:
-            obj, point, normal = caster.rayCast(
-                destination,
-                origin,
-                distance,
-                xray=xray
-            )
-        else:
-            obj, point, normal = caster.rayCast(
-                destination,
-                origin,
-                distance,
-                property_name,
-                xray=xray
-            )
-        if visualize:
-            origin = getattr(origin, 'worldPosition', origin)
-            line_dest: Vector = direction.copy()
-            line_dest.x *= distance
-            line_dest.y *= distance
-            line_dest.z *= distance
-            line_dest = line_dest + origin
-            render.drawLine(
-                origin,
-                line_dest,
-                [
-                    1,
-                    0,
-                    0,
-                    1
-                ]
-            )
-            if obj:
-                render.drawLine(
-                    origin,
-                    point,
-                    [
-                        0,
-                        1,
-                        0,
-                        1
-                    ]
-                )
-        self._set_value(obj is not None)
+        self._result = obj is not None
         self._picked_object = obj
         self._point = point
         self._normal = normal
         self._direction = direction
+        self._material = face.material_name[2:] if face else None
+        self._uv = uv
