@@ -270,11 +270,20 @@ def raycast_projectile(
 
 
 def raycast_camera(
-    aim=(.5, .5),
     distance=0,
     prop='',
-    xray=False
+    xray=False,
+    aim=Vector((.5, .5))
 ):
+    """Raycast from any point to any target. Returns additional face data.
+
+    :param `distance`: distance the ray will be cast
+    :param `prop`: look only for this property.
+    :param `xray`: look for objects behind others.
+    :param `aim`: X and Y coordinates of the screen from 0-1
+
+    :returns: `obj`, `point`, `normal`
+    """
     # assume screen coordinates
     camera = logic.getCurrentScene().active_camera
     if isinstance(aim, Vector) and len(aim) == 2:

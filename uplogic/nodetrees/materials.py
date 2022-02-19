@@ -9,7 +9,7 @@ def get_material_socket(
     material: str or Material,
     node: Node,
     socket: NodeSocket,
-    game_object=None
+    game_object: GameObject = None
 ):
     if isinstance(material, str):
         material = bpy.data.materials[material]
@@ -24,7 +24,13 @@ def get_material_socket(
     )
 
 
-def set_material_socket(material, node, socket, value, game_object=None):
+def set_material_socket(
+    material: str or Material,
+    node: Node,
+    socket: NodeSocket,
+    value,
+    game_object: GameObject = None
+):
     if isinstance(material, str):
         material = bpy.data.materials[material]
     if isinstance(material, int):
@@ -36,3 +42,42 @@ def set_material_socket(material, node, socket, value, game_object=None):
         .inputs[socket]
         .default_value
     ) = value
+
+
+def set_world_socket(world, node, socket, value, output=False):
+    if isinstance(world, str):
+        world = bpy.data.worlds[world]
+    if output:
+        (
+            world
+            .node_tree
+            .nodes[node]
+            .outputs[socket]
+            .default_value
+        ) = value
+    else:
+        (
+            world
+            .node_tree
+            .nodes[node]
+            .inputs[socket]
+            .default_value
+        ) = value
+
+
+def get_world_socket(world, node, socket, output=False):
+    if isinstance(world, str):
+        world = bpy.data.worlds[world]
+    return (
+        world
+        .node_tree
+        .nodes[node]
+        .outputs[socket]
+        .default_value
+    ) if output else (
+        world
+        .node_tree
+        .nodes[node]
+        .inputs[socket]
+        .default_value
+    )

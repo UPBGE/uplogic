@@ -159,7 +159,8 @@ class ULMouseLook():
         front=1
     ) -> None:
         self.obj = obj
-        self.head = head
+        self.head = head if head else obj
+        self._defaults = [obj.localOrientation.copy(), head.localOrientation.copy()]
         self.sensitivity = sensitivity
         self.use_cap_x = use_cap_x
         self.cap_x = cap_x
@@ -176,6 +177,19 @@ class ULMouseLook():
         self.get_data()
         self.mouse.position = self.screen_center
         logic.getCurrentScene().post_draw.append(self.update)
+
+    @property
+    def rotation(self):
+        return self.obj.worldOrientation, self.head.worldOrientation
+
+    @rotation.setter
+    def rotation(self, val):
+        self.obj.worldOrientation = val[0]
+        self.head.worldOrientation = val[1]
+
+    def reset(self):
+        self.obj.localOrientation = self._defaults[0]
+        self.head.localOrientation = self._defaults[1]
 
     def get_data(self):
         self.x = render.getWindowWidth()//2
@@ -196,7 +210,7 @@ class ULMouseLook():
             self.initialized = True
             return
         game_object_x = self.obj
-        game_object_y = self.head if self.head else self.obj
+        game_object_y = self.head
         sensitivity = self.sensitivity * 1000
         use_cap_x = self.use_cap_x
         use_cap_y = self.use_cap_y
@@ -259,4 +273,3 @@ class ULMouseLook():
         if self.mouse.position != self.screen_center and self.active:
             self.mouse.position = self.screen_center
         self.done = True
-

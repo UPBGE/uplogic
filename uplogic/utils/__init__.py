@@ -2,8 +2,10 @@
 '''
 
 from .curves import set_curve_points  # noqa
+from .curves import create_curve  # noqa
 from .raycasting import raycast
 from .raycasting import raycast_projectile
+from .raycasting import raycast_camera
 
 from bge import logic, render
 from bge.types import KX_GameObject as GameObject
