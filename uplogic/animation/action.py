@@ -1,4 +1,5 @@
 from bge import logic
+import bpy
 from bge.types import KX_GameObject as GameObject
 from random import randint
 from random import random

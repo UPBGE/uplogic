@@ -2,6 +2,7 @@ from bge import logic
 import bpy
 from bpy.types import Material
 
+
 def create_curve(name, bevel_depth=0.0, dimensions=3, material=None, collection=None):
     bcurve = bpy.data.curves.new(name, 'CURVE')
     bcurve.bevel_depth = bevel_depth
@@ -14,10 +15,8 @@ def create_curve(name, bevel_depth=0.0, dimensions=3, material=None, collection=
             bobj.data.materials.append(material)
     if collection:
         if isinstance(collection, str):
-            collection = bpy.data.collections[collection]
-    else:
-        collection = bpy.context.scene.collection
-    bpy.data.collections[collection.name].objects.link(bobj)
+            collection = bpy.data.collections.get(collection, bpy.context.scene.collection)
+    collection.objects.link(bobj)
     game_obj = logic.getCurrentScene().convertBlenderObject(bobj)
     return game_obj
 

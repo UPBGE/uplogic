@@ -2,8 +2,10 @@ from math import pi
 from bge import logic
 from bge import events
 from bge import render
+from bge.types import KX_GameObject as GameObject
 from mathutils import Vector
 from uplogic.utils import interpolate
+from uplogic.events import schedule_callback
 
 
 MOUSE_EVENTS = logic.mouse.inputs
@@ -146,7 +148,7 @@ class ULMouseLook():
 
     def __init__(
         self,
-        obj,
+        obj: GameObject,
         head=None,
         sensitivity=1.0,
         use_cap_x=False,
@@ -156,7 +158,8 @@ class ULMouseLook():
         invert=[False, True],
         smoothing=0.0,
         local=False,
-        front=1
+        front=1,
+        active=True
     ) -> None:
         self.obj = obj
         self.head = head if head else obj
@@ -169,14 +172,29 @@ class ULMouseLook():
         self.invert = invert
         self.smoothing = smoothing
         self.initialized = False
-        self.active = True
         self.front = front
         self._x = 0
         self._y = 0
+        self._active = False
         self.local = local
+        self.reset_factor = 0
         self.get_data()
         self.mouse.position = self.screen_center
-        logic.getCurrentScene().post_draw.append(self.update)
+        self.active = active
+
+    @property
+    def active(self):
+        return self._active
+
+    @active.setter
+    def active(self, val):
+        scene = logic.getCurrentScene()
+        if val == True and self.update not in scene.post_draw:
+            scene.post_draw.append(self.update)
+        elif val == False and self.update in scene.post_draw:
+            scene.post_draw.remove(self.update)
+        self._active = val
+
 
     @property
     def rotation(self):
@@ -186,10 +204,25 @@ class ULMouseLook():
     def rotation(self, val):
         self.obj.worldOrientation = val[0]
         self.head.worldOrientation = val[1]
+    
+    def stop(self):
+        self.active = False
+        self.initialized = False
 
-    def reset(self):
-        self.obj.localOrientation = self._defaults[0]
-        self.head.localOrientation = self._defaults[1]
+    def reset(self, factor=1):
+        if factor < 1:
+            self.active = False
+            if self.reset_factor < 1:
+                self.obj.localOrientation = self.obj.localOrientation.lerp(self._defaults[0], factor)
+                self.head.localOrientation = self.head.localOrientation.lerp(self._defaults[1], factor)
+                self.reset_factor = interpolate(self.reset_factor, 1, factor)
+                schedule_callback(self.reset, arg=factor)
+            else:
+                self.reset_factor = 0
+                self.active = True
+        else:
+            self.obj.localOrientation = self._defaults[0]
+            self.head.localOrientation = self._defaults[1]
 
     def get_data(self):
         self.x = render.getWindowWidth()//2
@@ -205,6 +238,7 @@ class ULMouseLook():
         self.get_data()
         if not self.active:
             self.initialized = False
+            return
         elif not self.initialized:
             self.mouse.position = self.screen_center
             self.initialized = True

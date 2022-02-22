@@ -10,6 +10,7 @@ from .raycasting import raycast_camera
 from bge import logic, render
 from bge.types import KX_GameObject as GameObject
 from mathutils import Vector
+from mathutils import Matrix
 import bpy
 import json
 import math
@@ -614,4 +615,3 @@ def get_direction(a, b, local=False) -> Vector:
     d = b - start
     d.normalize()
     return d
-

@@ -273,7 +273,8 @@ def raycast_camera(
     distance=0,
     prop='',
     xray=False,
-    aim=Vector((.5, .5))
+    aim=Vector((.5, .5)),
+    visualize=False
 ):
     """Raycast from any point to any target. Returns additional face data.
 
@@ -300,4 +301,17 @@ def raycast_camera(
         )
     else:
         obj, point, normal = camera.rayCast(aim, None, distance)
+    if visualize:
+        if not obj:
+            render.drawLine(
+                camera.worldPosition,
+                aim,
+                [1, 0, 0, 1]
+            )
+        else:
+            render.drawLine(
+                camera.worldPosition,
+                point,
+                [0, 1, 0, 1]
+            )
     return (obj, point, normal)
