@@ -127,6 +127,20 @@ def consume(name: str):
     return ULEventManager.consume(name, None)
 
 
+def bind(name, callback):
+    '''Send an event that can be reacted to.
+
+    :param `name`: Name of the event; can be anything, not just `str`.
+    :param `content`: This can be used to store data in an event.
+    :param `messenger`: Can be used to store an object.
+    '''
+    def _check_evt(name, callback):
+        evt = receive(name)
+        if evt:
+            callback(evt.name, evt.content, evt.messenger)
+    logic.getCurrentScene().post_draw.append(_check_evt)
+
+
 def schedule(name: str, content=None, messenger=None, delay=0.0):
     '''Send an event that can be reacted to with a delay.
 

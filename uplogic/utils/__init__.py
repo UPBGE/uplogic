@@ -484,6 +484,16 @@ def is_water(game_object: GameObject):
     return WATER in game_object
 
 
+def get_child_by_name(obj, child, recursive=True, partial=False):
+    children = obj.childrenRecursive if recursive else obj.children
+    if partial:
+        for c in children:
+            if child in c.name:
+                return c
+    else:
+        return children.get(child)
+
+
 ###############################################################################
 # MATH
 ###############################################################################

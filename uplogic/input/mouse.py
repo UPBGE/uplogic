@@ -195,7 +195,6 @@ class ULMouseLook():
             scene.post_draw.remove(self.update)
         self._active = val
 
-
     @property
     def rotation(self):
         return self.obj.worldOrientation, self.head.worldOrientation
@@ -297,8 +296,6 @@ class ULMouseLook():
 
         rot = [0, 0, 0]
         rot[1-self.front] = offset.y
-        print(self.screen_center)
-        print(self.mouse.position)
         game_object_y.applyRotation((*rot, ), True)
         if (Vector(self.mouse.position) - Vector(self.screen_center)).length > .00001:
         # if self.mouse.position != self.screen_center:
