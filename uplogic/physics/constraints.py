@@ -3,8 +3,12 @@ from bge import logic
 from bge import render
 from bge.types import KX_ConstraintWrapper as GameConstraint
 from bge.types import KX_GameObject as GameObject
+from mathutils import Vector
 from uplogic.utils import get_direction
 from uplogic.utils import set_curve_points
+from uplogic.utils import xrot_to
+from uplogic.utils import yrot_to
+from uplogic.utils import zrot_to
 
 
 CONSTRAINT_TYPES = {
@@ -59,6 +63,47 @@ def remove_constraint(constraint: GameConstraint) -> None:
     :param `constraint`: The constraint to remove.
     """
     constraints.removeConstraint(constraint.getConstraintId())
+
+
+class ULTrackTo():
+    def __init__(
+        self,
+        game_object: GameObject,
+        target: GameObject or Vector,
+        axis: int = 2,
+        front: int = 1,
+        speed: float = 0
+    ) -> None:
+        self._axis = None
+        self.game_object = game_object
+        self.target = target
+        self.front = front
+        self.speed = speed
+        self.axis = axis
+
+    @property
+    def axis(self):
+        return self._axis
+
+    @axis.setter
+    def axis(self, val):
+        if val == 0:
+            self.rotate_func = xrot_to
+        elif val == 1:
+            self.rotate_func = yrot_to
+        elif val == 2:
+            self.rotate_func = zrot_to
+        else:
+            self.rotate_func = None
+        self._axis = val
+        logic.getCurrentScene().pre_draw.append(self.update)
+
+    def remove(self):
+        logic.getCurrentScene().pre_draw.remove(self.update)
+
+    def update(self):
+        if self.rotate_func:
+            self.rotate_func(self.game_object, self.target, self.front, self.speed)
 
 
 class ULSpring():

@@ -22,7 +22,7 @@ class ULMouseData():
         self.position = get_mouse_position()
         self.movement = (0, 0)
         self.wheel = mouse_wheel()
-        logic.getCurrentScene().post_draw.append(self.update)
+        logic.getCurrentScene().pre_draw.append(self.update)
 
     def update(self):
         old_pos = self.position
@@ -35,7 +35,7 @@ class ULMouseData():
         self.wheel = mouse_wheel()
 
     def destroy(self):
-        logic.getCurrentScene().post_draw.remove(self.update)
+        logic.getCurrentScene().pre_draw.remove(self.update)
 
 
 def set_mouse_position(x: int, y: int, absolute: bool = False):
@@ -188,11 +188,11 @@ class ULMouseLook():
     @active.setter
     def active(self, val):
         scene = logic.getCurrentScene()
-        if val and self.update not in scene.post_draw:
-            scene.post_draw.append(self.update)
-        elif not val and self.update in scene.post_draw:
+        if val and self.update not in scene.pre_draw:
+            scene.pre_draw.append(self.update)
+        elif not val and self.update in scene.pre_draw:
             self.initialized = False
-            scene.post_draw.remove(self.update)
+            scene.pre_draw.remove(self.update)
         self._active = val
 
     @property
