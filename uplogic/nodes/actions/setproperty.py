@@ -12,6 +12,7 @@ class ULSetProperty(ULActionNode):
         self.game_object = None
         self.property_name = None
         self.property_value = None
+        self.mode = 'GAME'
         self.done = False
         self.OUT = ULOutSocket(self, self._get_done)
 
@@ -34,4 +35,5 @@ class ULSetProperty(ULActionNode):
         if condition:
             self.done = True
             self._set_ready()
-            game_object[property_name] = property_value
+            obj = game_object if self.mode == 'GAME' else game_object.blenderObject
+            obj[property_name] = property_value

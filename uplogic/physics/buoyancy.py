@@ -46,8 +46,9 @@ class ULFloatsam(ULBuoy):
             up,
             self.height,
             WATER,
-            True,
-            True
+            xray=True,
+            local=True,
+            visualize=True
         )
         if obj:
             lindamp = .8
@@ -68,11 +69,13 @@ class ULFloatsam(ULBuoy):
 
 class ULShip(ULBuoy):
 
-    def __init__(self, game_object, buoyancy=1, height=200) -> None:
+    def __init__(self, game_object, buoyancy=1, height=200, water=None) -> None:
         super().__init__()
         self.game_object = game_object
         game_object[SHIP] = self
         self.height = height
+        if water:
+            water[WATER] = True
         cs = sorted(game_object.childrenRecursive, key=lambda c: c.name)
         self.buoys = [c for c in cs if 'Buoy' in c.name]
         self.buoyancy = buoyancy
@@ -93,9 +96,9 @@ class ULShip(ULBuoy):
                 up,
                 self.height,
                 WATER,
-                True,
-                True,
-                True
+                xray=True,
+                local=True,
+                visualize=True
             )
             if obj:
                 lindamp += (.7 / lifts)

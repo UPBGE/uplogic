@@ -3,9 +3,10 @@
 
 from .curves import set_curve_points  # noqa
 from .curves import create_curve  # noqa
-from .raycasting import raycast
-from .raycasting import raycast_projectile
-from .raycasting import raycast_camera
+from .raycasting import raycast  # noqa
+from .raycasting import raycast_camera  # noqa
+from .raycasting import raycast_face  # noqa
+from .raycasting import raycast_projectile  # noqa
 
 from bge import logic, render
 from bge.types import KX_GameObject as GameObject
@@ -51,6 +52,18 @@ LOGIC_OPERATORS = [
     operator.ge,
     operator.le
 ]
+
+
+OPERATORS = {
+    "ADD": operator.add,
+    "DIV": operator.truediv,
+    "MUL": operator.mul,
+    "SUB": operator.sub,
+    'FDIV': operator.floordiv,
+    'MATMUL': operator.matmul,
+    'MOD': operator.mod,
+    'POW': operator.pow
+}
 
 
 LO_AXIS_TO_STRING_CODE = {

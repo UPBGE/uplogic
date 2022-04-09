@@ -12,6 +12,7 @@ class ULCopyProperty(ULActionNode):
         self.from_object = None
         self.to_object = None
         self.property_name = None
+        self.mode = 'GAME'
         self.done = False
         self.OUT = ULOutSocket(self, self._get_done)
 
@@ -31,6 +32,9 @@ class ULCopyProperty(ULActionNode):
         if is_waiting(property_name):
             return
         self._set_ready()
+        mode = self.mode == 'GAME'
+        from_object = from_object if mode else from_object.blenderObject
+        to_object = from_object if mode else to_object.blenderObject
         val = from_object.get(property_name)
         if val is not None:
             to_object[property_name] = val

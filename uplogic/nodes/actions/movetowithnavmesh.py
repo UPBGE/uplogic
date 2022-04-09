@@ -1,5 +1,6 @@
 from bge import render
-from uplogic.nodes import ULActionNode
+from bge.types import KX_GameObject as GameObject
+from uplogic.nodes import ULActionNode, ULOutSocket
 from uplogic.utils import is_invalid
 from uplogic.utils import not_met
 from uplogic.utils import rot_to
@@ -10,8 +11,8 @@ class ULMoveToWithNavmesh(ULActionNode):
 
     class MotionPath(object):
         def __init__(self):
-            self.points = []
-            self.cursor = 0
+            self.points: list = []
+            self.cursor: int = 0
             self.destination = None
 
         def next_point(self):
@@ -29,38 +30,53 @@ class ULMoveToWithNavmesh(ULActionNode):
 
     def __init__(self):
         ULActionNode.__init__(self)
-        self.condition = None
-        self.moving_object = None
-        self.rotating_object = None
-        self.navmesh_object = None
+        self.condition: bool = None
+        self.moving_object: GameObject = None
+        self.rotating_object: GameObject = None
+        self.navmesh_object: GameObject = None
         self.destination_point = None
-        self.move_dynamic = None
-        self.linear_speed = None
-        self.reach_threshold = None
-        self.look_at = None
-        self.rot_axis = None
-        self.front_axis = None
-        self.rot_speed = None
-        self.visualize = None
+        self.move_dynamic: bool = None
+        self.linear_speed: float = None
+        self.reach_threshold: float = None
+        self.look_at: bool = None
+        self.rot_axis: int = None
+        self.front_axis: int = None
+        self.rot_speed: float = None
+        self.visualize: bool = None
         self._motion_path = None
+        self.done: bool = False
+        self.finished: bool = False
+        self.OUT = ULOutSocket(self.get_done)
+        self.FINISHED = ULOutSocket(self.get_finished)
+        self.POINT = ULOutSocket(self.get_point)
+
+    def get_done(self):
+        return self.done
+
+    def get_finished(self):
+        return self.finished
+
+    def get_point(self):
+        return self._motion_path.next_point()
 
     def evaluate(self):
-        condition = self.get_input(self.condition)
+        self.done = False
+        condition: bool = self.get_input(self.condition)
         if not_met(condition):
             self._set_ready()
             return
-        moving_object = self.get_input(self.moving_object)
-        rotating_object = self.get_input(self.rotating_object)
-        navmesh_object = self.get_input(self.navmesh_object)
+        moving_object: GameObject = self.get_input(self.moving_object)
+        rotating_object: GameObject = self.get_input(self.rotating_object)
+        navmesh_object: GameObject = self.get_input(self.navmesh_object)
         destination_point = self.get_input(self.destination_point)
-        move_dynamic = self.get_input(self.move_dynamic)
-        linear_speed = self.get_input(self.linear_speed)
-        reach_threshold = self.get_input(self.reach_threshold)
-        look_at = self.get_input(self.look_at)
-        rot_axis = self.get_input(self.rot_axis)
-        front_axis = self.get_input(self.front_axis)
-        rot_speed = self.get_input(self.rot_speed)
-        visualize = self.get_input(self.visualize)
+        move_dynamic: bool = self.get_input(self.move_dynamic)
+        linear_speed: float = self.get_input(self.linear_speed)
+        reach_threshold: float = self.get_input(self.reach_threshold)
+        look_at: bool = self.get_input(self.look_at)
+        rot_axis: int = self.get_input(self.rot_axis)
+        front_axis: int = self.get_input(self.front_axis)
+        rot_speed: float = self.get_input(self.rot_speed)
+        visualize: bool = self.get_input(self.visualize)
         if is_invalid(
             destination_point,
             move_dynamic,
@@ -78,6 +94,7 @@ class ULMoveToWithNavmesh(ULActionNode):
         if is_invalid(rotating_object):
             rotating_object = None
         self._set_ready()
+        self.finished = False
         if (
             (self._motion_path is None) or
             (self._motion_path.destination_changed(destination_point))
@@ -123,4 +140,5 @@ class ULMoveToWithNavmesh(ULActionNode):
             if reached:
                 has_more = self._motion_path.advance()
                 if not has_more:
-                    self._set_value(True)
+                    self.finished = True
+            self.done = True

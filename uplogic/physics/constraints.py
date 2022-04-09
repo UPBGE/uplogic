@@ -4,7 +4,7 @@ from bge import render
 from bge.types import KX_ConstraintWrapper as GameConstraint
 from bge.types import KX_GameObject as GameObject
 from mathutils import Vector
-from uplogic.utils import get_direction
+from uplogic.utils import debug, get_direction
 from uplogic.utils import set_curve_points
 from uplogic.utils import xrot_to
 from uplogic.utils import yrot_to
@@ -13,10 +13,10 @@ from uplogic.utils import zrot_to
 
 CONSTRAINT_TYPES = {
     'point': 0,
-    'hinge': 0,
-    'angular': 0,
-    'conetwist': 0,
-    'generic6dof': 0
+    'hinge': 1,
+    'angular': 2,
+    'conetwist': 3,
+    'generic6dof': 4
 }
 
 
@@ -75,11 +75,25 @@ class ULTrackTo():
         speed: float = 0
     ) -> None:
         self._axis = None
+        self._target = None
         self.game_object = game_object
         self.target = target
         self.front = front
         self.speed = speed
         self.axis = axis
+
+    @property
+    def target(self):
+        return self._target
+    
+    @target.setter
+    def target(self, val):
+        if isinstance(val, list) or isinstance(val, tuple):
+            self._target = Vector(val)
+        elif isinstance(val, Vector):
+            self._target = val
+        else:
+            debug('Could not set TrackTo target!')
 
     @property
     def axis(self):
@@ -137,7 +151,11 @@ class ULSpring():
         visualize: bool = False
     ) -> None:
         self.force = 0
+        if isinstance(origin, tuple) or isinstance(origin, list):
+            origin = Vector((origin))
         self.origin = origin
+        if isinstance(target, tuple) or isinstance(target, list):
+            target = Vector((target))
         self.target = target
         self.use_push = use_push
         self.rigid_body_origin = rigid_body_origin if rigid_body_origin else origin
@@ -157,6 +175,18 @@ class ULSpring():
     def points(self):
         return [self.origin.worldPosition, self.target.worldPosition]
     
+    @points.setter
+    def points(self, val):
+        print("Attribute 'points' is read-only")
+
+    @property
+    def active(self):
+        return self.force != 0
+    
+    @active.setter
+    def active(self, val):
+        print("Attribute 'active' is read-only")
+
     def remove(self):
         logic.getCurrentScene().pre_draw.remove(self.update)
 
@@ -172,16 +202,20 @@ class ULSpring():
             logic.getCurrentScene().pre_draw.remove(self.update)
             return
         if self.visualize:
+            start = getattr(o, 'worldPosition', o)
+            end = getattr(t, 'worldPosition', t)
             render.drawLine(
-                o.worldPosition,
-                t.worldPosition,
+                start,
+                end,
                 # [1, 1-abs(power), 1-abs(power)]
                 [abs(force), 0, 1-abs(force)]
             )
         self.force = force
         if self.curve:
             set_curve_points(self.curve, self.points)
-        if self.rigid_body_origin.blenderObject.data:
-            self.rigid_body_origin.applyImpulse(o.worldPosition, get_direction(o, t) * force)
-        if self.rigid_body_target.blenderObject.data:
-            self.rigid_body_target.applyImpulse(o.worldPosition, get_direction(t, o) * force)
+        rbo = self.rigid_body_origin
+        rbt = self.rigid_body_target
+        if hasattr(rbo, 'blenderObject') and rbo.blenderObject.data:
+            rbo.applyImpulse(o.worldPosition, get_direction(o, t) * force)
+        if hasattr(rbt, 'blenderObject') and rbt.blenderObject.data:
+            rbt.applyImpulse(o.worldPosition, get_direction(t, o) * force)

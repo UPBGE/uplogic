@@ -7,17 +7,6 @@ from uplogic.utils import is_invalid
 
 class ULMath(ULParameterNode):
 
-    @classmethod
-    def op_by_code(cls, str):
-        import operator
-        opmap = {
-            "ADD": operator.add,
-            "SUB": operator.sub,
-            "DIV": operator.truediv,
-            "MUL": operator.mul
-        }
-        return opmap.get(str)
-
     def __init__(self):
         ULParameterNode.__init__(self)
         self.operand_a = None

@@ -11,6 +11,7 @@ class ULApplyRotation(ULActionNode):
         self.condition = None
         self.game_object = None
         self.rotation = None
+        self.local = False
         self.done = None
         self.OUT = ULOutSocket(self, self.get_done)
 

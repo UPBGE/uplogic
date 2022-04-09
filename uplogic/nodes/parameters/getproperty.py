@@ -7,6 +7,7 @@ class ULGetProperty(ULParameterNode):
         ULParameterNode.__init__(self)
         self.game_object = None
         self.property_name = None
+        self.mode = 'GAME'
         self.OUT = ULOutSocket(self, self.get_property)
 
     def get_property(self):
@@ -14,8 +15,14 @@ class ULGetProperty(ULParameterNode):
         property_name = self.get_input(self.property_name)
         if is_invalid(game_object, property_name):
             return STATUS_WAITING
-        if property_name in game_object:
-            return game_object[property_name]
+        props = (
+            game_object.getPropertyNames()
+            if self.mode == 'GAME' else
+            [p[0] for p in game_object.blenderObject.items()]
+        )
+        if property_name in props:
+            obj = game_object if self.mode == 'GAME' else game_object.blenderObject
+            return obj.get(property_name)
         game_object[property_name] = None
 
     def evaluate(self):

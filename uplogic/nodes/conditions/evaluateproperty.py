@@ -1,17 +1,17 @@
 from uplogic.nodes import ULOutSocket
 from uplogic.nodes import ULConditionNode
-from uplogic.utils import LOGIC_OPERATORS
 from uplogic.utils import STATUS_WAITING
 from uplogic.utils import is_invalid
 from uplogic.utils import is_waiting
 
 
 class ULEvaluateProperty(ULConditionNode):
-    def __init__(self, operator='EQUAL'):
+    def __init__(self):
         ULConditionNode.__init__(self)
         self.game_object = None
         self.property_name = None
-        self.operator = operator
+        self.operator = None
+        self.mode = 'GAME'
         self.compare_value = None
         self.OUT = ULOutSocket(self, self.get_out)
         self.val = 0
@@ -23,15 +23,9 @@ class ULEvaluateProperty(ULConditionNode):
             compare_value = self.get_input(self.compare_value)
             if is_waiting(compare_value):
                 return STATUS_WAITING
-            operator = self.get_input(self.operator)
-            if operator > 1:  # eq and neq are valid for None
-                if is_invalid(self.val, compare_value):
-                    return STATUS_WAITING
-            if operator is None:
-                return STATUS_WAITING
             return self.set_output(
                 'out',
-                LOGIC_OPERATORS[operator](self.val, compare_value)
+                self.operator(self.val, compare_value)
             )
         return socket
 
@@ -46,4 +40,5 @@ class ULEvaluateProperty(ULConditionNode):
         if is_waiting(property_name):
             return STATUS_WAITING
         self._set_ready()
-        self.val = game_object[property_name]
+        obj = game_object if self.mode == 'GAME' else game_object.blenderObject
+        self.val = obj.get(property_name)

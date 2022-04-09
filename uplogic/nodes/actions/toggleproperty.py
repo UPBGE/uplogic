@@ -11,6 +11,7 @@ class ULToggleProperty(ULActionNode):
         self.condition = None
         self.game_object = None
         self.property_name = None
+        self.mode = 'GAME'
         self.done = False
         self.OUT = ULOutSocket(self, self._get_done)
 
@@ -31,6 +32,7 @@ class ULToggleProperty(ULActionNode):
             return
         self._set_ready()
         if condition:
-            value = game_object[property_name]
-            game_object[property_name] = not value
+            obj = game_object if self.mode == 'GAME' else game_object.blenderObject
+            value = obj.get(property_name)
+            obj[property_name] = not value
         self.done = True

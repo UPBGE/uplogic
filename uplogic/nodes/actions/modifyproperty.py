@@ -7,17 +7,6 @@ from uplogic.utils import not_met
 
 class ULModifyProperty(ULActionNode):
 
-    @classmethod
-    def op_by_code(cls, str):
-        import operator
-        opmap = {
-            "ADD": operator.add,
-            "SUB": operator.sub,
-            "DIV": operator.truediv,
-            "MUL": operator.mul
-        }
-        return opmap.get(str)
-
     def __init__(self):
         ULActionNode.__init__(self)
         self.condition = None
@@ -25,6 +14,7 @@ class ULModifyProperty(ULActionNode):
         self.property_name = None
         self.property_value = None
         self.operator = None
+        self.mode = 'GAME'
         self.done = False
         self.OUT = ULOutSocket(self, self._get_done)
 
@@ -44,8 +34,9 @@ class ULModifyProperty(ULActionNode):
         if is_invalid(game_object):
             return
         self._set_ready()
-        value = game_object[property_name]
-        game_object[property_name] = (
+        obj = game_object if self.mode == 'GAME' else game_object.blenderObject
+        value = obj.get(property_name)
+        obj[property_name] = (
             self.operator(value, property_value)
         )
         self.done = True

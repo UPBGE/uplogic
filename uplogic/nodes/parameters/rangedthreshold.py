@@ -6,10 +6,6 @@ from uplogic.utils import is_waiting
 
 class ULRangedThreshold(ULParameterNode):
 
-    @classmethod
-    def op_by_code(cls, op):
-        return op
-
     def __init__(self):
         ULParameterNode.__init__(self)
         self.value = None

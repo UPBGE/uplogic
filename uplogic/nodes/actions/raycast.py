@@ -2,7 +2,7 @@ from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
 from uplogic.utils import is_waiting
 from uplogic.utils import not_met
-from uplogic.utils import raycast
+from uplogic.utils.raycasting import raycast
 from uplogic.utils.raycasting import raycast_face
 
 
@@ -60,21 +60,6 @@ class ULRaycast(ULActionNode):
 
     def get_uv(self):
         return self._uv
-
-    def _compute_direction(self, origin, dest, local, dist):
-        custom_dist = self.get_input(self.custom_dist)
-        start = (
-            origin.worldPosition.copy()
-            if hasattr(origin, "worldPosition")
-            else origin
-        )
-        if hasattr(dest, "worldPosition"):
-            dest = dest.worldPosition.copy()
-        if local:
-            dest = start + dest
-        d = dest - start
-        d.normalize()
-        return d, dist if custom_dist else (start - dest).length, dest
 
     def evaluate(self):
         condition = self.get_input(self.condition)

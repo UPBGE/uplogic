@@ -4,23 +4,21 @@ from bge.types import KX_GameObject as GameObject
 from mathutils import Vector
 
 
-def ray_data(origin, dest, local, dist):
+def ray_data(
+    origin: Vector,
+    dest: Vector,
+    local: bool,
+    dist: float
+):
     """Get necessary data to calculate the ray.\n
     Not intended for manual use.
     """
-    start = (
-        origin.worldPosition.copy()
-        if hasattr(origin, "worldPosition")
-        else origin
-    )
-    if hasattr(dest, "worldPosition"):
-        dest = dest.worldPosition.copy()
     if local:
-        dest = start + dest
-    d = dest - start
+        dest = origin + dest
+    d = dest - origin
     d.normalize()
-    dist = dist if dist else (start - dest).length
-    dest = start + d * dist
+    dist = dist if dist else (origin - dest).length
+    dest = origin + d * dist
     return d, dist, dest
 
 
@@ -55,8 +53,9 @@ def raycast(
     """
     if exclude:
         exclude_prop, prop = prop, ''
+    origin = getattr(origin, 'worldPosition', origin).copy()
+    dest = getattr(dest, 'worldPosition', dest).copy()
     direction, distance, dest = ray_data(origin, dest, local, distance)
-    origin = getattr(origin, 'worldPosition', origin)
     obj, point, normal = caster.rayCast(
         dest,
         origin,

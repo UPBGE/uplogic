@@ -9,6 +9,7 @@ class ULHasProperty(ULConditionNode):
         ULConditionNode.__init__(self)
         self.game_object = None
         self.property_name = None
+        self.mode = 'GAME'
         self.OUT = ULOutSocket(self, self.get_stat)
 
     def get_stat(self):
@@ -21,8 +22,12 @@ class ULHasProperty(ULConditionNode):
             return self.set_output(
                 'stat',
                 (
-                    True if property_name in game_object.getPropertyNames()
-                    else False
+                    property_name in game_object.getPropertyNames()
+                )
+            ) if self.mode == 'GAME' else self.set_output(
+                'stat',
+                (
+                    property_name in [p[0] for p in game_object.blenderObject.items()]
                 )
             )
         return socket
