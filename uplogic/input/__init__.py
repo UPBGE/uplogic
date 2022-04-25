@@ -19,6 +19,7 @@ from .mouse import get_mouse_position  # noqa
 from .mouse import mouse_down  # noqa
 from .mouse import mouse_moved  # noqa
 from .mouse import mouse_tap  # noqa
+from .mouse import mouse_up  # noqa
 from .mouse import mouse_wheel  # noqa
 from .mouse import set_mouse_position  # noqa
 from .mouse import ULMouseLook  # noqa

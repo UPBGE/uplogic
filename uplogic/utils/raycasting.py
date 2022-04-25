@@ -42,14 +42,14 @@ def raycast(
     :param `dest`: target point; any vector or list.
     :param `distance`: distance the ray will be cast
     (0 means the ray will only be cast to target).
-    :param `prop`: look only for this property.
+    :param `prop`: look only for objects with this property.
     :param `material`: look only for objects with this material applied.
     :param `exclude`: invert the selection for `prop` and `material`.
     :param `xray`: look for objects behind others.
     :param `local`: add the target vector to the origin.
     :param `visualize`: show the raycast.
 
-    :returns: `obj`, `point`, `normal`, `direction`
+    :returns: (`obj`, `point`, `normal`, `direction`)
     """
     if exclude:
         exclude_prop, prop = prop, ''
@@ -138,14 +138,14 @@ def raycast_face(
     :param `dest`: target point; any vector or list.
     :param `distance`: distance the ray will be cast
     (0 means the ray will only be cast to target).
-    :param `prop`: look only for this property.
+    :param `prop`: look only for objects with this property.
     :param `material`: look only for objects with this material applied.
     :param `exclude`: invert the selection for `prop` and `material`.
     :param `xray`: look for objects behind others.
     :param `local`: add the target vector to the origin.
     :param `visualize`: show the raycast.
 
-    :returns: `obj`, `point`, `normal`, `direction`, `face`, `uv`
+    :returns: (`obj`, `point`, `normal`, `direction`, `face`, `uv`)
     """
     if exclude:
         exclude_prop, prop = prop, ''
@@ -221,14 +221,29 @@ def raycast_projectile(
     origin,
     aim,
     power,
-    distance=0,
-    resolution=.9,
+    distance=100,
+    resolution=.05,
     prop='',
     xray=False,
     local=False,
     visualize=False
-):
-    def calc_projectile(self, t, vel, pos):
+) -> tuple[GameObject, Vector, Vector, list]:
+    """Raycast along the predicted parabola of a projectile.
+
+    :param `caster`: casting object, this object will be ignored by the ray.
+    :param `origin`: origin point; any vector or list.
+    :param `aim`: target point; the parabola will start towards this point.
+    :param `power`: "speed" of the projectile; a higher values mean further throws
+    :param `distance`: total distance the ray will be cast
+    :param `resolution`: detail quality of the parabola; higher values mean less detail
+    :param `prop`: look only for objects with this property.
+    :param `xray`: look for objects behind others.
+    :param `local`: add the target vector to the origin.
+    :param `visualize`: show the raycast.
+
+    :returns: (`obj`, `point`, `normal`, `points`)
+    """
+    def calc_projectile(t, vel, pos):
         half: float = logic.getCurrentScene().gravity.z * (.5 * t * t)
         vel = vel * t
         return Vector((0, 0, half)) + vel + pos
@@ -278,11 +293,11 @@ def raycast_camera(
     """Raycast from any point to any target. Returns additional face data.
 
     :param `distance`: distance the ray will be cast
-    :param `prop`: look only for this property.
+    :param `prop`: look only for objects with this property.
     :param `xray`: look for objects behind others.
     :param `aim`: X and Y coordinates of the screen from 0-1
 
-    :returns: `obj`, `point`, `normal`
+    :returns: (`obj`, `point`, `normal`)
     """
     # assume screen coordinates
     camera = logic.getCurrentScene().active_camera

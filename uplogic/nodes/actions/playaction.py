@@ -98,7 +98,7 @@ class ULPlayAction(ULActionNode):
                     self._action = None
                     self.in_use = False
             return
-        layer_action = self.act_system.get_layer(game_object, layer) 
+        layer_action: ULAction = self.act_system.get_layer(game_object, layer) 
         if layer_action is not self._action:
             self._action = layer_action 
         action_name = self.get_input(self.action_name)

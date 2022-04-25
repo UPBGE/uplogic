@@ -37,7 +37,7 @@ class ULClampedModifyProperty(ULActionNode):
             return
         self._set_ready()
         obj = game_object if self.mode == 'GAME' else game_object.blenderObject
-        value = obj.get(property_name)
+        value = obj.get(property_name, 0)
         new_val = self.operator(value, property_value)
         obj[property_name] = (
             clamp(new_val, val_range.x, val_range.y)

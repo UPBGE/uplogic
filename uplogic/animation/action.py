@@ -20,6 +20,7 @@ BLEND_MODES = {
     'add': logic.KX_ACTION_BLEND_ADD
 }
 
+
 ACTION_STARTED = 'ACTION_STARTED'
 ACTION_FINISHED = 'ACTION_FINISHED'
 
@@ -41,7 +42,7 @@ class ULAction():
         speed: float = 1,
         layer_weight: float = 1,
         blend_mode: str = 'blend',
-        keep=False
+        keep: bool =False
     ):
         self._locked = False
         self._speed = speed
@@ -132,7 +133,7 @@ class ULAction():
     def speed(self, value):
         if value < 0.00000000001:
             value = 0.00000000001
-        if not self.is_playing or value == self.speed:
+        if not self.is_playing or value == self._speed:
             return
         self._speed = value
         self._restart_action()
@@ -157,9 +158,9 @@ class ULAction():
             end_frame
         )
         next_frame = (
-            frame + speed
+            frame + speed / 2
             if
-            frame + speed <= end_frame
+            frame + speed / 2 <= end_frame
             else
             reset_frame
         )

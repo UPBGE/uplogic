@@ -35,7 +35,7 @@ class ULModifyProperty(ULActionNode):
             return
         self._set_ready()
         obj = game_object if self.mode == 'GAME' else game_object.blenderObject
-        value = obj.get(property_name)
+        value = obj.get(property_name, 0)
         obj[property_name] = (
             self.operator(value, property_value)
         )

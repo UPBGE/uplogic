@@ -1,4 +1,5 @@
 from bge import logic
+from mathutils import Vector
 
 
 XBOX = {
@@ -16,10 +17,10 @@ XBOX = {
     'R3': 8,
     'LB': 9,
     'RB': 10,
-    'DPADUP': 10,
-    'DPADDOWN': 10,
-    'DPADLEFT': 10,
-    'DPADRIGHT': 10,
+    'DPADUP': 11,
+    'DPADDOWN': 12,
+    'DPADLEFT': 13,
+    'DPADRIGHT': 14,
     'RT': 5,
     'LT': 4
 }
@@ -37,10 +38,10 @@ SONY = {
     'R3': 8,
     'L1': 9,
     'R1': 10,
-    'DPADUP': 10,
-    'DPADDOWN': 10,
-    'DPADLEFT': 10,
-    'DPADRIGHT': 10,
+    'DPADUP': 11,
+    'DPADDOWN': 12,
+    'DPADLEFT': 13,
+    'DPADRIGHT': 14,
     'R2': 5,
     'L2': 4
 }
@@ -135,10 +136,10 @@ def gamepad_stick(
     '''
     xaxis = STICKS[stick][0]
     yaxis = STICKS[stick][1]
-    return (
+    return Vector((
         gamepad_axis(xaxis, idx, threshold=threshold),
         gamepad_axis(yaxis, idx, threshold=threshold)
-    )
+    ))
 
 
 def gamepad_tap(

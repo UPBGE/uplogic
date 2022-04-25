@@ -3,6 +3,7 @@
 
 from bge import logic
 import time
+from uplogic.physics import on_collision
 
 
 def get_event_manager():

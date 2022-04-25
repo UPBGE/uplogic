@@ -1,4 +1,5 @@
 from bge import logic
+from bge.types import KX_GameObject as GameObject
 
 
 class ULCollision():
@@ -13,11 +14,11 @@ class ULCollision():
     done_objs = []
 
     def __init__(self, game_object, callback, prop, mat, tap):
-        self.callback = callback
-        self.prop = prop
-        self.mat = mat
-        self.tap = tap
-        self.game_object = game_object
+        self.callback: function = callback
+        self.prop: str = prop
+        self.mat: str = mat
+        self.tap: bool = tap
+        self.game_object: GameObject = game_object
         self.register()
 
     def collision(self, obj, point, normal):
@@ -56,11 +57,11 @@ class ULCollision():
     def register(self):
         if self.collision not in self.game_object.collisionCallbacks:
             self.game_object.collisionCallbacks.append(self.collision)
-        logic.getCurrentScene().post_draw.append(self.reset)
+        logic.getCurrentScene().pre_draw.append(self.reset)
 
     def unregister(self):
         self.game_object.collisionCallbacks.remove(self.collision)
-        logic.getCurrentScene().post_draw.remove(self.reset)
+        logic.getCurrentScene().pre_draw.remove(self.reset)
 
 
 def on_collision(obj, callback, prop='', material='', tap=False) -> ULCollision:

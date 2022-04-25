@@ -85,7 +85,7 @@ class ULTrackTo():
     @property
     def target(self):
         return self._target
-    
+
     @target.setter
     def target(self, val):
         if isinstance(val, list) or isinstance(val, tuple):
@@ -182,7 +182,7 @@ class ULSpring():
     @property
     def active(self):
         return self.force != 0
-    
+
     @active.setter
     def active(self, val):
         print("Attribute 'active' is read-only")

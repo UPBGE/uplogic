@@ -16,6 +16,12 @@ LMB = events.LEFTMOUSE
 RMB = events.RIGHTMOUSE
 MMB = events.MIDDLEMOUSE
 
+MOUSE_BUTTONS = {
+    'LMB': LMB,
+    'RMB': RMB,
+    'MMB': MMB
+}
+
 
 class ULMouseData():
     def __init__(self) -> None:
@@ -86,6 +92,7 @@ def mouse_tap(button=events.LEFTMOUSE) -> bool:
 
     :returns: boolean
     '''
+    button = MOUSE_BUTTONS.get(button, button)
     return (
         MOUSE_EVENTS[button].activated or
         MOUSE_EVENTS[button].activated
@@ -99,6 +106,7 @@ def mouse_down(button=events.LEFTMOUSE) -> bool:
 
     :returns: boolean
     '''
+    button = MOUSE_BUTTONS.get(button, button)
     return (
         MOUSE_EVENTS[button].active or
         MOUSE_EVENTS[button].activated or
@@ -114,6 +122,7 @@ def mouse_up(button=events.LEFTMOUSE) -> bool:
 
     :returns: boolean
     '''
+    button = MOUSE_BUTTONS.get(button, button)
     return (
         MOUSE_EVENTS[button].released
     )
@@ -207,6 +216,12 @@ class ULMouseLook():
     def stop(self):
         self.active = False
         self.initialized = False
+
+    def disable(self):
+        self.active = False
+
+    def enable(self):
+        self.active = True
 
     def reset(self, factor=1):
         if factor < 1:

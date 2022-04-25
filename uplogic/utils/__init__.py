@@ -359,8 +359,8 @@ def rot_to(
     rotating_object,
     target_pos,
     front_axis_code,
-    speed,
-    time_per_frame
+    speed = 0,
+    time_per_frame = 0
 ):
     if rot_axis_index == 0:
         return xrot_to(
