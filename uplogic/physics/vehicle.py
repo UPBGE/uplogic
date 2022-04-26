@@ -92,7 +92,7 @@ class ULVehicle():
         self.is_braking = False
         self.is_steering = False
 
-        logic.getCurrentScene().post_draw.append(self.reset)
+        logic.getCurrentScene().pre_draw.append(self.reset)
 
     def add_wheel(self, wheel, steering=False):
         body = self.body
@@ -129,7 +129,7 @@ class ULVehicle():
 
     def destroy(self):
         self.disable()
-        logic.getCurrentScene().post_draw.remove(self.reset)
+        logic.getCurrentScene().pre_draw.remove(self.reset)
 
     def enable(self):
         self.active = True

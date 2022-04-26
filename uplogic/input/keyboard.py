@@ -20,7 +20,6 @@ def key_event(key: str) -> bool:
         )
     ]
     if key:
-        print(key)
         return key
     else:
         print(f"""
@@ -42,7 +41,6 @@ def pad_event(key: str) -> bool:
     Not intended for manual use.
     '''
     key = KEYBOARD_EVENTS[getattr(events, f'PAD{key}')]
-    print(key)
     if key:
         return key
     else:
@@ -63,7 +61,7 @@ def pad_event(key: str) -> bool:
 def key_tap(key: str) -> bool:
     '''Detect key tapped.
 
-    :param key: key as `str` of 
+    :param `key`: key as `str` of
     [`'A'`, `'B'`, `'C'`, `'D'`, `'E'`, `'F'`, `'G'`, `'H'`, `'I'`, `'J'`, `'K'`, `'L'`, `'M'`, `'N'`, `'O'`, `'P'`, `'Q'`,
     `'R'`, `'S'`, `'T'`, `'U'`, `'V'`, `'W'`, `'X'`, `'Y'`, `'Z'`, `'ZERO'`, `'ONE'`, `'TWO'`, `'THREE'`, `'FOUR'`, `'FIVE'`,
     `'SIX'`, `'SEVEN'`, `'EIGHT'`, `'NINE'`, `'CAPSLOCK'`, `'LEFTCTRLKEY'`, `'LEFTARROW'`, `'DOWNARROW'`, `'RIGHTARROW'`,
@@ -82,7 +80,7 @@ def key_tap(key: str) -> bool:
 def key_down(key: str) -> bool:
     '''Detect key held down.
 
-    :param key: key as `str` of 
+    :param `key`: key as `str` of
     [`'A'`, `'B'`, `'C'`, `'D'`, `'E'`, `'F'`, `'G'`, `'H'`, `'I'`, `'J'`, `'K'`, `'L'`, `'M'`, `'N'`, `'O'`, `'P'`, `'Q'`,
     `'R'`, `'S'`, `'T'`, `'U'`, `'V'`, `'W'`, `'X'`, `'Y'`, `'Z'`, `'ZERO'`, `'ONE'`, `'TWO'`, `'THREE'`, `'FOUR'`, `'FIVE'`,
     `'SIX'`, `'SEVEN'`, `'EIGHT'`, `'NINE'`, `'CAPSLOCK'`, `'LEFTCTRLKEY'`, `'LEFTARROW'`, `'DOWNARROW'`, `'RIGHTARROW'`,
@@ -101,7 +99,7 @@ def key_down(key: str) -> bool:
 def key_up(key: str) -> bool:
     '''Detect key released.
 
-    :param key: key as `str` of 
+    :param `key`: key as `str` of
     [`'A'`, `'B'`, `'C'`, `'D'`, `'E'`, `'F'`, `'G'`, `'H'`, `'I'`, `'J'`, `'K'`, `'L'`, `'M'`, `'N'`, `'O'`, `'P'`, `'Q'`,
     `'R'`, `'S'`, `'T'`, `'U'`, `'V'`, `'W'`, `'X'`, `'Y'`, `'Z'`, `'ZERO'`, `'ONE'`, `'TWO'`, `'THREE'`, `'FOUR'`, `'FIVE'`,
     `'SIX'`, `'SEVEN'`, `'EIGHT'`, `'NINE'`, `'CAPSLOCK'`, `'LEFTCTRLKEY'`, `'LEFTARROW'`, `'DOWNARROW'`, `'RIGHTARROW'`,
@@ -120,7 +118,7 @@ def key_up(key: str) -> bool:
 def key_pulse(key: str, time: float = .4) -> bool:
     '''Detect key tapped, then held down after `time` has passed.
 
-    :param key: key as `str` of 
+    :param `key`: key as `str` of
     [`'A'`, `'B'`, `'C'`, `'D'`, `'E'`, `'F'`, `'G'`, `'H'`, `'I'`, `'J'`, `'K'`, `'L'`, `'M'`, `'N'`, `'O'`, `'P'`, `'Q'`,
     `'R'`, `'S'`, `'T'`, `'U'`, `'V'`, `'W'`, `'X'`, `'Y'`, `'Z'`, `'ZERO'`, `'ONE'`, `'TWO'`, `'THREE'`, `'FOUR'`, `'FIVE'`,
     `'SIX'`, `'SEVEN'`, `'EIGHT'`, `'NINE'`, `'CAPSLOCK'`, `'LEFTCTRLKEY'`, `'LEFTARROW'`, `'DOWNARROW'`, `'RIGHTARROW'`,

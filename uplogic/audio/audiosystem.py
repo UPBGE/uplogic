@@ -4,6 +4,8 @@
 from bge import logic
 from mathutils import Vector
 from uplogic.data.globaldb import GlobalDB
+from uplogic.input import get_vr_headset_data
+from uplogic.input.vr import ULHeadsetVRWrapper
 import aud
 import bpy
 
@@ -19,10 +21,45 @@ DISTANCE_MODELS = {
 }
 
 
-def set_master_volume(volume, aud_system='default') -> None:
-    aud_system = GlobalDB.retrieve('uplogic.audio').get(aud_system)
-    if aud_system:
-        aud_system.volume = volume
+def get_audio_system(system_name='default') -> None:
+    scene = logic.getCurrentScene()
+    aud_systems = GlobalDB.retrieve('uplogic.audio')
+    # print(scene.pre_draw)
+    if aud_systems.check(system_name):
+        aud_sys = aud_systems.get(system_name)
+    else:
+        aud_sys = ULAudioSystem(system_name)
+    if aud_sys.update not in scene.pre_draw:
+        scene.pre_draw.append(aud_sys.update)
+    return aud_sys
+
+
+def set_master_volume(volume, system_name='default') -> None:
+    scene = logic.getCurrentScene()
+    aud_systems = GlobalDB.retrieve('uplogic.audio')
+    # print(scene.pre_draw)
+    if aud_systems.check(system_name):
+        aud_sys = aud_systems.get(system_name)
+    else:
+        aud_sys = ULAudioSystem(system_name)
+    if aud_sys.update not in scene.pre_draw:
+        scene.pre_draw.append(aud_sys.update)
+    if aud_sys:
+        aud_sys.volume = volume
+
+
+def set_vr_audio(flag, system_name='default') -> None:
+    scene = logic.getCurrentScene()
+    aud_systems = GlobalDB.retrieve('uplogic.audio')
+    # print(scene.pre_draw)
+    if aud_systems.check(system_name):
+        aud_sys = aud_systems.get(system_name)
+    else:
+        aud_sys = ULAudioSystem(system_name)
+    if aud_sys.update not in scene.pre_draw:
+        scene.pre_draw.append(aud_sys.update)
+    if aud_sys:
+        aud_sys.use_vr = flag
 
 
 class ULAudioSystem(object):
@@ -39,10 +76,12 @@ class ULAudioSystem(object):
         self.device.doppler_factor = bpy.context.scene.audio_doppler_factor
         self.reverb_volumes = []
         self.scene = logic.getCurrentScene()
-        self.listener = self.scene.active_camera
+        self.use_vr = getattr(bpy.data.scenes[self.scene.name], 'use_vr_audio_space', False)
+        self.vr_headset = ULHeadsetVRWrapper()
+        self.listener = self.vr_headset if self.use_vr else self.scene.active_camera
         self.old_lis_pos = self.listener.worldPosition.copy()
         self.setup(self.scene)
-    
+
     def setup(self, scene=None):
         if scene is None:
             self.scene = logic.getCurrentScene()
@@ -54,7 +93,7 @@ class ULAudioSystem(object):
         self.reverb = len(self.reverb_volumes) > 0
         GlobalDB.retrieve('uplogic.audio').put(self.name, self)
         bpy.app.handlers.game_post.append(self.shutdown)
-        self.scene.post_draw.append(self.update)
+        self.scene.pre_draw.append(self.update)
 
     def get_distance_model(self, name):
         return DISTANCE_MODELS.get(name, aud.DISTANCE_MODEL_INVERSE_CLAMPED)
@@ -74,17 +113,18 @@ class ULAudioSystem(object):
         scene = logic.getCurrentScene()
         if scene is not self.scene:
             self.setup(scene)
-        cam = scene.active_camera
+        listener = self.vr_headset if self.use_vr else scene.active_camera
         self.reverb = False
-        self.listener = cam
+        if not self.use_vr:
+            self.listener = listener
         if not self.active_sounds:
             return  # do not update if no sound has been installed
         # update the listener data
-        cpos = cam.worldPosition
+        cpos = listener.worldPosition
         distances = {}
         if self.reverb_volumes:
             for obj in self.reverb_volumes:
-                dist = obj.getDistanceTo(cam)
+                dist = (obj - cpos).length
                 if dist > 50:
                     continue
                 else:
@@ -104,10 +144,10 @@ class ULAudioSystem(object):
             if in_range:
                 self.reverb = True
                 self.bounces = ob.reverb_samples
-        listener_vel = self.compute_listener_velocity(cam)
+        listener_vel = (0, 0, 0) if self.use_vr else self.compute_listener_velocity(listener)
         dev = self.device
         dev.listener_location = cpos
-        dev.listener_orientation = cam.worldOrientation.to_quaternion()
+        dev.listener_orientation = listener.worldOrientation.to_quaternion()
         dev.listener_velocity = listener_vel
         for s in self.active_sounds:
             s.update()

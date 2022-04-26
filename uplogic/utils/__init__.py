@@ -3,6 +3,7 @@
 
 from .curves import set_curve_points  # noqa
 from .curves import create_curve  # noqa
+from .curves import ULCurve
 from .raycasting import raycast  # noqa
 from .raycasting import raycast_camera  # noqa
 from .raycasting import raycast_face  # noqa

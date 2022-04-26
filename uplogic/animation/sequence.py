@@ -36,11 +36,11 @@ class ULSequence():
             .nodes[node]
         ).image_user
 
-        logic.getCurrentScene().post_draw.append(self.update)
+        logic.getCurrentScene().pre_draw.append(self.update)
 
     def stop(self):
         self.on_finish = True
-        logic.getCurrentScene().post_draw.remove(self.update)
+        logic.getCurrentScene().pre_draw.remove(self.update)
 
     def pause(self):
         self._pause = True

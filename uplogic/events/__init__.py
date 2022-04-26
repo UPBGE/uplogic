@@ -8,8 +8,8 @@ from uplogic.physics import on_collision
 
 def get_event_manager():
     scene = logic.getCurrentScene()
-    if ULEventManager.update not in scene.post_draw:
-        scene.post_draw.append(ULEventManager.update)
+    if ULEventManager.update not in scene.pre_draw:
+        scene.pre_draw.append(ULEventManager.update)
         # ULEventManager.initialized = True
 
 
@@ -139,7 +139,7 @@ def bind(name, callback):
         evt = receive(name)
         if evt:
             callback(evt.name, evt.content, evt.messenger)
-    logic.getCurrentScene().post_draw.append(_check_evt)
+    logic.getCurrentScene().pre_draw.append(_check_evt)
 
 
 def schedule(name: str, content=None, messenger=None, delay=0.0):

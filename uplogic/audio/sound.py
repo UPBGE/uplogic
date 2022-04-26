@@ -13,6 +13,8 @@ import aud
 
 
 class ULReverb():
+    """Reverb sound added by `ULSound3D` on demand.
+    """
 
     volume: float
 
@@ -100,8 +102,8 @@ class ULReverb():
 
 
 class ULSound():
-    '''TODO: Documentation
-    '''
+    """Base class for 2D and 3D Sounds
+    """
 
     sound = None
     finished: bool
@@ -119,18 +121,19 @@ class ULSound():
         '''
         scene = logic.getCurrentScene()
         aud_systems = GlobalDB.retrieve('uplogic.audio')
-        # print(scene.post_draw)
+        # print(scene.pre_draw)
         if aud_systems.check(name):
             aud_sys = aud_systems.get(name)
         else:
             aud_sys = ULAudioSystem(name)
-        if aud_sys.update not in scene.post_draw:
-            scene.post_draw.append(aud_sys.update)
+        if aud_sys.update not in scene.pre_draw:
+            scene.pre_draw.append(aud_sys.update)
         return aud_sys
 
 
 class ULSound2D(ULSound):
-    '''TODO: Documentation
+    '''Non-spacial sound, e.g. Music or Voice-Overs.\n
+    This class allows for modification of pitch and volume while playing.
     '''
     sound: aud.Sound
 
@@ -175,7 +178,8 @@ class ULSound2D(ULSound):
 
 
 class ULSound3D(ULSound):
-    '''TODO: Documentation
+    '''Spacial sound, e.g. World Effects or Voices.\n
+    This class allows for modification of pitch and volume as well as other attributes while playing.
     '''
     sounds: list
     speaker: GameObject
@@ -294,7 +298,7 @@ class ULSound3D(ULSound):
                 occluder, point, normal = cam.rayCast(
                     location,
                     cam.worldPosition,
-                    speaker.getDistanceTo(cam),
+                    speaker.getDistanceTo(cam.worldPosition),
                     xray=False
                 )
                 occluded = self.occluded = False
