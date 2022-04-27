@@ -6,6 +6,7 @@ from mathutils import Vector
 from uplogic.data.globaldb import GlobalDB
 from uplogic.input import get_vr_headset_data
 from uplogic.input.vr import ULHeadsetVRWrapper
+from uplogic.utils import check_vr_session_status
 import aud
 import bpy
 
@@ -77,7 +78,7 @@ class ULAudioSystem(object):
         self.reverb_volumes = []
         self.scene = logic.getCurrentScene()
         self.use_vr = getattr(bpy.data.scenes[self.scene.name], 'use_vr_audio_space', False)
-        self.vr_headset = ULHeadsetVRWrapper()
+        self.vr_headset = ULHeadsetVRWrapper() if check_vr_session_status() else None
         self.listener = self.vr_headset if self.use_vr else self.scene.active_camera
         self.old_lis_pos = self.listener.worldPosition.copy()
         self.setup(self.scene)

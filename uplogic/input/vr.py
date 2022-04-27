@@ -188,7 +188,8 @@ class ULCharacterVR():
         self.head = ULHeadsetVR()
         self.hand_left_object = left_hand_object
         self.hand_right_object = right_hand_object
-        logic.getCurrentScene().pre_draw.append(self.update)
+        if left_hand_object is not None or right_hand_object is not None:
+            logic.getCurrentScene().pre_draw.append(self.update)
     
     def update(self):
         if self.hand_left_object:

@@ -508,6 +508,14 @@ def get_child_by_name(obj, child, recursive=True, partial=False):
         return children.get(child)
 
 
+def check_vr_session_status() -> tuple[Vector, Matrix]:
+    """Get the current position and orientation of connected VR headset.
+    :returns: `tuple` of (`Vector`, `Matrix`)
+    """
+    session = bpy.context.window_manager.xr_session_state
+    return session is not None
+
+
 ###############################################################################
 # MATH
 ###############################################################################

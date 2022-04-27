@@ -87,3 +87,5 @@ from .randomvect import ULRandomVect  # noqa
 from .getlightenergy import ULGetLightEnergy  # noqa
 from .getlightcolor import ULGetLightColor  # noqa
 from .absolutevalue import ULAbsoluteValue  # noqa
+from .vrcontrollervalues import ULGetVRControllerValues  # noqa
+from .vrheadsetvalues import ULGetVRHeadsetValues  # noqa
