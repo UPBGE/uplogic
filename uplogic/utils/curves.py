@@ -75,11 +75,13 @@ class ULCurve():
 
     @property
     def points(self):
-        return self.object.blenderObject.data.splines[0].points
+        splines = self.object.blenderObject.data.splines
+        return splines[0].points if len(splines) > 0 else []
 
     @points.setter
     def points(self, val):
-        set_curve_points(self.object, val)
+        if val != self.points:
+            set_curve_points(self.object, val)
 
     @property
     def bevel_depth(self):

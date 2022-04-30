@@ -63,6 +63,16 @@ class ULControllerVR():
         print("Attribute 'orientation_aim' of 'ULControllerVR' is read-only!")
 
     @property
+    def aim(self) -> Matrix:
+        aim = self.position_aim - self.position
+        aim.normalize()
+        return aim
+
+    @aim.setter
+    def aim(self, val):
+        print("Attribute 'aim' of 'ULControllerVR' is read-only!")
+
+    @property
     def trigger(self) -> float:
         return self.session.action_state_get(
             bpy.context,

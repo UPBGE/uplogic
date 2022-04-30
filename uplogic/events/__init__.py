@@ -3,13 +3,13 @@
 
 from bge import logic
 import time
-from uplogic.physics import on_collision
+from uplogic.physics import on_collision  # noqa
 
 
 def get_event_manager():
     scene = logic.getCurrentScene()
-    if ULEventManager.update not in scene.pre_draw:
-        scene.pre_draw.append(ULEventManager.update)
+    if ULEventManager.update not in scene.post_draw:
+        scene.post_draw.append(ULEventManager.update)
         # ULEventManager.initialized = True
 
 
@@ -44,7 +44,8 @@ class ULEventManager():
     def deschedule(cls, cb):
         if not cls.initialized:
             get_event_manager()
-        cls.callbacks.remove(cb)
+        if cb in cls.callbacks:
+            cls.callbacks.remove(cb)
 
     @classmethod
     def register(cls, event):
@@ -139,7 +140,7 @@ def bind(name, callback):
         evt = receive(name)
         if evt:
             callback(evt.name, evt.content, evt.messenger)
-    logic.getCurrentScene().pre_draw.append(_check_evt)
+    logic.getCurrentScene().post_draw.append(_check_evt)
 
 
 def schedule(name: str, content=None, messenger=None, delay=0.0):
@@ -189,7 +190,7 @@ def schedule_callback(cb, delay=0.0, arg=None):
     :param `arg`: If this is defined, callback will be called with this
     argument.
     '''
-    ScheduledCallback(cb, delay, arg)
+    return ScheduledCallback(cb, delay, arg)
 
 
 class ScheduledCallback():
@@ -217,3 +218,6 @@ class ScheduledCallback():
             else:
                 self.callback()
             ULEventManager.deschedule(self.call_scheduled)
+
+    def cancel(self):
+        ULEventManager.deschedule(self.call_scheduled)

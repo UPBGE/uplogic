@@ -90,7 +90,6 @@ class ULStartSound3D(ULActionNode):
             attenuation,
             distance_ref,
             [cone_angle.x, cone_angle.y],
-            cone_outer_volume,
-            'default'
+            cone_outer_volume
         )
         self.done = True

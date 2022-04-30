@@ -6,6 +6,7 @@ from bge import logic
 from bge.types import KX_GameObject as GameObject
 from mathutils import Vector
 from uplogic.audio import ULAudioSystem
+from uplogic.audio import get_audio_system
 from uplogic.data import GlobalDB
 from uplogic.events import schedule_callback
 from uplogic.utils import debug, interpolate
@@ -111,24 +112,26 @@ class ULSound():
     volume: float
     aud_system: ULAudioSystem
 
+    @property
+    def position(self):
+        if self.sound:
+            return self.sound.position
+    
+    @position.setter
+    def position(self, val):
+        if self.sound:
+            self.sound.position = val
+
     def stop(self):
         '''TODO: Documentation
         '''
         self.sound.stop()
 
-    def get_aud_sys(self, name: str):
-        '''TODO: Documentation
-        '''
-        scene = logic.getCurrentScene()
-        aud_systems = GlobalDB.retrieve('uplogic.audio')
-        # print(scene.pre_draw)
-        if aud_systems.check(name):
-            aud_sys = aud_systems.get(name)
-        else:
-            aud_sys = ULAudioSystem(name)
-        if aud_sys.update not in scene.pre_draw:
-            scene.pre_draw.append(aud_sys.update)
-        return aud_sys
+    def pause(self):
+        self.sound.pause()
+
+    def resume(self):
+        self.sound.resume()
 
 
 class ULSound2D(ULSound):
@@ -140,16 +143,16 @@ class ULSound2D(ULSound):
     def __init__(
         self,
         file: str = '',
-        aud_system: str = 'default',
         volume: float = 1,
         pitch: float = 1,
         loop_count: int = 0
     ):
+        aud_system = 'default'
         self.finished = False
         if not (file and aud_system):
             return
         self.pitch = pitch
-        self.aud_system = self.get_aud_sys(aud_system)
+        self.aud_system = get_audio_system(aud_system)
         # print(self.aud_system)
         self.volume = volume
         soundfile = logic.expandPath(file)
@@ -160,10 +163,29 @@ class ULSound2D(ULSound):
         device = self.aud_system.device
         handle = self.sound = device.play(sound)
         handle.relative = True
-        handle.pitch = pitch
-        handle.volume = volume * self.aud_system.volume
+        # handle.pitch = pitch
+        # handle.volume = volume * self.aud_system.volume
         handle.loop_count = loop_count
         self.aud_system.add(self)
+
+    @property
+    def volume(self):
+        return self.sound.volume
+
+    @volume.setter
+    def volume(self, val):
+        if self.sound:
+            self.sound.volume = val * self.aud_system.volume
+
+    @property
+    def pitch(self):
+        if self.sound:
+            return self.sound.pitch / logic.getTimeScale()
+
+    @pitch.setter
+    def pitch(self, val):
+        if self.sound:
+            self.sound.pitch = val * logic.getTimeScale()
 
     def update(self):
         '''TODO: Documentation
@@ -173,8 +195,6 @@ class ULSound2D(ULSound):
             self.finished = True
             self.aud_system.remove(self)
             return
-        handle.pitch = self.pitch * logic.getTimeScale()
-        handle.volume = self.volume * self.aud_system.volume
 
 
 class ULSound3D(ULSound):
@@ -208,9 +228,9 @@ class ULSound3D(ULSound):
         attenuation: float = 1,
         distance_ref: float = 1,
         cone_angle: list[float] = [360, 360],
-        cone_outer_volume: float = 0,
-        aud_system: str = 'default'
+        cone_outer_volume: float = 0
     ):
+        aud_system: str = 'default'
         self.finished = False
         if not (file and aud_system and speaker):
             return
@@ -219,7 +239,7 @@ class ULSound3D(ULSound):
         self.occluded = False
         self.sounds = []
         self.reverb_samples = None
-        self.aud_system = self.get_aud_sys(aud_system)
+        self.aud_system = get_audio_system(aud_system)
         # print(self.aud_system)
         self.speaker = speaker
         self.reverb = reverb
@@ -291,7 +311,10 @@ class ULSound3D(ULSound):
                 .worldOrientation
                 .to_quaternion()
             )
-            getattr(speaker, 'worldLinearVelocity', Vector((0, 0, 0)))
+            if 'volume' in dir(self.speaker.blenderObject.data):
+                handle.velocity = Vector((0, 0, 0))
+            else:
+                handle.velocity = getattr(speaker, 'worldLinearVelocity', Vector((0, 0, 0)))
             if self.occlusion:
                 transition = self.transition
                 cam = self.aud_system.listener

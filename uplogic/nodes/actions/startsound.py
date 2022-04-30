@@ -60,7 +60,6 @@ class ULStartSound(ULActionNode):
 
         self._handle = ULSound2D(
             file,
-            'default',
             volume,
             pitch,
             loop_count

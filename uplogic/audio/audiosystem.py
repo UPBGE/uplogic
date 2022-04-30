@@ -36,29 +36,13 @@ def get_audio_system(system_name='default') -> None:
 
 
 def set_master_volume(volume, system_name='default') -> None:
-    scene = logic.getCurrentScene()
-    aud_systems = GlobalDB.retrieve('uplogic.audio')
-    # print(scene.pre_draw)
-    if aud_systems.check(system_name):
-        aud_sys = aud_systems.get(system_name)
-    else:
-        aud_sys = ULAudioSystem(system_name)
-    if aud_sys.update not in scene.pre_draw:
-        scene.pre_draw.append(aud_sys.update)
+    aud_sys = get_audio_system(system_name)
     if aud_sys:
         aud_sys.volume = volume
 
 
 def set_vr_audio(flag, system_name='default') -> None:
-    scene = logic.getCurrentScene()
-    aud_systems = GlobalDB.retrieve('uplogic.audio')
-    # print(scene.pre_draw)
-    if aud_systems.check(system_name):
-        aud_sys = aud_systems.get(system_name)
-    else:
-        aud_sys = ULAudioSystem(system_name)
-    if aud_sys.update not in scene.pre_draw:
-        scene.pre_draw.append(aud_sys.update)
+    aud_sys = get_audio_system(system_name)
     if aud_sys:
         aud_sys.use_vr = flag
 
@@ -72,7 +56,7 @@ class ULAudioSystem(object):
         self.bounces = 0
         self.volume = 1.0
         self.device = aud.Device()
-        self.device.distance_model = aud.DISTANCE_MODEL_INVERSE_CLAMPED
+        self.device.distance_model = DISTANCE_MODELS[bpy.context.scene.audio_distance_model]
         self.device.speed_of_sound = bpy.context.scene.audio_doppler_speed
         self.device.doppler_factor = bpy.context.scene.audio_doppler_factor
         self.reverb_volumes = []

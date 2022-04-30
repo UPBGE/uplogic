@@ -13,6 +13,8 @@ def ray_data(
     """Get necessary data to calculate the ray.\n
     Not intended for manual use.
     """
+    origin = getattr(origin, 'worldPosition', origin)
+    dest = getattr(dest, 'worldPosition', dest)
     if local:
         dest = origin + dest
     d = dest - origin
