@@ -8,7 +8,7 @@ def create_curve(
     name: str,
     bevel_depth: float = 0.0,
     dimensions: int = 3,
-    material: str | Material = None,
+    material: str or Material = None,
     collection: str = None
 ) -> GameObject:
     """Set the curve points of a `KX_GameObject` containing a `bpy.types.Curve` object.
@@ -62,7 +62,7 @@ class ULCurve():
         name: str,
         bevel_depth: float = 0.0,
         dimensions: int = 3,
-        material: str | Material =None,
+        material: str or Material =None,
         collection: str = None
     ) -> None:
         self.object = create_curve(
