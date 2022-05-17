@@ -2,9 +2,7 @@
 '''
 
 from bge import logic
-from mathutils import Vector
 from uplogic.data.globaldb import GlobalDB
-from uplogic.input import get_vr_headset_data
 from uplogic.input.vr import ULHeadsetVRWrapper
 from uplogic.utils import check_vr_session_status
 import aud
@@ -109,7 +107,7 @@ class ULAudioSystem(object):
         distances = {}
         if self.reverb_volumes:
             for obj in self.reverb_volumes:
-                dist = (obj - cpos).length
+                dist = (obj.worldPosition - cpos).length
                 if dist > 50:
                     continue
                 else:

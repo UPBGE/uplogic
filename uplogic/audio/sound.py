@@ -7,7 +7,6 @@ from bge.types import KX_GameObject as GameObject
 from mathutils import Vector
 from uplogic.audio import ULAudioSystem
 from uplogic.audio import get_audio_system
-from uplogic.data import GlobalDB
 from uplogic.events import schedule_callback
 from uplogic.utils import debug, interpolate
 import aud
@@ -138,44 +137,45 @@ class ULSound2D(ULSound):
     '''Non-spacial sound, e.g. Music or Voice-Overs.\n
     This class allows for modification of pitch and volume while playing.
     '''
-    sound: aud.Sound
+    sound: aud.Handle
 
     def __init__(
         self,
         file: str = '',
         volume: float = 1,
         pitch: float = 1,
-        loop_count: int = 0
+        loop_count: int = 0,
+        aud_sys: str = 'default'
     ):
-        aud_system = 'default'
+        self.file = file
+        self._lowpass = 20000
+        self._volume = 1
         self.finished = False
-        if not (file and aud_system):
+        if not (file):
             return
         self.pitch = pitch
-        self.aud_system = get_audio_system(aud_system)
-        # print(self.aud_system)
+        self.aud_system = get_audio_system(aud_sys)
         self.volume = volume
         soundfile = logic.expandPath(file)
         if not isfile(soundfile):
             debug(f'Soundfile {soundfile} could not be loaded!')
             return
-        sound = aud.Sound(soundfile)
+        sound = self.soundfile = aud.Sound(soundfile)
         device = self.aud_system.device
         handle = self.sound = device.play(sound)
         handle.relative = True
-        # handle.pitch = pitch
-        # handle.volume = volume * self.aud_system.volume
         handle.loop_count = loop_count
         self.aud_system.add(self)
 
     @property
     def volume(self):
-        return self.sound.volume
+        return self._volume
 
     @volume.setter
     def volume(self, val):
         if self.sound:
             self.sound.volume = val * self.aud_system.volume
+        self._volume = val
 
     @property
     def pitch(self):
@@ -186,6 +186,20 @@ class ULSound2D(ULSound):
     def pitch(self, val):
         if self.sound:
             self.sound.pitch = val * logic.getTimeScale()
+
+    @property
+    def lowpass(self):
+        return self._lowpass
+
+    @lowpass.setter
+    def lowpass(self, val):
+        self._lowpass = val
+        sound = self.soundfile.lowpass(val, .5)
+        sound = self.aud_system.device.play(sound)
+        sound.position = self.sound.position
+        sound.volume = self.sound.volume
+        schedule_callback(self.sound.stop, .1)
+        self.sound = sound
 
     def update(self):
         '''TODO: Documentation
@@ -228,19 +242,19 @@ class ULSound3D(ULSound):
         attenuation: float = 1,
         distance_ref: float = 1,
         cone_angle: list[float] = [360, 360],
-        cone_outer_volume: float = 0
+        cone_outer_volume: float = 0,
+        aud_sys: str = 'default'
     ):
-        aud_system: str = 'default'
+        self.file = file
         self.finished = False
-        if not (file and aud_system and speaker):
+        if not (file and speaker):
             return
         self._clear_sound = 1
         self._sustained = 1
         self.occluded = False
         self.sounds = []
         self.reverb_samples = None
-        self.aud_system = get_audio_system(aud_system)
-        # print(self.aud_system)
+        self.aud_system = get_audio_system(aud_sys)
         self.speaker = speaker
         self.reverb = reverb
         self.occlusion = occlusion

@@ -60,3 +60,11 @@ class ULActionSystem():
         if action in self.actions:
             self.actions.remove(action)
         ULActionSystem.free_layer(action)
+
+
+def get_action_system(name: str = 'default') -> ULActionSystem:
+    act_systems = GlobalDB.retrieve('uplogic.animation')
+    if act_systems.check(name):
+        return act_systems.get(name)
+    else:
+        return ULActionSystem(name)

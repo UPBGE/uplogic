@@ -205,19 +205,19 @@ class ScheduledCallback():
     '''
 
     def __init__(self, cb, delay=0.0, arg=None):
-        ULEventManager.schedule(self.call_scheduled)
         self.time = time.time()
         self.delay = self.time + delay
         self.callback = cb
         self.arg = arg
+        ULEventManager.schedule(self.call_scheduled)
 
     def call_scheduled(self):
         if time.time() >= self.delay:
+            ULEventManager.deschedule(self.call_scheduled)
             if self.arg is not None:
                 self.callback(self.arg)
             else:
                 self.callback()
-            ULEventManager.deschedule(self.call_scheduled)
 
     def cancel(self):
         ULEventManager.deschedule(self.call_scheduled)

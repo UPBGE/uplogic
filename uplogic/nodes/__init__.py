@@ -160,7 +160,7 @@ class ULLogicNode(ULLogicContainer):
     def get_output(self, socket, default=None):
         return self.output_values.get(socket, default)
 
-    def get_input(self, param, scene=None):
+    def get_input(self, param, scene=None, type=None):
         if str(param).startswith('NLO:'):
             if str(param) == 'NLO:U_O':
                 return self.network._owner

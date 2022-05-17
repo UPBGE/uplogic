@@ -4,6 +4,7 @@ from bge.types import KX_GameObject as GameObject
 from random import randint
 from random import random
 from uplogic.animation import ULActionSystem
+from uplogic.animation.actionsystem import get_action_system
 from uplogic.data import GlobalDB
 from uplogic.events import schedule
 
@@ -50,8 +51,7 @@ class ULAction():
         self.finished = False
         self.keep = keep
         self._layer_weight = layer_weight
-        act_system = 'default'
-        self.act_system = self.get_act_sys(act_system)
+        self.act_system = get_action_system()
         self.game_object = game_object
         self.name = action_name
         self.start_frame = start_frame
@@ -247,10 +247,3 @@ class ULAction():
 
     def set_frame(self, frame):
         self.frame = frame
-
-    def get_act_sys(self, name: str) -> ULActionSystem:
-        act_systems = GlobalDB.retrieve('uplogic.animation')
-        if act_systems.check(name):
-            return act_systems.get(name)
-        else:
-            return ULActionSystem(name)
