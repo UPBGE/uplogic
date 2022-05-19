@@ -67,8 +67,8 @@ class ULCollision():
 def on_collision(obj, callback, prop='', material='', tap=False) -> ULCollision:
     """Bind a callback to an object's collision detection.
 
-    :param `obj`: Object whose collision detection will be used.
-    :param `callback`: Callback to be called when collision occurs. Must have arguments `(obj, point, norma)`.
+    :param `obj`: Object whose collision detection will be monitored.
+    :param `callback`: Callback to be called when collision occurs. Must have arguments `(obj, point, normal)`.
     :param `prop`: Only look for objects that have this property.
     :param `material`: Only look for objects that have this material applied.
     :param `tap`: Only validate the first frame of the collision.

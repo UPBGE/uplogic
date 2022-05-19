@@ -10,7 +10,6 @@ def get_event_manager():
     scene = logic.getCurrentScene()
     if ULEventManager.update not in scene.post_draw:
         scene.post_draw.append(ULEventManager.update)
-        # ULEventManager.initialized = True
 
 
 class ULEventManager():
@@ -18,7 +17,6 @@ class ULEventManager():
     '''
     events = {}
     callbacks = []
-    initialized = False
     done = []
 
     @classmethod
@@ -33,44 +31,46 @@ class ULEventManager():
             for evt in cls.events:
                 print(f'\t{evt}:\t{cls.events[evt].content}')
 
-
     @classmethod
     def schedule(cls, cb):
-        if not cls.initialized:
-            get_event_manager()
+        get_event_manager()
         cls.callbacks.append(cb)
 
     @classmethod
-    def deschedule(cls, cb):
-        if not cls.initialized:
-            get_event_manager()
+    def cancel(cls, cb):
+        get_event_manager()
         if cb in cls.callbacks:
             cls.callbacks.remove(cb)
 
     @classmethod
+    def bind(cls, cb):
+        get_event_manager()
+        cls.schedule(cb)
+
+    @classmethod
+    def unbind(cls, cb):
+        get_event_manager()
+        cls.cancel(cb)
+
+    @classmethod
     def register(cls, event):
-        if not cls.initialized:
-            get_event_manager()
+        get_event_manager()
         cls.events[event.name] = event
-        cls.schedule(event.remove)
+        cls.schedule(event.cancel)
 
     @classmethod
     def send(cls, name, content, messenger) -> None:
-        if not cls.initialized:
-            get_event_manager()
+        get_event_manager()
         ULEvent(name, content, messenger)
-
 
     @classmethod
     def receive(cls, name):
-        if not cls.initialized:
-            get_event_manager()
+        get_event_manager()
         return cls.events.get(name, None)
 
     @classmethod
     def consume(cls, name):
-        if not cls.initialized:
-            get_event_manager()
+        get_event_manager()
         return cls.events.pop(name, None)
 
 
@@ -92,11 +92,11 @@ class ULEvent():
 
     def register(self):
         ULEventManager.register(self)
-        ULEventManager.deschedule(self.register)
+        ULEventManager.cancel(self.register)
 
-    def remove(self):
+    def cancel(self):
         ULEventManager.events.pop(self.name, None)
-        ULEventManager.deschedule(self.remove)
+        ULEventManager.cancel(self.cancel)
 
 
 def send(name, content=None, messenger=None) -> None:
@@ -119,7 +119,7 @@ def receive(name) -> ULEvent:
     return ULEventManager.receive(name)
 
 
-def consume(name: str):
+def consume(name: str) -> ULEvent:
     '''Check if an event has occured. This will remove the event.
 
     :param `name`: Name of the event; can be anything, not just `str`.
@@ -129,29 +129,28 @@ def consume(name: str):
     return ULEventManager.consume(name, None)
 
 
-def bind(name, callback):
-    '''Send an event that can be reacted to.
+def bind(name, callback) -> None:
+    '''Bind a callback to an event.
 
     :param `name`: Name of the event; can be anything, not just `str`.
-    :param `content`: This can be used to store data in an event.
-    :param `messenger`: Can be used to store an object.
+    :param `callback`: This callback will be called every time the event is
+    triggered.
     '''
-    def _check_evt(name, callback):
-        evt = receive(name)
-        if evt:
-            callback(evt.name, evt.content, evt.messenger)
-    logic.getCurrentScene().post_draw.append(_check_evt)
+    class BoundCallback():
+        def __init__(self, name, cb) -> None:
+            self.evt_name = name
+            self.callback = cb
+            ULEventManager.bind(self._check_evt)
 
+        def _check_evt(self):
+            evt = receive(self.evt_name)
+            if evt:
+                self.callback(evt)
 
-def schedule(name: str, content=None, messenger=None, delay=0.0):
-    '''Send an event that can be reacted to with a delay.
+        def unbind(self):
+            ULEventManager.unbind(self._check_evt)
 
-    :param `name`: Name of the event; can be anything, not just `str`.
-    :param `content`: This can be used to store data in an event.
-    :param `messenger`: Can be used to store an object.
-    :param `delay`: Delay with which to send the event in seconds.
-    '''
-    ScheduledEvent(delay, name, content, messenger)
+    return BoundCallback(name, callback)
 
 
 class ScheduledEvent():
@@ -175,22 +174,22 @@ class ScheduledEvent():
 
     def send_scheduled(self):
         if time.time() >= self.delay:
-            ULEventManager.deschedule(self.send_scheduled)
+            ULEventManager.cancel(self.send_scheduled)
             ULEvent(self.name, self.content, self.messenger)
 
+    def cancel(self):
+        ULEventManager.cancel(self.send_scheduled)
 
-def schedule_callback(cb, delay=0.0, arg=None):
-    '''Call a function with a delay. The function can have an argument when
-    defined as a keyword.
 
-    Callback cannot return anything.
+def schedule(name: str, content=None, messenger=None, delay=0.0) -> ScheduledEvent:
+    '''Send an event that can be reacted to with a delay.
 
-    :param `cb`: Callback to be evaluated.
-    :param `delay`: Delay with which to call the function in seconds.
-    :param `arg`: If this is defined, callback will be called with this
-    argument.
+    :param `name`: Name of the event; can be anything, not just `str`.
+    :param `content`: This can be used to store data in an event.
+    :param `messenger`: Can be used to store an object.
+    :param `delay`: Delay with which to send the event in seconds.
     '''
-    return ScheduledCallback(cb, delay, arg)
+    return ScheduledEvent(delay, name, content, messenger)
 
 
 class ScheduledCallback():
@@ -213,11 +212,25 @@ class ScheduledCallback():
 
     def call_scheduled(self):
         if time.time() >= self.delay:
-            ULEventManager.deschedule(self.call_scheduled)
+            ULEventManager.cancel(self.call_scheduled)
             if self.arg is not None:
                 self.callback(self.arg)
             else:
                 self.callback()
 
     def cancel(self):
-        ULEventManager.deschedule(self.call_scheduled)
+        ULEventManager.cancel(self.call_scheduled)
+
+
+def schedule_callback(cb, delay=0.0, arg=None) -> ScheduledCallback:
+    '''Call a function with a delay. The function can have an argument when
+    defined as a keyword.
+
+    Callback cannot return anything.
+
+    :param `cb`: Callback to be evaluated.
+    :param `delay`: Delay with which to call the function in seconds.
+    :param `arg`: If this is defined, callback will be called with this
+    argument.
+    '''
+    return ScheduledCallback(cb, delay, arg)

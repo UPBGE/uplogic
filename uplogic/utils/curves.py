@@ -11,7 +11,16 @@ def create_curve(
     material: str or Material = None,
     collection: str = None
 ) -> GameObject:
-    """Set the curve points of a `KX_GameObject` containing a `bpy.types.Curve` object.
+    """Create a `KX_GameObject` containing a `bpy.types.Curve` object.
+
+    :param `name`: Name of the new `KX_GameObject`.
+    :param `bevel_depth`: Define the "thickness" of the curve. This will add
+    geometry along the spline.
+    :param `dimensions`: Set the coordinate space in which to calculate the
+    curve.
+    :param `material`: The material to use for bevel geometry.
+    :param `collection`: The collection to which to add the curve. Leave at
+    `None` to use scene collection.
     """
     bcurve = bpy.data.curves.new(name, 'CURVE')
     bcurve.bevel_depth = bevel_depth
@@ -37,6 +46,9 @@ def set_curve_points(
     points: list
 ) -> None:
     """Set the curve points of a `KX_GameObject` containing a `bpy.types.Curve` object.
+
+    :param `curve`: `KX_GameObject`
+    :param `points`: A list of points to use for the curve.
     """
     bcurve = curve.blenderObject.data
     for spline in bcurve.splines:
@@ -55,6 +67,15 @@ def set_curve_points(
 
 class ULCurve():
     """Wrapper class for creating and handling curves more easily.
+
+    :param `name`: Name of this curve object.
+    :param `bevel_depth`: Define the "thickness" of the curve. This will add
+    geometry along the spline.
+    :param `dimensions`: Set the coordinate space in which to calculate the
+    curve.
+    :param `material`: The material to use for bevel geometry.
+    :param `collection`: The collection to which to add the curve. Leave at
+    `None` to use scene collection.
     """
 
     def __init__(
@@ -74,7 +95,17 @@ class ULCurve():
         )
 
     @property
+    def name(self):
+        """Name of the game object (Read-Only)."""
+        return self.object.name
+
+    @name.setter
+    def name(self, val):
+        print('ULCurve.name is read-only!')
+
+    @property
     def points(self):
+        """Points of the curve. These points use global coordinates."""
         splines = self.object.blenderObject.data.splines
         return splines[0].points if len(splines) > 0 else []
 
@@ -85,6 +116,7 @@ class ULCurve():
 
     @property
     def bevel_depth(self):
+        """Thickness of the curve geometry."""
         return self.object.blenderObject.data.bevel_depth
 
     @bevel_depth.setter

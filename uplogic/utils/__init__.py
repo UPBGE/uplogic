@@ -1,18 +1,27 @@
 '''TODO: Documentation
 '''
-
-from .curves import set_curve_points  # noqa
-from .curves import create_curve  # noqa
 from .curves import ULCurve
+from .curves import create_curve  # noqa
+from .curves import set_curve_points  # noqa
+from .nodetrees import get_geom_socket  # noqa
+from .nodetrees import get_material_socket  # noqa
+from .nodetrees import get_world_socket  # noqa
+from .nodetrees import modify_geom_socket  # noqa
+from .nodetrees import modify_material_socket  # noqa
+from .nodetrees import modify_world_socket  # noqa
+from .nodetrees import set_geom_socket  # noqa
+from .nodetrees import set_material_socket  # noqa
+from .nodetrees import set_world_socket  # noqa
 from .raycasting import raycast  # noqa
 from .raycasting import raycast_camera  # noqa
 from .raycasting import raycast_face  # noqa
 from .raycasting import raycast_projectile  # noqa
-
-from bge import logic, render
+from .scene import set_scene  # noqa
+from bge import logic
 from bge.types import KX_GameObject as GameObject
-from mathutils import Vector
 from mathutils import Matrix
+from mathutils import Vector
+
 import bpy
 import json
 import math
@@ -41,7 +50,6 @@ STATUS_INVALID = _Status("INVALID")
 VEHICLE = '.ulvehicleconst'
 SHIP = '.ulshipconst'
 FLOATSAM = '.ulfloatsamconst'
-
 WATER = '.ulwater'
 
 
@@ -495,7 +503,7 @@ def get_closest_instance(game_obj: GameObject, name: str):
 
 
 def is_water(game_object: GameObject):
-    return WATER in game_object
+    return WATER in game_object.getPropertyNames()
 
 
 def get_child_by_name(obj, child, recursive=True, partial=False):
@@ -521,7 +529,7 @@ def check_vr_session_status() -> tuple[Vector, Matrix]:
 ###############################################################################
 
 
-def clamp(value: float, min: float = 0, max: float = 1) -> float:
+def clamp(value: float or Vector, min: float = 0, max: float = 1) -> float:
     """Clamp a value in between two other values.
 
     :param value: input value
@@ -530,7 +538,8 @@ def clamp(value: float, min: float = 0, max: float = 1) -> float:
 
     :returns: clamped value as float
     """
-
+    if isinstance(value, Vector):
+        return vec_clamp(value, min, max)
     if value < min:
         return min
     if value > max:
@@ -548,7 +557,6 @@ def vec_clamp(vec: Vector, min: float = 0, max: float = 1) -> Vector:
     :returns: clamped vector as float
     """
     vec = vec.copy()
-
     if vec.length < min:
         vec.normalize()
         return vec * min

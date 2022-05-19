@@ -20,33 +20,36 @@ DISTANCE_MODELS = {
 }
 
 
-def get_audio_system(system_name='default') -> None:
-    scene = logic.getCurrentScene()
-    aud_systems = GlobalDB.retrieve('uplogic.audio')
-    # print(scene.pre_draw)
-    if aud_systems.check(system_name):
-        aud_sys = aud_systems.get(system_name)
-    else:
-        aud_sys = ULAudioSystem(system_name)
-    if aud_sys.update not in scene.pre_draw:
-        scene.pre_draw.append(aud_sys.update)
-    return aud_sys
-
-
 def set_master_volume(volume, system_name='default') -> None:
+    """Set the overall volume of a `ULAudioSystem`. All sounds played via this
+    system will have their volume multiplied by this value.
+    """
     aud_sys = get_audio_system(system_name)
     if aud_sys:
         aud_sys.volume = volume
 
 
 def set_vr_audio(flag, system_name='default') -> None:
+    """Set the audio mode for a `ULAudioSystem`. If set to `True`, the system
+    will track a VR Headset instead of the active scene camera.
+    """
     aud_sys = get_audio_system(system_name)
     if aud_sys:
         aud_sys.use_vr = flag
 
 
+def stop_all_audio(system_name='default') -> None:
+    """Stop every `ULAudioSystem` in this scene.
+    """
+    for sys in GlobalDB.retrieve('uplogic.audio'):
+        sys.shutdown()
+
+
 class ULAudioSystem(object):
-    '''TODO: Documentation
+    '''System for managing sounds started using `ULSound2D` or `ULSound3D`.
+
+    This is usually addressed indirectly through `ULSound2D` or `ULSound3D` and
+    is not intended for manual use.
     '''
     def __init__(self, name: str):
         self.active_sounds = []
@@ -64,8 +67,11 @@ class ULAudioSystem(object):
         self.listener = self.vr_headset if self.use_vr else self.scene.active_camera
         self.old_lis_pos = self.listener.worldPosition.copy()
         self.setup(self.scene)
+        self.scene.onRemove.append(self.shutdown)
 
     def setup(self, scene=None):
+        """Get necessary scene data.
+        """
         if scene is None:
             self.scene = logic.getCurrentScene()
         else:
@@ -75,13 +81,14 @@ class ULAudioSystem(object):
                 self.reverb_volumes.append(obj)
         self.reverb = len(self.reverb_volumes) > 0
         GlobalDB.retrieve('uplogic.audio').put(self.name, self)
-        bpy.app.handlers.game_post.append(self.shutdown)
         self.scene.pre_draw.append(self.update)
 
     def get_distance_model(self, name):
         return DISTANCE_MODELS.get(name, aud.DISTANCE_MODEL_INVERSE_CLAMPED)
 
     def compute_listener_velocity(self, listener):
+        """Compare positions of the listener to calculate velocity.
+        """
         wpos = listener.worldPosition.copy()
         olp = self.old_lis_pos
         vel = (
@@ -93,6 +100,8 @@ class ULAudioSystem(object):
         return vel
 
     def update(self):
+        """This is called each frame.
+        """
         scene = logic.getCurrentScene()
         if scene is not self.scene:
             self.setup(scene)
@@ -141,6 +150,20 @@ class ULAudioSystem(object):
     def remove(self, sound):
         self.active_sounds.remove(sound)
 
-    def shutdown(self, a, b):
+    def shutdown(self, a=None):
         self.device.stopAll()
-        bpy.app.handlers.game_post.remove(self.shutdown)
+        self.scene.pre_draw.remove(self.update)
+        GlobalDB.retrieve('uplogic.audio').remove(self.name)
+
+
+def get_audio_system(system_name='default') -> ULAudioSystem:
+    scene = logic.getCurrentScene()
+    aud_systems = GlobalDB.retrieve('uplogic.audio')
+    if aud_systems.check(system_name):
+        print('Already initialized')
+        aud_sys = aud_systems.get(system_name)
+    else:
+        aud_sys = ULAudioSystem(system_name)
+    if aud_sys.update not in scene.pre_draw:
+        scene.pre_draw.append(aud_sys.update)
+    return aud_sys

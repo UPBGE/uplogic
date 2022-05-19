@@ -203,6 +203,10 @@ class GlobalDB(object):
             return default
         return self.content.pop(key, default)
 
+    def remove(self, key):
+        if key in self.content.keys():
+            del self.content[key]
+
     def log(self):
         '''TODO: Documentation
         '''
