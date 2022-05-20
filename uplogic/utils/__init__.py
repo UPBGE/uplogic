@@ -1,9 +1,11 @@
 '''TODO: Documentation
 '''
 
-from .curves import set_curve_points  # noqa
+from .curves import ULCurve  # noqa
 from .curves import create_curve  # noqa
-from .curves import ULCurve
+from .curves import set_curve_points  # noqa
+from .lights import ULLight  # noqa
+from .lights import make_unique_light
 from .raycasting import raycast  # noqa
 from .raycasting import raycast_camera  # noqa
 from .raycasting import raycast_face  # noqa
@@ -406,79 +408,6 @@ def load_json_as_dict(filepath):
 ###############################################################################
 # SCENE
 ###############################################################################
-
-def make_unique_light(old_lamp_ge: GameObject) -> GameObject:
-    '''TODO: Documentation
-    '''
-    scene = logic.getCurrentScene()
-    name = old_lamp_ge.name
-    old_lamp = old_lamp_ge.blenderObject
-    old_lamp.name = 'OLD_LAMP'
-
-    settings = [
-        'color',
-        'energy',
-        'diffuse_factor',
-        'specular_factor',
-        'volume_factor',
-        'shadow_soft_size',
-        'use_custom_distance',
-        'cutoff_distance',
-        'spot_size',
-        'spot_blend',
-        'show_cone',
-        'angle',
-        'shape',
-        'size',
-        'size_y',
-        'use_shadow',
-        'shadow_buffer_clip_start',
-        'shadow_buffer_bias',
-        'use_soft_shadows',
-        'use_contact_shadow',
-        'contact_shadow_distance',
-        'contact_shadow_bias',
-        'contact_shadow_thickness',
-        'shadow_cascade_count',
-        'shadow_cascade_fade',
-        'shadow_cascade_max_distance',
-        'shadow_cascade_exponent'
-    ]
-
-    types = {
-        'POINT': 'Point',
-        'AREA': 'Area',
-        'SPOT': 'Spot',
-        'SUN': 'Sun'
-    }
-
-    light_type = old_lamp.data.type
-    bpy.ops.object.light_add(
-        type=light_type,
-        location=old_lamp_ge.worldPosition,
-        rotation=old_lamp_ge.worldOrientation.to_euler()
-    )
-    index = 1
-    light = None
-    while light is None:
-        if types[light_type] in bpy.data.objects[-index].name:
-            light = bpy.data.objects[-index]
-        index += 1
-    for attr in settings:
-        try:
-            setattr(light.data, attr, getattr(old_lamp.data, attr))
-        except Exception:
-            pass
-    light.name = name
-    new_lamp_ge = scene.convertBlenderObject(light)
-    for p in old_lamp_ge.getPropertyNames():
-        new_lamp_ge[p] = old_lamp_ge[p]
-    old_lamp_ge.endObject()
-    real_name = light.name
-    light.name = real_name
-    if old_lamp_ge.parent:
-        new_lamp_ge.setParent(old_lamp_ge.parent)
-    return new_lamp_ge
 
 
 def get_closest_instance(game_obj: GameObject, name: str):
