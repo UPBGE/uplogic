@@ -1,5 +1,6 @@
 from bge import logic
 from mathutils import Vector
+from uplogic.utils import debug
 
 
 XBOX = {
@@ -203,3 +204,39 @@ def gamepad_up(
         return gamepad_axis(btn_idx, idx, True, True)
     else:
         return gamepad_button(btn_idx, idx, True, True)
+
+
+class ULGamePad():
+
+    def __init__(
+        self,
+        idx: int = 0,
+        layout: dict = XBOX
+    ) -> None:
+        self.idx = idx
+        self.layout = layout
+        if not logic.joysticks[idx]:
+            debug(f'No Joystick found at index: {idx}')
+        self.joystick = logic.joysticks[idx]
+
+    def button_down(self, button: str):
+        return gamepad_down(button, self.idx, self.layout)
+        
+    def button_tap(self, button: str):
+        return gamepad_tap(button, self.idx, self.layout)
+
+    def button_up(self, button: str):
+        return gamepad_up(button, self.idx, self.layout)
+
+    def sticks(self, stick: str = LS, threshold: float = 0.07):
+        return gamepad_stick(stick, self.idx, threshold)
+    
+    def vibrate(self, strength: tuple = (.5, .5), time: float = 1.0):
+        if not self.joystick.hasVibration:
+            debug('Joystick at index {} has no vibration!'.format(self.idx))
+            return
+        self.joystick.strengthLeft = strength[0]
+        self.joystick.strengthRight = strength[1]
+        self.joystick.duration = int(round(time * 1000))
+
+        self.joystick.startVibration()

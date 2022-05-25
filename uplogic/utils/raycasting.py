@@ -55,8 +55,8 @@ def raycast(
     """
     if exclude:
         exclude_prop, prop = prop, ''
-    origin = getattr(origin, 'worldPosition', origin).copy()
-    dest = getattr(dest, 'worldPosition', dest).copy()
+    origin = getattr(origin, 'worldPosition', Vector(origin)).copy()
+    dest = getattr(dest, 'worldPosition', Vector(dest)).copy()
     direction, distance, dest = ray_data(origin, dest, local, distance)
     obj, point, normal = caster.rayCast(
         dest,

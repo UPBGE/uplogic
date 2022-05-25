@@ -23,7 +23,7 @@ MOUSE_BUTTONS = {
 }
 
 
-class ULMouseData():
+class ULMouse():
     def __init__(self) -> None:
         self.position = get_mouse_position()
         self.movement = (0, 0)
@@ -157,7 +157,7 @@ class ULMouseLook():
     def __init__(
         self,
         obj: GameObject,
-        head=None,
+        head: GameObject = None,
         sensitivity=1.0,
         use_cap_x=False,
         cap_x=[0, 0],
@@ -165,13 +165,17 @@ class ULMouseLook():
         cap_y=[-89, 89],
         invert=[False, True],
         smoothing=0.0,
-        local=False,
+        local=True,
         front=1,
         active=True
     ) -> None:
         self.obj = obj
         self.head = head if head else obj
-        self._defaults = [obj.localOrientation.copy(), head.localOrientation.copy()]
+        self._defaults = [
+            obj.localOrientation.copy(),
+            head.localOrientation.copy()
+            if head else
+            obj.localOrientation.copy()]
         self.sensitivity = sensitivity
         self.use_cap_x = use_cap_x
         self.cap_x = cap_x
@@ -286,12 +290,12 @@ class ULMouseLook():
             if objectRotation.z + offset.x > uppercapX:
                 offset.x = 0
                 objectRotation.z = uppercapX
-                game_object_x.localOrientation = objectRotation.to_matrix()
+                game_object_x.localOrientation = objectRotation
 
             if objectRotation.z + offset.x < lowercapX:
                 offset.x = 0
                 objectRotation.z = lowercapX
-                game_object_x.localOrientation = objectRotation.to_matrix()
+                game_object_x.localOrientation = objectRotation
 
         game_object_x.applyRotation((0, 0, offset.x), self.local)
 
@@ -301,12 +305,12 @@ class ULMouseLook():
 
             if objectRotation[rot_axis] + offset.y > uppercapY:
                 objectRotation[rot_axis] = uppercapY
-                game_object_y.localOrientation = objectRotation.to_matrix()
+                game_object_y.localOrientation = objectRotation
                 offset.y = 0
 
             if objectRotation[rot_axis] + offset.y < lowercapY:
                 objectRotation[rot_axis] = lowercapY
-                game_object_y.localOrientation = objectRotation.to_matrix()
+                game_object_y.localOrientation = objectRotation
                 offset.y = 0
 
         rot = [0, 0, 0]
