@@ -38,7 +38,7 @@ class ULVehicle():
         down = Vector((0, 0, -1))
         axle_dir = body.getAxisVect(Vector((-1, 0, 0)))
         wheels = []
-        cs = sorted(body.children, key=lambda c: c.name)
+        cs = sorted(body.childrenRecursive, key=lambda c: c.name)
         for c in cs:
             if 'FWheel' in c.name:
                 c.removeParent()
@@ -149,10 +149,10 @@ class ULVehicle():
         self.is_accelerating = True
         drive = self.drive
         wheelcount = self.acc_wheels
-        if drive == RWD:
+        if drive == FWD:
             for wheel in range(wheelcount):
                 self.constraint.applyEngineForce(-value, wheel)
-        elif drive == FWD:
+        elif drive == RWD:
             wheels = self.constraint.getNumWheels()
             for wheel in range(wheelcount):
                 wheel = wheels - wheel - 1
@@ -173,10 +173,10 @@ class ULVehicle():
         self.is_braking = True
         brakes = self.brakes
         wheelcount = self.brake_wheels
-        if brakes == RWD:
+        if brakes == FWD:
             for wheel in range(wheelcount):
                 self.constraint.applyBraking(value, wheel)
-        elif brakes == FWD:
+        elif brakes == RWD:
             wheels = self.constraint.getNumWheels()
             for wheel in range(wheelcount):
                 wheel = wheels - wheel - 1
@@ -197,10 +197,10 @@ class ULVehicle():
         self.is_steering = True
         steer_axle = self.steer_axle
         wheelcount = self.steer_wheels
-        if steer_axle == RWD:
+        if steer_axle == FWD:
             for wheel in range(wheelcount):
                 self.constraint.setSteeringValue(-value, wheel)
-        elif steer_axle == FWD:
+        elif steer_axle == RWD:
             wheels = self.constraint.getNumWheels()
             for wheel in range(wheelcount):
                 wheel = wheels - wheel - 1
@@ -228,6 +228,15 @@ class ULVehicle():
         self._stiffness = value
         for wheel in range(self.constraint.getNumWheels()):
             self.constraint.setSuspensionStiffness(value, wheel)
+
+    @property
+    def speed(self):
+        return self.body.localLinearVelocity.y * 3.6
+
+    @speed.setter
+    def speed(self, value):
+        print('ULVecicle.speed is read-only!')
+
 
     @property
     def damping(self):
@@ -271,23 +280,23 @@ class ULVehicle():
     def set_wheel_friction(self, wheel, friction):
         self.constraint.setTyreFriction(friction, wheel)
 
-    def accelerate(self, power, drive=None, wheelcount=None):
-        if drive != self.drive and drive is not None:
+    def accelerate(self, power: float = 1, drive='', wheelcount=''):
+        if drive != self.drive and drive:
             self.drive = drive
-        if wheelcount != self.acc_wheels and wheelcount is not None:
+        if wheelcount != self.acc_wheels and wheelcount:
             self.acc_wheels = wheelcount
         self.acceleration = power
 
-    def brake(self, power, brakes=None, wheelcount=None):
-        if brakes != self.brakes and brakes is not None:
+    def brake(self, power: float = .1, brakes: str = '', wheelcount: str = ''):
+        if brakes != self.brakes and brakes:
             self.drive = brakes
-        if wheelcount != self.brake_wheels and wheelcount is not None:
+        if wheelcount != self.brake_wheels and wheelcount:
             self.brake_wheels = wheelcount
         self.braking = power
 
-    def steer(self, power, steer_axle=None, wheelcount=None):
-        if steer_axle != self.steer_axle and steer_axle is not None:
+    def steer(self, power: float = 0, steer_axle: str = '', wheelcount: str = ''):
+        if steer_axle != self.steer_axle and steer_axle:
             self.steer_axle = steer_axle
-        if wheelcount != self.steer_wheels and wheelcount is not None:
+        if wheelcount != self.steer_wheels and wheelcount:
             self.steer_wheels = wheelcount
         self.steering = power

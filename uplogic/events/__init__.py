@@ -51,27 +51,27 @@ class ULEventManager():
     def register(cls, event):
         if not cls.initialized:
             get_event_manager()
-        cls.events[event.name] = event
+        cls.events[event.id] = event
         cls.schedule(event.remove)
 
     @classmethod
-    def send(cls, name, content, messenger) -> None:
+    def send(cls, id, content, messenger) -> None:
         if not cls.initialized:
             get_event_manager()
-        ULEvent(name, content, messenger)
+        ULEvent(id, content, messenger)
 
 
     @classmethod
-    def receive(cls, name):
+    def receive(cls, id):
         if not cls.initialized:
             get_event_manager()
-        return cls.events.get(name, None)
+        return cls.events.get(id, None)
 
     @classmethod
-    def consume(cls, name):
+    def consume(cls, id):
         if not cls.initialized:
             get_event_manager()
-        return cls.events.pop(name, None)
+        return cls.events.pop(id, None)
 
 
 class ULEvent():
@@ -79,13 +79,13 @@ class ULEvent():
     
     **Not intended for manual use.**
 
-    :param `name`: Name of the event; can be anything, not just `str`.
+    :param `id`: Identifier of the event; can be anything, not just `str`.
     :param `content`: This can be used to store data in an event.
     :param `messenger`: Can be used to store an object.
     '''
 
-    def __init__(self, name, content=None, messenger=None):
-        self.name = name
+    def __init__(self, id, content=None, messenger=None):
+        self.id = id
         self.content = content
         self.messenger = messenger
         ULEventManager.schedule(self.register)
@@ -95,63 +95,63 @@ class ULEvent():
         ULEventManager.deschedule(self.register)
 
     def remove(self):
-        ULEventManager.events.pop(self.name, None)
+        ULEventManager.events.pop(self.id, None)
         ULEventManager.deschedule(self.remove)
 
 
-def send(name, content=None, messenger=None) -> None:
+def send(id, content=None, messenger=None) -> None:
     '''Send an event that can be reacted to.
 
-    :param `name`: Name of the event; can be anything, not just `str`.
+    :param `id`: Identifier of the event; can be anything, not just `str`.
     :param `content`: This can be used to store data in an event.
     :param `messenger`: Can be used to store an object.
     '''
-    ULEventManager.send(name, content, messenger)
+    ULEventManager.send(id, content, messenger)
 
 
-def receive(name) -> ULEvent:
+def receive(id) -> ULEvent:
     '''Check if an event has occured.
 
-    :param `name`: Name of the event; can be anything, not just `str`.
+    :param `id`: Identifier of the event; can be anything, not just `str`.
 
-    :returns: `ULEvent` with `name`, `content` and `messenger` as attributes.
+    :returns: `ULEvent` with `id`, `content` and `messenger` as attributes.
     '''
-    return ULEventManager.receive(name)
+    return ULEventManager.receive(id)
 
 
-def consume(name: str):
+def consume(id: str):
     '''Check if an event has occured. This will remove the event.
 
-    :param `name`: Name of the event; can be anything, not just `str`.
+    :param `id`: Identifier of the event; can be anything, not just `str`.
 
-    :returns: `ULEvent` with `name`, `content` and `messenger` as attributes.
+    :returns: `ULEvent` with `id`, `content` and `messenger` as attributes.
     '''
-    return ULEventManager.consume(name, None)
+    return ULEventManager.consume(id, None)
 
 
-def bind(name, callback):
+def bind(id, callback):
     '''Send an event that can be reacted to.
 
-    :param `name`: Name of the event; can be anything, not just `str`.
+    :param `id`: Identifier of the event; can be anything, not just `str`.
     :param `content`: This can be used to store data in an event.
     :param `messenger`: Can be used to store an object.
     '''
-    def _check_evt(name, callback):
-        evt = receive(name)
+    def _check_evt(id, callback):
+        evt = receive(id)
         if evt:
-            callback(evt.name, evt.content, evt.messenger)
+            callback(evt.id, evt.content, evt.messenger)
     logic.getCurrentScene().post_draw.append(_check_evt)
 
 
-def schedule(name: str, content=None, messenger=None, delay=0.0):
+def schedule(id: str, content=None, messenger=None, delay=0.0):
     '''Send an event that can be reacted to with a delay.
 
-    :param `name`: Name of the event; can be anything, not just `str`.
+    :param `id`: Identifier of the event; can be anything, not just `str`.
     :param `content`: This can be used to store data in an event.
     :param `messenger`: Can be used to store an object.
     :param `delay`: Delay with which to send the event in seconds.
     '''
-    ScheduledEvent(delay, name, content, messenger)
+    ScheduledEvent(delay, id, content, messenger)
 
 
 class ScheduledEvent():
@@ -160,15 +160,15 @@ class ScheduledEvent():
     **Not intended for manual use.**
 
     :param `delay`: Delay with which to send the event in seconds.
-    :param `name`: Name of the event; can be anything, not just `str`
+    :param `id`: Identifier of the event; can be anything, not just `str`
     :param `content`: This can be used to store data in an event.
     :param `messenger`: Can be used to store an object.
     '''
 
-    def __init__(self, delay, name, content, messenger):
+    def __init__(self, delay, id, content, messenger):
         self.time = time.time()
         self.delay = self.time + delay
-        self.name = name
+        self.id = id
         self.content = content
         self.messenger = messenger
         ULEventManager.schedule(self.send_scheduled)
@@ -176,7 +176,7 @@ class ScheduledEvent():
     def send_scheduled(self):
         if time.time() >= self.delay:
             ULEventManager.deschedule(self.send_scheduled)
-            ULEvent(self.name, self.content, self.messenger)
+            ULEvent(self.id, self.content, self.messenger)
 
 
 def schedule_callback(cb, delay=0.0, arg=None):

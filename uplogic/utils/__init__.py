@@ -576,3 +576,12 @@ def get_direction(a, b, local=False) -> Vector:
     d = b - start
     d.normalize()
     return d
+
+
+def map_range(value, in_min, in_max, out_min, out_max, clamp=(None, None)):
+    result = (value - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
+    if clamp[0] is not None and result < clamp[0]:
+        return clamp[0]
+    if clamp[1] is not None and result > clamp[1]:
+        return clamp[1]
+    return result

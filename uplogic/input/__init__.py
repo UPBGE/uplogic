@@ -6,6 +6,7 @@ from .gamepad import gamepad_down  # noqa
 from .gamepad import gamepad_stick  # noqa
 from .gamepad import gamepad_tap  # noqa
 from .gamepad import gamepad_up  # noqa
+from .gamepad import ULGamePad  # noqa
 from .keyboard import KEYBOARD_EVENTS  # noqa
 from .keyboard import key_down  # noqa
 from .keyboard import key_pulse  # noqa
@@ -14,7 +15,7 @@ from .mouse import LMB  # noqa
 from .mouse import MMB  # noqa
 from .mouse import MOUSE_EVENTS  # noqa
 from .mouse import RMB  # noqa
-from .mouse import ULMouseData  # noqa
+from .mouse import ULMouse  # noqa
 from .mouse import get_mouse_position  # noqa
 from .mouse import mouse_down  # noqa
 from .mouse import mouse_moved  # noqa

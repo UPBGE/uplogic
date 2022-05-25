@@ -1,7 +1,7 @@
 '''TODO: Documentation
 '''
 
-from genericpath import isfile
+from os.path import isfile
 from bge import logic
 from bge.types import KX_GameObject as GameObject
 from mathutils import Vector
@@ -107,8 +107,11 @@ class ULSound():
     """
 
     sound = None
+    """Internal `aud.Sound` instance."""
     finished: bool
+    """Whether this sound has finished playing."""
     pitch: float
+    """Pitch (Frequency Shift)."""
     volume: float
     aud_system: ULAudioSystem
 
@@ -161,7 +164,7 @@ class ULSound2D(ULSound):
             return
         sound = aud.Sound(soundfile)
         device = self.aud_system.device
-        handle = self.sound = device.play(sound)
+        self.sound = handle = device.play(sound)
         handle.relative = True
         # handle.pitch = pitch
         # handle.volume = volume * self.aud_system.volume
