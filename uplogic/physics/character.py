@@ -62,17 +62,16 @@ class ULCharacter():
         self.character.walkDirection = self.owner.worldOrientation @ value
 
     @property
-    def move(self):
-        return self.character.walkDirection
-
-    @move.setter
-    def move(self, value):
-        self.character.walkDirection = value
-
-    @property
     def velocity(self):
         return self.velocity
 
     @velocity.setter
     def velocity(self, value):
         self.character.setVelocity(value, 100, False)
+
+    def move(self, direction=Vector((0, 0, 0)), local=True):
+        self.is_walking = True
+        self.character.walkDirection = self.owner.worldOrientation @ direction if local else direction
+
+    def jump(self):
+        self.character.jump()

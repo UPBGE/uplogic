@@ -9,6 +9,7 @@ from uplogic.utils.errors import NoXRSessionError
 
 def get_vr_headset_data() -> tuple[Vector, Matrix]:
     """Get the current position and orientation of connected VR headset.
+
     :returns: `tuple` of (`Vector`, `Matrix`)
     """
     session = bpy.context.window_manager.xr_session_state
@@ -21,6 +22,8 @@ class ULControllerVR():
     """Wrapper class for VR Controllers.\n
     This wrapper provides `position`, `position_aim`, `orientation`,
     `orientation_aim`, `trigger` and `thumbstick` attributes.
+
+    :param `idx`: Controller index; 0 for left, 1 for right controller.
     """
 
     def __init__(self, idx: int=0) -> None:
