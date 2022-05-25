@@ -160,7 +160,6 @@ def get_audio_system(system_name='default') -> ULAudioSystem:
     scene = logic.getCurrentScene()
     aud_systems = GlobalDB.retrieve('uplogic.audio')
     if aud_systems.check(system_name):
-        print('Already initialized')
         aud_sys = aud_systems.get(system_name)
     else:
         aud_sys = ULAudioSystem(system_name)

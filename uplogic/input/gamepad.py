@@ -1,6 +1,10 @@
 from bge import logic
+from bge.types import KX_GameObject as GameObject
+from math import pi
 from mathutils import Vector
 from uplogic.utils import debug
+from uplogic.utils import interpolate
+from uplogic.events import schedule_callback
 
 
 XBOX = {
@@ -47,8 +51,8 @@ SONY = {
     'L2': 4
 }
 
-LS = 'LEFTSTICK'
-RS = 'RIGHTSTICK'
+LS = 'LS'
+RS = 'RS'
 
 STICKS = {
     LS: [0, 1],
@@ -119,6 +123,14 @@ def gamepad_axis(
     val = gamepad.axisValues[axis]
     _active_axis[axis] = val
     return val if abs(val) >= threshold else 0
+
+
+def gamepad_trigger(
+    trigger: str = 'LT',
+    idx: int = 0,
+    threshold: float = .07
+) -> float:
+    return gamepad_axis(4 if trigger == 'LT' else 5, idx, threshold=threshold)
 
 
 def gamepad_stick(
@@ -206,6 +218,17 @@ def gamepad_up(
         return gamepad_button(btn_idx, idx, True, True)
 
 
+def gamepad_vibrate(idx: int = 0, strength: tuple = (.5, .5), time: float = 1.0):
+    joystick = logic.joysticks[idx]
+    if not joystick or not joystick.hasVibration:
+        debug('Joystick at index {} has no vibration!'.format(idx))
+    joystick.strengthLeft = strength[0]
+    joystick.strengthRight = strength[1]
+    joystick.duration = int(round(time * 1000))
+
+    joystick.startVibration()
+
+
 class ULGamePad():
 
     def __init__(
@@ -240,3 +263,177 @@ class ULGamePad():
         self.joystick.duration = int(round(time * 1000))
 
         self.joystick.startVibration()
+
+class ULGamepadLook():
+    def __init__(
+        self,
+        obj: GameObject,
+        head: GameObject = None,
+        sensitivity: float = .05,
+        use_cap_x: bool = False,
+        cap_x: list = [0, 0],
+        use_cap_y: bool = False,
+        cap_y: list = [-89, 89],
+        invert: list = [True, True],
+        smoothing: float = 0.0,
+        local: bool = True,
+        front: int = 1,
+        idx: int = 0,
+        stick: int = 'RS',
+        threshold: float = 0.07,
+        exponent: float = 2.3,
+        active=True
+    ) -> None:
+        self.obj = obj
+        self.head = head if head else obj
+        self._defaults = [
+            obj.localOrientation.copy(),
+            head.localOrientation.copy()
+            if head else
+            obj.localOrientation.copy()]
+        self.sensitivity = sensitivity
+        self.use_cap_x = use_cap_x
+        self.cap_x = cap_x
+        self.use_cap_y = use_cap_y
+        self.cap_y = cap_y
+        self.invert = invert
+        self.smoothing = smoothing
+        self.initialized = False
+        self.front = front
+        self._x = 0
+        self._y = 0
+        self._active = False
+        self.local = local
+        self.reset_factor = 0
+        self.stick = stick
+        self.threshold = threshold
+        self.exponent = exponent
+        self.joystick = logic.joysticks[idx]
+        self.active = active
+
+    @property
+    def active(self):
+        return self._active
+
+    @active.setter
+    def active(self, val):
+        scene = logic.getCurrentScene()
+        if val and self.update not in scene.pre_draw and self.joystick:
+            scene.pre_draw.append(self.update)
+        elif not val and self.update in scene.pre_draw:
+            self.initialized = False
+            scene.pre_draw.remove(self.update)
+        self._active = val
+
+    @property
+    def rotation(self):
+        return self.obj.worldOrientation, self.head.worldOrientation
+
+    @rotation.setter
+    def rotation(self, val):
+        self.obj.worldOrientation = val[0]
+        self.head.worldOrientation = val[1]
+
+    def stop(self):
+        self.active = False
+        self.initialized = False
+
+    def disable(self):
+        self.active = False
+
+    def enable(self):
+        self.active = True
+
+    def reset(self, factor=1):
+        if factor < 1:
+            self.active = False
+            if self.reset_factor < 1:
+                self.obj.localOrientation = self.obj.localOrientation.lerp(self._defaults[0], factor)
+                self.head.localOrientation = self.head.localOrientation.lerp(self._defaults[1], factor)
+                self.reset_factor = interpolate(self.reset_factor, 1, factor)
+                schedule_callback(self.reset, arg=factor)
+            else:
+                self.reset_factor = 0
+                self.reset()
+        else:
+            self.obj.localOrientation = self._defaults[0]
+            self.head.localOrientation = self._defaults[1]
+
+    def update(self):
+        game_object_x = self.obj
+        game_object_y = self.head
+        sensitivity = self.sensitivity * 10
+        use_cap_x = self.use_cap_x
+        use_cap_y = self.use_cap_y
+        cap_x = self.cap_x
+        lowercapX = cap_x[0] * pi / 180
+        uppercapX = cap_x[1] * pi / 180
+        cap_y = self.cap_y
+        lowercapY = cap_y[0] * pi / 180
+        uppercapY = cap_y[1] * pi / 180
+        invert = self.invert
+        smooth = 1 - (self.smoothing * .99)
+        joystick = self.joystick
+        raw_values = joystick.axisValues
+        if self.stick == 'RS':
+            x, y = raw_values[2], raw_values[3]
+        elif self.stick == 'LS':
+            x, y = raw_values[0], raw_values[1]
+        neg_x = -1 if x < 0 else 1
+        neg_y = -1 if y < 0 else 1
+
+        threshold = self.threshold
+        if -threshold < x < threshold:
+            x = 0
+        else:
+            x = abs(x) ** self.exponent
+
+        if -threshold < y < threshold:
+            y = 0
+        else:
+            y = abs(y) ** self.exponent
+
+        x *= neg_x
+        y *= neg_y
+
+        self._x = x = interpolate(self._x, -x if invert[0] else x, smooth)
+        self._y = y = interpolate(self._y, -y if invert[1] else y, smooth)
+        if self._x == self._y == 0:
+            self.done = True
+            return
+
+        x *= sensitivity
+        y *= sensitivity
+        if use_cap_x:
+            objectRotation = game_object_x.localOrientation.to_euler()
+
+            if objectRotation.z + x > uppercapX:
+                x = 0
+                objectRotation.z = uppercapX
+                game_object_x.localOrientation = objectRotation
+
+            if objectRotation.z + x < lowercapX:
+                x = 0
+                objectRotation.z = lowercapX
+                game_object_x.localOrientation = objectRotation
+
+        game_object_x.applyRotation((0, 0, x), self.local)
+
+        rot_axis = 1 - self.front
+        if use_cap_y:
+            objectRotation = game_object_y.localOrientation.to_euler()
+
+            if objectRotation[rot_axis] + y > uppercapY:
+                objectRotation[rot_axis] = uppercapY
+                game_object_y.localOrientation = objectRotation
+                y = 0
+
+            if objectRotation[rot_axis] + y < lowercapY:
+                objectRotation[rot_axis] = lowercapY
+                game_object_y.localOrientation = objectRotation
+                y = 0
+
+        rot = [0, 0, 0]
+        rot[1-self.front] = y
+        game_object_y.applyRotation((*rot, ), True)
+        self.done = True

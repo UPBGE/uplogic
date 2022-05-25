@@ -96,7 +96,7 @@ class ULEvent():
 
     def remove(self):
         ULEventManager.events.pop(self.id, None)
-        ULEventManager.deschedule(self.remove)
+        ULEventManager.cancel(self.remove)
 
 
 def send(id, content=None, messenger=None) -> None:

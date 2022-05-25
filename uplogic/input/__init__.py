@@ -4,8 +4,10 @@ from .gamepad import SONY  # noqa
 from .gamepad import XBOX  # noqa
 from .gamepad import gamepad_down  # noqa
 from .gamepad import gamepad_stick  # noqa
+from .gamepad import gamepad_trigger  # noqa
 from .gamepad import gamepad_tap  # noqa
 from .gamepad import gamepad_up  # noqa
+from .gamepad import ULGamepadLook  # noqa
 from .gamepad import ULGamePad  # noqa
 from .keyboard import KEYBOARD_EVENTS  # noqa
 from .keyboard import key_down  # noqa

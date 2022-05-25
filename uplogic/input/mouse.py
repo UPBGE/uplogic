@@ -216,7 +216,7 @@ class ULMouseLook():
     def rotation(self, val):
         self.obj.worldOrientation = val[0]
         self.head.worldOrientation = val[1]
-    
+
     def stop(self):
         self.active = False
         self.initialized = False
