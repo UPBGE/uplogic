@@ -1,3 +1,4 @@
+from typing import Callable
 from bge import logic
 from bge.types import KX_GameObject as GameObject
 
@@ -18,12 +19,12 @@ class ULCollision():
     def __init__(
         self,
         game_object: GameObject,
-        callback: function,
+        callback: Callable,
         prop: str = '',
         mat: str = '',
         tap: bool = False
     ):
-        self.callback: function = callback
+        self.callback: Callable = callback
         self.prop: str = prop
         self.mat: str = mat
         self.tap: bool = tap
@@ -75,7 +76,7 @@ class ULCollision():
 
 def on_collision(
     obj: GameObject,
-    callback: function,
+    callback: Callable,
     prop: str = '',
     material: str = '',
     tap: bool = False

@@ -290,7 +290,7 @@ class ULMouseLook():
 
     @active.setter
     def active(self, val):
-        pre_draw = logic.getCurrentScene()
+        pre_draw = logic.getCurrentScene().pre_draw
         if val and self.update not in pre_draw:
             pre_draw.append(self.update)
         elif not val and self.update in pre_draw:

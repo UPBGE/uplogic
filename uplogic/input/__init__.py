@@ -7,8 +7,8 @@ from .gamepad import gamepad_stick  # noqa
 from .gamepad import gamepad_trigger  # noqa
 from .gamepad import gamepad_tap  # noqa
 from .gamepad import gamepad_up  # noqa
-from .gamepad import ULGamepadLook  # noqa
 from .gamepad import ULGamePad  # noqa
+from .gamepad import ULGamepadLook  # noqa
 from .keyboard import KEYBOARD_EVENTS  # noqa
 from .keyboard import key_down  # noqa
 from .keyboard import key_pulse  # noqa
@@ -17,7 +17,6 @@ from .mouse import LMB  # noqa
 from .mouse import MMB  # noqa
 from .mouse import MOUSE_EVENTS  # noqa
 from .mouse import RMB  # noqa
-from .mouse import ULMouse  # noqa
 from .mouse import get_mouse_position  # noqa
 from .mouse import mouse_down  # noqa
 from .mouse import mouse_moved  # noqa
@@ -25,6 +24,7 @@ from .mouse import mouse_tap  # noqa
 from .mouse import mouse_up  # noqa
 from .mouse import mouse_wheel  # noqa
 from .mouse import set_mouse_position  # noqa
+from .mouse import ULMouse  # noqa
 from .mouse import ULMouseLook  # noqa
 from .vr import get_vr_headset_data  # noqa
 from .vr import ULControllerVR  # noqa
