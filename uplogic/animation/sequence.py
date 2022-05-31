@@ -1,24 +1,35 @@
-import bpy
 from bge import logic
+from uplogic.animation.action import PLAY_MODES
+import bpy
 import time
 
 
 class ULSequence():
+    '''Play an image animation through a material node.
+    
+    :param `material`: Name of the material to play the animation on.
+    :param `node`: Name of the node the image animation is loaded on.
+    :param `start_frame`: Starting frame of the animation.
+    :param `end_frame`: End frame of the animation.
+    :param `fps`: Frames per second.
+    :param `mode`: Animation mode, `str` of [`play`, `loop`, `pingpong`]
+    '''
+
     def __init__(
         self,
-        material,
-        node,
-        start_frame,
-        end_frame,
-        fps=60,
-        mode=0
+        material: str,
+        node: str,
+        start_frame: int,
+        end_frame: int,
+        fps: int = 60,
+        mode: str = 'play'
     ) -> None:
         self.material = material
         self.node = node
         self.start_frame = start_frame
         self.end_frame = end_frame
         self.fps = fps
-        self.mode = mode
+        self.mode = PLAY_MODES.get(mode, 0)
         self.time = 0.0
         self.frame = 0
         self.initialized = False
@@ -39,21 +50,26 @@ class ULSequence():
         logic.getCurrentScene().pre_draw.append(self.update)
 
     def stop(self):
+        '''Stop this animation completely.'''
         self.on_finish = True
         logic.getCurrentScene().pre_draw.remove(self.update)
 
     def pause(self):
+        '''Pause this animation.'''
         self._pause = True
         self.running = False
 
     def restart(self):
+        '''Restart this animation.'''
         self.initialized = False
 
     def unpause(self):
+        '''Continue this animation.'''
         self._pause = False
         self.running = True
 
     def update(self):
+        '''This is called each frame.'''
         now = time.time()
         player = self.player
         self.time += now - self._time_then

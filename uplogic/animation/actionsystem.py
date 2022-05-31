@@ -10,7 +10,7 @@ class ULActionSystem():
     layers: dict = {}
 
     def __init__(self, name: str):
-        self.actions = []
+        self.actions: list = []
         self.scene = scene = logic.getCurrentScene()
         self.listener = scene.active_camera
         self.old_lis_pos = self.listener.worldPosition.copy()
@@ -97,18 +97,24 @@ class ULActionSystem():
         ULActionSystem.free_layer(action)
 
     def shutdown(self):
+        '''Shutdown and remove this action system. This will stop all actions
+        playing in this system.'''
         self.scene.pre_draw.remove(self.update)
+        for action in self.actions.copy():
+            self.remove(action)
         GlobalDB.retrieve('uplogic.animation').remove(self)
 
 
-def get_action_system(name: str = 'default') -> ULActionSystem:
+def get_action_system(system_name: str = 'default') -> ULActionSystem:
     """Get or create a `ULActionSystem` with the given name. Using more than one
     action system is highly discouraged.
 
-    :param `name`: Look for this name.
+    :param `system_name`: Look for this name.
+
+    :returns: `ULActionSystem`, new system is created if none is found.
     """
     act_systems = GlobalDB.retrieve('uplogic.animation')
-    if act_systems.check(name):
-        return act_systems.get(name)
+    if act_systems.check(system_name):
+        return act_systems.get(system_name)
     else:
-        return ULActionSystem(name)
+        return ULActionSystem(system_name)

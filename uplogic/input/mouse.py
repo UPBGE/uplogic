@@ -23,28 +23,7 @@ MOUSE_BUTTONS = {
 }
 
 
-class ULMouse():
-    def __init__(self) -> None:
-        self.position = get_mouse_position()
-        self.movement = (0, 0)
-        self.wheel = mouse_wheel()
-        logic.getCurrentScene().pre_draw.append(self.update)
-
-    def update(self):
-        old_pos = self.position
-        new_pos = get_mouse_position()
-        self.movement = (
-            new_pos[0] - old_pos[0],
-            new_pos[1] - old_pos[1]
-        )
-        self.position = new_pos
-        self.wheel = mouse_wheel()
-
-    def destroy(self):
-        logic.getCurrentScene().pre_draw.remove(self.update)
-
-
-def set_mouse_position(x: int, y: int, absolute: bool = False):
+def set_mouse_position(x: int, y: int, absolute: bool = False) -> None:
     if absolute:
         render.setMousePosition(x, y)
         return
@@ -54,7 +33,7 @@ def set_mouse_position(x: int, y: int, absolute: bool = False):
     )
 
 
-def get_mouse_position(absolute: bool = False):
+def get_mouse_position(absolute: bool = False) -> tuple:
     pos = logic.mouse.position
     if absolute:
         return (
@@ -152,22 +131,132 @@ def mouse_wheel(tap: bool = False) -> int:
         )
 
 
+class ULMouse():
+    """Mouse Wrapper for accessing mouse data."""
+    def __init__(self) -> None:
+        self._position = get_mouse_position()
+        """Staggered updated mouse position for pos difference calculation."""
+        self.movement = (0, 0)
+        """Movement of the mouse as a tuple `(x, y)`."""
+        self.active = True
+
+    @property
+    def active(self):
+        """Tracking state of this component."""
+        return self.update in logic.getCurrentScene().pre_draw
+
+    @active.setter
+    def active(self, val):
+        pre_draw = logic.getCurrentScene().pre_draw
+        if val and self.update not in pre_draw:
+            pre_draw.append(self.update)
+        elif not val and self.update in pre_draw:
+            pre_draw.remove(self.update)
+
+    @property
+    def position(self):
+        """Position of the mouse as a tuple of `(x, y)` ranging from 0-1 on both
+        axis."""
+        return get_mouse_position()
+
+    @position.setter
+    def position(self, val):
+        render.setMousePosition(
+            int(val[0] * render.getWindowWidth()),
+            int(val[1] * render.getWindowHeight())
+        )
+        self._position = get_mouse_position()
+
+    @property
+    def moved(self):
+        """`True` if the mouse is moved, `False` if idle."""
+        return mouse_moved()
+
+    @moved.setter
+    def moved(self, val):
+        print('ULMouse.moved is read-only!')
+
+    @property
+    def wheel(self):
+        """Mouse wheel difference.
+        
+        -1 if scolled down, 0 if idle, 1 if scrolled up."""
+        return mouse_wheel()
+
+    @wheel.setter
+    def wheel(self, val):
+        print('ULMouse.wheel is read-only!')
+
+    def update(self) -> None:
+        """This is executed each frame if component is active."""
+        old_pos = self._position
+        new_pos = self.position
+        self.movement = (
+            new_pos[0] - old_pos[0],
+            new_pos[1] - old_pos[1]
+        )
+        self._position = new_pos
+
+    def button_down(self, button: str = 'LMB'):
+        """Check if a button on the mouse is held down.
+        
+        :param `button`: The button to check for; `str` of [`'LMB'`, `'MMB'`,
+        `'RMB'`]"""
+        return mouse_down(MOUSE_BUTTONS[button])
+
+    def button_up(self, button: str = 'LMB'):
+        """Check if a button on the mouse is released.
+        
+        :param `button`: The button to check for; `str` of [`'LMB'`, `'MMB'`,
+        `'RMB'`]"""
+        return mouse_up(MOUSE_BUTTONS[button])
+
+    def button_tap(self, button: str = 'LMB'):
+        """Check if a button on the mouse is pressed once.
+        
+        :param `button`: The button to check for; `str` of [`'LMB'`, `'MMB'`,
+        `'RMB'`]"""
+        return mouse_tap(MOUSE_BUTTONS[button])
+
+
 class ULMouseLook():
+    """Automatically track the mouse movement and translate it to a rotate a
+    body and optionally a head.
+
+    This component can be activated/deactivated at any time to keep performance
+    up.
+
+    :param `obj`: Main object to rotate around the object's Z axis.
+    :param `head`: Head object to rotate around the object's X/Y axis.
+    :param `sensitivity`: Translation factor of mouse movement to rotation.
+    :param `use_cap_x`: Whether to use capping on the mouse X movement (Z axis
+    rotation).
+    :param `cap_x`: Minimum and Maximum amount of rotation on the Z axis.
+    :param `use_cap_y`: Whether to use capping on the mouse Y movement (X/Y axis
+    rotation).
+    :param `cap_y`: Minimum and Maximum amount of rotation on the X/Y axis.
+    :param `invert`: Whether to use inverted values for mous X/Y movement.
+    :param `smoothing`: Amount of movement smoothing.
+    :param `local`: Whether to use local transform for the body object.
+    :param `front`: Front axis (traditionally in blender, Y is front).
+    :param `active`: Whether to start this component in active or inactive mode
+    (can be changed later).
+    """
 
     def __init__(
         self,
         obj: GameObject,
         head: GameObject = None,
-        sensitivity=1.0,
-        use_cap_x=False,
-        cap_x=[0, 0],
-        use_cap_y=False,
-        cap_y=[-89, 89],
-        invert=[False, True],
-        smoothing=0.0,
-        local=True,
-        front=1,
-        active=True
+        sensitivity: float = 1.0,
+        use_cap_x: bool = False,
+        cap_x: tuple = (0, 0),
+        use_cap_y: bool = False,
+        cap_y: tuple = (-89, 89),
+        invert: tuple = (False, True),
+        smoothing: float = 0.0,
+        local: bool = True,
+        front: int = 1,
+        active: bool = True
     ) -> None:
         self.obj = obj
         self.head = head if head else obj
@@ -175,7 +264,8 @@ class ULMouseLook():
             obj.localOrientation.copy(),
             head.localOrientation.copy()
             if head else
-            obj.localOrientation.copy()]
+            obj.localOrientation.copy()
+        ]
         self.sensitivity = sensitivity
         self.use_cap_x = use_cap_x
         self.cap_x = cap_x
@@ -187,7 +277,6 @@ class ULMouseLook():
         self.front = front
         self._x = 0
         self._y = 0
-        self._active = False
         self.local = local
         self.reset_factor = 0
         self.get_data()
@@ -196,20 +285,21 @@ class ULMouseLook():
 
     @property
     def active(self):
-        return self._active
+        """State of this component."""
+        return self.update in logic.getCurrentScene().pre_draw
 
     @active.setter
     def active(self, val):
-        scene = logic.getCurrentScene()
-        if val and self.update not in scene.pre_draw:
-            scene.pre_draw.append(self.update)
-        elif not val and self.update in scene.pre_draw:
+        pre_draw = logic.getCurrentScene()
+        if val and self.update not in pre_draw:
+            pre_draw.append(self.update)
+        elif not val and self.update in pre_draw:
             self.initialized = False
-            scene.pre_draw.remove(self.update)
-        self._active = val
+            pre_draw.remove(self.update)
 
     @property
     def rotation(self):
+        """Global body and head orientation."""
         return self.obj.worldOrientation, self.head.worldOrientation
 
     @rotation.setter
@@ -217,17 +307,30 @@ class ULMouseLook():
         self.obj.worldOrientation = val[0]
         self.head.worldOrientation = val[1]
 
-    def stop(self):
+    def stop(self, reset: bool = False):
+        """Stop this component.
+        
+        :param `reset`: Reset the orientation of objects to their original
+        state."""
         self.active = False
+        if reset:
+            self.reset()
         self.initialized = False
 
     def disable(self):
+        """Set this component to inactive."""
         self.active = False
 
     def enable(self):
+        """Set this component to active."""
         self.active = True
 
     def reset(self, factor=1):
+        """Reset the orientation of the objects in this component to their
+        original state.
+        
+        :param `factor`: Smoothing factor of the reset. If < 1, component will
+        be reset smoothly."""
         if factor < 1:
             self.active = False
             if self.reset_factor < 1:
@@ -243,6 +346,9 @@ class ULMouseLook():
             self.head.localOrientation = self._defaults[1]
 
     def get_data(self):
+        """Get data for this component.
+        
+        Not intended for manual use."""
         self.x = render.getWindowWidth()//2
         self.y = render.getWindowHeight()//2
         self.screen_center = (
@@ -253,6 +359,7 @@ class ULMouseLook():
         self.mouse = logic.mouse
 
     def update(self):
+        """This is executed each frame if component is active."""
         self.get_data()
         if not self.initialized:
             self.mouse.position = self.screen_center
@@ -261,8 +368,6 @@ class ULMouseLook():
         game_object_x = self.obj
         game_object_y = self.head
         sensitivity = self.sensitivity * 10
-        use_cap_x = self.use_cap_x
-        use_cap_y = self.use_cap_y
         cap_x = self.cap_x
         lowercapX = cap_x[0] * pi / 180
         uppercapX = cap_x[1] * pi / 180
@@ -284,7 +389,7 @@ class ULMouseLook():
         self._x = offset.x = interpolate(self._x, offset.x, smooth, 0)
         self._y = offset.y = interpolate(self._y, offset.y, smooth, 0)
 
-        if use_cap_x:
+        if self.use_cap_x:
             objectRotation = game_object_x.localOrientation.to_euler()
 
             if objectRotation.z + offset.x > uppercapX:
@@ -300,7 +405,7 @@ class ULMouseLook():
         game_object_x.applyRotation((0, 0, offset.x), self.local)
 
         rot_axis = 1 - self.front
-        if use_cap_y:
+        if self.use_cap_y:
             objectRotation = game_object_y.localOrientation.to_euler()
 
             if objectRotation[rot_axis] + offset.y > uppercapY:

@@ -12,8 +12,8 @@ from .nodetrees import modify_world_socket  # noqa
 from .nodetrees import set_geom_socket  # noqa
 from .nodetrees import set_material_socket  # noqa
 from .nodetrees import set_world_socket  # noqa
-from .lights import ULLight
-from .lights import make_unique_light
+# from .lights import ULLight
+# from .lights import make_unique_light
 from .raycasting import raycast  # noqa
 from .raycasting import raycast_camera  # noqa
 from .raycasting import raycast_face  # noqa

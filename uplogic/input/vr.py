@@ -10,7 +10,7 @@ from uplogic.utils.errors import NoXRSessionError
 def get_vr_headset_data() -> tuple[Vector, Matrix]:
     """Get the current position and orientation of connected VR headset.
 
-    :returns: `tuple` of (`Vector`, `Matrix`)
+    :returns: `tuple` of (position: `Vector`, orientation: `Matrix`)
     """
     session = bpy.context.window_manager.xr_session_state
     if not session:
@@ -19,7 +19,8 @@ def get_vr_headset_data() -> tuple[Vector, Matrix]:
 
 
 class ULControllerVR():
-    """Wrapper class for VR Controllers.\n
+    """Wrapper class for VR Controllers.
+
     This wrapper provides `position`, `position_aim`, `orientation`,
     `orientation_aim`, `trigger` and `thumbstick` attributes.
 
@@ -35,6 +36,7 @@ class ULControllerVR():
 
     @property
     def position(self) -> Vector:
+        """The global position of the controller."""
         return Vector(self.session.controller_grip_location_get(bpy.context, self.idx))
 
     @position.setter
@@ -43,6 +45,7 @@ class ULControllerVR():
 
     @property
     def orientation(self) -> Matrix:
+        """The global orientation of the controller."""
         return Quaternion(self.session.controller_grip_rotation_get(bpy.context, self.idx)).to_matrix()
 
     @orientation.setter
@@ -51,6 +54,7 @@ class ULControllerVR():
 
     @property
     def position_aim(self) -> Vector:
+        """The global position of the tip of the controller."""
         return Vector(self.session.controller_aim_location_get(bpy.context, self.idx))
 
     @position_aim.setter
@@ -59,6 +63,7 @@ class ULControllerVR():
 
     @property
     def orientation_aim(self) -> Matrix:
+        """The global orientation of the tip of the controller."""
         return Quaternion(self.session.controller_aim_rotation_get(bpy.context, self.idx)).to_matrix()
 
     @orientation_aim.setter
@@ -66,10 +71,10 @@ class ULControllerVR():
         print("Attribute 'orientation_aim' of 'ULControllerVR' is read-only!")
 
     @property
-    def aim(self) -> Matrix:
+    def aim(self) -> Vector:
+        """Targeting vector of the controller."""
         aim = self.position_aim - self.position
-        aim.normalize()
-        return aim
+        return aim.normalized()
 
     @aim.setter
     def aim(self, val):
@@ -77,6 +82,7 @@ class ULControllerVR():
 
     @property
     def trigger(self) -> float:
+        """The intensity with which the trigger on the controller is pressed."""
         return self.session.action_state_get(
             bpy.context,
             'blender_default',
@@ -90,6 +96,7 @@ class ULControllerVR():
 
     @property
     def thumbstick(self) -> Vector:
+        """Stick values for the controller."""
         if self.idx == 0:
             x = self.session.action_state_get(
                 bpy.context,
@@ -125,7 +132,8 @@ class ULControllerVR():
 
 
 class ULHeadsetVR():
-    """Wrapper class for a VR Headset.\n
+    """Wrapper class for a VR Headset.
+
     This wrapper provides a `position` and an `orientation`
     attribute.
     """
@@ -152,7 +160,8 @@ class ULHeadsetVR():
 
 
 class ULHeadsetVRWrapper(ULHeadsetVR):
-    """Wrapper class for a VR Headset to be used for audio calculations.\n
+    """Wrapper class for a VR Headset to be used for audio calculations.
+
     Not intended for manual use.
     """
     @property
@@ -183,9 +192,11 @@ class ULHeadsetVRWrapper(ULHeadsetVR):
 
 class ULCharacterVR():
     """Wrapper class for all VR Devices. This wrapper contains 2 `ULControllerVR` objects as well as one
-    `ULHeadsetVR` object.\n
+    `ULHeadsetVR` object.
+
     Optionally, `KX_GameObjects` can be defined for both left and right controller. These objects will by
-    automatically synched with their respective controller's position and orientation.\n
+    automatically synched with their respective controller's position and orientation.
+
     This class provides a `position` an `orientation` and a `scale` attribute.
     """
     def __init__(

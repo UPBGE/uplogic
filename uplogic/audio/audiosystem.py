@@ -51,9 +51,10 @@ class ULAudioSystem(object):
     This is usually addressed indirectly through `ULSound2D` or `ULSound3D` and
     is not intended for manual use.
     '''
-    def __init__(self, name: str):
+    def __init__(self, name: str, mode: str = '3D'):
         self.active_sounds = []
         self.name = name
+        self.mode = mode
         self.bounces = 0
         self.volume = 1.0
         self.device = aud.Device()
@@ -102,67 +103,78 @@ class ULAudioSystem(object):
     def update(self):
         """This is called each frame.
         """
-        scene = logic.getCurrentScene()
-        if scene is not self.scene:
-            self.setup(scene)
-        listener = self.vr_headset if self.use_vr else scene.active_camera
-        self.reverb = False
-        if not self.use_vr:
-            self.listener = listener
-        if not self.active_sounds:
-            return  # do not update if no sound has been installed
-        # update the listener data
-        cpos = listener.worldPosition
-        distances = {}
-        if self.reverb_volumes:
-            for obj in self.reverb_volumes:
-                dist = (obj.worldPosition - cpos).length
-                if dist > 50:
-                    continue
-                else:
-                    distances[dist] = obj
-            min_dist = distances[min(distances.keys())]
-            obj = min_dist
-            ob = obj.blenderObject
-            r = ob.empty_display_size
-            wpos = obj.worldPosition
-            sca = ob.scale
-            # if cam.getDistanceTo(obj) < ob.empty_display_size:
-            in_range = (
-                wpos.x - r*sca.x < cpos.x < wpos.x + r*sca.x and
-                wpos.y - r*sca.y < cpos.y < wpos.y + r*sca.y and
-                wpos.z - r*sca.z < cpos.z < wpos.z + r*sca.z
-            )
-            if in_range:
-                self.reverb = True
-                self.bounces = ob.reverb_samples
-        listener_vel = (0, 0, 0) if self.use_vr else self.compute_listener_velocity(listener)
-        dev = self.device
-        dev.listener_location = cpos
-        dev.listener_orientation = listener.worldOrientation.to_quaternion()
-        dev.listener_velocity = listener_vel
+        if self.mode == '3D':
+            scene = logic.getCurrentScene()
+            if scene is not self.scene:
+                self.setup(scene)
+            listener = self.vr_headset if self.use_vr else scene.active_camera
+            self.reverb = False
+            if not self.use_vr:
+                self.listener = listener
+            if not self.active_sounds:
+                return  # do not update if no sound has been installed
+            # update the listener data
+            cpos = listener.worldPosition
+            distances = {}
+            if self.reverb_volumes:
+                for obj in self.reverb_volumes:
+                    dist = (obj.worldPosition - cpos).length
+                    if dist > 50:
+                        continue
+                    else:
+                        distances[dist] = obj
+                min_dist = distances[min(distances.keys())]
+                obj = min_dist
+                ob = obj.blenderObject
+                r = ob.empty_display_size
+                wpos = obj.worldPosition
+                sca = ob.scale
+                # if cam.getDistanceTo(obj) < ob.empty_display_size:
+                in_range = (
+                    wpos.x - r*sca.x < cpos.x < wpos.x + r*sca.x and
+                    wpos.y - r*sca.y < cpos.y < wpos.y + r*sca.y and
+                    wpos.z - r*sca.z < cpos.z < wpos.z + r*sca.z
+                )
+                if in_range:
+                    self.reverb = True
+                    self.bounces = ob.reverb_samples
+            listener_vel = (0, 0, 0) if self.use_vr else self.compute_listener_velocity(listener)
+            dev = self.device
+            dev.listener_location = cpos
+            dev.listener_orientation = listener.worldOrientation.to_quaternion()
+            dev.listener_velocity = listener_vel
         for s in self.active_sounds:
             s.update()
 
     def add(self, sound):
+        '''Add a `ULSound` to this audio system.'''
         self.active_sounds.append(sound)
 
     def remove(self, sound):
+        '''Remove a `ULSound` from this audio system.'''
         self.active_sounds.remove(sound)
 
     def shutdown(self, a=None):
+        '''Stop and remove this audio system. This will stop all sounds playing
+        on this system.'''
         self.device.stopAll()
         self.scene.pre_draw.remove(self.update)
         GlobalDB.retrieve('uplogic.audio').remove(self.name)
 
 
-def get_audio_system(system_name='default') -> ULAudioSystem:
+def get_audio_system(system_name: str = 'default', mode: str = '3D') -> ULAudioSystem:
+    '''Get or create a `ULAudioSystem` with the given name.
+
+    :param `system_name`: Look for this name.
+
+    :returns: `ULAudioSystem`, new system is created if none is found.
+    '''
     scene = logic.getCurrentScene()
     aud_systems = GlobalDB.retrieve('uplogic.audio')
     if aud_systems.check(system_name):
         aud_sys = aud_systems.get(system_name)
     else:
-        aud_sys = ULAudioSystem(system_name)
+        aud_sys = ULAudioSystem(system_name, mode)
     if aud_sys.update not in scene.pre_draw:
         scene.pre_draw.append(aud_sys.update)
     return aud_sys

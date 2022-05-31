@@ -3,7 +3,9 @@ from bge.types import KX_GameObject as GameObject
 
 
 class ULCollision():
-    """Collision Handler. Not intended for manual use."""
+    """Collision Handler.
+    
+    Not intended for manual use."""
     target = None
     point = None
     normal = None
@@ -13,7 +15,14 @@ class ULCollision():
     _objects = []
     done_objs = []
 
-    def __init__(self, game_object, callback, prop, mat, tap):
+    def __init__(
+        self,
+        game_object: GameObject,
+        callback: function,
+        prop: str = '',
+        mat: str = '',
+        tap: bool = False
+    ):
         self.callback: function = callback
         self.prop: str = prop
         self.mat: str = mat
@@ -64,7 +73,13 @@ class ULCollision():
         logic.getCurrentScene().pre_draw.remove(self.reset)
 
 
-def on_collision(obj, callback, prop='', material='', tap=False) -> ULCollision:
+def on_collision(
+    obj: GameObject,
+    callback: function,
+    prop: str = '',
+    material: str = '',
+    tap: bool = False
+) -> ULCollision:
     """Bind a callback to an object's collision detection.
 
     :param `obj`: Object whose collision detection will be monitored.

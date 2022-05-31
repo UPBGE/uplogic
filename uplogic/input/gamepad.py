@@ -29,6 +29,11 @@ XBOX = {
     'RT': 5,
     'LT': 4
 }
+"""Buttons in [`A`, `B`, `X`, `Y`, `SELECT`, `BACK`, `START`, `MENU`, `LS`,
+`L3`, `RS`, `R3`, `LB`, `RB`, `DPADUP`, `DPADDOWN`, `DPADLEFT`, `DPADRIGHT`,
+`RT`, `LT`]"""
+
+
 SONY = {
     'X': 0,
     'CROSS': 0,
@@ -50,6 +55,10 @@ SONY = {
     'R2': 5,
     'L2': 4
 }
+"""Buttons in [`X`, `CROSS`, `CIRCLE`, `SQUARE`, `TRIANGLE`, `SELECT`, `SHARE`,
+`START`, `MENU`, `L3`, `R3`, `L1`, `R1`, `DPADUP`, `DPADDOWN`, `DPADLEFT`,
+`DPADRIGHT`, `R2`, `L2`]"""
+
 
 LS = 'LS'
 RS = 'RS'
@@ -130,6 +139,15 @@ def gamepad_trigger(
     idx: int = 0,
     threshold: float = .07
 ) -> float:
+    """Retrieve gamepad trigger values.
+
+    :param `trigger`: Whether to use the left or right trigger;
+    `str` in [`'LT'`, `'RT'`].
+    :param `idx`: index of the gamepad.
+    :param `threshold`: Only detect values higher than the threshold.
+
+    :returns: Intensity of the selected trigger.
+    """
     return gamepad_axis(4 if trigger == 'LT' else 5, idx, threshold=threshold)
 
 
@@ -219,9 +237,13 @@ def gamepad_up(
 
 
 def gamepad_vibrate(idx: int = 0, strength: tuple = (.5, .5), time: float = 1.0):
+    """Start the vibrators of the gamepad if available.
+
+    :param `idx`: 
+    """
     joystick = logic.joysticks[idx]
     if not joystick or not joystick.hasVibration:
-        debug('Joystick at index {} has no vibration!'.format(idx))
+        debug(f'Joystick at index {idx} has no vibration!')
     joystick.strengthLeft = strength[0]
     joystick.strengthRight = strength[1]
     joystick.duration = int(round(time * 1000))
@@ -230,6 +252,14 @@ def gamepad_vibrate(idx: int = 0, strength: tuple = (.5, .5), time: float = 1.0)
 
 
 class ULGamePad():
+    """Wrapper class for a controller. The index determines which connected
+    gamepad to use, the layout determines whether to use XBox or Sony button
+    naming.
+    
+    :param `idx`: Which gamepad to use.
+    :param `layout`: Layout determining button names; `str` in [`'XBOX'`,
+    `'SONY'`].
+    """
 
     def __init__(
         self,
@@ -264,17 +294,40 @@ class ULGamePad():
 
         self.joystick.startVibration()
 
+
 class ULGamepadLook():
+    """Automatically track the mouse movement and translate it to a rotate a
+    body and optionally a head.
+
+    This component can be activated/deactivated at any time to keep performance
+    up.
+    
+    :param `obj`: Main object to rotate around the object's Z axis.
+    :param `head`: Head object to rotate around the object's X/Y axis.
+    :param `sensitivity`: Translation factor of mouse movement to rotation.
+    :param `use_cap_x`: Whether to use capping on the mouse X movement (Z axis
+    rotation).
+    :param `cap_x`: Minimum and Maximum amount of rotation on the Z axis.
+    :param `use_cap_y`: Whether to use capping on the mouse Y movement (X/Y axis
+    rotation).
+    :param `cap_y`: Minimum and Maximum amount of rotation on the X/Y axis.
+    :param `invert`: Whether to use inverted values for mous X/Y movement.
+    :param `smoothing`: Amount of movement smoothing.
+    :param `local`: Whether to use local transform for the body object.
+    :param `front`: Front axis (traditionally in blender, Y is front).
+    :param `active`: Whether to start this component in active or inactive mode
+    (can be changed later).
+    """
     def __init__(
         self,
         obj: GameObject,
         head: GameObject = None,
         sensitivity: float = .05,
         use_cap_x: bool = False,
-        cap_x: list = [0, 0],
+        cap_x: tuple = (0, 0),
         use_cap_y: bool = False,
-        cap_y: list = [-89, 89],
-        invert: list = [True, True],
+        cap_y: tuple = (-89, 89),
+        invert: tuple = (True, True),
         smoothing: float = 0.0,
         local: bool = True,
         front: int = 1,
@@ -363,8 +416,6 @@ class ULGamepadLook():
         game_object_x = self.obj
         game_object_y = self.head
         sensitivity = self.sensitivity * 10
-        use_cap_x = self.use_cap_x
-        use_cap_y = self.use_cap_y
         cap_x = self.cap_x
         lowercapX = cap_x[0] * pi / 180
         uppercapX = cap_x[1] * pi / 180
@@ -404,7 +455,7 @@ class ULGamepadLook():
 
         x *= sensitivity
         y *= sensitivity
-        if use_cap_x:
+        if self.use_cap_x:
             objectRotation = game_object_x.localOrientation.to_euler()
 
             if objectRotation.z + x > uppercapX:
@@ -420,7 +471,7 @@ class ULGamepadLook():
         game_object_x.applyRotation((0, 0, x), self.local)
 
         rot_axis = 1 - self.front
-        if use_cap_y:
+        if self.use_cap_y:
             objectRotation = game_object_y.localOrientation.to_euler()
 
             if objectRotation[rot_axis] + y > uppercapY:

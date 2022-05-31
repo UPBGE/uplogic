@@ -1,3 +1,6 @@
+'''
+'''
+
 from bge import logic
 from bge.types import KX_GameObject as GameObject
 from random import randint
@@ -68,30 +71,30 @@ class ULAction():
         self._speed = speed
         self._frozen_speed = speed
         self.finished = False
-        """Finish state of the animation."""
+        '''Finish state of the animation.'''
         self.keep = keep
-        """Whether to keep or free animation data after playback has finished."""
+        '''Whether to keep or free animation data after playback has finished.'''
         self._layer_weight = layer_weight
         self._act_system = get_action_system()
         self.game_object = game_object
-        """The game object the animation is playing on."""
+        '''The game object the animation is playing on.'''
         self.name = action_name
-        """Name of this action."""
+        '''Name of this action.'''
         self.start_frame = start_frame
-        """Starting Frame of the animation."""
+        '''Starting Frame of the animation.'''
         self.end_frame = end_frame
-        """End Frame of the animation."""
+        '''End Frame of the animation.'''
         self.priority = priority
-        """Priority of this animation; This is only relevant if multiple
-        animations are playing on the same layer."""
+        '''Priority of this animation; This is only relevant if multiple
+        animations are playing on the same layer.'''
         self.blendin = blendin
-        """The amount of blending frames when starting the animation."""
+        '''The amount of blending frames when starting the animation.'''
         self.layer = layer
-        """The layer the animation is playing on."""
+        '''The layer the animation is playing on.'''
         self.play_mode = play_mode = PLAY_MODES.get(play_mode, play_mode)
-        """Playback mode of the animation."""
+        '''Playback mode of the animation.'''
         self.blend_mode = blend_mode = BLEND_MODES.get(blend_mode, blend_mode)
-        """Blending Mode of the animation."""
+        '''Blending Mode of the animation.'''
         if layer == -1:
             ULActionSystem.find_free_layer(self)
         elif ULActionSystem.check_layer(self):
@@ -121,18 +124,18 @@ class ULAction():
 
 
     def on_start(self):
-        """Handler for animation playback start.
-        """
+        '''Handler for animation playback start.
+        '''
         schedule(self, ACTION_STARTED)
 
     def on_finish(self):
-        """Handler for animation playback finish.
-        """
+        '''Handler for animation playback finish.
+        '''
         schedule(self, ACTION_FINISHED)
 
     @property
     def is_playing(self) -> bool:
-        """Check if the animation is being played (Read-Only)."""
+        '''Check if the animation is being played (Read-Only).'''
         if self.game_object.invalid:
             return False
         return self.game_object.isPlayingAction(self.layer)
@@ -143,7 +146,7 @@ class ULAction():
 
     @property
     def frame(self) -> float:
-        """Current Frame of the animation."""
+        '''Current Frame of the animation.'''
         if self.is_playing:
             return self.game_object.getActionFrame(self.layer)
         return -1
@@ -154,8 +157,8 @@ class ULAction():
 
     @property
     def layer_weight(self) -> float:
-        """Intensity of the animation. Higher layers can be blended over lower
-        ones."""
+        '''Intensity of the animation. Higher layers can be blended over lower
+        ones.'''
         return self._layer_weight
 
     @layer_weight.setter
@@ -167,7 +170,7 @@ class ULAction():
 
     @property
     def speed(self) -> float:
-        """Playback speed of the animation."""
+        '''Playback speed of the animation.'''
         return self._speed
 
     @speed.setter
@@ -180,10 +183,10 @@ class ULAction():
         self._restart_action()
 
     def _restart_action(self):
-        """Restart action to use updated values.
+        '''Restart action to use updated values.
 
-        **Not intended for manual use.**
-        """
+        Not intended for manual use.
+        '''
         self._locked = True
         layer = self.layer
         game_object = self.game_object
@@ -225,8 +228,8 @@ class ULAction():
         game_object.setActionFrame(next_frame, layer)
 
     def update(self):
-        """This is called each frame.
-        """
+        '''This is called each frame.
+        '''
         self._locked = False
         game_object = self.game_object
         if game_object.invalid:
@@ -253,34 +256,34 @@ class ULAction():
                     self._act_system.remove(self)
 
     def remove(self):
-        """Stop and remove this action.
-        """
+        '''Stop and remove this action.
+        '''
         self._act_system.remove(self)
 
     def pause(self):
-        """Pause this action.
-        """
+        '''Pause this action.
+        '''
         self._frozen_speed = self.speed
         self.speed = 0
 
     def unpause(self):
-        """Unpause this action.
-        """
+        '''Unpause this action.
+        '''
         self.speed = self._frozen_speed
 
     def stop(self):
-        """Stop playback of this action.
-        """
+        '''Stop playback of this action.
+        '''
         self.finished = True
         self.on_finish()
         self.game_object.stopAction(self.layer)
 
     def randomize_frame(self, min=None, max=None):
-        """Randomize the frame of this animation.
+        '''Randomize the frame of this animation.
 
         :param `min`: Min range of randomization (Optional).
         :param `max`: Max range of randomization (Optional).
-        """
+        '''
         if min is None:
             min = self.start_frame
         if max is None:
@@ -289,15 +292,15 @@ class ULAction():
         self.frame = frame
 
     def randomize_speed(self, min=.9, max=1.1):
-        """Randomize the speed of this animation.
+        '''Randomize the speed of this animation.
 
         :param `min`: Min range of randomization (Optional, default 0.9).
         :param `max`: Max range of randomization (Optional, default 1.1).
-        """
+        '''
         delta = max - min
         self.speed = min + (delta * random())
 
     def set_frame(self, frame):
-        """Set the frame of this action.
-        """
+        '''Set the frame of this action.
+        '''
         self.frame = frame
