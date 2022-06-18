@@ -19,6 +19,9 @@ from .raycasting import raycast_camera  # noqa
 from .raycasting import raycast_face  # noqa
 from .raycasting import raycast_projectile  # noqa
 from .scene import set_scene  # noqa
+from .visuals import draw_cube
+from .visuals import draw_line
+from .visuals import draw_box
 from bge import logic
 from bge.types import KX_GameObject as GameObject
 from mathutils import Matrix
@@ -547,7 +550,7 @@ def get_angle(a: Vector, b: Vector, up=Vector((0, 0, 1))) -> float:
 
     :returns: calculated value as float
     """
-    direction = get_direction(a, b)
+    direction = get_direction(Vector(a), Vector(b))
     rad: float = direction.angle(up)
     deg: float = rad * 180/math.pi
     return deg
@@ -593,3 +596,26 @@ def map_range(value, in_min, in_max, out_min, out_max, clamp=(None, None)):
     if clamp[1] is not None and result > clamp[1]:
         return clamp[1]
     return result
+
+def screen_to_world(x=None, y=None, distance=10):
+    camera = logic.getCurrentScene().active_camera
+    mouse = logic.mouse
+    x = x if x else mouse.position[0]
+    y = y if y else mouse.position[1]
+    direction = camera.getScreenVect(x, y)
+    origin = camera.worldPosition
+    aim = direction * -distance
+    return origin + (aim)
+
+def mouse_over(game_object: GameObject):
+    scene = game_object.scene
+    camera = scene.active_camera
+    distance = 2.0 * camera.getDistanceTo(game_object)
+    mouse = logic.mouse
+    mouse_position = mouse.position
+    target = camera.getScreenRay(
+        mouse_position[0],
+        mouse_position[1],
+        distance
+    )
+    return target is game_object

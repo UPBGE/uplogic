@@ -1,18 +1,22 @@
 from bge import logic
 from bge.constraints import getCharacter
+from bge.types import KX_GameObject as GameObject
 from mathutils import Vector
 from uplogic.utils import debug
 
 
 class ULCharacter():
-    def __init__(self, owner) -> None:
+    def __init__(self, owner: GameObject) -> None:
         self.owner = owner
         self.character = getCharacter(owner)
+        self._old_position = owner.worldPosition.copy()
         self.velocity = Vector((0, 0, 0))
         self.is_walking = False
         logic.getCurrentScene().pre_draw.append(self.reset)
 
     def reset(self):
+        self._velocity = (self.owner.worldPosition - self._old_position) / 10
+        self._old_position = self.owner.worldPosition.copy()
         if not self.is_walking:
             self.walk = Vector((0, 0, 0))
         self.is_walking = False
@@ -63,11 +67,27 @@ class ULCharacter():
 
     @property
     def velocity(self):
-        return self.velocity
+        return self._velocity
 
     @velocity.setter
     def velocity(self, value):
-        self.character.setVelocity(value, 100, False)
+        self.character.setVelocity(value, 1, False)
+
+    @property
+    def jump_force(self):
+        return self.jump_force
+
+    @jump_force.setter
+    def jump_force(self, value):
+        self.character.jumpSpeed = value
+
+    @property
+    def fall_speed(self):
+        return self.character.fallSpeed
+
+    @fall_speed.setter
+    def fall_speed(self, value):
+        self.character.fallSpeed = value
 
     def move(self, direction=Vector((0, 0, 0)), local=True):
         self.is_walking = True

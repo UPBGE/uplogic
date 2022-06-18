@@ -6,6 +6,14 @@ import time
 from uplogic.physics import on_collision  # noqa
 
 
+def on_pre_draw(callback):
+    logic.getCurrentScene().pre_draw.append(callback)
+
+
+def on_post_draw(callback):
+    logic.getCurrentScene().post_draw.append(callback)
+
+
 def get_event_manager():
     scene = logic.getCurrentScene()
     if ULEventManager.update not in scene.post_draw:
@@ -129,28 +137,28 @@ def consume(id: str):
     return ULEventManager.consume(id, None)
 
 
-def bind(name, callback) -> None:
+def bind(id, callback) -> None:
     '''Bind a callback to an event.
 
-    :param `name`: Name of the event; can be anything, not just `str`.
+    :param `id`: Name of the event; can be anything, not just `str`.
     :param `callback`: This callback will be called every time the event is
     triggered.
     '''
     class BoundCallback():
-        def __init__(self, name, cb) -> None:
-            self.evt_name = name
+        def __init__(self, id, cb) -> None:
+            self.id = id
             self.callback = cb
             ULEventManager.bind(self._check_evt)
 
         def _check_evt(self):
-            evt = receive(self.evt_name)
+            evt = receive(self.id)
             if evt:
                 self.callback(evt)
 
         def unbind(self):
             ULEventManager.unbind(self._check_evt)
 
-    return BoundCallback(name, callback)
+    return BoundCallback(id, callback)
 
 
 class ScheduledEvent():
@@ -172,22 +180,22 @@ class ScheduledEvent():
 
     def send_scheduled(self):
         if time.time() >= self.delay:
-            ULEventManager.deschedule(self.send_scheduled)
+            ULEventManager.cancel(self.send_scheduled)
             ULEvent(self.id, self.content, self.messenger)
 
     def cancel(self):
         ULEventManager.cancel(self.send_scheduled)
 
 
-def schedule(name: str, content=None, messenger=None, delay=0.0) -> ScheduledEvent:
+def schedule(id: str, content=None, messenger=None, delay=0.0) -> ScheduledEvent:
     '''Send an event that can be reacted to with a delay.
 
-    :param `name`: Name of the event; can be anything, not just `str`.
+    :param `id`: Name of the event; can be anything, not just `str`.
     :param `content`: This can be used to store data in an event.
     :param `messenger`: Can be used to store an object.
     :param `delay`: Delay with which to send the event in seconds.
     '''
-    return ScheduledEvent(delay, name, content, messenger)
+    return ScheduledEvent(delay, id, content, messenger)
 
 
 class ScheduledCallback():

@@ -156,9 +156,7 @@ class ULSound2D(ULSound):
         self.finished = False
         if not (file):
             return
-        self.pitch = pitch
         self.aud_system = get_audio_system(aud_sys)
-        self.volume = volume
         soundfile = logic.expandPath(file)
         if not isfile(soundfile):
             debug(f'Soundfile {soundfile} could not be loaded!')
@@ -169,6 +167,8 @@ class ULSound2D(ULSound):
         handle.relative = True
         handle.loop_count = loop_count
         self.aud_system.add(self)
+        self.volume = volume
+        self.pitch = pitch
 
     @property
     def volume(self):

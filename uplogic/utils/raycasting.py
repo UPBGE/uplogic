@@ -65,7 +65,7 @@ def raycast(
         prop,
         xray=xray
     )
-    if (material and point) or (obj and exclude and prop in obj):
+    if (material and point) or (obj and exclude and exclude_prop in obj):
         bo = obj.blenderObject
         leftover_dist = distance - (origin - point).length
         while (
@@ -73,7 +73,7 @@ def raycast(
                 slot.material.name for
                 slot in
                 bo.material_slots
-            ] or exclude_prop in obj if exclude else 
+            ] or exclude_prop in obj.getPropertyNames() if exclude else 
             material not in [
                 slot.material.name for
                 slot in
@@ -169,7 +169,7 @@ def raycast_face(
                 slot.material.name for
                 slot in
                 bo.material_slots
-            ] or exclude_prop in obj.getPropertyNames() if exclude else 
+            ] or exclude_prop in obj.getPropertyNames() if exclude else
             material not in [
                 slot.material.name for
                 slot in

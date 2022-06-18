@@ -27,6 +27,8 @@ def set_master_volume(volume, system_name='default') -> None:
     aud_sys = get_audio_system(system_name)
     if aud_sys:
         aud_sys.volume = volume
+        for sound in aud_sys.active_sounds:
+            sound.volume = sound.volume
 
 
 def set_vr_audio(flag, system_name='default') -> None:

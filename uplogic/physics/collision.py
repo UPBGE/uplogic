@@ -47,9 +47,8 @@ class ULCollision():
             ]:
                 return
         if prop:
-            for obj in self._objects:
-                if prop not in obj:
-                    return
+            if prop not in obj.getPropertyNames():
+                return
 
         self.active = True
         if obj not in self.done_objs:
@@ -69,7 +68,7 @@ class ULCollision():
             self.game_object.collisionCallbacks.append(self.collision)
         logic.getCurrentScene().pre_draw.append(self.reset)
 
-    def unregister(self):
+    def remove(self):
         self.game_object.collisionCallbacks.remove(self.collision)
         logic.getCurrentScene().pre_draw.remove(self.reset)
 

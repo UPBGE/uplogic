@@ -15,7 +15,7 @@ class ULLight():
 
     def __init__(
         self,
-        name: str,
+        name: str = '',
         type: str = 'POINT',
         lamp: GameObject = None
     ) -> None:

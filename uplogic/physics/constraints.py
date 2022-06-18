@@ -143,7 +143,7 @@ class ULSpring():
         rigid_body_target: GameObject = None,
         stiffness: float = 1,
         max_force: float = -1,
-        distance: float = 0,
+        distance: float = None,
         use_push: bool = False,
         use_breaking: bool = False,
         break_threshold: float = 1,
@@ -166,9 +166,10 @@ class ULSpring():
         self.break_threshold = break_threshold
         self.visualize = visualize
         obj_dist = origin.getDistanceTo(target)
-        self.distance = distance or obj_dist
+        self.distance = distance if distance is not None else obj_dist
         self.curve = curve
         if not use_breaking or self.distance >= obj_dist:
+            self.update()
             logic.getCurrentScene().pre_draw.append(self.update)
 
     @property
@@ -188,7 +189,9 @@ class ULSpring():
         print("Attribute 'active' is read-only")
 
     def remove(self):
-        logic.getCurrentScene().pre_draw.remove(self.update)
+        pre_draw = logic.getCurrentScene().pre_draw
+        if self.update in pre_draw:
+            pre_draw.remove(self.update)
 
     def update(self):
         o = self.origin
