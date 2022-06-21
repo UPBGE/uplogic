@@ -40,7 +40,6 @@ setup(
         'uplogic.events',
         'uplogic.input',
         'uplogic.nodes',
-        'uplogic.nodetrees',
         'uplogic.nodes.actions',
         'uplogic.nodes.conditions',
         'uplogic.nodes.parameters',

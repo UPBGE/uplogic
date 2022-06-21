@@ -278,6 +278,7 @@ class ULMouseLook():
         self._x = 0
         self._y = 0
         self.local = local
+        self.axis_lock = [False, False]
         self.reset_factor = 0
         self.get_data()
         self.mouse.position = self.screen_center
@@ -402,7 +403,8 @@ class ULMouseLook():
                 objectRotation.z = lowercapX
                 game_object_x.localOrientation = objectRotation
 
-        game_object_x.applyRotation((0, 0, offset.x), self.local)
+        if not self.axis_lock[0]:
+            game_object_x.applyRotation((0, 0, offset.x), self.local)
 
         rot_axis = 1 - self.front
         if self.use_cap_y:
@@ -420,7 +422,8 @@ class ULMouseLook():
 
         rot = [0, 0, 0]
         rot[1-self.front] = offset.y
-        game_object_y.applyRotation((*rot, ), True)
+        if not self.axis_lock[1]:
+            game_object_y.applyRotation((*rot, ), True)
         if (Vector(self.mouse.position) - Vector(self.screen_center)).length > .00001:
         # if self.mouse.position != self.screen_center:
             self.mouse.position = self.screen_center
