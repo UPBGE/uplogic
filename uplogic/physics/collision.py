@@ -14,6 +14,7 @@ class ULCollision():
     consumed = False
     active = False
     _objects = []
+    _old_objs = []
     done_objs = []
 
     def __init__(

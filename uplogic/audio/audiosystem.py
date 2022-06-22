@@ -20,6 +20,15 @@ DISTANCE_MODELS = {
 }
 
 
+def set_lowpass(frequency, system_name='default') -> None:
+    """Set the overall volume of a `ULAudioSystem`. All sounds played via this
+    system will have their volume multiplied by this value.
+    """
+    aud_sys = get_audio_system(system_name)
+    if aud_sys:
+        aud_sys.lowpass = frequency
+
+
 def set_master_volume(volume, system_name='default') -> None:
     """Set the overall volume of a `ULAudioSystem`. All sounds played via this
     system will have their volume multiplied by this value.
@@ -40,7 +49,7 @@ def set_vr_audio(flag, system_name='default') -> None:
         aud_sys.use_vr = flag
 
 
-def stop_all_audio(system_name='default') -> None:
+def stop_all_audio() -> None:
     """Stop every `ULAudioSystem` in this scene.
     """
     for sys in GlobalDB.retrieve('uplogic.audio'):
@@ -59,6 +68,8 @@ class ULAudioSystem(object):
         self.mode = mode
         self.bounces = 0
         self.volume = 1.0
+        self.reverb = False
+        self._lowpass = False
         self.device = aud.Device()
         self.device.distance_model = DISTANCE_MODELS[bpy.context.scene.audio_distance_model]
         self.device.speed_of_sound = bpy.context.scene.audio_doppler_speed
@@ -71,6 +82,18 @@ class ULAudioSystem(object):
         self.old_lis_pos = self.listener.worldPosition.copy()
         self.setup(self.scene)
         self.scene.onRemove.append(self.shutdown)
+
+    @property
+    def lowpass(self):
+        return self._lowpass
+
+    @lowpass.setter
+    def lowpass(self, val):
+        if val == self._lowpass:
+            return
+        self._lowpass = val
+        for sound in self.active_sounds:
+            sound.lowpass = val
 
     def setup(self, scene=None):
         """Get necessary scene data.

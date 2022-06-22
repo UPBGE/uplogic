@@ -1,5 +1,6 @@
 from .audiosystem import ULAudioSystem  # noqa
 from .audiosystem import set_master_volume  # noqa
+from .audiosystem import set_lowpass  # noqa
 from .audiosystem import set_vr_audio  # noqa
 from .audiosystem import get_audio_system  # noqa
 from .audiosystem import stop_all_audio  # noqa

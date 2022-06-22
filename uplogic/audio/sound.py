@@ -139,7 +139,14 @@ class ULSound():
 class ULSound2D(ULSound):
     '''Non-spacial sound, e.g. Music or Voice-Overs.\n
     This class allows for modification of pitch and volume while playing.
+
+    :param `file`: Path to the sound file.
+    :param `volume`: Initial volume.
+    :param `pitch`: Initial pitch.
+    :param `loop_count`: Plays the sound this many times (0 for once, -1 for endless).
+    :param `aud_sys`: Audiosystem to play this sound on.
     '''
+
     sound: aud.Handle
 
     def __init__(
@@ -151,7 +158,6 @@ class ULSound2D(ULSound):
         aud_sys: str = 'default'
     ):
         self.file = file
-        self._lowpass = 20000
         self._volume = 1
         self.finished = False
         if not (file):
@@ -162,6 +168,8 @@ class ULSound2D(ULSound):
             debug(f'Soundfile {soundfile} could not be loaded!')
             return
         sound = self.soundfile = aud.Sound(soundfile)
+        if self.aud_system.lowpass:
+            sound = self.soundfile = sound.lowpass(self.aud_system.lowpass, .5)
         device = self.aud_system.device
         self.sound = handle = device.play(sound)
         handle.relative = True
@@ -169,6 +177,8 @@ class ULSound2D(ULSound):
         self.aud_system.add(self)
         self.volume = volume
         self.pitch = pitch
+        self._lowpass = False
+        self.lowpass = self.aud_system.lowpass
 
     @property
     def volume(self):
@@ -196,11 +206,16 @@ class ULSound2D(ULSound):
 
     @lowpass.setter
     def lowpass(self, val):
+        if self._lowpass == val:
+            return
         self._lowpass = val
-        sound = self.soundfile.lowpass(val, .5)
+        sound = self.soundfile
+        if val:
+            sound = sound.lowpass(val, .5)
         sound = self.aud_system.device.play(sound)
         sound.position = self.sound.position
         sound.volume = self.sound.volume
+        sound.pitch = self.sound.pitch
         schedule_callback(self.sound.stop, .1)
         self.sound = sound
 
