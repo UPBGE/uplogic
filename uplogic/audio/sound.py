@@ -213,6 +213,7 @@ class ULSound2D(ULSound):
         if val:
             sound = sound.lowpass(val, .5)
         sound = self.aud_system.device.play(sound)
+        sound.loop_count = self.sound.loop_count
         sound.position = self.sound.position
         sound.volume = self.sound.volume
         sound.pitch = self.sound.pitch
