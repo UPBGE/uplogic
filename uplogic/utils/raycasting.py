@@ -1,6 +1,7 @@
 from bge import logic
 from bge import render
 from bge.types import KX_GameObject as GameObject
+from bge.types import KX_PolyProxy
 from mathutils import Vector
 
 
@@ -73,7 +74,7 @@ def raycast(
                 slot.material.name for
                 slot in
                 bo.material_slots
-            ] or exclude_prop in obj.getPropertyNames() if exclude else 
+            ] or exclude_prop in obj.getPropertyNames() if exclude else
             material not in [
                 slot.material.name for
                 slot in
@@ -132,7 +133,7 @@ def raycast_face(
     xray: bool = False,
     local: bool = False,
     visualize: bool = False
-) -> tuple[GameObject, Vector, Vector, Vector]:
+) -> tuple[GameObject, Vector, KX_PolyProxy, Vector]:
     """Raycast from any point to any target. Returns additional face data.
 
     :param `caster`: casting object, this object will be ignored by the ray.

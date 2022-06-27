@@ -408,12 +408,14 @@ def rot_to(
 
 def load_json_as_dict(filepath):
     if not filepath.endswith('.json'):
-        path = f'{filepath}.json'
-    if path:
-        f = open(path, 'r')
+        filepath = f'{filepath}.json'
+    if filepath:
+        f = open(filepath, 'r')
         data = json.load(f)
         f.close()
         return data
+    else:
+        raise FileNotFoundError(f'File {filepath} could not be opened!')
 
 
 ###############################################################################

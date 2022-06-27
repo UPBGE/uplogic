@@ -155,6 +155,7 @@ class ULSound2D(ULSound):
         volume: float = 1,
         pitch: float = 1,
         loop_count: int = 0,
+        lowpass=False,
         aud_sys: str = 'default'
     ):
         self.file = file
@@ -168,8 +169,9 @@ class ULSound2D(ULSound):
             debug(f'Soundfile {soundfile} could not be loaded!')
             return
         sound = self.soundfile = aud.Sound(soundfile)
-        if self.aud_system.lowpass:
-            sound = self.soundfile = sound.lowpass(self.aud_system.lowpass, .5)
+        lowpass = self.aud_system.lowpass or lowpass
+        if lowpass:
+            sound = self.soundfile = sound.lowpass(lowpass, .5)
         device = self.aud_system.device
         self.sound = handle = device.play(sound)
         handle.relative = True

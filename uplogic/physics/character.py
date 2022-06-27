@@ -3,6 +3,7 @@ from bge.constraints import getCharacter
 from bge.types import KX_GameObject as GameObject
 from mathutils import Vector
 from uplogic.utils import debug
+import bpy
 
 
 class ULCharacter():
@@ -12,6 +13,7 @@ class ULCharacter():
         self._old_position = owner.worldPosition.copy()
         self.velocity = Vector((0, 0, 0))
         self.is_walking = False
+        self._phys_step = bpy.data.scenes[logic.getCurrentScene().name].game_settings.physics_step_sub
         logic.getCurrentScene().pre_draw.append(self.reset)
 
     def reset(self):
@@ -58,12 +60,12 @@ class ULCharacter():
 
     @property
     def walk(self):
-        return self.character.walkDirection @ self.owner.worldOrientation
+        return (self.character.walkDirection @ self.owner.worldOrientation) * self._phys_step
 
     @walk.setter
     def walk(self, value):
         self.is_walking = True
-        self.character.walkDirection = self.owner.worldOrientation @ value
+        self.character.walkDirection = (self.owner.worldOrientation @ value) / self._phys_step
 
     @property
     def velocity(self):
