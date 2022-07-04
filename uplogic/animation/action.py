@@ -122,7 +122,6 @@ class ULAction():
         self.speed = speed
         self._act_system.add(self)
 
-
     def on_start(self):
         '''Handler for animation playback start.
         '''
@@ -206,9 +205,9 @@ class ULAction():
             end_frame
         )
         next_frame = (
-            frame + speed / 2
+            frame + speed
             if
-            frame + speed / 2 <= end_frame
+            frame + speed <= end_frame
             else
             reset_frame
         )
@@ -277,6 +276,24 @@ class ULAction():
         self.finished = True
         self.on_finish()
         self.game_object.stopAction(self.layer)
+
+    def restart(self):
+        '''Restart this animation with its current parameters.
+        '''
+        self.finished = False
+        self.game_object.stopAction(self.layer)
+        self.game_object.playAction(
+            self.name,
+            self.start_frame,
+            self.end_frame,
+            layer=self.layer,
+            priority=self.priority,
+            blendin=self.blendin,
+            play_mode=self.play_mode,
+            speed=self.speed,
+            layer_weight=1 - self.layer_weight,
+            blend_mode=self.blend_mode
+        )
 
     def randomize_frame(self, min=None, max=None):
         '''Randomize the frame of this animation.

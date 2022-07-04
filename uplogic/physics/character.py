@@ -9,16 +9,23 @@ import bpy
 class ULCharacter():
     def __init__(self, owner: GameObject) -> None:
         self.owner = owner
-        self.character = getCharacter(owner)
+        self.wrapper = getCharacter(owner)
         self._old_position = owner.worldPosition.copy()
         self.velocity = Vector((0, 0, 0))
         self.is_walking = False
+        self._on_ground = self.wrapper.onGround
+        self.landed = False
         self._phys_step = bpy.data.scenes[logic.getCurrentScene().name].game_settings.physics_step_sub
         logic.getCurrentScene().pre_draw.append(self.reset)
 
     def reset(self):
         self._velocity = (self.owner.worldPosition - self._old_position) / 10
         self._old_position = self.owner.worldPosition.copy()
+        if not self._on_ground and self.on_ground:
+            self.landed = True
+        else:
+            self.landed = False
+        self._on_ground = self.on_ground
         if not self.is_walking:
             self.walk = Vector((0, 0, 0))
         self.is_walking = False
@@ -28,31 +35,31 @@ class ULCharacter():
 
     @property
     def on_ground(self):
-        return self.character.onGround
+        return self.wrapper.onGround
 
     @on_ground.setter
     def on_ground(self, value):
-        debug('Character.on_ground is Read-Only!')
+        debug('ULCharacter.on_ground is Read-Only!')
 
     @property
     def max_jumps(self):
-        return self.character.maxJumps
+        return self.wrapper.maxJumps
 
     @max_jumps.setter
     def max_jumps(self, value):
-        self.character.maxJumps = value
+        self.wrapper.maxJumps = value
 
     @property
     def gravity(self):
-        return self.character.gravity
+        return self.wrapper.gravity
 
     @gravity.setter
     def gravity(self, value):
-        self.character.gravity = value
+        self.wrapper.gravity = value
 
     @property
     def jump_count(self):
-        return self.character.jumpCount
+        return self.wrapper.jumpCount
 
     @jump_count.setter
     def jump_count(self, value):
@@ -60,12 +67,12 @@ class ULCharacter():
 
     @property
     def walk(self):
-        return (self.character.walkDirection @ self.owner.worldOrientation) * self._phys_step
+        return (self.wrapper.walkDirection @ self.owner.worldOrientation) * self._phys_step
 
     @walk.setter
     def walk(self, value):
         self.is_walking = True
-        self.character.walkDirection = (self.owner.worldOrientation @ value) / self._phys_step
+        self.wrapper.walkDirection = (self.owner.worldOrientation @ value) / self._phys_step
 
     @property
     def velocity(self):
@@ -73,7 +80,7 @@ class ULCharacter():
 
     @velocity.setter
     def velocity(self, value):
-        self.character.setVelocity(value, 1, False)
+        self.wrapper.setVelocity(value, 1, False)
 
     @property
     def jump_force(self):
@@ -81,19 +88,19 @@ class ULCharacter():
 
     @jump_force.setter
     def jump_force(self, value):
-        self.character.jumpSpeed = value
+        self.wrapper.jumpSpeed = value
 
     @property
     def fall_speed(self):
-        return self.character.fallSpeed
+        return self.wrapper.fallSpeed
 
     @fall_speed.setter
     def fall_speed(self, value):
-        self.character.fallSpeed = value
+        self.wrapper.fallSpeed = value
 
     def move(self, direction=Vector((0, 0, 0)), local=True):
         self.is_walking = True
-        self.character.walkDirection = self.owner.worldOrientation @ direction if local else direction
+        self.wrapper.walkDirection = self.owner.worldOrientation @ direction if local else direction
 
     def jump(self):
-        self.character.jump()
+        self.wrapper.jump()

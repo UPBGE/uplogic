@@ -2,6 +2,43 @@ from bge import logic
 from bge.types import KX_GameObject as GameObject
 import bpy
 from bpy.types import Material
+from .errors import LogicControllerNotSupportedError
+
+
+def controller_brick_status(owner, controller_name):
+    cont = owner.controllers[controller_name]
+    state = (
+        owner
+        .blenderObject
+        .game
+        .controllers[controller_name]
+        .type
+    )
+    if not cont.sensors:
+        return False
+    elif state == 'LOGIC_AND':
+        return False not in [sens.positive for sens in cont.sensors]
+    elif state == 'LOGIC_OR':
+        return True in [sens.positive for sens in cont.sensors]
+    elif state == 'LOGIC_NAND':
+        return False in [sens.positive for sens in cont.sensors]
+    elif state == 'LOGIC_NOR':
+        return True not in [sens.positive for sens in cont.sensors]
+    elif state == 'LOGIC_XOR':
+        return [
+            sens.positive
+            for sens in
+            cont.sensors
+        ].count(True) % 2 != 0
+    elif state == 'LOGIC_XNOR':
+        check = cont.sensors[0].positive
+        return False not in [
+            sens.positive == check
+            for sens in
+            cont.sensors
+        ]
+    else:
+        raise LogicControllerNotSupportedError
 
 
 def create_curve(

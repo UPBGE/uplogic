@@ -1,8 +1,9 @@
 '''TODO: Documentation
 '''
-from .curves import ULCurve
-from .curves import create_curve  # noqa
-from .curves import set_curve_points  # noqa
+from .objects import ULCurve
+from .objects import create_curve  # noqa
+from .objects import set_curve_points  # noqa
+from .objects import controller_brick_status  # noqa
 from .nodetrees import get_geom_socket  # noqa
 from .nodetrees import get_material_socket  # noqa
 from .nodetrees import get_world_socket  # noqa
