@@ -24,8 +24,8 @@ void main( )
 
 class Vignette(ULFilter):
 
-    def __init__(self, idx: int = None) -> None:
-        self.settings = {'power': 0.0}
+    def __init__(self, power: float = 0.25, idx: int = None) -> None:
+        self.settings = {'power': power}
         super().__init__(vignette, idx, {'power': self.settings})
     
     @property
