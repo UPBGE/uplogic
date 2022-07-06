@@ -2,79 +2,90 @@ from bge import logic
 from mathutils import Vector, Matrix
 from uplogic.utils.errors import PassIndexOccupiedError
 from pathlib import Path
-import os
-path = os.path.abspath(os.path.join(__file__, os.pardir, 'filters', 'ssao.glsl'))
+from uplogic.utils import debug
 
 
-def load_glsl(filepath):
+def load_glsl(filepath: str):
     return Path(filepath).read_text()
 
 
-class ShaderSystem:
-    shaders: dict = {}
+class ULFilter():
+    '''Wrapper for KX_2DFilter.
 
-    @classmethod
-    def add_shader(cls, shader):
-        if shader.idx and cls.shaders.get(shader.idx, None) is None:
-            cls.shaders[shader.idx] = shader
-            shader.start()
-        elif shader.idx and cls.shaders.get(shader.idx):
-            raise PassIndexOccupiedError
+    :param `program`: GLSL code as `str`.
+    :param `idx`: Pass Index for this filter.
+    :param `uniforms`: A `dict` of [`str`: `dict`] binding dictionary values to
+    the filter in the form "key of dictionary".
+    '''
+
+    @property
+    def active(self):
+        return self in FilterSystem.filters.values()
+    
+    @active.setter
+    def active(self, val):
+        if val:
+            self.start()
         else:
-            idx = 0
-            while cls.shaders.get(idx, None) is not None:
-                idx += 1
-            cls.shaders[idx] = shader
-            shader.idx = idx
-            shader.start()
-
-    @classmethod
-    def remove_shader(cls, shader):
-        if isinstance(shader, int) and cls.shaders.get(shader, None):
-            cls.shaders.get(shader).shutdown()
+            self.shutdown()
 
 
-class ULShader():
-    '''
-    '''
     def __init__(
         self,
-        fragment_shader,
+        program: str,
         idx: int = None,
-        uniforms: dict = {}
+        bound_uniforms: dict = {}
     ) -> None:
-        self.frag_code = fragment_shader
+        self.program = program
         self.idx = idx
         scene = logic.getCurrentScene()
         self.manager = scene.filterManager
-        self._uniforms = uniforms
-        self.filter = None
-        ShaderSystem.add_shader(self)
+        self._uniforms = bound_uniforms
+        self._filter = None
+        FilterSystem.add_filter(self)
 
     def start(self):
-        filter2d = self.filter = self.manager.addFilter(self.idx, 12, self.frag_code)
-        for uniform in self._uniforms:
-            filter2d
-    
+        if FilterSystem.filters.get(self.idx) is not None:
+            raise PassIndexOccupiedError(self.idx)
+        FilterSystem.filters[self.idx] = self
+        self._filter = self.manager.addFilter(self.idx, 12, self.program)
+        uniforms = self._uniforms
+        for uniform in uniforms:
+            self.set_uniform(uniform, uniforms[uniform].get(uniform))
+        if uniforms.keys():
+            logic.getCurrentScene().post_draw.append(self.update)
+
+    def update(self):
+        uniforms = self._uniforms
+        for uniform in uniforms:
+            self.set_uniform(uniform, uniforms[uniform].get(uniform))
+
+    def shutdown(self):
+        if self.update in logic.getCurrentScene().post_draw:
+            logic.getCurrentScene().post_draw.remove(self.update)
+        if self in FilterSystem.filters.values():
+            FilterSystem.filters.pop(self.idx)
+            self.manager.removeFilter(self.idx)
+
     def set_uniform(self, name, value):
         cls = value.__class__
         if cls is int:
-            self.filter.setUniform1i(name, value)
+            self._filter.setUniform1i(name, value)
         elif cls is float:
-            self.filter.setUniform1f(name, value)
+            self._filter.setUniform1f(name, value)
         elif cls is Vector:
             dim = len(value)
             if dim == 2:
-                self.filter.setUniform2f(name, value.x, value.y)
+                self._filter.setUniform2f(name, value.x, value.y)
             if dim == 3:
-                self.filter.setUniform3f(name, value.x, value.y, value.z)
+                self._filter.setUniform3f(name, value.x, value.y, value.z)
             if dim == 4:
-                self.filter.setUniform4f(name, value.x, value.y, value.z, value.w)
+                self._filter.setUniform4f(name, value.x, value.y, value.z, value.w)
         elif cls is Matrix:
             rows = len(value.row)
             cols = len(value.col)
             if rows == cols == 3:
-                self.filter.setUniformMatrix3(
+                self._filter.setUniformMatrix3(
                     name,(
                         [value[0][0], value[0][1], value[0][2]],
                         [value[1][0], value[1][1], value[1][2]],
@@ -83,7 +94,7 @@ class ULShader():
                     False
                 )
             elif rows == cols == 4:
-                self.filter.setUniformMatrix4(
+                self._filter.setUniformMatrix4(
                     name,
                     (
                         [value[0][0], value[0][1], value[0][2], value[0][3]],
@@ -92,3 +103,30 @@ class ULShader():
                         [value[3][0], value[2][1], value[3][2], value[3][3]]
                     ),
                 )
+
+
+class FilterSystem:
+    filters: dict[ULFilter] = {}
+
+    @classmethod
+    def get_filter(cls, idx):
+        return logic.getCurrentScene().filterManager.getFilter(idx)
+
+    @classmethod
+    def add_filter(cls, filter):
+        if filter.idx and cls.filters.get(filter.idx, None) is None:
+            filter.start()
+        elif filter.idx and cls.filters.get(filter.idx):
+            raise PassIndexOccupiedError
+        else:
+            idx = 0
+            while cls.filters.get(idx, None) is not None:
+                idx += 1
+            print(idx)
+            filter.idx = idx
+            filter.start()
+
+    @classmethod
+    def remove_filter(cls, filter):
+        if isinstance(filter, int) and cls.filters.get(filter, None):
+            cls.filters.get(filter).shutdown()

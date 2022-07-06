@@ -6,9 +6,9 @@ class NoXRSessionError(Exception):
 
 
 class PassIndexOccupiedError(Exception):
-    """2D Filter pass index occupied."""
-    def __init__(self, message="2D Filter pass index occupied!"):
-        self.message = message
+    """2D Filter pass index already in-use."""
+    def __init__(self, idx=0):
+        self.message = f"2D Filter pass index {idx} already in-use!"
         super().__init__(self.message)
 
 

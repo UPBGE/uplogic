@@ -121,7 +121,9 @@ class ULTrackTo():
 
 
 class ULSpring():
-    """Spring Physics Constraint.
+    """Spring Physics Constraint. The two objects connected by the string will
+    be pulled towards each other if the string is streched, optionally they will
+    be pushed apart when the spring is being compacted.
 
     :param `origin`: First connection point of the spring.
     :param `target`: Second connection point of the spring.
