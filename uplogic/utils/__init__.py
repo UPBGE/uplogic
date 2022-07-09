@@ -593,6 +593,15 @@ def get_direction(a, b, local=False) -> Vector:
 
 
 def map_range(value, in_min, in_max, out_min, out_max, clamp=(None, None)):
+    """Map a value from one range to another.
+    
+    :param `value`: Value to be remapped.
+    :param `in_min`: Lower end of the original range.
+    :param `in_max`: Upper end of the original range.
+    :param `out_min`: Lower end of the new range.
+    :param `out_max`: Upper end of the new range.
+    :param `clamp`: Clamp the modified value.
+    """
     result = (value - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
     if clamp[0] is not None and result < clamp[0]:
         return clamp[0]

@@ -119,7 +119,8 @@ class MainLoop:
     def _do_tick(self):
         now = time.time()
         self._dispatch('tick')
-        if self._last_frame + self._frame_delay <= now:
+        fps = bge.logic.getAverageFrameRate()
+        if self._last_frame + self._frame_delay <= now or fps < self.max_fps:
             self._last_frame = now
             self._dispatch('update')
             self._dispatch_queue()
@@ -190,7 +191,7 @@ def start(max_fps=60, tick_idle=.001):
 
 
 class ULLoop:
-    def __init__(self, max_fps=-1, tick_idle=.001) -> None:
+    def __init__(self, max_fps=-1, tick_idle=.00001) -> None:
         MainLoop.on_start(self.start)
         MainLoop.on_tick(self.tick)
         MainLoop.on_update(self.update)
