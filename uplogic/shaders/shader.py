@@ -2,7 +2,6 @@ from bge import logic
 from mathutils import Vector, Matrix
 from uplogic.utils.errors import PassIndexOccupiedError
 from pathlib import Path
-from uplogic.utils import debug
 
 
 def load_glsl(filepath: str):

@@ -3,8 +3,7 @@ from .shader import ULFilter
 
 vignette = """
 uniform sampler2D bgl_RenderedTexture;
-uniform float bgl_RenderedTextureWidth;
-uniform float bgl_RenderedTextureHeight;
+
 in vec4 bgl_TexCoord;
 uniform float power;
 
@@ -12,7 +11,7 @@ out vec4 fragColor;
 
 void main( )
 {
-	vec2 uv = bgl_TexCoord.xy; // / vec2(bgl_RenderedTextureWidth, bgl_RenderedTextureHeight);
+	vec2 uv = bgl_TexCoord.xy;
     uv *=  1.0 - uv.yx;
     float vig = uv.x * uv.y * 15;
     vig = pow(vig, power);
@@ -25,7 +24,7 @@ void main( )
 class Vignette(ULFilter):
 
     def __init__(self, power: float = 0.25, idx: int = None) -> None:
-        self.settings = {'power': power}
+        self.settings = {'power': float(power)}
         super().__init__(vignette, idx, {'power': self.settings})
     
     @property

@@ -29,12 +29,12 @@ Using the mainloop
 
     MainLoop.on_start(on_start_callback)
 
-    def on_tick_callback(timestamp):
+    def on_tick_callback():
         '''Gets called as fast as mainloop runs.'''
 
     MainLoop.on_tick(on_tick_callback)
 
-    def on_update_callback(timestamp):
+    def on_update_callback():
         '''Gets called when enough time has elapsed to render the next frame.'''
 
     MainLoop.on_update(on_update_callback)
@@ -61,6 +61,7 @@ mainloop on purpose, use the following code:
 from collections import deque
 from .input import key_tap
 import bge
+import bpy
 import signal
 import time
 
@@ -188,12 +189,15 @@ def start(max_fps=60, tick_idle=.001):
     eventloop.start()
 
 
-class Loop:
-    def __init__(self, max_fps=60, tick_idle=.001) -> None:
+class ULLoop:
+    def __init__(self, max_fps=-1, tick_idle=.001) -> None:
         MainLoop.on_start(self.start)
         MainLoop.on_tick(self.tick)
         MainLoop.on_update(self.update)
         MainLoop.on_stop(self.stop)
+        self.scene = bge.logic.getCurrentScene()
+        if max_fps == -1:
+            max_fps = bpy.data.scenes[self.scene.name].game_settings.fps
         start(max_fps, tick_idle)
 
     def start(self):
