@@ -72,14 +72,14 @@ class ULTrackTo():
         target: GameObject or Vector,
         axis: int = 2,
         front: int = 1,
-        speed: float = 0
+        factor: float = 1
     ) -> None:
         self._axis = None
         self._target = None
         self.game_object = game_object
         self.target = target
         self.front = front
-        self.speed = speed
+        self.factor = factor
         self.axis = axis
 
     @property

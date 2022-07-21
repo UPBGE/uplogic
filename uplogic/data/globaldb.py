@@ -211,3 +211,13 @@ class GlobalDB(object):
         '''TODO: Documentation
         '''
         print(self.content)
+
+
+def store(key, value):
+    values = GlobalDB.retrieve('uplogic.default_globals')
+    values.put(key, value)
+
+
+def retrieve(key, value, default=None):
+    values = GlobalDB.retrieve('uplogic.default_globals')
+    values.get(key, default)

@@ -10,6 +10,7 @@ from uplogic.utils import debug
 from uplogic.utils import load_user_module
 from uplogic.utils import make_valid_name
 import bpy
+# from uplogic import get_mainloop
 from bge.types import SCA_PythonKeyboard as Keyboard
 from bge.types import SCA_PythonMouse as Mouse
 import collections
@@ -41,12 +42,16 @@ class ULLogicTree(ULLogicContainer):
         self.mouse_wheel_delta = 0
         self.aud_system_owner = False
         self.init_glob_cats()
-        self.audio_system = self.create_aud_system()
+        self.audio_system = self.get_aud_system()
         self.sub_networks = []  # a list of networks updated by this network
         self.capslock_pressed = False
         self.evaluated_cells = 0
+        scene = logic.getCurrentScene()
+        mainloop = scene.get('uplogic.mainloop')
+        if mainloop:
+            mainloop.logic_tree = self
 
-    def create_aud_system(self):
+    def get_aud_system(self):
         aud_sys = GlobalDB.retrieve('uplogic.audio').get('default')
         if not aud_sys:
             self.aud_system_owner = True

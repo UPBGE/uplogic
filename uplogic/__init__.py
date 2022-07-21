@@ -59,6 +59,8 @@ mainloop on purpose, use the following code:
 """
 
 from collections import deque
+
+from uplogic.utils import load_user_module
 from .input import key_tap
 import bge
 import bpy
@@ -191,12 +193,20 @@ def start(max_fps=60, tick_idle=.001):
 
 
 class ULLoop:
+
     def __init__(self, max_fps=-1, tick_idle=.00001) -> None:
+        self.scene = bge.logic.getCurrentScene()
+        logic_tree = bpy.data.scenes[self.scene.name].get('custom_mainloop_tree')
+        if logic_tree:
+            module = load_user_module(f'nl_{logic_tree.name.lower()}')
+            logic_tree = module.get_tree(self.scene)
+            MainLoop.on_update(logic_tree.network.evaluate)
         MainLoop.on_start(self.start)
         MainLoop.on_tick(self.tick)
         MainLoop.on_update(self.update)
         MainLoop.on_stop(self.stop)
-        self.scene = bge.logic.getCurrentScene()
+
+        self.scene['uplogic.mainloop'] = self
         if max_fps == -1:
             max_fps = bpy.data.scenes[self.scene.name].game_settings.fps
         start(max_fps, tick_idle)

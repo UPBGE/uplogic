@@ -1,9 +1,7 @@
 '''TODO: Documentation
 '''
-from .objects import ULCurve
-from .objects import create_curve  # noqa
-from .objects import set_curve_points  # noqa
-from .objects import controller_brick_status  # noqa
+from .lights import ULLight  # noqa
+from .lights import make_unique_light  # noqa
 from .nodetrees import get_geom_socket  # noqa
 from .nodetrees import get_material_socket  # noqa
 from .nodetrees import get_world_socket  # noqa
@@ -13,16 +11,18 @@ from .nodetrees import modify_world_socket  # noqa
 from .nodetrees import set_geom_socket  # noqa
 from .nodetrees import set_material_socket  # noqa
 from .nodetrees import set_world_socket  # noqa
-from .lights import ULLight
-from .lights import make_unique_light
+from .objects import ULCurve  # noqa
+from .objects import controller_brick_status  # noqa
+from .objects import create_curve  # noqa
+from .objects import set_curve_points  # noqa
 from .raycasting import raycast  # noqa
 from .raycasting import raycast_camera  # noqa
 from .raycasting import raycast_face  # noqa
 from .raycasting import raycast_projectile  # noqa
 from .scene import set_scene  # noqa
-from .visuals import draw_cube
-from .visuals import draw_line
-from .visuals import draw_box
+from .visuals import draw_box  # noqa
+from .visuals import draw_cube  # noqa
+from .visuals import draw_line  # noqa
 from bge import logic
 from bge.types import KX_GameObject as GameObject
 from mathutils import Matrix
@@ -261,112 +261,78 @@ def xrot_to(
     rotating_object,
     target_pos,
     front_axis_code=0,
-    speed=0,
-    time_per_frame=1/60
+    factor=1
 ):
     front_vector = LO_AXIS_TO_VECTOR[front_axis_code]
     vec = rotating_object.getVectTo(target_pos)[1]
-    if speed == 0:
-        if front_axis_code >= 3:
-            vec.negate()
-            front_axis_code = front_axis_code - 3
-        if vec.x == vec.y == vec.z == 0:
-            return
-        rotating_object.alignAxisToVect(vec, front_axis_code, 1.0)
-        rotating_object.alignAxisToVect(LO_AXIS_TO_VECTOR[0], 0, 1.0)
+    vec = project_vector3(vec, 1, 2)
+    vec.normalize()
+    front_vector = rotating_object.getAxisVect(front_vector)
+    front_vector = project_vector3(front_vector, 1, 2)
+    signed_angle = vec.angle_signed(front_vector, None)
+    if signed_angle is None:
+        return
+    abs_angle = abs(signed_angle)
+    if abs_angle < 0.01:
         return True
-    else:
-        vec = project_vector3(vec, 1, 2)
-        vec.normalize()
-        front_vector = rotating_object.getAxisVect(front_vector)
-        front_vector = project_vector3(front_vector, 1, 2)
-        signed_angle = vec.angle_signed(front_vector, None)
-        if signed_angle is None:
-            return
-        abs_angle = abs(signed_angle)
-        if abs_angle < 0.01:
-            return True
-        angle_sign = (signed_angle > 0) - (signed_angle < 0)
-        drot = angle_sign * abs_angle * speed * time_per_frame
-        eulers = rotating_object.localOrientation.to_euler()
-        eulers[0] += drot
-        rotating_object.localOrientation = eulers
-        return False
+    angle_sign = (signed_angle > 0) - (signed_angle < 0)
+    drot = angle_sign * abs_angle * clamp(factor)
+    eulers = rotating_object.localOrientation.to_euler()
+    eulers[0] += drot
+    rotating_object.localOrientation = eulers
+    return False
 
 
 def yrot_to(
     rotating_object,
     target_pos,
     front_axis_code=0,
-    speed=0,
-    time_per_frame=1/60
+    factor=1
 ):
     front_vector = LO_AXIS_TO_VECTOR[front_axis_code]
     vec = rotating_object.getVectTo(target_pos)[1]
-    if speed == 0:
-        if front_axis_code >= 3:
-            vec.negate()
-            front_axis_code = front_axis_code - 3
-        if vec.x == vec.y == vec.z == 0:
-            return
-        rotating_object.alignAxisToVect(vec, front_axis_code, 1.0)
-        rotating_object.alignAxisToVect(LO_AXIS_TO_VECTOR[1], 1, 1.0)
+    vec = project_vector3(vec, 2, 0)
+    vec.normalize()
+    front_vector = rotating_object.getAxisVect(front_vector)
+    front_vector = project_vector3(front_vector, 2, 0)
+    signed_angle = vec.angle_signed(front_vector, None)
+    if signed_angle is None:
+        return
+    abs_angle = abs(signed_angle)
+    if abs_angle < 0.01:
         return True
-    else:
-        vec = project_vector3(vec, 2, 0)
-        vec.normalize()
-        front_vector = rotating_object.getAxisVect(front_vector)
-        front_vector = project_vector3(front_vector, 2, 0)
-        signed_angle = vec.angle_signed(front_vector, None)
-        if signed_angle is None:
-            return
-        abs_angle = abs(signed_angle)
-        if abs_angle < 0.01:
-            return True
-        angle_sign = (signed_angle > 0) - (signed_angle < 0)
-        drot = angle_sign * abs_angle * speed * time_per_frame
-        eulers = rotating_object.localOrientation.to_euler()
-        eulers[1] += drot
-        rotating_object.localOrientation = eulers
-        return False
+    angle_sign = (signed_angle > 0) - (signed_angle < 0)
+    drot = angle_sign * abs_angle * clamp(factor)
+    eulers = rotating_object.localOrientation.to_euler()
+    eulers[1] += drot
+    rotating_object.localOrientation = eulers
+    return False
 
 
 def zrot_to(
     rotating_object,
     target_pos,
     front_axis_code=0,
-    speed=0,
-    time_per_frame=1/60
+    factor=1
 ):
     front_vector = LO_AXIS_TO_VECTOR[front_axis_code]
     vec = rotating_object.getVectTo(target_pos)[1]
-    if speed == 0:
-        if front_axis_code >= 3:
-            vec.negate()
-            front_axis_code = front_axis_code - 3
-        if vec.x == vec.y == vec.z == 0:
-            return
-        rotating_object.alignAxisToVect(vec, front_axis_code, 1.0)
-        rotating_object.alignAxisToVect(LO_AXIS_TO_VECTOR[2], 2, 1.0)
+    vec = project_vector3(vec, 0, 1)
+    vec.normalize()
+    front_vector = rotating_object.getAxisVect(front_vector)
+    front_vector = project_vector3(front_vector, 0, 1)
+    signed_angle = vec.angle_signed(front_vector, None)
+    if signed_angle is None:
         return True
-    else:
-        # project in 2d, compute angle diff, set euler rot 2
-        vec = project_vector3(vec, 0, 1)
-        vec.normalize()
-        front_vector = rotating_object.getAxisVect(front_vector)
-        front_vector = project_vector3(front_vector, 0, 1)
-        signed_angle = vec.angle_signed(front_vector, None)
-        if signed_angle is None:
-            return True
-        abs_angle = abs(signed_angle)
-        if abs_angle < 0.01:
-            return True
-        angle_sign = (signed_angle > 0) - (signed_angle < 0)
-        drot = angle_sign * abs_angle * speed * time_per_frame
-        eulers = rotating_object.localOrientation.to_euler()
-        eulers[2] += drot
-        rotating_object.localOrientation = eulers
-        return False
+    abs_angle = abs(signed_angle)
+    if abs_angle < 0.01:
+        return True
+    angle_sign = (signed_angle > 0) - (signed_angle < 0)
+    drot = angle_sign * abs_angle * clamp(factor)
+    eulers = rotating_object.localOrientation.to_euler()
+    eulers[2] += drot
+    rotating_object.localOrientation = eulers
+    return False
 
 
 def rot_to(
@@ -374,32 +340,28 @@ def rot_to(
     rotating_object,
     target_pos,
     front_axis_code,
-    speed = 0,
-    time_per_frame = 0
+    factor=1
 ):
     if rot_axis_index == 0:
         return xrot_to(
             rotating_object,
             target_pos,
             front_axis_code,
-            speed,
-            time_per_frame
+            factor
         )
     elif rot_axis_index == 1:
         return yrot_to(
             rotating_object,
             target_pos,
             front_axis_code,
-            speed,
-            time_per_frame
+            factor
         )
     elif rot_axis_index == 2:
         return zrot_to(
             rotating_object,
             target_pos,
             front_axis_code,
-            speed,
-            time_per_frame
+            factor
         )
 
 
@@ -631,3 +593,6 @@ def mouse_over(game_object: GameObject):
         distance
     )
     return target is game_object
+
+def get_local(obj, target):
+    return obj.worldTransform.inverted() @ target

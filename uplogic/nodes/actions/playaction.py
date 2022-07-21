@@ -26,7 +26,7 @@ class ULPlayAction(ULActionNode):
         self.priority = None
         self.play_mode = None
         self.layer_weight = None
-        self.old_layer_weight = None
+        self.old_intensity = None
         self.speed = None
         self.old_speed = None
         self.blendin = None
@@ -79,7 +79,7 @@ class ULPlayAction(ULActionNode):
         action = self._action
         has_action = action is not None
         condition = self.get_input(self.condition)
-        layer_weight = self.get_input(self.layer_weight)
+        intensity = self.get_input(self.layer_weight)
         speed = self.get_input(self.speed)
         layer = self.get_input(self.layer)
         game_object = self.get_input(self.game_object)
@@ -89,7 +89,7 @@ class ULPlayAction(ULActionNode):
             self._set_ready()
             if has_action:
                 action.speed = speed
-                action.layer_weight = layer_weight
+                action.intensity = intensity
                 if self._action.finished:
                     self._action = None
                     self.in_use = False
@@ -104,7 +104,7 @@ class ULPlayAction(ULActionNode):
         action_name = self.get_input(self.action_name)
         if layer_action and layer_action.name == action_name:
             layer_action.speed = speed
-            layer_action.layer_weight = layer_weight
+            layer_action.intensity = intensity
             return
         if self.in_use:
             return
@@ -125,7 +125,7 @@ class ULPlayAction(ULActionNode):
             layer,
             priority,
             play_mode,
-            layer_weight,
+            intensity,
             speed,
             blendin,
             blend_mode
@@ -133,10 +133,10 @@ class ULPlayAction(ULActionNode):
             return
         if play_mode > 2:
             play_mode -= 3
-        if layer_weight <= 0:
-            layer_weight = 0.0
-        elif layer_weight >= 1:
-            layer_weight = 1.0
+        if intensity <= 0:
+            intensity = 0.0
+        elif intensity >= 1:
+            intensity = 1.0
         if speed <= 0:
             speed = 0.01
         if is_invalid(game_object):  # can't play
@@ -153,7 +153,7 @@ class ULPlayAction(ULActionNode):
             blendin,
             play_mode,
             speed,
-            layer_weight,
+            intensity,
             blend_mode
         )
         self._action.on_finish = self.on_finish

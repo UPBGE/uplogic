@@ -13,7 +13,6 @@ class ULGetObject(ULParameterNode):
     def get_obj(self):
         game_object = self.get_input(self.game_object)
         if is_invalid(game_object):
-            print('whell whoopsie', game_object)
             return STATUS_WAITING
         return game_object
 

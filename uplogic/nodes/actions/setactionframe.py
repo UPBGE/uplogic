@@ -45,12 +45,12 @@ class ULSetActionFrame(ULActionNode):
         action_frame = self.get_input(self.action_frame)
         freeze = self.get_input(self.freeze)
         action_name = self.get_input(self.action_name)
-        layer_weight = self.get_input(self.layer_weight)
+        intensity = self.get_input(self.layer_weight)
         self._set_ready()
         if is_waiting(
             action_layer,
             action_frame,
-            layer_weight
+            intensity
         ):
             return
         if is_invalid(
@@ -70,11 +70,11 @@ class ULSetActionFrame(ULActionNode):
                 start_frame,
                 end_frame,
                 action_layer,
-                layer_weight=layer_weight
+                intensity=intensity
             )
 
         game_object.setActionFrame(action_frame, action_layer)
         if freeze:
             action.speed = 0
-        action.layer_weight = layer_weight
+        action.intensity = intensity
         self.done = True

@@ -44,7 +44,7 @@ class ULAction():
     :param `blendin`: Use this many frames to "blend into" the animation.
     :param `play_mode`: Mode of playback of [`'play'`, `'loop'`, `'pingpong'`].
     :param `speed`: Playback speed.
-    :param `layer_weight`: "Intensity" of the action; Use this to blend
+    :param `intensity`: "Intensity" of the action; Use this to blend
     animations on different layers together.
     :param `blend_mode`: Mode of blending of [`'blend'`, `'add'`]
     :param `keep`: Whether to keep the animation cached after playback has
@@ -63,7 +63,7 @@ class ULAction():
         blendin: float = 0,
         play_mode: str = 'play',
         speed: float = 1,
-        layer_weight: float = 1,
+        intensity: float = 1,
         blend_mode: str = 'blend',
         keep: bool = False
     ):
@@ -74,7 +74,7 @@ class ULAction():
         '''Finish state of the animation.'''
         self.keep = keep
         '''Whether to keep or free animation data after playback has finished.'''
-        self._layer_weight = layer_weight
+        self._intensity = intensity
         self._act_system = get_action_system()
         self.game_object = game_object
         '''The game object the animation is playing on.'''
@@ -115,10 +115,10 @@ class ULAction():
                 layer=layer,
                 priority=priority,
                 blendin=blendin,
-                layer_weight=1-layer_weight,
+                layer_weight=1-intensity,
                 blend_mode=blend_mode
             )
-        self.layer_weight = layer_weight
+        self.intensity = intensity
         self.speed = speed
         self._act_system.add(self)
 
@@ -155,16 +155,16 @@ class ULAction():
         self.game_object.setActionFrame(value, self.layer)
 
     @property
-    def layer_weight(self) -> float:
+    def intensity(self) -> float:
         '''Intensity of the animation. Higher layers can be blended over lower
         ones.'''
-        return self._layer_weight
+        return self._intensity
 
-    @layer_weight.setter
-    def layer_weight(self, value):
-        if not self.is_playing or value == self.layer_weight:
+    @intensity.setter
+    def intensity(self, value):
+        if not self.is_playing or value == self.intensity:
             return
-        self._layer_weight = clamp(value, 0, 1)
+        self._intensity = clamp(value, 0, 1)
         self._restart_action()
 
     @property
@@ -195,7 +195,7 @@ class ULAction():
         play_mode = self.play_mode
         priority = self.priority
         blendin = self.blendin
-        layer_weight = self.layer_weight
+        intensity = self.intensity
         speed = self.speed
         blend_mode = self.blend_mode
         frame = self.frame
@@ -221,7 +221,7 @@ class ULAction():
             blendin=blendin,
             play_mode=play_mode,
             speed=speed,
-            layer_weight=1 - layer_weight,
+            layer_weight=1 - intensity,
             blend_mode=blend_mode
         )
         game_object.setActionFrame(next_frame, layer)
@@ -291,7 +291,7 @@ class ULAction():
             blendin=self.blendin,
             play_mode=self.play_mode,
             speed=self.speed,
-            layer_weight=1 - self.layer_weight,
+            layer_weight=1 - self.intensity,
             blend_mode=self.blend_mode
         )
 

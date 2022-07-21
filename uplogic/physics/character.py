@@ -15,16 +15,16 @@ class ULCharacter():
         self.is_walking = False
         self._on_ground = self.wrapper.onGround
         self.landed = False
+        self.start_falling = False
+        self.speed = 1
         self._phys_step = bpy.data.scenes[logic.getCurrentScene().name].game_settings.physics_step_sub
         logic.getCurrentScene().pre_draw.append(self.reset)
 
     def reset(self):
         self._velocity = (self.owner.worldPosition - self._old_position) / 10
         self._old_position = self.owner.worldPosition.copy()
-        if not self._on_ground and self.on_ground:
-            self.landed = True
-        else:
-            self.landed = False
+        self.landed = not self._on_ground and self.on_ground
+        self.start_falling = self._on_ground and not self.on_ground
         self._on_ground = self.on_ground
         if not self.is_walking:
             self.walk = Vector((0, 0, 0))
@@ -67,12 +67,12 @@ class ULCharacter():
 
     @property
     def walk(self):
-        return (self.wrapper.walkDirection @ self.owner.worldOrientation) * self._phys_step
+        return ((self.wrapper.walkDirection @ self.owner.worldOrientation) * self._phys_step) / self.speed
 
     @walk.setter
     def walk(self, value):
         self.is_walking = True
-        self.wrapper.walkDirection = (self.owner.worldOrientation @ value) / self._phys_step
+        self.wrapper.walkDirection = ((self.owner.worldOrientation @ value) / self._phys_step) * self.speed
 
     @property
     def velocity(self):
@@ -100,7 +100,7 @@ class ULCharacter():
 
     def move(self, direction=Vector((0, 0, 0)), local=True):
         self.is_walking = True
-        self.wrapper.walkDirection = self.owner.worldOrientation @ direction if local else direction
+        self.wrapper.walkDirection = self.owner.worldOrientation @ direction * self.speed if local else direction * self.speed
 
     def jump(self):
         self.wrapper.jump()

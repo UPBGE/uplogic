@@ -39,8 +39,7 @@ class ULActionRotateTo(ULActionNode):
                     moving_object,
                     target_point,
                     front_axis,
-                    speed,
-                    self.network.time_per_frame
+                    speed
                 )
             )
         elif rot_axis == 1:
@@ -49,8 +48,7 @@ class ULActionRotateTo(ULActionNode):
                     moving_object,
                     target_point,
                     front_axis,
-                    speed,
-                    self.network.time_per_frame
+                    speed
                 )
             )
         elif rot_axis == 2:
@@ -59,7 +57,6 @@ class ULActionRotateTo(ULActionNode):
                     moving_object,
                     target_point,
                     front_axis,
-                    speed,
-                    self.network.time_per_frame
+                    speed
                 )
             )

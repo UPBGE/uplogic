@@ -174,6 +174,7 @@ class ULSound2D(ULSound):
             sound = self.soundfile = sound.lowpass(lowpass, .5)
         device = self.aud_system.device
         self.sound = handle = device.play(sound)
+
         handle.relative = True
         handle.loop_count = loop_count
         self.aud_system.add(self)
@@ -188,18 +189,18 @@ class ULSound2D(ULSound):
 
     @volume.setter
     def volume(self, val):
-        if self.sound:
+        if self.sound and self.sound.status:
             self.sound.volume = val * self.aud_system.volume
         self._volume = val
 
     @property
     def pitch(self):
-        if self.sound:
+        if self.sound and self.sound.status:
             return self.sound.pitch / logic.getTimeScale()
 
     @pitch.setter
     def pitch(self, val):
-        if self.sound:
+        if self.sound and self.sound.status:
             self.sound.pitch = val * logic.getTimeScale()
 
     @property

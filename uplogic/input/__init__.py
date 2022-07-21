@@ -13,6 +13,7 @@ from .keyboard import KEYBOARD_EVENTS  # noqa
 from .keyboard import key_down  # noqa
 from .keyboard import key_pulse  # noqa
 from .keyboard import key_tap  # noqa
+from .keyboard import key_up  # noqa
 from .mouse import LMB  # noqa
 from .mouse import MMB  # noqa
 from .mouse import MOUSE_EVENTS  # noqa
