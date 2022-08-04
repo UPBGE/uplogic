@@ -121,8 +121,6 @@ def error(msg):
     if logger is None:
         return
     for msg in str(msg).split('\n'):
-        print(logger.system)
-
         if msg:
             msg.replace('  ', '    ')
             logger.add_message(f'ERROR:\t{msg}', 'ERROR')

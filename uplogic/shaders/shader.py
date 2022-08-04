@@ -24,7 +24,7 @@ class ULFilter():
     @active.setter
     def active(self, val):
         if val:
-            self.start()
+            self.startup()
         else:
             self.shutdown()
 
@@ -43,7 +43,7 @@ class ULFilter():
         self._filter = None
         FilterSystem.add_filter(self)
 
-    def start(self):
+    def startup(self):
         if FilterSystem.filters.get(self.idx) is not None:
             raise PassIndexOccupiedError(self.idx)
         FilterSystem.filters[self.idx] = self
@@ -114,16 +114,15 @@ class FilterSystem:
     @classmethod
     def add_filter(cls, filter):
         if filter.idx and cls.filters.get(filter.idx, None) is None:
-            filter.start()
+            filter.startup()
         elif filter.idx and cls.filters.get(filter.idx):
             raise PassIndexOccupiedError
         else:
             idx = 0
             while cls.filters.get(idx, None) is not None:
                 idx += 1
-            print(idx)
             filter.idx = idx
-            filter.start()
+            filter.startup()
 
     @classmethod
     def remove_filter(cls, filter):

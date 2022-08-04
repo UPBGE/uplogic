@@ -1,7 +1,7 @@
 from .shader import ULFilter
 
 
-fxaa = """
+glsl = """
 //----------------------------------------------------------------------------------
 //
 // Copyright (c) 2014, NVIDIA CORPORATION. All rights reserved.
@@ -741,4 +741,4 @@ void main()
 class FXAA(ULFilter):
 
     def __init__(self, idx: int = None) -> None:
-        super().__init__(fxaa, idx)
+        super().__init__(glsl, idx)

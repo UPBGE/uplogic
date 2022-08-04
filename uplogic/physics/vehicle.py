@@ -94,6 +94,9 @@ class ULVehicle():
 
         logic.getCurrentScene().pre_draw.append(self.reset)
 
+    def rebuild(self):
+        pass
+
     def add_wheel(self, wheel, steering=False):
         body = self.body
         car = self.constraint
@@ -118,6 +121,7 @@ class ULVehicle():
     def reset(self):
         if self.active:
             if not self.is_accelerating:
+                print('Helo')
                 self.acceleration = 0
             if not self.is_braking:
                 self.braking = 0
@@ -149,6 +153,7 @@ class ULVehicle():
         self.is_accelerating = True
         drive = self.drive
         wheelcount = self.acc_wheels
+        value *= self.body.mass
         if drive == FWD:
             for wheel in range(wheelcount):
                 self.constraint.applyEngineForce(-value, wheel)
@@ -173,6 +178,7 @@ class ULVehicle():
         self.is_braking = True
         brakes = self.brakes
         wheelcount = self.brake_wheels
+        value *= self.body.mass
         if brakes == FWD:
             for wheel in range(wheelcount):
                 self.constraint.applyBraking(value, wheel)
@@ -280,23 +286,23 @@ class ULVehicle():
     def set_wheel_friction(self, wheel, friction):
         self.constraint.setTyreFriction(friction, wheel)
 
-    def accelerate(self, power: float = 1, drive='', wheelcount=''):
+    def accelerate(self, power: float = 1, drive='', wheelcount: int = None):
         if drive != self.drive and drive:
             self.drive = drive
-        if wheelcount != self.acc_wheels and wheelcount:
+        if wheelcount and wheelcount != self.acc_wheels:
             self.acc_wheels = wheelcount
         self.acceleration = power
 
-    def brake(self, power: float = .1, brakes: str = '', wheelcount: str = ''):
+    def brake(self, power: float = .1, brakes: str = '', wheelcount: int = None):
         if brakes != self.brakes and brakes:
             self.drive = brakes
-        if wheelcount != self.brake_wheels and wheelcount:
+        if wheelcount and wheelcount != self.brake_wheels:
             self.brake_wheels = wheelcount
         self.braking = power
 
-    def steer(self, power: float = 0, steer_axle: str = '', wheelcount: str = ''):
+    def steer(self, power: float = 0, steer_axle: str = '', wheelcount: int = None):
         if steer_axle != self.steer_axle and steer_axle:
             self.steer_axle = steer_axle
-        if wheelcount != self.steer_wheels and wheelcount:
+        if wheelcount and wheelcount != self.steer_wheels:
             self.steer_wheels = wheelcount
         self.steering = power

@@ -19,6 +19,7 @@ from .raycasting import raycast  # noqa
 from .raycasting import raycast_camera  # noqa
 from .raycasting import raycast_face  # noqa
 from .raycasting import raycast_projectile  # noqa
+from .raycasting import raycast_mouse  # noqa
 from .scene import set_scene  # noqa
 from .visuals import draw_box  # noqa
 from .visuals import draw_cube  # noqa
@@ -379,6 +380,30 @@ def load_json_as_dict(filepath):
         return data
     else:
         raise FileNotFoundError(f'File {filepath} could not be opened!')
+
+
+class MaterialLoader():
+
+    def __init__(self, game_object):
+        self.status = 0.0
+        self.game_object = game_object
+        if len(game_object.blenderObject.material_slots) < 1:
+            debug('MaterialLoader object needs at least one material slot!')
+            return
+        self.materials = [m for m in bpy.data.materials]
+        logic.getCurrentScene().pre_draw.append(self.load_next)
+
+    def load_next(self):
+        next_mat = self.materials.pop()
+        self.game_object.blenderObject.material_slots[0].material = next_mat
+        self.status += 1 / len(bpy.data.materials)
+        if not self.materials:
+            logic.getCurrentScene().pre_draw.remove(self.load_next)
+            self.on_finish()
+
+    def on_finish(self):
+        pass
+
 
 
 ###############################################################################

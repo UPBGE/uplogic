@@ -60,8 +60,9 @@ mainloop on purpose, use the following code:
 
 from collections import deque
 
-from uplogic.utils import load_user_module
+from .utils import load_user_module
 from .input import key_tap
+from .logging import enable
 import bge
 import bpy
 import signal
@@ -122,7 +123,7 @@ class MainLoop:
         now = time.time()
         self._dispatch('tick')
         fps = bge.logic.getAverageFrameRate()
-        if self._last_frame + self._frame_delay <= now or fps < self.max_fps:
+        if self._last_frame + self._frame_delay <= now:# or fps < self.max_fps:
             self._last_frame = now
             self._dispatch('update')
             self._dispatch_queue()
@@ -195,6 +196,7 @@ def start(max_fps=60, tick_idle=.001):
 class ULLoop:
 
     def __init__(self, max_fps=-1, tick_idle=.00001) -> None:
+        # enable()
         self.scene = bge.logic.getCurrentScene()
         logic_tree = bpy.data.scenes[self.scene.name].get('custom_mainloop_tree')
         if logic_tree:

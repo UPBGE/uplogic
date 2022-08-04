@@ -28,8 +28,8 @@ def ray_data(
 
 def raycast(
     caster: GameObject,
-    origin: Vector or GameObject,
-    dest: Vector or GameObject,
+    origin: Vector,
+    dest: Vector,
     distance: float = 0,
     prop: str = '',
     material: str = '',
@@ -124,8 +124,8 @@ def raycast(
 
 def raycast_face(
     caster: GameObject,
-    origin: Vector or GameObject,
-    dest: Vector or GameObject,
+    origin: Vector,
+    dest: Vector,
     distance: float = 0,
     prop: str = '',
     material: str = '',
@@ -220,16 +220,16 @@ def raycast_face(
 
 
 def raycast_projectile(
-    caster,
-    origin,
-    aim,
-    power,
-    distance=100,
-    resolution=.05,
-    prop='',
-    xray=False,
-    local=False,
-    visualize=False
+    caster: GameObject,
+    origin: Vector,
+    aim: Vector,
+    power: float,
+    distance: float = 100,
+    resolution: float = .05,
+    prop: str = '',
+    xray: bool = False,
+    local: bool = False,
+    visualize: bool = False
 ) -> tuple[GameObject, Vector, Vector, list]:
     """Raycast along the predicted parabola of a projectile.
 
@@ -287,11 +287,11 @@ def raycast_projectile(
 
 
 def raycast_camera(
-    distance=0,
-    prop='',
-    xray=False,
-    aim=Vector((.5, .5)),
-    visualize=False
+    distance: float = 0,
+    prop: str = '',
+    xray: bool = False,
+    aim: Vector = Vector((.5, .5)),
+    visualize: bool = False
 ):
     """Raycast from any point to any target. Returns additional face data.
 
@@ -332,3 +332,37 @@ def raycast_camera(
                 [0, 1, 0, 1]
             )
     return (obj, point, normal)
+
+
+def raycast_mouse(
+    distance: float = 100,
+    prop: str = '',
+    material: str = '',
+    exclude: bool = False,
+    xray: bool = False
+):
+    """Raycast from the active camera to world cursor coordinates.
+
+    :param `distance`: distance the ray will be cast
+    :param `prop`: look only for objects with this property.
+    :param `material`: look only for objects with this material applied.
+    :param `exclude`: invert the selection for `prop` and `material`.
+    :param `xray`: look for objects behind others.
+    :param `aim`: X and Y coordinates of the screen from 0-1
+
+    :returns: (`obj`, `point`, `normal`, `direction`)
+    """
+    camera = logic.getCurrentScene().active_camera
+    mpos = logic.mouse.position
+    vec = 10 * camera.getScreenVect(*mpos)
+    ray_target = camera.worldPosition - vec
+    return raycast(
+        camera,
+        camera.worldPosition,
+        ray_target,
+        distance,
+        prop,
+        material,
+        exclude,
+        xray
+    )

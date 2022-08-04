@@ -125,8 +125,7 @@ class ULMoveToWithNavmesh(ULActionNode):
                     rotating_object,
                     next_point,
                     front_axis,
-                    rot_speed,
-                    tpf
+                    rot_speed
                 )
             ths = reach_threshold  # if next_point == self._motion_path.destination else .1  # noqa
             reached = move_to(

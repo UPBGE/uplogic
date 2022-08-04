@@ -136,7 +136,8 @@ def key_pulse(key: str, time: float = .4) -> bool:
         _keys_active[key] = 0
         return True
     k = _keys_active.get(key, 0)
-    _keys_active[key] = k + (1 / logic.getAverageFrameRate())
+    fps = logic.getAverageFrameRate()
+    _keys_active[key] = k + (1 / (logic.getAverageFrameRate() or 0.01))
     if _keys_active[key] > time:
         return key_event(key).active
     return False

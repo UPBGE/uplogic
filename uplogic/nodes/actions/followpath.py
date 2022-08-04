@@ -112,8 +112,7 @@ class ULFollowPath(ULActionNode):
                     rotating_object,
                     next_point,
                     front_axis,
-                    rot_speed,
-                    tpf
+                    rot_speed
                 )
             reached = move_to(
                 moving_object,
