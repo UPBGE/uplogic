@@ -193,7 +193,7 @@ class SSAO(ULFilter):
             'znear': self.settings,
             'zfar': self.settings
         })
-    
+
     def update(self):
         super().update()
         cam = logic.getCurrentScene().active_camera

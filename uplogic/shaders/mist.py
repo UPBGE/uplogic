@@ -60,7 +60,7 @@ class Mist(ULFilter):
     @property
     def start(self):
         return self.settings['start']
-    
+
     @start.setter
     def start(self, val):
         self.settings['start'] = float(val)
@@ -68,15 +68,15 @@ class Mist(ULFilter):
     @property
     def end(self):
         return self.settings['end']
-    
+
     @end.setter
     def end(self, val):
         self.settings['end'] = float(val)
-    
+
     @property
     def power(self):
         return self.settings['power']
-    
+
     @power.setter
     def power(self, val):
         self.settings['power'] = val
@@ -84,7 +84,7 @@ class Mist(ULFilter):
     @property
     def color(self):
         return self.settings['color']
-    
+
     @color.setter
     def color(self, val):
         if not isinstance(val, Vector):

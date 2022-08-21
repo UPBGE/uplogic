@@ -313,7 +313,7 @@ class HBAO(ULFilter):
             'zfar': self.settings,
             'fov': self.settings
         })
-    
+
     def update(self):
         super().update()
         cam = logic.getCurrentScene().active_camera

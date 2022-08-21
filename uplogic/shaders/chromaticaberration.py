@@ -26,11 +26,11 @@ class ChromaticAberration(ULFilter):
     def __init__(self, power: float = 2.0, idx: int = None) -> None:
         self.settings = {'power': float(power)}
         super().__init__(glsl, idx, {'power': self.settings})
-    
+
     @property
     def power(self):
         return self.settings['power']
-    
+
     @power.setter
     def power(self, val):
         self.settings['power'] = val

@@ -203,6 +203,7 @@ class ULLogicTree(ULLogicContainer):
         curr_mpos = self.mouse.position
         last_mpos = self._last_mouse_position
         mpos_delta = self.mouse_motion_delta
+        # print(mpos_delta)
         mpos_delta[0] = curr_mpos[0] - last_mpos[0]
         mpos_delta[1] = curr_mpos[1] - last_mpos[1]
         last_mpos[:] = curr_mpos

@@ -32,8 +32,6 @@ class ULAddObject(ULActionNode):
         life = self.get_input(self.life)
         name = self.get_input(self.name)
         name = getattr(name, 'name', name)
-        print('################')
-        print(name)
         full_copy = self.get_input(self.full_copy)
         self._set_ready()
         reference = self.get_input(self.reference)

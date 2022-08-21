@@ -97,15 +97,15 @@ class ULShip(ULBuoy):
                 self.height,
                 WATER,
                 xray=True,
-                local=True,
-                visualize=True
+                local=True
             )
             if obj:
-                lindamp += (.7 / lifts)
-                lift = (up * (wpos - point).length * self.buoyancy) / lifts
+                div = 1 / lifts
+                lindamp += (.7 * div)
+                lift = (up * (wpos - point).length * self.buoyancy) * div
                 ship.applyImpulse(
                     wpos,
-                    vec_clamp(lift, max=self.buoyancy * 2 / lifts),
+                    vec_clamp(lift, max=self.buoyancy * 2 * div),
                     False
                 )
         ship.linearDamping = lindamp

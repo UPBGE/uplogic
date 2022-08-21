@@ -1,6 +1,7 @@
 from bge import logic
 from mathutils import Vector, Matrix
 from uplogic.utils.errors import PassIndexOccupiedError
+from uplogic.utils import debug
 from pathlib import Path
 
 
@@ -115,8 +116,9 @@ class FilterSystem:
     def add_filter(cls, filter):
         if filter.idx and cls.filters.get(filter.idx, None) is None:
             filter.startup()
-        elif filter.idx and cls.filters.get(filter.idx):
-            raise PassIndexOccupiedError
+        elif filter.idx is not None and cls.filters.get(filter.idx):
+            #raise PassIndexOccupiedError
+            debug(f"2D Filter pass index {filter.idx} already in-use!")
         else:
             idx = 0
             while cls.filters.get(idx, None) is not None:

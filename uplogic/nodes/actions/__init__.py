@@ -131,3 +131,4 @@ from .stopallsounds import ULStopAllSounds  # noqa
 from .stopsound import ULStopSound  # noqa
 from .stopsubnetwork import ULStopSubNetwork  # noqa
 from .translate import ULTranslate  # noqa
+from .addfilter import ULAddFilter  # noqa
