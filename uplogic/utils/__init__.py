@@ -3,12 +3,14 @@
 from .lights import ULLight  # noqa
 from .lights import make_unique_light  # noqa
 from .nodetrees import get_geom_socket  # noqa
+from .nodetrees import get_group_socket  # noqa
 from .nodetrees import get_material_socket  # noqa
 from .nodetrees import get_world_socket  # noqa
 from .nodetrees import modify_geom_socket  # noqa
 from .nodetrees import modify_material_socket  # noqa
 from .nodetrees import modify_world_socket  # noqa
 from .nodetrees import set_geom_socket  # noqa
+from .nodetrees import set_group_socket  # noqa
 from .nodetrees import set_material_socket  # noqa
 from .nodetrees import set_world_socket  # noqa
 from .objects import ULCurve  # noqa

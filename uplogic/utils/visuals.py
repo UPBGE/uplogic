@@ -1,24 +1,26 @@
 from bge import render
+from mathutils import Vector
 
-def draw_line(start, end, color=[1, 1, 1, 1]):
+
+def draw_line(origin: Vector, target: Vector, color: list = [1, 1, 1, 1]):
     render.drawLine(
-        start,
-        end,
+        origin,
+        target,
         color
     )
 
-def draw_cube(origin, width, color=[1, 1, 1, 1]):
+def draw_cube(origin: Vector, width: float, color: list = [1, 1, 1, 1]):
     draw_box(origin, width, width, width, color)
 
 
-def draw_box(origin, length, width, height, color=[1, 1, 1, 1]):
-    c1 = origin.copy()
-    c2 = origin.copy()
-    c3 = origin.copy()
-    c4 = origin.copy()
-    c5 = origin.copy()
-    c6 = origin.copy()
-    c7 = origin.copy()
+def draw_box(origin: Vector, length: float, width: float, height: float, color: list = [1, 1, 1, 1]):
+    c1: Vector = origin.copy()
+    c2: Vector = origin.copy()
+    c3: Vector = origin.copy()
+    c4: Vector = origin.copy()
+    c5: Vector = origin.copy()
+    c6: Vector = origin.copy()
+    c7: Vector = origin.copy()
 
     c1[0] += width
 

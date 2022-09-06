@@ -213,11 +213,11 @@ class GlobalDB(object):
         print(self.content)
 
 
-def store(key, value):
-    values = GlobalDB.retrieve('uplogic.default_globals')
+def store(key, value, category='uplogic.default_globals'):
+    values = GlobalDB.retrieve(category)
     values.put(key, value)
 
 
-def retrieve(key, value, default=None):
-    values = GlobalDB.retrieve('uplogic.default_globals')
+def retrieve(key, category='uplogic.default_globals', default=None):
+    values = GlobalDB.retrieve(category)
     values.get(key, default)

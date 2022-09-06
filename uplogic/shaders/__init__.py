@@ -9,3 +9,6 @@ from .mist import Mist
 from .levels import Levels
 from .chromaticaberration import ChromaticAberration
 from .shader import load_glsl
+from .shader import remove_filter
+from .shader import toggle_filter
+from .shader import set_filter_state

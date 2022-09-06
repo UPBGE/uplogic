@@ -17,6 +17,7 @@ class ULAddFilter(ULActionNode):
         self.end = None
         self.filter = None
         self.filter_type = 'FXAA'
+        self.done = False
         self.OUT = ULOutSocket(self, self._get_done)
 
     def _get_done(self):
@@ -33,7 +34,7 @@ class ULAddFilter(ULActionNode):
                     self.filter.settings['color'] = self.get_input(self.color)
                 elif ftype == 'BRIGHTNESS':
                     self.filter.settings['brightness'] = self.get_input(self.brightness)
-                elif ftype == 'CRHOMAB':
+                elif ftype == 'CHROMAB':
                     self.filter.settings['power'] = self.get_input(self.power)
                 elif ftype == 'GRAYSCALE':
                     self.filter.settings['power'] = self.get_input(self.power)
@@ -64,7 +65,7 @@ class ULAddFilter(ULActionNode):
                 self.get_input(self.brightness),
                 self.get_input(self.pass_idx)
             )
-        elif ftype == 'CRHOMAB':
+        elif ftype == 'CHROMAB':
             self.filter = ChromaticAberration(
                 self.get_input(self.power),
                 self.get_input(self.pass_idx)

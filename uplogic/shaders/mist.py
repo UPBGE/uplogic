@@ -22,7 +22,8 @@ float linearize_depth(vec2 uv){
     float n = start;
     float f = end;
     float z = texture(bgl_DepthTexture, uv).x;
-    return (2.0 * n) / (f + n - z * (f - n));
+    float ndc = z * 2.0 - 1.0;
+    return (2.0 * n) / (f + n - ndc * (f - n));
 }
 
 void main(){

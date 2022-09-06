@@ -59,6 +59,8 @@ from .applyrotation import ULApplyRotation  # noqa
 from .applytorque import ULApplyTorque  # noqa
 from .characterjump import ULCharacterJump  # noqa
 from .clearvariables import ULClearVariables  # noqa
+from .drawbox import ULDrawBox  # noqa
+from .drawcube import ULDrawCube  # noqa
 from .drawline import ULDrawLine  # noqa
 from .editbone import ULEditBone  # noqa
 from .endobject import ULEndObject  # noqa
@@ -132,3 +134,6 @@ from .stopsound import ULStopSound  # noqa
 from .stopsubnetwork import ULStopSubNetwork  # noqa
 from .translate import ULTranslate  # noqa
 from .addfilter import ULAddFilter  # noqa
+from .removefilter import ULRemoveFilter  # noqa
+from .togglefilter import ULToggleFilter  # noqa
+from .setfilterstate import ULSetFilterState  # noqa

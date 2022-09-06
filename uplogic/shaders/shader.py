@@ -9,6 +9,20 @@ def load_glsl(filepath: str):
     return Path(filepath).read_text()
 
 
+def remove_filter(pass_idx):
+    FilterSystem.remove_filter(pass_idx)
+
+
+def toggle_filter(pass_idx):
+    filter = FilterSystem.get_filter(pass_idx)
+    filter.active = not filter.active
+
+
+def set_filter_state(pass_idx, state=True):
+    filter = FilterSystem.get_filter(pass_idx)
+    filter.active = state
+
+
 class ULFilter():
     '''Wrapper for KX_2DFilter.
 
@@ -20,14 +34,14 @@ class ULFilter():
 
     @property
     def active(self):
-        return self in FilterSystem.filters.values()
+        return self._filter.enabled
     
     @active.setter
     def active(self, val):
         if val:
-            self.startup()
+            self.activate()
         else:
-            self.shutdown()
+            self.pause()
 
 
     def __init__(
@@ -52,17 +66,24 @@ class ULFilter():
         uniforms = self._uniforms
         for uniform in uniforms:
             self.set_uniform(uniform, uniforms[uniform].get(uniform))
-        if uniforms.keys():
+
+    def activate(self):
+        self._filter.enabled = True
+        if self._uniforms.keys():
             logic.getCurrentScene().post_draw.append(self.update)
 
     def update(self):
         uniforms = self._uniforms
         for uniform in uniforms:
             self.set_uniform(uniform, uniforms[uniform].get(uniform))
-
-    def shutdown(self):
+    
+    def pause(self):
+        self._filter.enabled = False
         if self.update in logic.getCurrentScene().post_draw:
             logic.getCurrentScene().post_draw.remove(self.update)
+
+    def shutdown(self):
+        self.pause()
         if self in FilterSystem.filters.values():
             FilterSystem.filters.pop(self.idx)
             self.manager.removeFilter(self.idx)
@@ -109,8 +130,9 @@ class FilterSystem:
     filters: dict[ULFilter] = {}
 
     @classmethod
-    def get_filter(cls, idx):
-        return logic.getCurrentScene().filterManager.getFilter(idx)
+    def get_filter(cls, idx) -> ULFilter:
+        return cls.filters.get(idx)
+        # return logic.getCurrentScene().filterManager.getFilter(idx)
 
     @classmethod
     def add_filter(cls, filter):

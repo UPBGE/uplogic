@@ -1,4 +1,4 @@
-from bge import render
+from bge.render import drawLine
 from uplogic.nodes import ULActionNode
 from uplogic.utils import is_invalid
 from uplogic.utils import not_met
@@ -7,6 +7,7 @@ from uplogic.utils import not_met
 class ULDrawLine(ULActionNode):
     def __init__(self):
         ULActionNode.__init__(self)
+        self.condition = None
         self.color = None
         self.from_point = None
         self.to_point = None
@@ -21,7 +22,7 @@ class ULDrawLine(ULActionNode):
         if is_invalid(from_point, to_point, color):
             return
         self._set_ready()
-        render.drawLine(
+        drawLine(
             from_point,
             to_point,
             [

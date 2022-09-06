@@ -25,7 +25,7 @@ class ULKeyLogger(ULActionNode):
         return self._character
 
     def reset(self):
-        super().reset(self)
+        super().reset()
         self._key_logged = False
         self._key_code = None
         self._character = None

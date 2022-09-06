@@ -6,6 +6,53 @@ from bpy.types import NodeGroup
 import bpy
 
 
+def get_group_socket(
+    tree: str or NodeGroup,
+    node: str or Node,
+    socket: int or NodeSocket
+):
+    if isinstance(tree, str):
+        tree = bpy.data.node_groups[tree]
+    return (
+        tree
+        .nodes[node]
+        .inputs[socket]
+        .default_value
+    )
+
+
+def set_group_socket(
+    tree: str or NodeGroup,
+    node: str or Node,
+    socket: int or NodeSocket,
+    value
+):
+    if isinstance(tree, str):
+        tree = bpy.data.node_groups[tree]
+    (
+        tree
+        .nodes[node]
+        .inputs[socket]
+        .default_value
+    ) = value
+
+
+def modify_group_socket(
+    tree: str or NodeGroup,
+    node: str or Node,
+    socket: int or NodeSocket,
+    value
+):
+    if isinstance(tree, str):
+        tree = bpy.data.node_groups[tree]
+    (
+        tree
+        .nodes[node]
+        .inputs[socket]
+        .default_value
+    ) += value
+
+
 def get_material_socket(
     material: str or Material,
     node: Node,
