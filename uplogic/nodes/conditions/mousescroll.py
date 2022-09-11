@@ -15,8 +15,8 @@ class ULMouseScrolled(ULConditionNode):
         if wd is None:
             return
         elif wd == 1:  # UP
-            self._set_value(self.network.mouse_wheel_delta > 0)
+            self._set_value(self.network.mouse.wheel > 0)
         elif wd == 2:  # DOWN
-            self._set_value(self.network.mouse_wheel_delta < 0)
+            self._set_value(self.network.mouse.wheel < 0)
         elif wd == 3:  # UP OR DOWN
-            self._set_value(self.network.mouse_wheel_delta != 0)
+            self._set_value(self.network.mouse.wheel != 0)

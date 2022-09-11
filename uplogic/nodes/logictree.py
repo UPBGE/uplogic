@@ -192,12 +192,13 @@ class ULLogicTree(ULLogicContainer):
             debug("Network Owner removed from game. Shutting down the network")
             return True
         self.keyboard = logic.keyboard
-        # store mouse and keyboard events to be used by cells
         self.keyboard_events = self.keyboard.inputs.copy()
         self.active_keyboard_events = self.keyboard.activeInputs.copy()
         caps_lock_event = self.keyboard_events[events.CAPSLOCKKEY]
         if(caps_lock_event.released):
             self.capslock_pressed = not self.capslock_pressed
+
+        # update the cells
         cells = self._iter
         max_loop_count = len(cells)
         loop_index = 0

@@ -2,6 +2,9 @@ from uplogic.nodes import ULConditionNode
 from uplogic.nodes import ULOutSocket
 from uplogic.utils import STATUS_WAITING
 from uplogic.utils import is_waiting
+from uplogic.input import mouse_down
+from uplogic.input import mouse_tap
+from bge.logic import mouse
 
 
 class ULMousePressed(ULConditionNode):
@@ -18,7 +21,7 @@ class ULMousePressed(ULConditionNode):
             if is_waiting(mouse_button):
                 return STATUS_WAITING
             self._set_ready()
-            mstat = self.network.mouse_events[mouse_button]
+            mstat = mouse.inputs[mouse_button]
             if self.pulse:
                 return self.set_output(
                     'pressed',

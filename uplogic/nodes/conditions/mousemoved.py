@@ -1,5 +1,6 @@
 from bge import events
 from uplogic.nodes import ULConditionNode
+from uplogic.input import mouse_moved
 
 
 class ULMouseMoved(ULConditionNode):
@@ -9,16 +10,11 @@ class ULMouseMoved(ULConditionNode):
 
     def evaluate(self):
         self._set_ready()
-        mstat = self.network.mouse_events
         if self.pulse:
             self._set_value(
-                mstat[events.MOUSEX].active or
-                mstat[events.MOUSEX].activated or
-                mstat[events.MOUSEY].active or
-                mstat[events.MOUSEY].activated
+                mouse_moved()
             )
         else:
             self._set_value(
-                mstat[events.MOUSEX].activated or
-                mstat[events.MOUSEY].activated
+                mouse_moved(tap=True)
             )

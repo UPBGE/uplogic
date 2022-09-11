@@ -24,7 +24,7 @@ class ULMousePressedOn(ULConditionNode):
                 return STATUS_WAITING
             if is_invalid(game_object):
                 return STATUS_WAITING
-            mstat = self.network.mouse_events[mouse_button]
+            mstat = logic.mouse.inputs[mouse_button]
             if not mstat.activated:
                 return (False)
             mpos = logic.mouse.position

@@ -28,6 +28,7 @@ class ULRaycast(ULActionNode):
         self._direction = None
         self._material = None
         self._uv = None
+        self.advanced = False
         self.RESULT = ULOutSocket(self, self.get_result)
         self.PICKED_OBJECT = ULOutSocket(self, self.get_picked_object)
         self.POINT = ULOutSocket(self, self.get_point)
@@ -82,8 +83,9 @@ class ULRaycast(ULActionNode):
             return
         self._set_ready()
         caster = self.network._owner
-        obj, point, normal = None, None, None
-        obj, point, normal, direction, face, uv = raycast_face(
+        res = (None, None, None)
+        cast_f = raycast_face if self.advanced else raycast
+        res = cast_f(
             caster,
             origin,
             destination,
@@ -93,12 +95,14 @@ class ULRaycast(ULActionNode):
             exclude,
             xray,
             local,
+            65535,
             visualize,
         )
-        self._result = obj is not None
-        self._picked_object = obj
-        self._point = point
-        self._normal = normal
-        self._direction = direction
-        self._material = face.material_name[2:] if face else None
-        self._uv = uv
+        self._result = res[0] is not None
+        self._picked_object = res[0]
+        self._point = res[1]
+        self._normal = res[2]
+        self._direction = res[3]
+        if self.advanced:
+            self._material = res[4].material_name[2:] if res[4] else None
+            self._uv = res[5]
