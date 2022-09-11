@@ -12,6 +12,7 @@ class GlobalDB(object):
     '''TODO: Documentation
     '''
     index: int
+    initialized: bool = False
 
     class LineBuffer(object):
         def __init__(self, buffer=[]):
@@ -214,10 +215,45 @@ class GlobalDB(object):
 
 
 def store(key, value, category='uplogic.default_globals'):
+    initialize()
     values = GlobalDB.retrieve(category)
     values.put(key, value)
 
 
 def retrieve(key, category='uplogic.default_globals', default=None):
+    initialize()
     values = GlobalDB.retrieve(category)
-    values.get(key, default)
+    return values.get(key, default)
+
+
+def initialize():
+    if not GlobalDB.initialized:
+        scene = logic.getCurrentScene()
+        cats = getattr(
+            bpy.data.scenes[scene.name],
+            'nl_global_categories',
+            None
+        )
+        if not cats:
+            return
+
+        msg = ''
+
+        dat = {
+            'STRING': 'string_val',
+            'FLOAT': 'float_val',
+            'INTEGER': 'int_val',
+            'BOOLEAN': 'bool_val',
+            'FILE_PATH': 'filepath_val'
+        }
+
+        for c in cats:
+            db = GlobalDB.retrieve(c.name)
+            msg += f' {c.name},'
+            for v in c.content:
+                val = getattr(v, dat.get(v.value_type, 'FLOAT'), 0)
+                db.put(v.name, val, v.persistent)
+
+        if msg:
+            debug(f'Globals Initialized:{msg[:-1]}')
+        GlobalDB.initialized = True

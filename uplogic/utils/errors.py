@@ -17,3 +17,9 @@ class LogicControllerNotSupportedError(Exception):
     def __init__(self, message="Expression/Python not supported for controller!"):
         self.message = message
         super().__init__(self.message)
+
+
+class TypeMismatchError(Exception):
+    """Type mismatch."""
+    def __init__(self, msg='Type Mismatch!'):
+        super().__init__(msg)

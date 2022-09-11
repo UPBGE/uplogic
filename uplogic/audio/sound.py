@@ -226,6 +226,8 @@ class ULSound2D(ULSound):
     def update(self):
         '''TODO: Documentation
         '''
+        if self.volume == 0:
+            return
         handle = self.sound
         if not handle.status:
             self.finished = True
@@ -328,6 +330,10 @@ class ULSound3D(ULSound):
     def update(self):
         '''TODO: Documentation
         '''
+        if self.volume == 0:
+            for i, handle in enumerate(self.handles[1]):
+                handle.volume = 0
+            return
         aud_system = self.aud_system
         speaker = self.speaker
         if not speaker or speaker.invalid:

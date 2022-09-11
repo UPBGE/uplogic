@@ -16,27 +16,25 @@ class ULMouseData(ULParameterNode):
         self.MDXY0 = ULOutSocket(self, self.getmdxyz)
 
     def getmx(self):
-        return self.network._last_mouse_position[0]
+        return self.network.mouse.position[0]
 
     def getmy(self):
-        return self.network._last_mouse_position[1]
+        return self.network.mouse.position[1]
 
     def getmdx(self):
-        return self.network.mouse_motion_delta[0]
+        return self.network.mouse.movement[0]
 
     def getmdy(self):
-        return self.network.mouse_motion_delta[1]
+        return self.network.mouse.movement[1]
 
     def getmdwheel(self):
-        return self.network.mouse_wheel_delta
+        return self.network.mouse.wheel
 
     def getmxyz(self):
-        mp = self.network._last_mouse_position
-        return Vector((mp[0], mp[1], 0))
+        return Vector(self.network.mouse.position)
 
     def getmdxyz(self):
-        mp = self.network.mouse_motion_delta
-        return Vector((mp[0], mp[1], 0))
+        return Vector(self.network.mouse.movement)
 
     def evaluate(self):
         self._set_ready()

@@ -280,9 +280,10 @@ class ULMouseLook():
         self.local = local
         self.axis_lock = [False, False]
         self.reset_factor = 0
-        self.get_data()
-        self.mouse.position = self.screen_center
         self.active = active
+        self.get_data()
+        if active:
+            self.mouse.position = self.screen_center
 
     @property
     def active(self):

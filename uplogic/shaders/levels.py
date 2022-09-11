@@ -8,6 +8,7 @@ in vec4 bgl_TexCoord;
 vec2 texcoord = bgl_TexCoord.xy;
 uniform vec3 color;
 
+out vec4 fragColor;
 
 vec4 gradient(vec4 coo)
 {
@@ -24,9 +25,9 @@ void main (void)
 	vec4 value = texture(bgl_RenderedTexture, texcoord);
 		
 
-// 	gl_FragColor = gradient(vec4(clamp(gl_TexCoord[3].s,0.0,1.0)));
-	gl_FragColor.rgb = gradient(value).rgb;
-	gl_FragColor.a = 1.0;	
+// 	fragColor = gradient(vec4(clamp(gl_TexCoord[3].s,0.0,1.0)));
+	fragColor.rgb = gradient(value).rgb;
+	fragColor.a = 1.0;	
 }
 """
 

@@ -33,8 +33,8 @@ class ULCursorBehavior(ULActionNode):
         if not cursor_object.visible:
             cursor_object.setVisible(True, True)
         else:
-            x = self.network._last_mouse_position[0]
-            y = self.network._last_mouse_position[1]
+            x = self.network.mouse.position[0]
+            y = self.network.mouse.position[1]
             direction = camera.getScreenVect(x, y)
             origin = camera.worldPosition
             aim = direction * -world_z

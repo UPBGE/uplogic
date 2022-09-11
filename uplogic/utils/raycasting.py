@@ -36,6 +36,7 @@ def raycast(
     exclude: bool = False,
     xray: bool = False,
     local: bool = False,
+    mask: int = 65535,
     visualize: bool = False
 ) -> tuple[GameObject, Vector, Vector, Vector]:
     """Raycast from any point to any target
@@ -50,6 +51,7 @@ def raycast(
     :param `exclude`: invert the selection for `prop` and `material`.
     :param `xray`: look for objects behind others.
     :param `local`: add the target vector to the origin.
+    :param `mask`: Collision Mask for this ray.
     :param `visualize`: show the raycast.
 
     :returns: (`obj`, `point`, `normal`, `direction`)
@@ -64,7 +66,8 @@ def raycast(
         origin,
         distance,
         prop,
-        xray=xray
+        xray=xray,
+        mask=mask
     )
     if (material and point) or (obj and exclude and exclude_prop in obj):
         bo = obj.blenderObject
@@ -132,6 +135,7 @@ def raycast_face(
     exclude: bool = False,
     xray: bool = False,
     local: bool = False,
+    mask: int = 65535,
     visualize: bool = False
 ) -> tuple[GameObject, Vector, KX_PolyProxy, Vector]:
     """Raycast from any point to any target. Returns additional face data.
@@ -146,6 +150,7 @@ def raycast_face(
     :param `exclude`: invert the selection for `prop` and `material`.
     :param `xray`: look for objects behind others.
     :param `local`: add the target vector to the origin.
+    :param `mask`: Collision Mask for this ray.
     :param `visualize`: show the raycast.
 
     :returns: (`obj`, `point`, `normal`, `direction`, `face`, `uv`)
@@ -160,7 +165,8 @@ def raycast_face(
         distance,
         prop,
         xray=xray,
-        poly=2
+        poly=2,
+        mask=mask
     )
     if (material and point) or (obj and exclude):
         bo = obj.blenderObject
@@ -229,6 +235,7 @@ def raycast_projectile(
     prop: str = '',
     xray: bool = False,
     local: bool = False,
+    mask: int = 65535,
     visualize: bool = False
 ) -> tuple[GameObject, Vector, Vector, list]:
     """Raycast along the predicted parabola of a projectile.
@@ -242,6 +249,7 @@ def raycast_projectile(
     :param `prop`: look only for objects with this property.
     :param `xray`: look for objects behind others.
     :param `local`: add the target vector to the origin.
+    :param `mask`: Collision Mask for this ray.
     :param `visualize`: show the raycast.
 
     :returns: (`obj`, `point`, `normal`, `points`)
@@ -269,7 +277,8 @@ def raycast_projectile(
             start,
             target,
             prop=prop,
-            xray=xray
+            xray=xray,
+            mask=mask
         )
         total_dist += (target-start).length
         if not obj:
@@ -291,7 +300,7 @@ def raycast_camera(
     prop: str = '',
     xray: bool = False,
     aim: Vector = Vector((.5, .5)),
-    visualize: bool = False
+    mask: int = 65535
 ):
     """Raycast from any point to any target. Returns additional face data.
 
@@ -299,6 +308,7 @@ def raycast_camera(
     :param `prop`: look only for objects with this property.
     :param `xray`: look for objects behind others.
     :param `aim`: X and Y coordinates of the screen from 0-1
+    :param `mask`: Collision Mask for this ray.
 
     :returns: (`obj`, `point`, `normal`)
     """
@@ -314,23 +324,11 @@ def raycast_camera(
             None,
             distance,
             prop,
-            xray=xray
+            xray=xray,
+            mask=mask
         )
     else:
         obj, point, normal = camera.rayCast(aim, None, distance)
-    if visualize:
-        if not obj:
-            render.drawLine(
-                camera.worldPosition,
-                aim,
-                [1, 0, 0, 1]
-            )
-        else:
-            render.drawLine(
-                camera.worldPosition,
-                point,
-                [0, 1, 0, 1]
-            )
     return (obj, point, normal)
 
 
@@ -339,7 +337,8 @@ def raycast_mouse(
     prop: str = '',
     material: str = '',
     exclude: bool = False,
-    xray: bool = False
+    xray: bool = False,
+    mask: int = 65535
 ):
     """Raycast from the active camera to world cursor coordinates.
 
@@ -348,7 +347,7 @@ def raycast_mouse(
     :param `material`: look only for objects with this material applied.
     :param `exclude`: invert the selection for `prop` and `material`.
     :param `xray`: look for objects behind others.
-    :param `aim`: X and Y coordinates of the screen from 0-1
+    :param `mask`: Collision Mask for this ray.
 
     :returns: (`obj`, `point`, `normal`, `direction`)
     """
@@ -364,5 +363,6 @@ def raycast_mouse(
         prop,
         material,
         exclude,
-        xray
+        xray,
+        mask=mask
     )

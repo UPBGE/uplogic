@@ -581,7 +581,7 @@ def get_direction(a, b, local=False) -> Vector:
     return d
 
 
-def map_range(value, in_min, in_max, out_min, out_max, clamp=(None, None)):
+def map_range(value: float, in_min: float, in_max: float, out_min: float, out_max: float, clamp=(None, None)) -> float:
     """Map a value from one range to another.
     
     :param `value`: Value to be remapped.
@@ -598,7 +598,17 @@ def map_range(value, in_min, in_max, out_min, out_max, clamp=(None, None)):
         return clamp[1]
     return result
 
-def screen_to_world(x=None, y=None, distance=10):
+
+def screen_to_world(x=None, y=None, distance=10) -> Vector:
+    """Get the world coordinates of a point on the screen in a given distance.
+    
+    :param `x`: X position on the screen. Leave at `None` to use mouse position.
+    :param `y`: Y position on the screen. Leave at `None` to use mouse position.
+    :param `distance`: The distance from the camera at which to get the position.
+    
+    :returns: Position as `Vector`
+    """
+
     camera = logic.getCurrentScene().active_camera
     mouse = logic.mouse
     x = x if x else mouse.position[0]
@@ -608,7 +618,7 @@ def screen_to_world(x=None, y=None, distance=10):
     aim = direction * -distance
     return origin + (aim)
 
-def mouse_over(game_object: GameObject):
+def mouse_over(game_object: GameObject) -> bool:
     scene = game_object.scene
     camera = scene.active_camera
     distance = 2.0 * camera.getDistanceTo(game_object)
@@ -621,5 +631,5 @@ def mouse_over(game_object: GameObject):
     )
     return target is game_object
 
-def get_local(obj, target):
+def get_local(obj, target) -> Matrix:
     return obj.worldTransform.inverted() @ target

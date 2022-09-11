@@ -19,6 +19,7 @@ import time
 
 class ULLogicTree(ULLogicContainer):
     def __init__(self):
+        from ..input import ULMouse
         ULLogicContainer.__init__(self)
         self._cells: list = []
         self._iter = collections.deque()
@@ -26,7 +27,8 @@ class ULLogicTree(ULLogicContainer):
         self._owner: GameObject = None
         self._max_blocking_loop_count: int = 0
         self.keyboard: Keyboard = None
-        self.mouse: Mouse = None
+        # self.mouse: Mouse = None
+        self.mouse: ULMouse = ULMouse()
         self.keyboard_events = None
         self.active_keyboard_events = None
         self.mouse_events = None
@@ -35,11 +37,6 @@ class ULLogicTree(ULLogicContainer):
         self._time_then = None
         self.time_per_frame = 0.0
         self._do_remove = False
-        self._last_mouse_position = [
-            logic.mouse.position[0], logic.mouse.position[1]
-        ]
-        self.mouse_motion_delta = [0.0, 0.0]
-        self.mouse_wheel_delta = 0
         self.aud_system_owner = False
         self.init_glob_cats()
         self.audio_system = self.get_aud_system()
@@ -148,8 +145,6 @@ class ULLogicTree(ULLogicContainer):
 
     def set_mouse_position(self, screen_x, screen_y):
         self.mouse.position = (screen_x, screen_y)
-        self._last_mouse_position = [screen_x, screen_y]
-        pass
 
     def get_owner(self):
         return self._owner
@@ -159,7 +154,6 @@ class ULLogicTree(ULLogicContainer):
         for cell in self._cells:
             cell.network = self
             cell.setup(self)
-        self._last_mouse_position[:] = logic.mouse.position
 
     def is_running(self):
         return not self.stopped
@@ -198,33 +192,12 @@ class ULLogicTree(ULLogicContainer):
             debug("Network Owner removed from game. Shutting down the network")
             return True
         self.keyboard = logic.keyboard
-        self.mouse = logic.mouse
-        # compute mouse translation since last frame (or initialization)
-        curr_mpos = self.mouse.position
-        last_mpos = self._last_mouse_position
-        mpos_delta = self.mouse_motion_delta
-        # print(mpos_delta)
-        mpos_delta[0] = curr_mpos[0] - last_mpos[0]
-        mpos_delta[1] = curr_mpos[1] - last_mpos[1]
-        last_mpos[:] = curr_mpos
         # store mouse and keyboard events to be used by cells
         self.keyboard_events = self.keyboard.inputs.copy()
         self.active_keyboard_events = self.keyboard.activeInputs.copy()
         caps_lock_event = self.keyboard_events[events.CAPSLOCKKEY]
         if(caps_lock_event.released):
             self.capslock_pressed = not self.capslock_pressed
-        me = self.mouse.inputs
-        self.mouse_wheel_delta = 0
-        wheelup = me[events.WHEELUPMOUSE]
-        wheeldown = me[events.WHEELDOWNMOUSE]
-        if(wheelup.active or wheelup.activated):
-            self.mouse_wheel_delta += 1
-        elif(
-            wheeldown.active or wheeldown.activated
-        ):
-            self.mouse_wheel_delta -= 1
-        self.mouse_events = me
-        # update the cells
         cells = self._iter
         max_loop_count = len(cells)
         loop_index = 0
