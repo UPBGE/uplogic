@@ -189,7 +189,7 @@ class ULLogicTree(ULLogicContainer):
         self.timeline += dtime
         self.time_per_frame = dtime
         if self._owner.invalid:
-            debug("Network Owner removed from game. Shutting down the network")
+            print("Network Owner removed from game. Shutting down the network")
             return True
         self.keyboard = logic.keyboard
         self.keyboard_events = self.keyboard.inputs.copy()
@@ -203,8 +203,9 @@ class ULLogicTree(ULLogicContainer):
         max_loop_count = len(cells)
         loop_index = 0
         done_cells = []
+        max_blocking_loop_count = self._max_blocking_loop_count
         while cells:
-            if loop_index == self._max_blocking_loop_count:
+            if loop_index == max_blocking_loop_count:
                 debug(
                     "Network found a blocking condition" +
                     " (due to unconnected or non responsive cell)"

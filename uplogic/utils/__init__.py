@@ -15,6 +15,7 @@ from .nodetrees import set_material_socket  # noqa
 from .nodetrees import set_world_socket  # noqa
 from .objects import ULCurve  # noqa
 from .objects import controller_brick_status  # noqa
+from .objects import controller_brick  # noqa
 from .objects import create_curve  # noqa
 from .objects import set_curve_points  # noqa
 from .raycasting import raycast  # noqa
@@ -26,6 +27,8 @@ from .scene import set_scene  # noqa
 from .visuals import draw_box  # noqa
 from .visuals import draw_cube  # noqa
 from .visuals import draw_line  # noqa
+from .scene import FileLoader  # noqa
+from .scene import SceneLoader  # noqa
 from bge import logic
 from bge.types import KX_GameObject as GameObject
 from mathutils import Matrix
@@ -384,29 +387,6 @@ def load_json_as_dict(filepath):
         raise FileNotFoundError(f'File {filepath} could not be opened!')
 
 
-class MaterialLoader():
-
-    def __init__(self, game_object):
-        self.status = 0.0
-        self.game_object = game_object
-        if len(game_object.blenderObject.material_slots) < 1:
-            debug('MaterialLoader object needs at least one material slot!')
-            return
-        self.materials = [m for m in bpy.data.materials]
-        logic.getCurrentScene().pre_draw.append(self.load_next)
-
-    def load_next(self):
-        next_mat = self.materials.pop()
-        self.game_object.blenderObject.material_slots[0].material = next_mat
-        self.status += 1 / len(bpy.data.materials)
-        if not self.materials:
-            logic.getCurrentScene().pre_draw.remove(self.load_next)
-            self.on_finish()
-
-    def on_finish(self):
-        pass
-
-
 
 ###############################################################################
 # SCENE
@@ -468,6 +448,24 @@ def clamp(value: float or Vector, min: float = 0, max: float = 1) -> float:
         return min
     if value > max:
         return max
+    return value
+
+
+def cycle(value: float or Vector, min: float = 0, max: float = 1) -> float:
+    """Clamp a value in between two other values.
+
+    :param value: input value
+    :param min: minimum value
+    :param max: maximum value
+
+    :returns: clamped value as float
+    """
+    if isinstance(value, Vector):
+        return vec_clamp(value, min, max)
+    if value < min:
+        return max
+    if value > max:
+        return min
     return value
 
 

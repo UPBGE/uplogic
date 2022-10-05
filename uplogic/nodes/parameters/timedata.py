@@ -1,6 +1,7 @@
 from uplogic.nodes import ULParameterNode
 from uplogic.nodes import ULOutSocket
 from uplogic.utils import STATUS_READY
+from bge import logic
 
 
 class ULTimeData(ULParameterNode):
@@ -18,14 +19,12 @@ class ULTimeData(ULParameterNode):
         return self.network.time_per_frame
 
     def get_fps(self):
-        tpf = self.network.time_per_frame
-        if not tpf:
-            return 1
-        fps = (1 / tpf)
-        return fps
+        tpf = self.network.time_per_frame or 1
+        fps = logic.getAverageFrameRate()
+        return fps if fps < 500 else 1 / tpf
 
     def get_timeline(self):
-        return self.network.timeline
+        return logic.getRealTime()
 
     def setup(self, network):
         self.network = network

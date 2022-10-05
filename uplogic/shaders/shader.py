@@ -35,14 +35,13 @@ class ULFilter():
     @property
     def active(self):
         return self._filter.enabled
-    
+
     @active.setter
     def active(self, val):
         if val:
             self.activate()
         else:
             self.pause()
-
 
     def __init__(
         self,
@@ -76,7 +75,7 @@ class ULFilter():
         uniforms = self._uniforms
         for uniform in uniforms:
             self.set_uniform(uniform, uniforms[uniform].get(uniform))
-    
+
     def pause(self):
         self._filter.enabled = False
         if self.update in logic.getCurrentScene().post_draw:
@@ -107,7 +106,7 @@ class ULFilter():
             cols = len(value.col)
             if rows == cols == 3:
                 self._filter.setUniformMatrix3(
-                    name,(
+                    name, (
                         [value[0][0], value[0][1], value[0][2]],
                         [value[1][0], value[1][1], value[1][2]],
                         [value[2][0], value[2][1], value[2][2]]
@@ -138,6 +137,7 @@ class FilterSystem:
     def add_filter(cls, filter):
         if filter.idx and cls.filters.get(filter.idx, None) is None:
             filter.startup()
+            filter.activate()
         elif filter.idx is not None and cls.filters.get(filter.idx):
             #raise PassIndexOccupiedError
             debug(f"2D Filter pass index {filter.idx} already in-use!")
@@ -147,6 +147,7 @@ class FilterSystem:
                 idx += 1
             filter.idx = idx
             filter.startup()
+            filter.activate()
 
     @classmethod
     def remove_filter(cls, filter):

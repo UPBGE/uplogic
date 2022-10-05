@@ -41,6 +41,65 @@ def controller_brick_status(owner, controller_name):
         raise LogicControllerNotSupportedError
 
 
+class ControllerBrick(tuple):
+
+    @property
+    def brick(self):
+        return self[0]
+
+    @property
+    def name(self):
+        return self[0].name
+
+    @property
+    def positive(self):
+        return self[1]
+
+    @property
+    def sensors(self):
+        return self[2]
+
+    @property
+    def actuators(self):
+        return self[3]
+
+
+def controller_brick(owner, controller_name):
+    cont = owner.controllers[controller_name]
+    state = (
+        owner
+        .blenderObject
+        .game
+        .controllers[controller_name]
+        .type
+    )
+    if not cont.sensors:
+        return ControllerBrick([cont, False, cont.sensors, cont.actuators])
+    elif state == 'LOGIC_AND':
+        return ControllerBrick([cont, False not in [sens.positive for sens in cont.sensors], cont.sensors, cont.actuators])
+    elif state == 'LOGIC_OR':
+        return ControllerBrick([cont, True in [sens.positive for sens in cont.sensors], cont.sensors, cont.actuators])
+    elif state == 'LOGIC_NAND':
+        return ControllerBrick([cont, False in [sens.positive for sens in cont.sensors], cont.sensors, cont.actuators])
+    elif state == 'LOGIC_NOR':
+        return ControllerBrick([cont, True not in [sens.positive for sens in cont.sensors], cont.sensors, cont.actuators])
+    elif state == 'LOGIC_XOR':
+        return ControllerBrick([cont, [
+            sens.positive
+            for sens in
+            cont.sensors
+        ].count(True) % 2 != 0, cont.sensors, cont.actuators])
+    elif state == 'LOGIC_XNOR':
+        check = cont.sensors[0].positive
+        return ControllerBrick([cont, False not in [
+            sens.positive == check
+            for sens in
+            cont.sensors
+        ], cont.sensors, cont.actuators])
+    else:
+        raise LogicControllerNotSupportedError
+
+
 def create_curve(
     name: str,
     bevel_depth: float = 0.0,

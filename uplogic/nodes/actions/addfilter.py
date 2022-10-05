@@ -12,6 +12,7 @@ class ULAddFilter(ULActionNode):
         self.pass_idx = None
         self.brightness = None
         self.power = None
+        self.density = None
         self.color = None
         self.start = None
         self.end = None
@@ -44,7 +45,7 @@ class ULAddFilter(ULActionNode):
                     self.filter.settings['power'] = self.get_input(self.power)
                     self.filter.settings['color'] = self.get_input(self.color)
                     self.filter.settings['start'] = self.get_input(self.start)
-                    self.filter.settings['end'] = self.get_input(self.end)
+                    self.filter.settings['density'] = self.get_input(self.end)
             return
         self._set_ready()
 
@@ -83,7 +84,7 @@ class ULAddFilter(ULActionNode):
         elif ftype == 'MIST':
             self.filter = Mist(
                 self.get_input(self.start),
-                self.get_input(self.end),
+                self.get_input(self.density),
                 self.get_input(self.color),
                 self.get_input(self.power),
                 self.get_input(self.pass_idx)

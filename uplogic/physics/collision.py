@@ -5,7 +5,7 @@ from bge.types import KX_GameObject as GameObject
 
 class ULCollision():
     """Collision Handler.
-    
+
     Not intended for manual use."""
     target = None
     point = None
@@ -55,7 +55,8 @@ class ULCollision():
 
         self.active = True
         if obj not in self.done_objs:
-            self.callback(obj, point, normal)
+            if self.game_object.collisionGroup & obj.collisionMask and self.game_object.collisionMask & obj.collisionGroup:
+                self.callback(obj, point, normal)
             self.done_objs.append(obj)
 
     def reset(self):

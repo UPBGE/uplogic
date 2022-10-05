@@ -137,3 +137,6 @@ from .addfilter import ULAddFilter  # noqa
 from .removefilter import ULRemoveFilter  # noqa
 from .togglefilter import ULToggleFilter  # noqa
 from .setfilterstate import ULSetFilterState  # noqa
+from .setscene import ULSetScene  # noqa
+from .loadscene import ULLoadScene  # noqa
+from .loadfilecontent import ULLoadFileContent  # noqa

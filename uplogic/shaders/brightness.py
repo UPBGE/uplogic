@@ -26,4 +26,4 @@ class Brightness(ULFilter):
 
     @brightness.setter
     def brightness(self, val):
-        self.settings['brightness'] = val
+        self.settings['brightness'] = float(val)

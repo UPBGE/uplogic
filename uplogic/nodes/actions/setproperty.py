@@ -37,3 +37,5 @@ class ULSetProperty(ULActionNode):
             self._set_ready()
             obj = game_object if self.mode == 'GAME' else game_object.blenderObject
             obj[property_name] = property_value
+            if self.mode != 'GAME':
+                obj.color = obj.color

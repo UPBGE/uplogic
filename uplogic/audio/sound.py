@@ -254,7 +254,7 @@ class ULSound3D(ULSound):
 
     def __init__(
         self,
-        speaker: GameObject = None,
+        speaker: GameObject or Vector = None,
         file: str = '',
         occlusion: bool = False,
         transition_speed: float = .1,
@@ -269,6 +269,7 @@ class ULSound3D(ULSound):
         cone_outer_volume: float = 0,
         aud_sys: str = 'default'
     ):
+        self._is_vector = isinstance(speaker, Vector)
         self.file = file
         self.finished = False
         if not (file and speaker):
@@ -291,26 +292,27 @@ class ULSound3D(ULSound):
         if not isfile(soundfile):
             debug(f'Soundfile {soundfile} could not be loaded!')
             return
-        sound = self.soundpath = aud.Sound(soundfile)
+        sound = self.soundpath = aud.Sound(soundfile).rechannel(1)
         device = self.aud_system.device
         handle = device.play(sound)
         if occlusion:
-            soundlow = aud.Sound.lowpass(sound, 4400 * cutoff_frequency, .5)
+            soundlow = aud.Sound.lowpass(sound, 4400 * cutoff_frequency, .5).rechannel(1)
             handlelow = device.play(soundlow)
             self.handles = [speaker, [handle, handlelow]]
         else:
             self.handles = [speaker, [handle]]
         for handle in self.handles[1]:
             handle.relative = False
-            handle.location = speaker.worldPosition
-            if speaker.mass:
+            handle.location = speaker if self._is_vector else speaker.worldPosition
+            if not self._is_vector and speaker.mass:
                 handle.velocity = getattr(
                     speaker,
                     'worldLinearVelocity',
                     Vector((0, 0, 0))
                 )
             handle.attenuation = attenuation
-            handle.orientation = speaker.worldOrientation.to_quaternion()
+            if not self._is_vector:
+                handle.orientation = speaker.worldOrientation.to_quaternion()
             handle.pitch = pitch
             handle.volume = volume * master_volume
             handle.distance_reference = distance_ref
@@ -336,11 +338,11 @@ class ULSound3D(ULSound):
             return
         aud_system = self.aud_system
         speaker = self.speaker
-        if not speaker or speaker.invalid:
+        if not self._is_vector and (not speaker or speaker.invalid):
             self.finished = True
             aud_system.remove(self)
             return
-        location = speaker.worldPosition
+        location = speaker if self._is_vector else speaker.worldPosition
         for i, handle in enumerate(self.handles[1]):
             if not handle.status:
                 self.finished = True
@@ -348,22 +350,22 @@ class ULSound3D(ULSound):
                 return
             handle.pitch = self.pitch * logic.getTimeScale()
             handle.location = location
-            handle.orientation = (
-                speaker
-                .worldOrientation
-                .to_quaternion()
-            )
-            if 'volume' in dir(self.speaker.blenderObject.data):
-                handle.velocity = Vector((0, 0, 0))
-            else:
-                handle.velocity = getattr(speaker, 'worldLinearVelocity', Vector((0, 0, 0)))
+            if not self._is_vector:
+                handle.orientation = (
+                    speaker
+                    .worldOrientation
+                    .to_quaternion()
+                )
+                if 'volume' in dir(self.speaker.blenderObject.data):
+                    handle.velocity = Vector((0, 0, 0))
+                else:
+                    handle.velocity = getattr(speaker, 'worldLinearVelocity', Vector((0, 0, 0)))
             if self.occlusion:
                 transition = self.transition
                 cam = self.aud_system.listener
                 occluder, point, normal = cam.rayCast(
                     location,
                     cam.worldPosition,
-                    speaker.getDistanceTo(cam.worldPosition),
                     xray=False
                 )
                 occluded = self.occluded = False
@@ -388,7 +390,6 @@ class ULSound3D(ULSound):
                     occluder, point, normal = occluder.rayCast(
                         location,
                         point,
-                        speaker.getDistanceTo(point),
                         xray=False
                     )
                 cs = self._clear_sound
@@ -424,3 +425,34 @@ class ULSound3D(ULSound):
         '''
         for sound in self.sounds:
             sound.stop()
+
+
+class ULSpeaker(ULSound3D):
+
+    def __init__(
+        self,
+        speaker: GameObject,
+        occlusion: bool = False,
+        transition_speed: float = 0.1,
+        cutoff_frequency: float = 0.1,
+        loop_count: int = 0,
+        reverb=False,
+        aud_sys: str = 'default'
+    ):
+        speaker_data = speaker.blenderObject.data
+        super().__init__(
+            speaker,
+            speaker_data.sound.filepath,
+            occlusion,
+            transition_speed,
+            cutoff_frequency,
+            loop_count,
+            speaker_data.pitch,
+            speaker_data.volume,
+            reverb,
+            speaker_data.attenuation,
+            speaker_data.distance_reference,
+            [speaker_data.cone_angle_inner, speaker_data.cone_angle_outer],
+            speaker_data.cone_volume_outer,
+            aud_sys
+        )

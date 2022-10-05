@@ -25,6 +25,23 @@ def ray_data(
     return d, dist, dest
 
 
+class RayCastData(tuple):
+    @property
+    def obj(self):
+        return self[0]
+
+    @property
+    def point(self):
+        return self[1]
+
+    @property
+    def normal(self):
+        return self[2]
+
+    @property
+    def direction(self):
+        return self[3]
+
 
 def raycast(
     caster: GameObject,
@@ -38,7 +55,7 @@ def raycast(
     local: bool = False,
     mask: int = 65535,
     visualize: bool = False
-) -> tuple[GameObject, Vector, Vector, Vector]:
+) -> RayCastData[GameObject, Vector, Vector, Vector]:
     """Raycast from any point to any target
 
     :param `caster`: casting object, this object will be ignored by the ray.
@@ -122,7 +139,17 @@ def raycast(
                 point,
                 [0, 1, 0, 1]
             )
-    return (obj, point, normal, direction)
+    return RayCastData((obj, point, normal, direction))
+
+
+class RayCastFaceData(RayCastData):
+    @property
+    def poly(self):
+        return self[4]
+
+    @property
+    def uv(self):
+        return self[5]
 
 
 def raycast_face(
@@ -137,7 +164,7 @@ def raycast_face(
     local: bool = False,
     mask: int = 65535,
     visualize: bool = False
-) -> tuple[GameObject, Vector, KX_PolyProxy, Vector]:
+) -> RayCastFaceData[GameObject, Vector, Vector, Vector, KX_PolyProxy, Vector]:
     """Raycast from any point to any target. Returns additional face data.
 
     :param `caster`: casting object, this object will be ignored by the ray.
@@ -222,7 +249,25 @@ def raycast_face(
                 point,
                 [0, 1, 0, 1]
             )
-    return (obj, point, normal, direction, face, uv)
+    return RayCastFaceData((obj, point, normal, direction, face, uv))
+
+
+class RayCastProjectileData(tuple):
+    @property
+    def obj(self):
+        return self[0]
+
+    @property
+    def point(self):
+        return self[1]
+
+    @property
+    def normal(self):
+        return self[2]
+
+    @property
+    def points(self):
+        return self[3]
 
 
 def raycast_projectile(
@@ -237,7 +282,7 @@ def raycast_projectile(
     local: bool = False,
     mask: int = 65535,
     visualize: bool = False
-) -> tuple[GameObject, Vector, Vector, list]:
+) -> RayCastProjectileData[GameObject, Vector, Vector, list]:
     """Raycast along the predicted parabola of a projectile.
 
     :param `caster`: casting object, this object will be ignored by the ray.
@@ -292,7 +337,21 @@ def raycast_projectile(
         for i, p in enumerate(points):
             if i < len(points) - 1:
                 render.drawLine(p, points[i+1], color)
-    return (obj, point, normal, points)
+    return RayCastProjectileData((obj, point, normal, points))
+
+
+class RayCastCameraData(tuple):
+    @property
+    def obj(self):
+        return self[0]
+
+    @property
+    def point(self):
+        return self[1]
+
+    @property
+    def normal(self):
+        return self[2]
 
 
 def raycast_camera(
@@ -301,7 +360,7 @@ def raycast_camera(
     xray: bool = False,
     aim: Vector = Vector((.5, .5)),
     mask: int = 65535
-):
+) -> RayCastCameraData:
     """Raycast from any point to any target. Returns additional face data.
 
     :param `distance`: distance the ray will be cast
@@ -329,7 +388,7 @@ def raycast_camera(
         )
     else:
         obj, point, normal = camera.rayCast(aim, None, distance)
-    return (obj, point, normal)
+    return RayCastCameraData((obj, point, normal))
 
 
 def raycast_mouse(
@@ -339,7 +398,7 @@ def raycast_mouse(
     exclude: bool = False,
     xray: bool = False,
     mask: int = 65535
-):
+) -> RayCastData:
     """Raycast from the active camera to world cursor coordinates.
 
     :param `distance`: distance the ray will be cast

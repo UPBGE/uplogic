@@ -6,4 +6,5 @@ from .audiosystem import get_audio_system  # noqa
 from .audiosystem import stop_all_audio  # noqa
 from .sound import ULSound2D  # noqa
 from .sound import ULSound3D  # noqa
+from .sound import ULSpeaker  # noqa
 from .music import ULMusic  # noqa

@@ -37,6 +37,7 @@ setup(
         'uplogic.animation',
         'uplogic.audio',
         'uplogic.data',
+        'uplogic.decorators',
         'uplogic.events',
         'uplogic.input',
         'uplogic.logging',
