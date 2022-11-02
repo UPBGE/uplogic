@@ -3,6 +3,7 @@ from .fxaa import FXAA
 from .brightness import Brightness
 from .vignette import Vignette
 from .grayscale import Grayscale
+from .adaptivetonemapping import AdaptiveToneMapping
 from .hbao import HBAO
 from .ssao import SSAO
 from .mist import Mist

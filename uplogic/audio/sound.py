@@ -427,7 +427,28 @@ class ULSound3D(ULSound):
             sound.stop()
 
 
-class ULSpeaker(ULSound3D):
+class ULSpeaker2D(ULSound2D):
+
+    def __init__(
+        self,
+        speaker: GameObject,
+        loop_count: int = 0,
+        lowpass=False,
+        aud_sys: str = 'default'
+    ):
+        speaker_data = speaker.blenderObject.data
+        ULSound2D()
+        super().__init__(
+            speaker_data.sound.filepath,
+            speaker_data.volume,
+            speaker_data.pitch,
+            loop_count,
+            lowpass,
+            aud_sys
+        )
+
+
+class ULSpeaker3D(ULSound3D):
 
     def __init__(
         self,

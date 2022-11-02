@@ -12,6 +12,9 @@ class ULVectorMath(ULParameterNode):
         self.vector = None
         self.vector_2 = None
         self.factor = None
+        self.scale = None
+        self.vector_3 = None
+        self.ior = None
         self.OUT = ULOutSocket(self, self.get_done)
 
     def get_done(self):
@@ -38,6 +41,8 @@ class ULVectorMath(ULParameterNode):
         matvec = vec.copy()
         if op == 'normalize':
             matvec.normalize()
+        elif op == 'length':
+            return matvec.length
         elif op == 'lerp':
             return matvec.lerp(vec2, fac)
         elif op == 'negate':

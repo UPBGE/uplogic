@@ -1,14 +1,17 @@
 from .globaldb import GlobalDB
 from .globaldb import retrieve  # noqa
 from .globaldb import store  # noqa
+from .file import read_file  # noqa
+from .file import write_file  # noqa
+from .file import load_file  # noqa
 from .serializers import StringSerializer
 from .serializers import FloatSerializer
 from .serializers import IntegerSerializer
 from .serializers import ListSerializer
 from .serializers import VectorSerializer
 from mathutils import Vector
-
-from bge.types import KX_PythonComponent, KX_GameObject
+from bge.types import KX_PythonComponent
+from bge.types import KX_GameObject
 
 
 GlobalDB.serializers[str(type(""))] = StringSerializer()

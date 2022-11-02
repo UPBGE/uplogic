@@ -43,8 +43,8 @@ class ULStopAction(ULActionNode):
             return
         if is_invalid(action_layer):
             return
-        
+
         action = self.act_system.get_layer(game_object, action_layer)
         if action is not None:
-            action.stop()
+            self.act_system.remove(action)
         self.done = True

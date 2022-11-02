@@ -5,6 +5,7 @@ from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
 from uplogic.utils import is_waiting
 from uplogic.utils import not_met
+from uplogic.utils import raycast_projectile
 
 
 class ULProjectileRayCast(ULActionNode):
@@ -46,9 +47,9 @@ class ULProjectileRayCast(ULActionNode):
         return self._normal
 
     def calc_projectile(self, t, vel, pos):
-        half: float = logic.getCurrentScene().gravity.z * (.5 * t * t)
+        half: float = logic.getCurrentScene().gravity * (.5 * t * t)
         vel = vel * t
-        return Vector((0, 0, half)) + vel + pos
+        return half + vel + pos
 
     def evaluate(self):
         condition = self.get_input(self.condition)
@@ -72,39 +73,22 @@ class ULProjectileRayCast(ULActionNode):
         destination.normalize()
         destination *= power
         origin = getattr(origin, 'worldPosition', origin)
-
-        points: list = []
-        color: list = [1, 0, 0]
-        idx = 0
-        total_dist: float = 0
-        found: bool = False
         owner = self.network._owner
 
         self._set_ready()
 
-        while total_dist < distance:
-            target = (self.calc_projectile(idx, destination, origin))
-            start = origin if not points else points[-1]
-            obj, point, normal = owner.rayCast(
-                start,
-                target,
-                prop=property_name,
-                xray=xray
-            )
-            total_dist += (target-start).length
-            if not obj:
-                points.append(target)
-            else:
-                points.append(point)
-                color = [0, 1, 0]
-                found = True
-                break
-            idx += resolution
-        if visualize:
-            for i, p in enumerate(points):
-                if i < len(points) - 1:
-                    render.drawLine(p, points[i+1], color)
-        self._set_value(points[-1] if found else None)
+        obj, point, normal, points = raycast_projectile(
+            caster=owner,
+            origin=origin,
+            aim=destination,
+            power=power,
+            distance=distance,
+            resolution=resolution,
+            prop=property_name,
+            xray=xray,
+            visualize=visualize
+        )
+        self._set_value(True if obj else False)
         self._picked_object = obj
         self._point = point
         self._normal = normal

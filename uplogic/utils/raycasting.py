@@ -27,19 +27,19 @@ def ray_data(
 
 class RayCastData(tuple):
     @property
-    def obj(self):
+    def obj(self) -> GameObject:
         return self[0]
 
     @property
-    def point(self):
+    def point(self) -> Vector:
         return self[1]
 
     @property
-    def normal(self):
+    def normal(self) -> Vector:
         return self[2]
 
     @property
-    def direction(self):
+    def direction(self) -> Vector:
         return self[3]
 
 
@@ -144,11 +144,11 @@ def raycast(
 
 class RayCastFaceData(RayCastData):
     @property
-    def poly(self):
+    def poly(self) -> KX_PolyProxy:
         return self[4]
 
     @property
-    def uv(self):
+    def uv(self) -> Vector:
         return self[5]
 
 
@@ -254,19 +254,19 @@ def raycast_face(
 
 class RayCastProjectileData(tuple):
     @property
-    def obj(self):
+    def obj(self) -> GameObject:
         return self[0]
 
     @property
-    def point(self):
+    def point(self) -> Vector:
         return self[1]
 
     @property
-    def normal(self):
+    def normal(self) -> Vector:
         return self[2]
 
     @property
-    def points(self):
+    def points(self) -> list:
         return self[3]
 
 
@@ -281,6 +281,7 @@ def raycast_projectile(
     xray: bool = False,
     local: bool = False,
     mask: int = 65535,
+    gravity: Vector = None,
     visualize: bool = False
 ) -> RayCastProjectileData[GameObject, Vector, Vector, list]:
     """Raycast along the predicted parabola of a projectile.
@@ -299,10 +300,10 @@ def raycast_projectile(
 
     :returns: (`obj`, `point`, `normal`, `points`)
     """
-    def calc_projectile(t, vel, pos):
-        half: float = logic.getCurrentScene().gravity.z * (.5 * t * t)
+    def calc_projectile(t, vel, pos, gravity):
+        half: float = gravity * (.5 * t * t)
         vel = vel * t
-        return Vector((0, 0, half)) + vel + pos
+        return half + vel + pos
 
     aim.normalize()
     aim *= power
@@ -315,8 +316,9 @@ def raycast_projectile(
     idx = 0
     total_dist: float = 0
 
+    grav = gravity if gravity else logic.getCurrentScene().gravity
     while total_dist < distance:
-        target = (calc_projectile(idx, aim, origin))
+        target = (calc_projectile(idx, aim, origin, grav))
         start = origin if not points else points[-1]
         obj, point, normal = caster.rayCast(
             start,

@@ -72,6 +72,8 @@ class ULShip(ULBuoy):
     def __init__(self, game_object, buoyancy=1, height=200, water=None) -> None:
         super().__init__()
         self.game_object = game_object
+        self.linear_damping = game_object.linearDamping
+        self.angular_damping = game_object.angularDamping
         game_object[SHIP] = self
         self.height = height
         if water:
@@ -87,7 +89,10 @@ class ULShip(ULBuoy):
         up = Vector((0, 0, 1))
         lifts = len(self.buoys)
         ship = self.game_object
-        lindamp = .1
+        max_lin_damp = .9 - self.linear_damping
+        max_ang_damp = .8 - self.linear_damping
+        lin_dampen_factor = 0
+        ang_dampen_factor = 0
         for buoy in self.buoys:
             wpos = buoy.worldPosition
             obj, point, normal, direction = raycast(
@@ -101,15 +106,16 @@ class ULShip(ULBuoy):
             )
             if obj:
                 div = 1 / lifts
-                lindamp += (.7 * div)
+                lin_dampen_factor += (max_lin_damp * div)
+                ang_dampen_factor += (max_ang_damp * div)
                 lift = (up * (wpos - point).length * self.buoyancy) * div
                 ship.applyImpulse(
                     wpos,
                     vec_clamp(lift, max=self.buoyancy * 2 * div),
                     False
                 )
-        ship.linearDamping = lindamp
-        ship.angularDamping = lindamp * .8
+        ship.linearDamping = self.linear_damping + lin_dampen_factor
+        ship.angularDamping = self.angular_damping + ang_dampen_factor
 
     def destroy(self):
         logic.getCurrentScene().pre_draw.remove(self.update)

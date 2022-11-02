@@ -30,7 +30,8 @@ class ULAlignAxisToVector(ULActionNode):
         factor = self.get_input(self.factor)
         if is_invalid(game_object):
             return
-        if is_waiting(axis, factor, v) or v.length <= 0:
+        # length = v.length :
+        if is_waiting(axis, factor, v):# or v.length <= 0:
             return
         v = getattr(v, 'worldPosition', v).copy()
         if not self.local:

@@ -27,12 +27,14 @@ from .scene import set_scene  # noqa
 from .visuals import draw_box  # noqa
 from .visuals import draw_cube  # noqa
 from .visuals import draw_line  # noqa
+from .visuals import draw_points  # noqa
 from .scene import FileLoader  # noqa
 from .scene import SceneLoader  # noqa
 from bge import logic
 from bge.types import KX_GameObject as GameObject
 from mathutils import Matrix
 from mathutils import Vector
+import time as t
 
 import bpy
 import json
@@ -372,23 +374,6 @@ def rot_to(
 
 
 ###############################################################################
-# DATA
-###############################################################################
-
-def load_json_as_dict(filepath):
-    if not filepath.endswith('.json'):
-        filepath = f'{filepath}.json'
-    if filepath:
-        f = open(filepath, 'r')
-        data = json.load(f)
-        f.close()
-        return data
-    else:
-        raise FileNotFoundError(f'File {filepath} could not be opened!')
-
-
-
-###############################################################################
 # SCENE
 ###############################################################################
 
@@ -597,7 +582,7 @@ def map_range(value: float, in_min: float, in_max: float, out_min: float, out_ma
     return result
 
 
-def screen_to_world(x=None, y=None, distance=10) -> Vector:
+def screen_to_world(x:float = None, y: float = None, distance: float = 10) -> Vector:
     """Get the world coordinates of a point on the screen in a given distance.
     
     :param `x`: X position on the screen. Leave at `None` to use mouse position.
@@ -616,6 +601,7 @@ def screen_to_world(x=None, y=None, distance=10) -> Vector:
     aim = direction * -distance
     return origin + (aim)
 
+
 def mouse_over(game_object: GameObject) -> bool:
     scene = game_object.scene
     camera = scene.active_camera
@@ -629,5 +615,28 @@ def mouse_over(game_object: GameObject) -> bool:
     )
     return target is game_object
 
+
 def get_local(obj, target) -> Matrix:
     return obj.worldTransform.inverted() @ target
+
+
+def get_collision_bitmask(
+    slot_0: float = 1,
+    slot_1: float = 1,
+    slot_2: float = 1,
+    slot_3: float = 1,
+    slot_4: float = 1,
+    slot_5: float = 1,
+    slot_6: float = 1,
+    slot_7: float = 1,
+    slot_8: float = 1,
+    slot_9: float = 1,
+    slot_10: float = 1,
+    slot_11: float = 1,
+    slot_12: float = 1,
+    slot_13: float = 1,
+    slot_14: float = 1,
+    slot_15: float = 1
+) -> int:
+    slots = [slot_0, slot_1, slot_2, slot_3, slot_4, slot_5, slot_6, slot_7, slot_8, slot_9, slot_10, slot_11, slot_12, slot_13, slot_14, slot_15]
+    return sum([slots[idx] * (2**idx) for idx in range(16)])

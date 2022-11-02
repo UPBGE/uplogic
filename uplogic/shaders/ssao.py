@@ -34,6 +34,8 @@ vec2 texCoord = bgl_TexCoord.xy;
 uniform float znear; //Z-near
 uniform float zfar; //Z-far
 
+uniform float power;
+
 //user variables
 int samples = 32; //ao sample count
 
@@ -161,7 +163,7 @@ void main(void)
 	ao = mix(ao, 1.0,doMist());
 	}
 	
-	vec3 color = texture2D(bgl_RenderedTexture,texCoord).rgb;
+	vec3 color = texture(bgl_RenderedTexture,texCoord).rgb;
 	
 	vec3 lumcoeff = vec3(0.299,0.587,0.114);
 	float lum = dot(color.rgb, lumcoeff);
@@ -175,7 +177,7 @@ void main(void)
 	}
 	
 	
-	gl_FragColor = vec4(final,1.0); 
+	gl_FragColor = mix(vec4(color, 1.0), vec4(final, 1.0), power);
 	
 }
 """
@@ -183,22 +185,29 @@ void main(void)
 
 class SSAO(ULFilter):
 
-    def __init__(self, idx: int = None) -> None:
+    def __init__(self, power=1.0, idx: int = None) -> None:
         cam = logic.getCurrentScene().active_camera
         self.settings = {
+			'power': float(power),
             'znear': cam.near,
             'zfar': cam.far
         }
         super().__init__(glsl, idx, {
+			'power': self.settings,
             'znear': self.settings,
             'zfar': self.settings
         })
 
+    @property
+    def power(self):
+        return self.settings['power']
+
+    @power.setter
+    def power(self, val):
+        self.settings['power'] = val
+
     def update(self):
         super().update()
         cam = logic.getCurrentScene().active_camera
-        self.settings = {
-            'znear': cam.near,
-            'zfar': cam.far
-        }
-
+        self.settings['znear'] = cam.near
+        self.settings['zfar'] = cam.far

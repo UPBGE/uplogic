@@ -47,6 +47,54 @@ class ULLight():
         self.light.blenderObject.data.color = val
 
     @property
+    def use_shadow(self):
+        return self.light.blenderObject.data.use_shadow
+
+    @use_shadow.setter
+    def use_shadow(self, val):
+        self.light.blenderObject.data.use_shadow = val
+
+    @property
+    def use_custom_distance(self):
+        return self.light.blenderObject.data.use_custom_distance
+
+    @use_custom_distance.setter
+    def use_custom_distance(self, val):
+        self.light.blenderObject.data.use_custom_distance = val
+
+    @property
+    def distance(self):
+        return self.light.blenderObject.data.cutoff_distance
+
+    @distance.setter
+    def distance(self, val):
+        self.light.blenderObject.data.cutoff_distance = val
+
+    @property
+    def angle(self):
+        return self.light.blenderObject.data.angle
+
+    @angle.setter
+    def angle(self, val):
+        self.light.blenderObject.data.angle = val
+
+    @property
+    def spot_size(self):
+        return self.light.blenderObject.data.spot_size
+
+    @spot_size.setter
+    def spot_size(self, val):
+        self.light.blenderObject.data.spot_size = val
+
+    @property
+    def spot_blend(self):
+        return self.light.blenderObject.data.spot_blend
+
+    @spot_blend.setter
+    def spot_blend(self, val):
+        self.light.blenderObject.data.spot_blend = val
+
+    @property
     def parent(self):
         return self.light.parent
 

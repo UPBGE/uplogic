@@ -25,7 +25,7 @@ class ULActionSystem():
         :param `action`: The `ULAction` whose layer will be locked.
         """
         layers = cls.layers.get(action.game_object, {})
-        layers[action.layer] = action
+        layers[str(action.layer)] = action
         cls.layers[action.game_object] = layers
 
     @classmethod
@@ -35,7 +35,7 @@ class ULActionSystem():
         :param `action`: The `ULAction` whose layer will be freed.
         """
         layers = cls.layers.get(action.game_object, {})
-        layers.pop(action.layer, None)
+        layers.pop(str(action.layer), None)
         cls.layers[action.game_object] = layers
 
     @classmethod
@@ -58,7 +58,7 @@ class ULActionSystem():
         :return: `True` if the layer is occupied, `False` if not
         """
         layers = cls.layers.get(action.game_object, {})
-        return action.layer in layers.keys()
+        return str(action.layer) in layers.keys()
     
     @classmethod
     def get_layer(cls, game_object, layer=0):
@@ -70,7 +70,8 @@ class ULActionSystem():
 
         :return: `ULAction` if layer is occupied, else `None`
         """
-        return cls.layers.get(game_object, {}).get(layer, None)
+        action = cls.layers.get(game_object, {}).get(str(layer))
+        return action
 
     def update(self):
         """This is called each frame.

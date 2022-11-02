@@ -10,6 +10,7 @@ uniform sampler2D bgl_DepthTexture;
 uniform sampler2D bgl_RenderedTexture;
 uniform float bgl_RenderedTextureWidth;
 uniform float bgl_RenderedTextureHeight;
+uniform float power;
 in vec4 bgl_TexCoord;
 out vec4 fragColor;
 
@@ -282,7 +283,7 @@ void main()
     occlusion = lum + ((1.0 - lum) * occlusion);
     occlusion = mix(occlusion, 1, d);
 
-    fragColor.rgb = color * occlusion;
+    fragColor.rgb = color * mix(1.0f, occlusion, power);
     fragColor.a = occlusion;
 
     if(externalBlur) {
@@ -301,25 +302,33 @@ void main()
 
 class HBAO(ULFilter):
 
-    def __init__(self, idx: int = None) -> None:
+    def __init__(self, power=1.0, idx: int = None) -> None:
         cam = logic.getCurrentScene().active_camera
         self.settings = {
+            'power': float(power),
             'znear': cam.near,
             'zfar': cam.far,
             'fov': cam.fov
         }
         super().__init__(glsl, idx, {
+            'power': self.settings,
             'znear': self.settings,
             'zfar': self.settings,
             'fov': self.settings
         })
 
+    @property
+    def power(self):
+        return self.settings['power']
+
+    @power.setter
+    def power(self, val):
+        self.settings['power'] = val
+
     def update(self):
         super().update()
         cam = logic.getCurrentScene().active_camera
-        self.settings = {
-            'znear': cam.near,
-            'zfar': cam.far,
-            'fov': cam.fov
-        }
+        self.settings['znear'] = cam.near
+        self.settings['zfar'] = cam.far
+        self.settings['fov'] = cam.fov
 

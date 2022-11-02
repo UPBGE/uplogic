@@ -1,8 +1,15 @@
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_waiting
 from uplogic.utils import not_met
-from uplogic.shaders import FXAA, HBAO, SSAO, Vignette, Brightness, ChromaticAberration, Grayscale, Levels, Mist
+from uplogic.shaders import FXAA
+from uplogic.shaders import HBAO
+from uplogic.shaders import SSAO
+from uplogic.shaders import Vignette
+from uplogic.shaders import Brightness
+from uplogic.shaders import ChromaticAberration
+from uplogic.shaders import Grayscale
+from uplogic.shaders import Levels
+from uplogic.shaders import Mist
 
 
 class ULAddFilter(ULActionNode):
@@ -45,7 +52,7 @@ class ULAddFilter(ULActionNode):
                     self.filter.settings['power'] = self.get_input(self.power)
                     self.filter.settings['color'] = self.get_input(self.color)
                     self.filter.settings['start'] = self.get_input(self.start)
-                    self.filter.settings['density'] = self.get_input(self.end)
+                    self.filter.settings['density'] = self.get_input(self.density)
             return
         self._set_ready()
 

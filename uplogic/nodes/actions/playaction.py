@@ -76,13 +76,16 @@ class ULPlayAction(ULActionNode):
         return super().reset()
 
     def evaluate(self):
-        action = self._action
-        has_action = action is not None
         condition = self.get_input(self.condition)
         intensity = self.get_input(self.layer_weight)
         speed = self.get_input(self.speed)
         layer = self.get_input(self.layer)
         game_object = self.get_input(self.game_object)
+        layer_action: ULAction = self.act_system.get_layer(game_object, layer)
+        if layer_action is not self._action:
+            self._action = layer_action
+        action = self._action
+        has_action = action is not None
         play_mode = self.get_input(self.play_mode)
         self.action_evt = receive(self._action)
         if not_met(condition):
@@ -98,15 +101,12 @@ class ULPlayAction(ULActionNode):
                     self._action = None
                     self.in_use = False
             return
-        layer_action: ULAction = self.act_system.get_layer(game_object, layer) 
-        if layer_action is not self._action:
-            self._action = layer_action 
         action_name = self.get_input(self.action_name)
         if layer_action and layer_action.name == action_name:
             layer_action.speed = speed
             layer_action.intensity = intensity
             return
-        if self.in_use:
+        if self.in_use and has_action:
             return
         if has_action and action.finished:
             self._action = None

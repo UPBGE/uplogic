@@ -125,12 +125,12 @@ class ULAction():
     def on_start(self):
         '''Handler for animation playback start.
         '''
-        schedule(self, ACTION_STARTED)
+        schedule(self, 0, ACTION_STARTED)
 
     def on_finish(self):
         '''Handler for animation playback finish.
         '''
-        schedule(self, ACTION_FINISHED)
+        schedule(self, 0, ACTION_FINISHED)
 
     @property
     def is_playing(self) -> bool:

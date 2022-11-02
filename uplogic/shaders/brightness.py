@@ -17,7 +17,7 @@ void main() {
 class Brightness(ULFilter):
 
     def __init__(self, brightness=1.0, idx: int = None) -> None:
-        self.settings = {'brightness': brightness}
+        self.settings = {'brightness': float(brightness)}
         super().__init__(glsl, idx, {'brightness': self.settings})
 
     @property
