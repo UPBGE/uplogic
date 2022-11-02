@@ -53,15 +53,17 @@ class ULAddFilter(ULActionNode):
                     self.filter.settings['color'] = self.get_input(self.color)
                     self.filter.settings['start'] = self.get_input(self.start)
                     self.filter.settings['density'] = self.get_input(self.density)
+                elif ftype in ['HBAO', 'SSAO']:
+                    self.filter.settings['power'] = self.get_input(self.power)
             return
         self._set_ready()
 
         if ftype == 'FXAA':
             self.filter = FXAA(self.get_input(self.pass_idx))
         elif ftype == 'HBAO':
-            self.filter = HBAO(self.get_input(self.pass_idx))
+            self.filter = HBAO(self.get_input(self.power), self.get_input(self.pass_idx))
         elif ftype == 'SSAO':
-            self.filter = SSAO(self.get_input(self.pass_idx))
+            self.filter = SSAO(self.get_input(self.power), self.get_input(self.pass_idx))
         elif ftype == 'VIGNETTE':
             self.filter = Vignette(
                 self.get_input(self.power),
