@@ -17,10 +17,10 @@ class ULLight():
         self,
         name: str = '',
         type: str = 'POINT',
-        lamp: GameObject = None
+        light: GameObject = None
     ) -> None:
-        if lamp:
-            self.light = make_unique_light(lamp)
+        if light:
+            self.light = make_unique_light(light)
             return
         game_scene = logic.getCurrentScene()
         scene = bpy.data.scenes[game_scene.name]

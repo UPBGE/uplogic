@@ -34,7 +34,7 @@ class ULCharacter():
         logic.getCurrentScene().pre_draw.remove(self.reset)
 
     @property
-    def on_ground(self):
+    def on_ground(self) -> bool:
         return self.wrapper.onGround
 
     @on_ground.setter
@@ -42,7 +42,7 @@ class ULCharacter():
         debug('ULCharacter.on_ground is Read-Only!')
 
     @property
-    def max_jumps(self):
+    def max_jumps(self) -> int:
         return self.wrapper.maxJumps
 
     @max_jumps.setter
@@ -50,7 +50,7 @@ class ULCharacter():
         self.wrapper.maxJumps = value
 
     @property
-    def gravity(self):
+    def gravity(self) -> Vector:
         return self.wrapper.gravity
 
     @gravity.setter
@@ -58,7 +58,7 @@ class ULCharacter():
         self.wrapper.gravity = value
 
     @property
-    def jump_count(self):
+    def jump_count(self) -> int:
         return self.wrapper.jumpCount
 
     @jump_count.setter
@@ -66,7 +66,7 @@ class ULCharacter():
         debug('Character.jump_count is Read-Only!')
 
     @property
-    def walk(self):
+    def walk(self) -> Vector:
         return ((self.wrapper.walkDirection @ self.owner.worldOrientation) * self._phys_step) / self.speed
 
     @walk.setter
@@ -75,7 +75,7 @@ class ULCharacter():
         self.wrapper.walkDirection = ((self.owner.worldOrientation @ value) / self._phys_step) * self.speed
 
     @property
-    def velocity(self):
+    def velocity(self) -> Vector:
         return self._velocity
 
     @velocity.setter
@@ -83,7 +83,7 @@ class ULCharacter():
         self.wrapper.setVelocity(value, 1, False)
 
     @property
-    def jump_force(self):
+    def jump_force(self) -> float:
         return self.jump_force
 
     @jump_force.setter
@@ -91,7 +91,7 @@ class ULCharacter():
         self.wrapper.jumpSpeed = value
 
     @property
-    def fall_speed(self):
+    def fall_speed(self) -> float:
         return self.wrapper.fallSpeed
 
     @fall_speed.setter

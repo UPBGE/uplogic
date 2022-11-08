@@ -77,7 +77,7 @@ def key_tap(key: str) -> bool:
     return key_event(key).activated
 
 
-def key_down(key: str) -> bool:
+def key_down(key: str, tap=False) -> bool:
     '''Detect key held down.
 
     :param `key`: key as `str` of
@@ -93,7 +93,8 @@ def key_down(key: str) -> bool:
 
     :returns: boolean
     '''
-    return key_event(key).active
+    key = key_event(key)
+    return key.activated if tap else key.active or key.activated
 
 
 def key_up(key: str) -> bool:

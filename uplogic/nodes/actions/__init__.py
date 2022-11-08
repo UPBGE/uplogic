@@ -140,3 +140,4 @@ from .setfilterstate import ULSetFilterState  # noqa
 from .setscene import ULSetScene  # noqa
 from .loadscene import ULLoadScene  # noqa
 from .loadfilecontent import ULLoadFileContent  # noqa
+from .slowfollow import ULSlowFollow  # noqa

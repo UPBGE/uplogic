@@ -309,7 +309,7 @@ class ULSound3D(ULSound):
                     speaker,
                     'worldLinearVelocity',
                     Vector((0, 0, 0))
-                )
+                ) if speaker.blenderObject.game.physics_type != 'NO_COLLISION' else Vector((0, 0, 0))
             handle.attenuation = attenuation
             if not self._is_vector:
                 handle.orientation = speaker.worldOrientation.to_quaternion()
@@ -358,7 +358,7 @@ class ULSound3D(ULSound):
                 )
                 if 'volume' in dir(self.speaker.blenderObject.data):
                     handle.velocity = Vector((0, 0, 0))
-                else:
+                elif speaker.mass:
                     handle.velocity = getattr(speaker, 'worldLinearVelocity', Vector((0, 0, 0)))
             if self.occlusion:
                 transition = self.transition
