@@ -37,8 +37,6 @@ class Server:
             # print(e)
             return
         self.socket.listen()
-        # if self.update not in bge.logic.getCurrentScene().pre_draw:
-        #     bge.logic.getCurrentScene().pre_draw.append(self.update)
         debug('Success')
 
     def shutdown(self):

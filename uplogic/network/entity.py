@@ -22,7 +22,7 @@ class StaticObject(Entity):
 
 
 class Actor(Entity):
-    def __init__(self, game_object: KX_GameObject, streamtype='upstream'):
+    def __init__(self, game_object: KX_GameObject, streamtype='upstream', instance=None):
         super().__init__(streamtype)
         self.game_object = game_object
     
