@@ -66,6 +66,11 @@ SHIP = '.ulshipconst'
 FLOATSAM = '.ulfloatsamconst'
 WATER = '.ulwater'
 
+STREAMTYPE_DOWNSTREAM = 0
+STREAMTYPE_UPSTREAM = 1
+
+DISCONNECT_MSG = '!DISCONNECT'
+
 
 LOGIC_OPERATORS = [
     operator.eq,

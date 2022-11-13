@@ -3,3 +3,4 @@ from .client import Client
 from .entity import Entity
 from .entity import StaticObject
 from .entity import Actor
+from .entity import Player

@@ -78,7 +78,7 @@ def mouse_tap(button=events.LEFTMOUSE) -> bool:
     )
 
 
-def mouse_down(button=events.LEFTMOUSE, tap=False) -> bool:
+def mouse_down(button=events.LEFTMOUSE) -> bool:
     '''Detect mouse button held down.
 
     :param button: can be either `LMB`, `RMB` or `MMB` from `uplogic.input`
@@ -86,13 +86,29 @@ def mouse_down(button=events.LEFTMOUSE, tap=False) -> bool:
     :returns: boolean
     '''
     button = MOUSE_BUTTONS.get(button, button)
-    return (
+    (
+        MOUSE_EVENTS[button].active or
         MOUSE_EVENTS[button].activated or
+        MOUSE_EVENTS[button].active or
         MOUSE_EVENTS[button].activated
-    ) if tap else (
+    )
+
+
+def mouse_press(button=events.LEFTMOUSE, down=False) -> bool:
+    '''Detect mouse button tap or held down.
+
+    :param button: can be either `LMB`, `RMB` or `MMB` from `uplogic.input`
+
+    :returns: boolean
+    '''
+    button = MOUSE_BUTTONS.get(button, button)
+    return (
         MOUSE_EVENTS[button].active or
         MOUSE_EVENTS[button].activated or
         MOUSE_EVENTS[button].active or
+        MOUSE_EVENTS[button].activated
+    ) if down else (
+        MOUSE_EVENTS[button].activated or
         MOUSE_EVENTS[button].activated
     )
 

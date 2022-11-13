@@ -1,16 +1,15 @@
 from bge.types import KX_GameObject
 import pickle
+from uplogic.utils import STREAMTYPE_DOWNSTREAM, STREAMTYPE_UPSTREAM
 
 
 class Entity:
-
-    def __init__(self, streamtype='upstream'):
-        self.streamtype = streamtype
+    pass
 
 
 class StaticObject(Entity):
-    def __init__(self, game_object: KX_GameObject, streamtype='upstream'):
-        super().__init__(streamtype)
+    def __init__(self, game_object: KX_GameObject):
+        self.streamtype = STREAMTYPE_DOWNSTREAM
         self.game_object = game_object
     
     def get_data(self):
@@ -22,8 +21,8 @@ class StaticObject(Entity):
 
 
 class Actor(Entity):
-    def __init__(self, game_object: KX_GameObject, streamtype='upstream', instance=None):
-        super().__init__(streamtype)
+    def __init__(self, game_object: KX_GameObject):
+        self.streamtype = STREAMTYPE_DOWNSTREAM
         self.game_object = game_object
     
     def get_data(self):
@@ -36,9 +35,10 @@ class Actor(Entity):
         lpos = go.localPosition
         lori = go.localOrientation
         lsca = go.localScale
-        return pickle.dumps({
+        return {
             'id': self.game_object.blenderObject.name,
             'name': self.game_object.name,
+            'streamtype': self.streamtype,
             'set_attrs': {
                 'worldPosition': [
                     wpos.x,
@@ -81,4 +81,11 @@ class Actor(Entity):
                     lsca.z
                 ]
             }
-        })
+        }
+
+
+class Player(Actor):
+
+    def __init__(self, game_object: KX_GameObject):
+        super().__init__(game_object)
+        self.streamtype = STREAMTYPE_UPSTREAM
