@@ -86,7 +86,7 @@ def mouse_down(button=events.LEFTMOUSE) -> bool:
     :returns: boolean
     '''
     button = MOUSE_BUTTONS.get(button, button)
-    (
+    return (
         MOUSE_EVENTS[button].active or
         MOUSE_EVENTS[button].activated or
         MOUSE_EVENTS[button].active or
