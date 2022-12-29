@@ -13,6 +13,7 @@ class ULStartSound(ULActionNode):
         self.loop_count = None
         self.pitch = None
         self.volume = None
+        self.ignore_timescale = None
         self.done = None
         self.device = None
         self.on_finish = False
@@ -54,6 +55,7 @@ class ULStartSound(ULActionNode):
             return
         file = self.get_input(self.sound)
         loop_count = self.get_input(self.loop_count)
+        ignore_timescale = self.get_input(self.ignore_timescale)
 
         if is_invalid(file):
             return
@@ -62,6 +64,7 @@ class ULStartSound(ULActionNode):
             file,
             volume,
             pitch,
-            loop_count
+            loop_count,
+            ignore_timescale=ignore_timescale
         )
         self.done = True

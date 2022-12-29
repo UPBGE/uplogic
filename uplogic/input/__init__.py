@@ -19,6 +19,7 @@ from .mouse import LMB  # noqa
 from .mouse import MMB  # noqa
 from .mouse import MOUSE_EVENTS  # noqa
 from .mouse import RMB  # noqa
+from .mouse import MOUSE  # noqa
 from .mouse import get_mouse_position  # noqa
 from .mouse import mouse_down  # noqa
 from .mouse import mouse_moved  # noqa

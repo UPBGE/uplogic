@@ -6,6 +6,7 @@ from uplogic.nodes import ULOutSocket
 from uplogic.utils import is_invalid
 from uplogic.utils import not_met
 from uplogic.utils import interpolate
+import cython
 
 
 class ULMouseLook(ULActionNode):
@@ -25,15 +26,15 @@ class ULMouseLook(ULActionNode):
         self.sensitivity = None
         self.use_cap_z = None
         self.cap_z = None
-        self.use_cap_z = None
+        self.use_cap_y = None
         self.cap_y = None
         self.smooth = None
         self.initialized = False
+        self.use_local_head = False
         self._x = 0
         self._y = 0
         self.done = None
         self.OUT = ULOutSocket(self, self.get_done)
-        self.use_local_head = False
         self.get_data()
         self.mouse.position = self.screen_center
 

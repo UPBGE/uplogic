@@ -52,8 +52,8 @@ class Server:
             for conn in self.clients:
                 conn.close()
             self.clients = []
-            if self.update in bge.logic.getCurrentScene().pre_draw:
-                bge.logic.getCurrentScene().pre_draw.remove(self.update)
+            # if self.update in bge.logic.getCurrentScene().pre_draw:
+            #     bge.logic.getCurrentScene().pre_draw.remove(self.update)
             print('Success.')
         except Exception as e:
             print(e)
@@ -64,7 +64,6 @@ class Server:
         self.startup()
 
     def threaded_client(self, conn, addr):
-        scene = bge.logic.getCurrentScene()
         connected = True
         self.clients.append(conn)
         while connected:
@@ -104,7 +103,7 @@ class Server:
             for entity_id in self.entities[connection]:
                 # name = entity['id']
                 entity = data[entity_id]
-
+                print(data)
                 bobj = bpy.data.objects.get(entity_id)
                 if bobj is not None:
                     game_object = self.scene.getGameObjectFromObject(bobj)

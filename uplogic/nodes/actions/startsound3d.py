@@ -23,6 +23,7 @@ class ULStartSound3D(ULActionNode):
         self.distance_ref = None
         self.cone_angle = None
         self.cone_outer_volume = None
+        self.ignore_timescale = None
         self.done = None
         self.on_finish = False
         self._clear_sound = 1
@@ -73,6 +74,7 @@ class ULStartSound3D(ULActionNode):
         loop_count = self.get_input(self.loop_count)
         distance_ref = self.get_input(self.distance_ref)
         cone_angle = self.get_input(self.cone_angle)
+        ignore_timescale = self.get_input(self.ignore_timescale)
         self._set_ready()
 
         if is_invalid(file):
@@ -90,6 +92,7 @@ class ULStartSound3D(ULActionNode):
             attenuation,
             distance_ref,
             [cone_angle.x, cone_angle.y],
-            cone_outer_volume
+            cone_outer_volume,
+            ignore_timescale
         )
         self.done = True

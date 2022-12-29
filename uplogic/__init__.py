@@ -74,7 +74,9 @@ class MainLoop:
     def __init__(self, max_fps=60, tick_idle=.001):
         self.max_fps = max_fps
         self.tick_idle = tick_idle
-        self._last_frame = 0
+        self.time_per_tick = 0.0
+        self._last_frame = 0.0
+        self._last_tick = 0.0
         self._running = False
         self._evt_queue = deque()
         signal.signal(signal.SIGTERM, self._terminate)
@@ -121,8 +123,10 @@ class MainLoop:
     def _do_tick(self):
         now = time.time()
         self._dispatch('tick')
-        fps = bge.logic.getAverageFrameRate()
-        if self._last_frame + self._frame_delay <= now:# or fps < self.max_fps:
+        self.time_per_tick = now - self._last_tick
+        self._last_tick = now
+        # print(now + self.time_per_tick, self.time_per_tick)
+        if (now - self._last_frame + self.time_per_tick) > self._frame_delay:
             self._last_frame = now
             self._dispatch('update')
             self._dispatch_queue()

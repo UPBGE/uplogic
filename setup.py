@@ -1,4 +1,5 @@
 from setuptools import setup
+from Cython.Build import cythonize
 import os
 
 
@@ -49,6 +50,7 @@ setup(
         'uplogic.shaders',
         'uplogic.utils'
     ],
+    # ext_modules=cythonize('uplogic\\utils\\visuals.pyx'),
     zip_safe=True,
     install_requires=['setuptools']
 )

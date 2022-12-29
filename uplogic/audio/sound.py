@@ -156,6 +156,7 @@ class ULSound2D(ULSound):
         pitch: float = 1,
         loop_count: int = 0,
         lowpass=False,
+        ignore_timescale = False,
         aud_sys: str = 'default'
     ):
         self.file = file
@@ -174,6 +175,7 @@ class ULSound2D(ULSound):
             sound = self.soundfile = sound.lowpass(lowpass, .5)
         device = self.aud_system.device
         self.sound = handle = device.play(sound)
+        self.ignore_timescale = ignore_timescale
 
         handle.relative = True
         handle.loop_count = loop_count
@@ -195,13 +197,15 @@ class ULSound2D(ULSound):
 
     @property
     def pitch(self):
+        ts = 1 if self.ignore_timescale else logic.getTimeScale()
         if self.sound and self.sound.status:
-            return self.sound.pitch / logic.getTimeScale()
+            return self.sound.pitch / ts
 
     @pitch.setter
     def pitch(self, val):
+        ts = 1 if self.ignore_timescale else logic.getTimeScale()
         if self.sound and self.sound.status:
-            self.sound.pitch = val * logic.getTimeScale()
+            self.sound.pitch = val * ts
 
     @property
     def lowpass(self):
@@ -267,6 +271,7 @@ class ULSound3D(ULSound):
         distance_ref: float = 1,
         cone_angle: list[float] = [360, 360],
         cone_outer_volume: float = 0,
+        ignore_timescale: bool = False,
         aud_sys: str = 'default'
     ):
         self._is_vector = isinstance(speaker, Vector)
@@ -288,6 +293,7 @@ class ULSound3D(ULSound):
         self.cone_outer_volume = cone_outer_volume
         master_volume = self.aud_system.volume
         self.transition = transition_speed
+        self.ignore_timescale = ignore_timescale
         soundfile = logic.expandPath(file)
         if not isfile(soundfile):
             debug(f'Soundfile {soundfile} could not be loaded!')
@@ -348,7 +354,7 @@ class ULSound3D(ULSound):
                 self.finished = True
                 aud_system.remove(self)
                 return
-            handle.pitch = self.pitch * logic.getTimeScale()
+            handle.pitch = self.pitch * (1 if self.ignore_timescale else logic.getTimeScale())
             handle.location = location
             if not self._is_vector:
                 handle.orientation = (
@@ -434,6 +440,7 @@ class ULSpeaker2D(ULSound2D):
         speaker: GameObject,
         loop_count: int = 0,
         lowpass=False,
+        ignore_timescale: bool = False,
         aud_sys: str = 'default'
     ):
         speaker_data = speaker.blenderObject.data
@@ -444,6 +451,7 @@ class ULSpeaker2D(ULSound2D):
             speaker_data.pitch,
             loop_count,
             lowpass,
+            ignore_timescale=
             aud_sys
         )
 
@@ -458,6 +466,7 @@ class ULSpeaker3D(ULSound3D):
         cutoff_frequency: float = 0.1,
         loop_count: int = 0,
         reverb=False,
+        ignore_timescale: bool = False,
         aud_sys: str = 'default'
     ):
         speaker_data = speaker.blenderObject.data
@@ -475,5 +484,6 @@ class ULSpeaker3D(ULSound3D):
             speaker_data.distance_reference,
             [speaker_data.cone_angle_inner, speaker_data.cone_angle_outer],
             speaker_data.cone_volume_outer,
+            ignore_timescale,
             aud_sys
         )

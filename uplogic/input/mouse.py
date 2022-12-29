@@ -33,14 +33,14 @@ def set_mouse_position(x: int, y: int, absolute: bool = False) -> None:
     )
 
 
-def get_mouse_position(absolute: bool = False) -> tuple:
+def get_mouse_position(absolute: bool = False) -> Vector:
     pos = logic.mouse.position
     if absolute:
-        return (
+        return Vector((
             int(pos[0] * render.getWindowWidth()),
             int(pos[1] * render.getWindowHeight())
-        )
-    return pos
+        ))
+    return Vector(pos)
 
 
 def mouse_moved(tap: bool = False) -> bool:
@@ -236,6 +236,9 @@ class ULMouse():
         :param `button`: The button to check for; `str` of [`'LMB'`, `'MMB'`,
         `'RMB'`]"""
         return mouse_tap(MOUSE_BUTTONS[button])
+
+
+MOUSE = ULMouse()
 
 
 class ULMouseLook():
