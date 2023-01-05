@@ -1,7 +1,7 @@
 from uplogic.nodes import ULParameterNode
 from uplogic.nodes import ULOutSocket
 from uplogic.utils import STATUS_WAITING
-from uplogic.utils import interpolate
+from uplogic.utils import lerp
 from uplogic.utils import is_invalid
 
 
@@ -22,7 +22,7 @@ class ULInterpolate(ULParameterNode):
             fac = self.get_input(self.fac)
             if is_invalid(a, b, fac):
                 return STATUS_WAITING
-            return self.set_output('val', interpolate(a, b, fac))
+            return self.set_output('val', lerp(a, b, fac))
         return socket
 
     def evaluate(self):

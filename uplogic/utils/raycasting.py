@@ -311,7 +311,7 @@ def raycast_projectile(
     if local:
         origin = origin + caster.worldPosition
 
-    points: list = []
+    points: list = [origin]
     color: list = [1, 0, 0]
     idx = 0
     total_dist: float = 0

@@ -162,7 +162,7 @@ class ULAction():
 
     @intensity.setter
     def intensity(self, value):
-        if not self.is_playing or value == self.intensity:
+        if not self.is_playing:
             return
         self._intensity = clamp(value, 0, 1)
         self._restart_action()

@@ -79,8 +79,8 @@ class ULProjectileRayCast(ULActionNode):
 
         obj, point, normal, points = raycast_projectile(
             caster=owner,
-            origin=origin,
-            aim=destination,
+            origin=Vector(origin),
+            aim=Vector(destination),
             power=power,
             distance=distance,
             resolution=resolution,

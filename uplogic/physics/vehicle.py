@@ -121,7 +121,6 @@ class ULVehicle():
     def reset(self):
         if self.active:
             if not self.is_accelerating:
-                print('Helo')
                 self.acceleration = 0
             if not self.is_braking:
                 self.braking = 0

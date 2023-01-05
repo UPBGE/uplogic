@@ -501,8 +501,6 @@ def lerp(a: float, b: float, fac: float) -> float:
 
     :returns: calculated value as float
     """
-    if -.001 < a-b < .001:
-        return b
     return (fac * b) + ((1-fac) * a)
 
 

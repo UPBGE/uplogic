@@ -15,9 +15,11 @@ from bge.types import SCA_PythonKeyboard as Keyboard
 from bge.types import SCA_PythonMouse as Mouse
 import collections
 import time
+import Cython
 
 
 class ULLogicTree(ULLogicContainer):
+
     def __init__(self):
         from ..input import ULMouse
         ULLogicContainer.__init__(self)

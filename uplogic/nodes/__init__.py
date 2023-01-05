@@ -2,6 +2,7 @@ from bge import logic
 from uplogic.utils import STATUS_READY
 from uplogic.utils import STATUS_WAITING
 from uplogic.utils import check_game_object
+import Cython
 
 
 def alpha_move(a, b, fac):

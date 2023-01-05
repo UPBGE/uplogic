@@ -50,7 +50,11 @@ setup(
         'uplogic.shaders',
         'uplogic.utils'
     ],
-    # ext_modules=cythonize('uplogic\\utils\\visuals.pyx'),
+    ext_modules=cythonize([
+        'uplogic\\nodes\\__init__.pyx',
+        'uplogic\\utils\\visuals.pyx',
+        'uplogic\\nodes\\logictree.pyx'
+    ]),
     zip_safe=True,
     install_requires=['setuptools']
 )

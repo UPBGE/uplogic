@@ -190,7 +190,7 @@ class ScheduledEvent():
 def schedule(id: str, delay=0.0, content=None, messenger=None) -> ScheduledEvent:
     '''Send an event that can be reacted to with a delay.
 
-    :param `id`: Name of the event; can be anything, not just `str`.
+    :param `id`: Name of the event; can be anything, not just `str`. If `id` is callable, `content` can be used as argument.
     :param `content`: This can be used to store data in an event.
     :param `messenger`: Can be used to store an object.
     :param `delay`: Delay with which to send the event in seconds.

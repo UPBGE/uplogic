@@ -10,6 +10,7 @@ from uplogic.utils import STATUS_INVALID, STATUS_WAITING
 from uplogic.utils import is_invalid
 from uplogic.utils import is_waiting
 from uplogic.utils import not_met
+from uplogic.utils import clamp
 
 
 class ULPlayAction(ULActionNode):
@@ -77,7 +78,7 @@ class ULPlayAction(ULActionNode):
 
     def evaluate(self):
         condition = self.get_input(self.condition)
-        intensity = self.get_input(self.layer_weight)
+        intensity = clamp(self.get_input(self.layer_weight))
         speed = self.get_input(self.speed)
         layer = self.get_input(self.layer)
         game_object = self.get_input(self.game_object)
@@ -103,7 +104,9 @@ class ULPlayAction(ULActionNode):
             return
         action_name = self.get_input(self.action_name)
         if layer_action and layer_action.name == action_name:
+            # if layer_action.speed != speed:
             layer_action.speed = speed
+            # if layer_action.intensity != intensity:
             layer_action.intensity = intensity
             return
         if self.in_use and has_action:
@@ -133,10 +136,6 @@ class ULPlayAction(ULActionNode):
             return
         if play_mode > 2:
             play_mode -= 3
-        if intensity <= 0:
-            intensity = 0.0
-        elif intensity >= 1:
-            intensity = 1.0
         if speed <= 0:
             speed = 0.01
         if is_invalid(game_object):  # can't play
