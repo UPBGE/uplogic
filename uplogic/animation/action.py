@@ -186,6 +186,7 @@ class ULAction():
 
         Not intended for manual use.
         '''
+        import time
         self._locked = True
         layer = self.layer
         game_object = self.game_object
@@ -196,7 +197,7 @@ class ULAction():
         priority = self.priority
         blendin = self.blendin
         intensity = self.intensity
-        speed = self.speed
+        speed = self.speed * logic.getTimeScale()
         blend_mode = self.blend_mode
         frame = self.frame
         reset_frame = (
