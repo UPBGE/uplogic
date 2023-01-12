@@ -87,14 +87,14 @@ class ULSequence():
         start_frame = self.end_frame if self.reverse else self.start_frame
         end_frame = self.start_frame if self.reverse else self.end_frame
         if not self.initialized:
-            player.frame_offset = start_frame
+            player.frame_offset = round(start_frame)
             self.initialized = True
         inverted = (start_frame > end_frame)
         frame = self.frame = player.frame_offset
         reset_cond = (frame <= end_frame) if inverted else (frame >= end_frame)
         if not running:
             if reset_cond:
-                player.frame_offset = start_frame if inverted else end_frame
+                player.frame_offset = round(start_frame) if inverted else round(end_frame)
             self.on_start = True
             self._consumed = False
 
@@ -102,7 +102,7 @@ class ULSequence():
 
         if start_cond:
             self.running = True
-            player.frame_offset = start_frame
+            player.frame_offset = round(start_frame)
         frame = player.frame_offset
         run_cond = (frame > end_frame) if inverted else (frame < end_frame)
         if run_cond:
@@ -115,11 +115,11 @@ class ULSequence():
                         span = start_frame - end_frame
                         while leftover > span:
                             leftover -= span
-                        player.frame_offset = start_frame - leftover
+                        player.frame_offset = round(start_frame - leftover)
                     else:
-                        player.frame_offset = end_frame
+                        player.frame_offset = round(end_frame)
                 else:
-                    player.frame_offset -= s
+                    player.frame_offset -= round(s)
             else:
                 if frame + s > end_frame:
                     if play_mode == 1:
@@ -127,13 +127,13 @@ class ULSequence():
                         span = end_frame - start_frame
                         while leftover > span:
                             leftover -= span
-                        player.frame_offset = start_frame + leftover
+                        player.frame_offset = round(start_frame + leftover)
                     else:
-                        player.frame_offset = end_frame
+                        player.frame_offset = round(end_frame)
                 else:
-                    player.frame_offset += s
+                    player.frame_offset += round(s)
         elif play_mode == 1:
-            player.frame_offset = end_frame if inverted else start_frame
+            player.frame_offset = round(end_frame if inverted else start_frame)
         elif play_mode == 2:
             self.reverse = not self.reverse
         else:

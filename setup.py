@@ -51,10 +51,15 @@ setup(
         'uplogic.utils'
     ],
     ext_modules=cythonize([
-        'uplogic\\nodes\\__init__.pyx',
-        'uplogic\\utils\\visuals.pyx',
-        'uplogic\\nodes\\logictree.pyx'
-    ]),
+        'uplogic\\utils\\math.pyx',
+        # 'uplogic\\utils\\nodes.pyx',
+        # 'uplogic\\nodes\\logictree.pyx',
+        'uplogic\\utils\\nodes.pyx',
+    #     'uplogic\\utils\\visuals.pyx',
+        # 'uplogic\\nodes\\logictree.pyx'
+    ], annotate=True),
     zip_safe=True,
     install_requires=['setuptools']
 )
+
+#  "C:\Users\Zedikon\AppData\Local\Programs\Python\Python310\python" setup.py build_ext --inplace 

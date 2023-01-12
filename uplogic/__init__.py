@@ -68,6 +68,9 @@ import signal
 import time
 
 
+bgelogic = bge.logic
+
+
 class MainLoop:
     _handles = {}
 

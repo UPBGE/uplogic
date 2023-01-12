@@ -2,6 +2,12 @@
 '''
 from .lights import ULLight  # noqa
 from .lights import make_unique_light  # noqa
+from .math import interpolate  # noqa
+from .math import lerp  # noqa
+from .math import clamp  # noqa
+from .math import cycle  # noqa
+from .math import vec_clamp  # noqa
+from .math import map_range  # noqa
 from .nodetrees import get_geom_socket  # noqa
 from .nodetrees import get_group_socket  # noqa
 from .nodetrees import get_material_socket  # noqa
@@ -112,44 +118,49 @@ LO_AXIS_TO_VECTOR = {
 ###############################################################################
 
 
-def _name_query(named_items, query):
-    assert len(query) > 0
-    postfix = (query[0] == "*")
-    prefix = (query[-1] == "*")
-    infix = (prefix and postfix)
-    if infix:
-        token = query[1:-1]
-        for item in named_items:
-            if token in item.name:
-                return item
-    if prefix:
-        token = query[:-1]
-        for item in named_items:
-            if item.name.startswith(token):
-                return item
-    if postfix:
-        token = query[1:]
-        for item in named_items:
-            if item.name.endswith(token):
-                return item
-    for item in named_items:
-        if item.name == query:
-            return item
-    return None
+from .nodes import name_query
+
+# def name_query(named_items, query):
+#     assert len(query) > 0
+#     postfix = (query[0] == "*")
+#     prefix = (query[-1] == "*")
+#     infix = (prefix and postfix)
+#     if infix:
+#         token = query[1:-1]
+#         for item in named_items:
+#             if token in item.name:
+#                 return item
+#     if prefix:
+#         token = query[:-1]
+#         for item in named_items:
+#             if item.name.startswith(token):
+#                 return item
+#     if postfix:
+#         token = query[1:]
+#         for item in named_items:
+#             if item.name.endswith(token):
+#                 return item
+#     for item in named_items:
+#         if item.name == query:
+#             return item
+    # return None
 
 
-def check_game_object(query, scene=None):
-    '''TODO: Documentation
-    '''
-    if not scene:
-        scene = logic.getCurrentScene()
-    else:
-        scene = scene
-    if (query is None) or (query == ""):
-        return
-    if not is_invalid(scene):
-        # find from scene
-        return _name_query(scene.objects, query)
+from .nodes import check_game_object
+
+
+# def check_game_object(query, scene=None):
+#     '''TODO: Documentation
+#     '''
+#     if not scene:
+#         scene = logic.getCurrentScene()
+#     else:
+#         scene = scene
+#     if (query is None) or (query == ""):
+#         return
+#     if not is_invalid(scene):
+#         # find from scene
+#         return name_query(list(scene.objects), query)
 
 
 def compute_distance(parama, paramb) -> float:
@@ -179,15 +190,18 @@ def debug(message: str):
         print('[UPLOGIC] ' + message)
 
 
-def is_invalid(*a) -> bool:
-    for ref in a:
-        if ref is None or ref is STATUS_WAITING or ref == '':
-            return True
-        if not hasattr(ref, "invalid"):
-            continue
-        elif ref.invalid:
-            return True
-    return False
+from .nodes import is_invalid
+
+
+# def is_invalid(*a) -> bool:
+#     for ref in a:
+#         if ref is None or ref is STATUS_WAITING or ref == '':
+#             return True
+#         if not hasattr(ref, "invalid"):
+#             continue
+#         elif ref.invalid:
+#             return True
+#     return False
 
 
 def is_waiting(*args) -> bool:
@@ -196,7 +210,7 @@ def is_waiting(*args) -> bool:
     return False
 
 
-def make_valid_name(name):
+def make_valid_name(name) -> str:
     valid_characters = (
         "abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     )
@@ -423,88 +437,7 @@ def check_vr_session_status() -> tuple[Vector, Matrix]:
 ###############################################################################
 
 
-def clamp(value: float or Vector, min: float = 0, max: float = 1) -> float:
-    """Clamp a value in between two other values.
-
-    :param value: input value
-    :param min: minimum value
-    :param max: maximum value
-
-    :returns: clamped value as float
-    """
-    if isinstance(value, Vector):
-        return vec_clamp(value, min, max)
-    if value < min:
-        return min
-    if value > max:
-        return max
-    return value
-
-
-def cycle(value: float or Vector, min: float = 0, max: float = 1) -> float:
-    """Clamp a value in between two other values.
-
-    :param value: input value
-    :param min: minimum value
-    :param max: maximum value
-
-    :returns: clamped value as float
-    """
-    if isinstance(value, Vector):
-        return vec_clamp(value, min, max)
-    if value < min:
-        return max
-    if value > max:
-        return min
-    return value
-
-
-def vec_clamp(vec: Vector, min: float = 0, max: float = 1) -> Vector:
-    """Clamp length of a vector.
-
-    :param value: `Vector`
-    :param min: minimum length
-    :param max: maximum length
-
-    :returns: clamped vector as float
-    """
-    vec = vec.copy()
-    if vec.length < min:
-        vec.normalize()
-        return vec * min
-    if vec.length > max:
-        vec.normalize()
-        return vec * max
-    return vec
-
-
-def interpolate(a: float, b: float, fac: float, threshold: float = 0.001) -> float:
-    """Interpolate between 2 values using a factor.
-
-    :param a: starting value
-    :param b: target value
-    :param fac: interpolation factor
-
-    :returns: calculated value as float
-    """
-    if -threshold < a-b < threshold:
-        return b
-    return (fac * b) + ((1-fac) * a)
-
-
-def lerp(a: float, b: float, fac: float) -> float:
-    """Interpolate between 2 values using a factor.
-
-    :param a: starting value
-    :param b: target value
-    :param fac: interpolation factor
-
-    :returns: calculated value as float
-    """
-    return (fac * b) + ((1-fac) * a)
-
-
-def vec_abs(vec):
+def vec_abs(vec: Vector):
     """Make every value of this vector positive.\n
     Only supports less than 4 Dimensions.
 
@@ -567,25 +500,7 @@ def get_direction(a, b, local=False) -> Vector:
     return d
 
 
-def map_range(value: float, in_min: float, in_max: float, out_min: float, out_max: float, clamp=(None, None)) -> float:
-    """Map a value from one range to another.
-    
-    :param `value`: Value to be remapped.
-    :param `in_min`: Lower end of the original range.
-    :param `in_max`: Upper end of the original range.
-    :param `out_min`: Lower end of the new range.
-    :param `out_max`: Upper end of the new range.
-    :param `clamp`: Clamp the modified value.
-    """
-    result = (value - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
-    if clamp[0] is not None and result < clamp[0]:
-        return clamp[0]
-    if clamp[1] is not None and result > clamp[1]:
-        return clamp[1]
-    return result
-
-
-def screen_to_world(x:float = None, y: float = None, distance: float = 10) -> Vector:
+def screen_to_world(x: float = None, y: float = None, distance: float = 10) -> Vector:
     """Get the world coordinates of a point on the screen in a given distance.
     
     :param `x`: X position on the screen. Leave at `None` to use mouse position.

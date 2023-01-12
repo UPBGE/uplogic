@@ -314,11 +314,13 @@ class ULMouseLook():
 
     @active.setter
     def active(self, val):
+        print(self.obj, val)
         pre_draw = logic.getCurrentScene().pre_draw
         if val and self.update not in pre_draw:
             pre_draw.append(self.update)
         elif not val and self.update in pre_draw:
             self.initialized = False
+            print('Removed from', self.obj)
             pre_draw.remove(self.update)
 
     @property
@@ -389,6 +391,7 @@ class ULMouseLook():
             self.mouse.position = self.screen_center
             self.initialized = True
             return
+        # print(self.obj)
         game_object_x = self.obj
         game_object_y = self.head
         sensitivity = self.sensitivity * 10
@@ -410,8 +413,8 @@ class ULMouseLook():
             offset.x = -offset.x
         offset *= sensitivity
 
-        self._x = offset.x = interpolate(self._x, offset.x, smooth, 0)
-        self._y = offset.y = interpolate(self._y, offset.y, smooth, 0)
+        self._x = offset.x = interpolate(self._x, offset.x, smooth)
+        self._y = offset.y = interpolate(self._y, offset.y, smooth)
 
         if self.use_cap_x:
             objectRotation = game_object_x.localOrientation.to_euler()

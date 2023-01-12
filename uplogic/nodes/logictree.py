@@ -1,5 +1,5 @@
 from bge import events
-from bge import logic
+from bge import logic as bgelogic
 from bge.types import KX_GameObject as GameObject
 from uplogic.audio import ULAudioSystem
 from uplogic.data import GlobalDB
@@ -11,11 +11,12 @@ from uplogic.utils import load_user_module
 from uplogic.utils import make_valid_name
 import bpy
 # from uplogic import get_mainloop
+from uplogic.utils.nodes import evaluate_cells
 from bge.types import SCA_PythonKeyboard as Keyboard
 from bge.types import SCA_PythonMouse as Mouse
 import collections
 import time
-import Cython
+
 
 
 class ULLogicTree(ULLogicContainer):
@@ -24,7 +25,7 @@ class ULLogicTree(ULLogicContainer):
         from ..input import ULMouse
         ULLogicContainer.__init__(self)
         self._cells: list = []
-        self._iter = collections.deque()
+        self._iter: collections.deque = collections.deque()
         self._lastuid: int = 0
         self._owner: GameObject = None
         self._max_blocking_loop_count: int = 0
@@ -45,7 +46,7 @@ class ULLogicTree(ULLogicContainer):
         self.sub_networks = []  # a list of networks updated by this network
         self.capslock_pressed = False
         self.evaluated_cells = 0
-        scene = logic.getCurrentScene()
+        scene = bgelogic.getCurrentScene()
         mainloop = scene.get('uplogic.mainloop')
         if mainloop:
             mainloop.logic_tree = self
@@ -59,7 +60,7 @@ class ULLogicTree(ULLogicContainer):
 
     def init_glob_cats(self):
         if not hasattr(bpy.types.Scene, 'nl_globals_initialized'):
-            scene = logic.getCurrentScene()
+            scene = bgelogic.getCurrentScene()
             cats = getattr(
                 bpy.data.scenes[scene.name],
                 'nl_global_categories',
@@ -73,7 +74,7 @@ class ULLogicTree(ULLogicContainer):
             dat = {
                 'STRING': 'string_val',
                 'FLOAT': 'float_val',
-                'INTEULR': 'int_val',
+                'INTEGER': 'int_val',
                 'BOOLEAN': 'bool_val',
                 'FILE_PATH': 'filepath_val'
             }
@@ -193,7 +194,7 @@ class ULLogicTree(ULLogicContainer):
         if self._owner.invalid:
             print("Network Owner removed from game. Shutting down the network")
             return True
-        self.keyboard = logic.keyboard
+        self.keyboard = bgelogic.keyboard
         self.keyboard_events = self.keyboard.inputs.copy()
         self.active_keyboard_events = self.keyboard.activeInputs.copy()
         caps_lock_event = self.keyboard_events[events.CAPSLOCKKEY]
@@ -206,6 +207,12 @@ class ULLogicTree(ULLogicContainer):
         loop_index = 0
         done_cells = []
         max_blocking_loop_count = self._max_blocking_loop_count
+        # now = time.time()
+        # print('Heööp')
+        # evaluate_cells(
+        #     self, self._iter, self._max_blocking_loop_count
+        # )
+
         while cells:
             if loop_index == max_blocking_loop_count:
                 debug(
@@ -242,6 +249,10 @@ class ULLogicTree(ULLogicContainer):
                 self.sub_networks.remove(network)
             elif not network.stopped:
                 network.evaluate()
+
+        # newnow = time.time()
+        # print('############################')
+        # print(newnow - now)
 
     def install_subnetwork(self, owner_object, node_tree_name, initial_status):
         # transform the tree name into a NL module name
