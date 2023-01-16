@@ -65,8 +65,10 @@ class ULAction():
         speed: float = 1,
         intensity: float = 1,
         blend_mode: str = 'blend',
-        keep: bool = False
+        keep: bool = False,
+        overwrite: bool = False
     ):
+        self._fps_factor = bpy.context.scene.render.fps / 60
         self._locked = False
         self._speed = speed
         self._frozen_speed = speed
@@ -97,13 +99,14 @@ class ULAction():
         '''Blending Mode of the animation.'''
         if layer == -1:
             ULActionSystem.find_free_layer(self)
-        elif ULActionSystem.check_layer(self):
+        elif ULActionSystem.check_layer(self) and not overwrite:
             self.finished = True
             return
         layer = self.layer
         same_action = game_object.getActionName(layer) == action_name
         self.on_start()
-        if not same_action and self.is_playing:
+        self.restart_flag = False
+        if (not same_action and self.is_playing) or overwrite:
             game_object.stopAction(layer)
         if not (self.is_playing or same_action):
             game_object.playAction(
@@ -164,8 +167,10 @@ class ULAction():
     def intensity(self, value):
         if not self.is_playing:
             return
-        self._intensity = clamp(value, 0, 1)
+        if not self.is_playing or value == self._intensity:
+            return
         self._restart_action()
+        self._intensity = clamp(value, 0, 1)
 
     @property
     def speed(self) -> float:
@@ -178,15 +183,16 @@ class ULAction():
             value = 0.00000000001
         if not self.is_playing or value == self._speed:
             return
-        self._speed = value
         self._restart_action()
+        self._speed = value
 
     def _restart_action(self):
         '''Restart action to use updated values.
 
         Not intended for manual use.
         '''
-        import time
+        if self._locked:
+            return
         self._locked = True
         layer = self.layer
         game_object = self.game_object
@@ -197,7 +203,7 @@ class ULAction():
         priority = self.priority
         blendin = self.blendin
         intensity = self.intensity
-        speed = self.speed * logic.getTimeScale()
+        speed = self.speed * self._fps_factor * logic.getTimeScale()
         blend_mode = self.blend_mode
         frame = self.frame
         reset_frame = (
@@ -221,7 +227,7 @@ class ULAction():
             priority=priority,
             blendin=blendin,
             play_mode=play_mode,
-            speed=speed,
+            speed=self.speed,
             layer_weight=1 - intensity,
             blend_mode=blend_mode
         )
@@ -234,6 +240,8 @@ class ULAction():
         game_object = self.game_object
         if game_object.invalid:
             self.remove()
+            return
+        if not self.intensity:
             return
         layer = self.layer
         start_frame = self.start_frame
