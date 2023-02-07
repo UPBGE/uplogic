@@ -1,17 +1,29 @@
 from bge.types import KX_GameObject as GameObject
 from bge import logic
 import bpy
+from mathutils import Vector, Matrix, Color
 
 
-def make_unique_light(lamp_ge: GameObject) -> GameObject:
-    '''TODO: Documentation
+def make_unique_light(light: GameObject) -> GameObject:
+    '''Make a copy of this light to allow for unique modifications.
+
+    :param `light`: The `KX_LightObject` of which to copy the data.
+
+    :returns: The modified `KX_LightObject`. This return value is for usability reasons and
+    is the same as the original argument.
     '''
-    lamp = lamp_ge.blenderObject
+    lamp = light.blenderObject
     lamp.data = lamp.data.copy()
-    return lamp_ge
+    return light
 
 
 class ULLight():
+    """Wrapper for `KX_LightObject`. Can either convert a given scene light or create a new one.
+
+    :param `name`: The name of the new light (only relevant if `light` argument is None).
+    :param `type`: The type of the new light of [`"POINT"`, `"SUN"`, `"SPOT"`, `"AREA"`] (only relevant if `light` argument is None).
+    :param `light`: The scene light to be converted. Leave at `None` to create new.
+    """
 
     def __init__(
         self,
@@ -21,6 +33,7 @@ class ULLight():
     ) -> None:
         if light:
             self.light = make_unique_light(light)
+            """The wrapped `KX_LightObject`."""
             return
         game_scene = logic.getCurrentScene()
         scene = bpy.data.scenes[game_scene.name]
@@ -28,164 +41,165 @@ class ULLight():
         light = bpy.data.objects.new(name, light)
         scene.collection.objects.link(light)
         self.light = game_scene.convertBlenderObject(light)
+        """The wrapped `KX_LightObject`."""
         self.energy = 10
 
     @property
-    def energy(self):
+    def energy(self) -> float:
         return self.light.blenderObject.data.energy
 
     @energy.setter
-    def energy(self, val):
+    def energy(self, val: float):
         self.light.blenderObject.data.energy = val
 
     @property
-    def color(self):
+    def color(self) -> Color:
         return self.light.blenderObject.data.color
 
     @color.setter
-    def color(self, val):
+    def color(self, val: Color):
         self.light.blenderObject.data.color = val
 
     @property
-    def use_shadow(self):
+    def use_shadow(self) -> bool:
         return self.light.blenderObject.data.use_shadow
 
     @use_shadow.setter
-    def use_shadow(self, val):
+    def use_shadow(self, val: bool):
         self.light.blenderObject.data.use_shadow = val
 
     @property
-    def use_custom_distance(self):
+    def use_custom_distance(self) -> bool:
         return self.light.blenderObject.data.use_custom_distance
 
     @use_custom_distance.setter
-    def use_custom_distance(self, val):
+    def use_custom_distance(self, val: bool):
         self.light.blenderObject.data.use_custom_distance = val
 
     @property
-    def distance(self):
+    def distance(self) -> float:
         return self.light.blenderObject.data.cutoff_distance
 
     @distance.setter
-    def distance(self, val):
+    def distance(self, val: float):
         self.light.blenderObject.data.cutoff_distance = val
 
     @property
-    def angle(self):
+    def angle(self)-> float:
         return self.light.blenderObject.data.angle
 
     @angle.setter
-    def angle(self, val):
+    def angle(self, val: float):
         self.light.blenderObject.data.angle = val
 
     @property
-    def spot_size(self):
+    def spot_size(self) -> float:
         return self.light.blenderObject.data.spot_size
 
     @spot_size.setter
-    def spot_size(self, val):
+    def spot_size(self, val: float):
         self.light.blenderObject.data.spot_size = val
 
     @property
-    def spot_blend(self):
+    def spot_blend(self) -> float:
         return self.light.blenderObject.data.spot_blend
 
     @spot_blend.setter
-    def spot_blend(self, val):
+    def spot_blend(self, val: float):
         self.light.blenderObject.data.spot_blend = val
 
     @property
-    def parent(self):
+    def parent(self) -> GameObject:
         return self.light.parent
 
     @parent.setter
-    def parent(self, val):
+    def parent(self, val: GameObject):
         self.light.setParent(val)
 
     @property
-    def worldPosition(self):
+    def worldPosition(self) -> Vector:
         return self.light.worldPosition
 
     @worldPosition.setter
-    def worldPosition(self, val):
+    def worldPosition(self, val: Vector):
         self.light.worldPosition = val
 
     @property
-    def localPosition(self):
+    def localPosition(self) -> Vector:
         return self.light.localPosition
 
     @localPosition.setter
-    def localPosition(self, val):
+    def localPosition(self, val: Vector):
         self.light.localPosition = val
 
     @property
-    def worldOrientation(self):
+    def worldOrientation(self) -> Matrix:
         return self.light.worldOrientation
 
     @worldOrientation.setter
-    def worldOrientation(self, val):
+    def worldOrientation(self, val: Matrix):
         self.light.worldOrientation = val
 
     @property
-    def localOrientation(self):
+    def localOrientation(self) -> Matrix:
         return self.light.localOrientation
 
     @localOrientation.setter
-    def localOrientation(self, val):
+    def localOrientation(self, val: Matrix):
         self.light.localOrientation = val
 
     @property
-    def worldScale(self):
+    def worldScale(self) -> Vector:
         return self.light.worldScale
 
     @worldScale.setter
-    def worldScale(self, val):
+    def worldScale(self, val: Vector):
         self.light.worldScale = val
 
     @property
-    def localScale(self):
+    def localScale(self) -> Vector:
         return self.light.localScale
 
     @localScale.setter
-    def localScale(self, val):
+    def localScale(self, val: Vector):
         self.light.localScale = val
 
     @property
-    def worldLinearVelocity(self):
+    def worldLinearVelocity(self) -> Vector:
         return self.light.worldLinearVelocity
 
     @worldLinearVelocity.setter
-    def worldLinearVelocity(self, val):
+    def worldLinearVelocity(self, val: Vector):
         self.light.worldLinearVelocity = val
 
     @property
-    def localLinearVelocity(self):
+    def localLinearVelocity(self) -> Vector:
         return self.light.localLinearVelocity
 
     @localLinearVelocity.setter
-    def localLinearVelocity(self, val):
+    def localLinearVelocity(self, val: Vector):
         self.light.localLinearVelocity = val
 
     @property
-    def worldAngularVelocity(self):
+    def worldAngularVelocity(self) -> Vector:
         return self.light.worldAngularVelocity
 
     @worldAngularVelocity.setter
-    def worldAngularVelocity(self, val):
+    def worldAngularVelocity(self, val: Vector):
         self.light.worldAngularVelocity = val
 
     @property
-    def localAngularVelocity(self):
+    def localAngularVelocity(self) -> Vector:
         return self.light.localAngularVelocity
 
     @localAngularVelocity.setter
-    def localAngularVelocity(self, val):
+    def localAngularVelocity(self, val: Vector):
         self.light.localAngularVelocity = val
 
     @property
-    def worldTransform(self):
+    def worldTransform(self) -> Matrix:
         return self.light.worldTransform
 
     @worldTransform.setter
-    def worldTransform(self, val):
+    def worldTransform(self, val: Matrix):
         self.light.worldTransform = val

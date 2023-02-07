@@ -17,12 +17,14 @@ PLAY_MODES = {
     'pingpong': logic.KX_ACTION_MODE_PING_PONG,
     'loop': logic.KX_ACTION_MODE_LOOP
 }
+"""Available play modes of [`"play"`, `"pingpong"`, `"loop"`]"""
 
 
 BLEND_MODES = {
     'blend': logic.KX_ACTION_BLEND_BLEND,
     'add': logic.KX_ACTION_BLEND_ADD
 }
+"""Available blending modes of [`"blend"`, `"add"`]"""
 
 
 ACTION_STARTED = 'ACTION_STARTED'
@@ -65,8 +67,7 @@ class ULAction():
         speed: float = 1,
         intensity: float = 1,
         blend_mode: str = 'blend',
-        keep: bool = False,
-        overwrite: bool = False
+        keep: bool = False
     ):
         self._fps_factor = bpy.context.scene.render.fps / 60
         self._locked = False
@@ -99,14 +100,13 @@ class ULAction():
         '''Blending Mode of the animation.'''
         if layer == -1:
             ULActionSystem.find_free_layer(self)
-        elif ULActionSystem.check_layer(self) and not overwrite:
+        elif ULActionSystem.check_layer(self):
             self.finished = True
             return
         layer = self.layer
         same_action = game_object.getActionName(layer) == action_name
         self.on_start()
-        self.restart_flag = False
-        if (not same_action and self.is_playing) or overwrite:
+        if (not same_action and self.is_playing):
             game_object.stopAction(layer)
         if not (self.is_playing or same_action):
             game_object.playAction(
@@ -154,7 +154,7 @@ class ULAction():
         return -1
 
     @frame.setter
-    def frame(self, value):
+    def frame(self, value: float):
         self.game_object.setActionFrame(value, self.layer)
 
     @property
@@ -164,7 +164,7 @@ class ULAction():
         return self._intensity
 
     @intensity.setter
-    def intensity(self, value):
+    def intensity(self, value: float):
         if not self.is_playing:
             return
         if not self.is_playing or value == self._intensity:
@@ -178,7 +178,7 @@ class ULAction():
         return self._speed
 
     @speed.setter
-    def speed(self, value):
+    def speed(self, value: float):
         if value < 0.00000000001:
             value = 0.00000000001
         if not self.is_playing or value == self._speed:
@@ -304,20 +304,20 @@ class ULAction():
             blend_mode=self.blend_mode
         )
 
-    def randomize_frame(self, min=None, max=None):
+    def randomize_frame(self, min: float = -1, max: float = -1):
         '''Randomize the frame of this animation.
 
         :param `min`: Min range of randomization (Optional).
         :param `max`: Max range of randomization (Optional).
         '''
-        if min is None:
+        if min == -1:
             min = self.start_frame
-        if max is None:
+        if max == -1:
             max = self.end_frame
         frame = randint(min, max)
         self.frame = frame
 
-    def randomize_speed(self, min=.9, max=1.1):
+    def randomize_speed(self, min: float = .9, max: float = 1.1):
         '''Randomize the speed of this animation.
 
         :param `min`: Min range of randomization (Optional, default 0.9).
@@ -326,7 +326,7 @@ class ULAction():
         delta = max - min
         self.speed = min + (delta * random())
 
-    def set_frame(self, frame):
+    def set_frame(self, frame: float):
         '''Set the frame of this action.
         '''
         self.frame = frame

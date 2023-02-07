@@ -60,7 +60,8 @@ def state_machine(cls: KX_PythonComponent) -> KX_PythonComponent:
         prop = property(getState, setState)
         setattr(cls, 'state', prop)
         setattr(cls, 'set_state', set_state)
-        setattr(cls, 'on_state', on_state)
+        if not hasattr(cls, 'on_state'):
+            setattr(cls, 'on_state', on_state)
         return cls
 
     return deco(cls)
@@ -74,6 +75,10 @@ def game_props(prop_names):
 
     :param `prop_names`: Names of game properties as a list.
     """
+
+    def on_attr(self, val):
+        pass
+
     def deco(cls: KX_PythonComponent or KX_GameObject) -> KX_PythonComponent or KX_GameObject:
         if not (issubclass(cls, KX_PythonComponent) or issubclass(cls, KX_GameObject)):
             raise TypeMismatchError('Decorator only viable for KX_PythonComponent or KX_GameObject subclasses!')
@@ -85,12 +90,14 @@ def game_props(prop_names):
                 return self.object.get(attr_name)
 
             def setPropComponent(self, value, attr_name=game_prop):
+                getattr(self, f'on_{game_prop}')(value)
                 self.object[attr_name] = value
 
             def getPropObject(self, attr_name=game_prop):
                 return self.get(attr_name)
 
             def setPropObject(self, value, attr_name=game_prop):
+                getattr(self, f'on_{game_prop}')(value)
                 self[attr_name] = value
 
             if issubclass(cls, KX_PythonComponent):
@@ -101,6 +108,8 @@ def game_props(prop_names):
                 return
 
             setattr(cls, game_prop, prop)
+            if not hasattr(cls, f'on_{game_prop}'):
+                setattr(cls, f'on_{game_prop}', on_attr)
         return cls
     return deco
 
@@ -114,6 +123,10 @@ def bl_attrs(attr_names):
 
     :param `attr_names`: Names of game properties as a list.
     """
+
+    def on_attr(self, val):
+        pass
+
     def deco(cls: KX_PythonComponent or KX_GameObject) -> KX_PythonComponent or KX_GameObject:
         if not (issubclass(cls, KX_PythonComponent) or issubclass(cls, KX_GameObject)):
             raise TypeMismatchError('Decorator only viable for KX_PythonComponent or KX_GameObject subclasses!')
@@ -125,6 +138,7 @@ def bl_attrs(attr_names):
                 return self.object.blenderObject.get(attr_name)
 
             def setPropComponent(self, value, attr_name=attr_name):
+                getattr(self, f'on_{attr_name}')(value)
                 self.object.blenderObject[attr_name] = value
                 self.object.color = self.object.color
 
@@ -132,6 +146,7 @@ def bl_attrs(attr_names):
                 return self.blenderObject.get(attr_name)
 
             def setPropObject(self, value, attr_name=attr_name):
+                getattr(self, f'on_{attr_name}')(value)
                 self.blenderObject[attr_name] = value
                 self.object.color = self.object.color
 
@@ -143,6 +158,8 @@ def bl_attrs(attr_names):
                 return
 
             setattr(cls, attr_name, prop)
+            if not hasattr(cls, f'on_{attr_name}'):
+                setattr(cls, f'on_{attr_name}', on_attr)
         return cls
     return deco
 

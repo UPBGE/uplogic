@@ -198,6 +198,8 @@ def start(max_fps=60, tick_idle=.001):
 
 class ULLoop:
 
+    quit_key = 'esc'
+
     def __init__(self, max_fps=-1, tick_idle=.00001) -> None:
         self.scene = bge.logic.getCurrentScene()
         logic_tree = bpy.data.scenes[self.scene.name].get('custom_mainloop_tree')
@@ -219,7 +221,7 @@ class ULLoop:
         pass
 
     def tick(self):
-        if key_tap('esc'):
+        if key_tap(self.quit_key):
             get_mainloop().stop()
 
     def update(self):

@@ -273,7 +273,7 @@ def project_vector3(v, xi, yi):
 def xrot_to(
     rotating_object,
     target_pos,
-    front_axis_code=0,
+    front_axis_code=1,
     factor=1
 ):
     front_vector = LO_AXIS_TO_VECTOR[front_axis_code]
@@ -299,7 +299,7 @@ def xrot_to(
 def yrot_to(
     rotating_object,
     target_pos,
-    front_axis_code=0,
+    front_axis_code=1,
     factor=1
 ):
     front_vector = LO_AXIS_TO_VECTOR[front_axis_code]
@@ -325,7 +325,7 @@ def yrot_to(
 def zrot_to(
     rotating_object,
     target_pos,
-    front_axis_code=0,
+    front_axis_code=1,
     factor=1
 ):
     front_vector = LO_AXIS_TO_VECTOR[front_axis_code]
@@ -487,6 +487,8 @@ def interpolate(a: float, b: float, fac: float, threshold: float = 0.001) -> flo
 
     :returns: calculated value as float
     """
+    if isinstance(a, Vector) or isinstance(b, Vector):
+        debug('Warning: utils.interpolate() will not work for Vector anymore; Use mathutils.Vector.lerp(vec2, fac) instead!')
     if -threshold < a-b < threshold:
         return b
     return (fac * b) + ((1-fac) * a)
@@ -501,6 +503,8 @@ def lerp(a: float, b: float, fac: float) -> float:
 
     :returns: calculated value as float
     """
+    if isinstance(a, Vector) or isinstance(b, Vector):
+        debug('Warning: utils.lerp() will not work for Vector anymore; Use mathutils.Vector.lerp(vec2, fac) instead!')
     return (fac * b) + ((1-fac) * a)
 
 

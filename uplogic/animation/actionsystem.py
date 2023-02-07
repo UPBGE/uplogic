@@ -1,4 +1,5 @@
 from bge import logic
+from bge.types import KX_GameObject
 from uplogic.data import GlobalDB
 
 
@@ -12,8 +13,6 @@ class ULActionSystem():
     def __init__(self, name: str):
         self.actions: list = []
         self.scene = scene = logic.getCurrentScene()
-        self.listener = scene.active_camera
-        self.old_lis_pos = self.listener.worldPosition.copy()
         GlobalDB.retrieve('uplogic.animation').put(name, self)
         scene.pre_draw.append(self.update)
         scene.onRemove.append(self.shutdown)
@@ -61,7 +60,7 @@ class ULActionSystem():
         return str(action.layer) in layers.keys()
     
     @classmethod
-    def get_layer(cls, game_object, layer=0):
+    def get_layer(cls, game_object: KX_GameObject, layer: int = 0):
         """Get the `ULAction` of an object on the given layer.
 
         :param `game_object`: The `KX_GameObject` on which the action is

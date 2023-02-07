@@ -166,6 +166,7 @@ class ULSound2D(ULSound):
             return
         self.aud_system = get_audio_system(aud_sys)
         soundfile = logic.expandPath(file)
+        self.ignore_timescale = ignore_timescale
         if not isfile(soundfile):
             debug(f'Soundfile {soundfile} could not be loaded!')
             return
@@ -175,7 +176,6 @@ class ULSound2D(ULSound):
             sound = self.soundfile = sound.lowpass(lowpass, .5)
         device = self.aud_system.device
         self.sound = handle = device.play(sound)
-        self.ignore_timescale = ignore_timescale
 
         handle.relative = True
         handle.loop_count = loop_count
@@ -338,10 +338,10 @@ class ULSound3D(ULSound):
     def update(self):
         '''TODO: Documentation
         '''
-        if self.volume == 0:
-            for i, handle in enumerate(self.handles[1]):
-                handle.volume = 0
-            return
+        # if self.volume == 0:
+        #     for i, handle in enumerate(self.handles[1]):
+        #         handle.volume = 0
+        #     return
         aud_system = self.aud_system
         speaker = self.speaker
         if not self._is_vector and (not speaker or speaker.invalid):
@@ -423,6 +423,15 @@ class ULSound3D(ULSound):
                     mult *
                     master_volume
                 )
+            else:
+                master_volume = self.aud_system.volume
+                handle.volume = self.volume * master_volume
+                handle.cone_volume_outer = (
+                    self.cone_outer_volume *
+                    self.volume *
+                    master_volume
+                )
+
         if self.reverb_samples:
             self.reverb_samples.update()
 

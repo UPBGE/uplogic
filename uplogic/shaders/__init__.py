@@ -8,6 +8,7 @@ from .hbao import HBAO
 from .ssao import SSAO
 from .mist import Mist
 from .levels import Levels
+from .letterbox import Letterbox
 from .chromaticaberration import ChromaticAberration
 from .shader import load_glsl
 from .shader import remove_filter
