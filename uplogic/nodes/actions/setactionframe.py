@@ -1,5 +1,5 @@
 from uplogic.animation import ULActionSystem
-from uplogic.animation.action import ULAction
+from uplogic.animation.action import Action
 from uplogic.data import GlobalDB
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
@@ -64,7 +64,7 @@ class ULSetActionFrame(ULActionNode):
             action = bpy.data.actions[action_name]
             start_frame = action.frame_range[0]
             end_frame = action.frame_range[1]
-            action = ULAction(
+            action = Action(
                 game_object,
                 action_name,
                 start_frame,

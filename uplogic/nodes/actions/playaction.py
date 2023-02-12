@@ -1,6 +1,6 @@
 from uplogic.animation import ULActionSystem
 from uplogic.data import GlobalDB
-from uplogic.animation import ULAction
+from uplogic.animation import Action
 from uplogic.animation import ACTION_STARTED
 from uplogic.animation import ACTION_FINISHED
 from uplogic.events import receive
@@ -82,7 +82,7 @@ class ULPlayAction(ULActionNode):
         speed = self.get_input(self.speed)
         layer = self.get_input(self.layer)
         game_object = self.get_input(self.game_object)
-        layer_action: ULAction = self.act_system.get_layer(game_object, layer)
+        layer_action: Action = self.act_system.get_layer(game_object, layer)
         if layer_action is not self._action:
             self._action = layer_action
         action = self._action
@@ -142,7 +142,7 @@ class ULPlayAction(ULActionNode):
             self._action = None
             self.in_use = False
 
-        self._action = ULAction(
+        self._action = Action(
             game_object,
             action_name,
             start_frame,

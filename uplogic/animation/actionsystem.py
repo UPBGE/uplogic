@@ -4,8 +4,8 @@ from uplogic.data import GlobalDB
 
 
 class ULActionSystem():
-    '''System for managing actions started using `ULAction`. This class is
-    usually addressed indirectly through `ULAction` and is not intended for
+    '''System for managing actions started using `Action`. This class is
+    usually addressed indirectly through `Action` and is not intended for
     manual use.
     '''
     layers: dict = {}
@@ -19,9 +19,9 @@ class ULActionSystem():
 
     @classmethod
     def lock_layer(cls, action):
-        """Lock a layer according to a `ULAction`.
+        """Lock a layer according to a `Action`.
 
-        :param `action`: The `ULAction` whose layer will be locked.
+        :param `action`: The `Action` whose layer will be locked.
         """
         layers = cls.layers.get(action.game_object, {})
         layers[str(action.layer)] = action
@@ -31,7 +31,7 @@ class ULActionSystem():
     def free_layer(cls, action):
         """Allow for the layer of the given action to be used again.
 
-        :param `action`: The `ULAction` whose layer will be freed.
+        :param `action`: The `Action` whose layer will be freed.
         """
         layers = cls.layers.get(action.game_object, {})
         layers.pop(str(action.layer), None)
@@ -39,9 +39,9 @@ class ULActionSystem():
 
     @classmethod
     def find_free_layer(cls, action):
-        """Incrementally find the next free layer for a `ULAction`.
+        """Incrementally find the next free layer for a `Action`.
 
-        :param `action`: The `ULAction` for which to find a free layer.
+        :param `action`: The `Action` for which to find a free layer.
         """
         layers = cls.layers.get(action.game_object, {})
         action.layer = 0
@@ -50,9 +50,9 @@ class ULActionSystem():
 
     @classmethod
     def check_layer(cls, action):
-        """Check if the layer for this `ULAction` is free.
+        """Check if the layer for this `Action` is free.
 
-        :param `action`: The `ULAction` whose layer to check.
+        :param `action`: The `Action` whose layer to check.
 
         :return: `True` if the layer is occupied, `False` if not
         """
@@ -61,13 +61,13 @@ class ULActionSystem():
     
     @classmethod
     def get_layer(cls, game_object: KX_GameObject, layer: int = 0):
-        """Get the `ULAction` of an object on the given layer.
+        """Get the `Action` of an object on the given layer.
 
         :param `game_object`: The `KX_GameObject` on which the action is
         playing.
         :param `layer`: The layer on which the action is playing.
 
-        :return: `ULAction` if layer is occupied, else `None`
+        :return: `Action` if layer is occupied, else `None`
         """
         action = cls.layers.get(game_object, {}).get(str(layer))
         return action
@@ -79,17 +79,17 @@ class ULActionSystem():
             action.update()
 
     def add(self, action):
-        '''Add a `ULAction` to this system.
+        '''Add a `Action` to this system.
 
-        :param `action`: `ULAction` to add.
+        :param `action`: `Action` to add.
         '''
         self.actions.append(action)
         ULActionSystem.lock_layer(action)
 
     def remove(self, action):
-        '''Remove a `ULAction` from this system.
+        '''Remove a `Action` from this system.
 
-        :param `action`: `ULAction` which to remove.
+        :param `action`: `Action` which to remove.
         '''
         action.stop()
         if action in self.actions:

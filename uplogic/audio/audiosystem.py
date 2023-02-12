@@ -36,7 +36,7 @@ def set_master_volume(volume, system_name='default') -> None:
     aud_sys = get_audio_system(system_name)
     if aud_sys:
         aud_sys.volume = volume
-        for sound in aud_sys.active_sounds:
+        for sound in aud_sys._active_sounds:
             sound.volume = sound.volume
 
 
@@ -63,7 +63,7 @@ class ULAudioSystem(object):
     is not intended for manual use.
     '''
     def __init__(self, name: str, mode: str = '3D'):
-        self.active_sounds = []
+        self._active_sounds = []
         self.name = name
         self.mode = mode
         self.bounces = 0
@@ -74,7 +74,7 @@ class ULAudioSystem(object):
         self.device.distance_model = DISTANCE_MODELS[bpy.context.scene.audio_distance_model]
         self.device.speed_of_sound = bpy.context.scene.audio_doppler_speed
         self.device.doppler_factor = bpy.context.scene.audio_doppler_factor
-        self.reverb_volumes = []
+        self._reverb_volumes = []
         self.scene = logic.getCurrentScene()
         self.use_vr = getattr(bpy.data.scenes[self.scene.name], 'use_vr_audio_space', False)
         self.vr_headset = ULHeadsetVRWrapper() if check_vr_session_status() else None
@@ -92,7 +92,7 @@ class ULAudioSystem(object):
         if val == self._lowpass:
             return
         self._lowpass = val
-        for sound in self.active_sounds:
+        for sound in self._active_sounds:
             sound.lowpass = val
 
     def setup(self, scene=None):
@@ -104,8 +104,8 @@ class ULAudioSystem(object):
             self.scene = scene
         for obj in self.scene.objects:
             if getattr(obj.blenderObject, 'reverb_volume', False) and not obj.blenderObject.data:
-                self.reverb_volumes.append(obj)
-        self.reverb = len(self.reverb_volumes) > 0
+                self._reverb_volumes.append(obj)
+        self.reverb = len(self._reverb_volumes) > 0
         GlobalDB.retrieve('uplogic.audio').put(self.name, self)
         self.scene.pre_draw.append(self.update)
 
@@ -136,13 +136,13 @@ class ULAudioSystem(object):
             self.reverb = False
             if not self.use_vr:
                 self.listener = listener
-            if not self.active_sounds:
+            if not self._active_sounds:
                 return  # do not update if no sound has been installed
             # update the listener data
             cpos = listener.worldPosition
             distances = {}
-            if self.reverb_volumes:
-                for obj in self.reverb_volumes:
+            if self._reverb_volumes:
+                for obj in self._reverb_volumes:
                     dist = (obj.worldPosition - cpos).length
                     if dist > 50:
                         continue
@@ -154,7 +154,6 @@ class ULAudioSystem(object):
                 r = ob.empty_display_size
                 wpos = obj.worldPosition
                 sca = ob.scale
-                # if cam.getDistanceTo(obj) < ob.empty_display_size:
                 in_range = (
                     wpos.x - r*sca.x < cpos.x < wpos.x + r*sca.x and
                     wpos.y - r*sca.y < cpos.y < wpos.y + r*sca.y and
@@ -168,16 +167,16 @@ class ULAudioSystem(object):
             dev.listener_location = cpos
             dev.listener_orientation = listener.worldOrientation.to_quaternion()
             dev.listener_velocity = listener_vel
-        for s in self.active_sounds:
+        for s in self._active_sounds:
             s.update()
 
     def add(self, sound):
         '''Add a `ULSound` to this audio system.'''
-        self.active_sounds.append(sound)
+        self._active_sounds.append(sound)
 
     def remove(self, sound):
         '''Remove a `ULSound` from this audio system.'''
-        self.active_sounds.remove(sound)
+        self._active_sounds.remove(sound)
 
     def shutdown(self, a=None):
         '''Stop and remove this audio system. This will stop all sounds playing

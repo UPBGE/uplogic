@@ -11,7 +11,7 @@ def listener(original_class: KX_PythonComponent) -> KX_PythonComponent:
     `object` attribute as ID.
     Executes the component's `on_object` function when an event is detected
     """
-    if not issubclass(cls, KX_PythonComponent):
+    if not issubclass(original_class, KX_PythonComponent):
         raise TypeMismatchError('Decorator only viable for KX_PythonComponent subclasses!')
     orig_init = original_class.__init__
 
@@ -67,7 +67,7 @@ def state_machine(cls: KX_PythonComponent) -> KX_PythonComponent:
     return deco(cls)
 
 
-def game_props(prop_names):
+def game_props(prop_names) -> KX_PythonComponent:
     """Decorator for `KX_PythonComponent` or `KX_GameObject` classes and subclasses.
 
     Automatically adds property handlers for this class to use the `game_object[prop]`
@@ -114,14 +114,14 @@ def game_props(prop_names):
     return deco
 
 
-def bl_attrs(attr_names):
+def bl_attrs(attr_names) -> KX_PythonComponent:
     """Decorator for `KX_PythonComponent` or `KX_GameObject` classes and subclasses.
 
     Automatically adds attribute handlers for this class to use the
     `game_object.blenderObject[attribute]` syntax instead of saving values on the
     instance itself.
 
-    :param `attr_names`: Names of game properties as a list.
+    :param `attr_names`: Names of custom attributes as a list.
     """
 
     def on_attr(self, val):
@@ -164,13 +164,13 @@ def bl_attrs(attr_names):
     return deco
 
 
-def global_dict(prop_names):
+def global_dict(prop_names) -> KX_PythonComponent:
     """Decorator for `KX_PythonComponent` or `KX_GameObject` classes and subclasses.
 
     Automatically adds property handlers for this class to use the `bge.logic.globalDict[key]`
     syntax instead of saving values on the instance itself.
 
-    :param `prop_names`: Names of game properties as a list.
+    :param `prop_names`: Keys as a list.
     """
     def deco(cls: KX_PythonComponent or KX_GameObject) -> KX_PythonComponent or KX_GameObject:
         if not (issubclass(cls, KX_PythonComponent) or issubclass(cls, KX_GameObject)):
@@ -198,7 +198,7 @@ def scene_props(prop_names):
     Automatically adds property handlers for this class to use the `game_object.scene[prop]`
     syntax instead of saving values on the instance itself.
 
-    :param `prop_names`: Names of game properties as a list.
+    :param `prop_names`: Names of properties as a list.
     """
     def deco(cls: KX_PythonComponent or KX_GameObject) -> KX_PythonComponent or KX_GameObject:
         if not (issubclass(cls, KX_PythonComponent) or issubclass(cls, KX_GameObject)):

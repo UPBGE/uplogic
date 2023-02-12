@@ -1,4 +1,4 @@
-from uplogic.animation.sequence import ULSequence
+from uplogic.animation.sequence import Sequence
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
 from uplogic.utils import is_waiting
@@ -67,7 +67,7 @@ class ULPaySequence(ULActionNode):
         if not self.sequence:
             if play_mode > 2:
                 play_mode -= 3
-            self.sequence = ULSequence(
+            self.sequence = Sequence(
                 mat_name,
                 node_name,
                 frames.x,

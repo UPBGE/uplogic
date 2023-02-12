@@ -5,8 +5,10 @@ import time
 
 
 class ULSequence():
-    '''Play an image animation through a material node.
-    
+    '''[DEPRECATED]
+
+    Play an image animation through a material node.
+
     :param `material`: Name of the material to play the animation on.
     Each Object with this material applied will play the animation.
     :param `node`: Name of the node the image animation is loaded on.
@@ -148,3 +150,17 @@ class ULSequence():
             self._reverse = not self._reverse
         else:
             self.stop()
+
+
+class Sequence(ULSequence):
+    '''Play an image animation through a material node.
+
+    :param `material`: Name of the material to play the animation on.
+    Each Object with this material applied will play the animation.
+    :param `node`: Name of the node the image animation is loaded on.
+    :param `start_frame`: Starting frame of the animation.
+    :param `end_frame`: End frame of the animation.
+    :param `fps`: Frames per second.
+    :param `mode`: Animation mode, `str` of [`play`, `loop`, `pingpong`]
+    '''
+    pass

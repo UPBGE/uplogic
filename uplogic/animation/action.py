@@ -9,7 +9,7 @@ from uplogic.animation import ULActionSystem
 from uplogic.animation.actionsystem import get_action_system
 from uplogic.events import schedule
 import bpy
-from uplogic.utils import clamp
+from uplogic.utils import clamp, debug
 
 
 PLAY_MODES = {
@@ -32,7 +32,10 @@ ACTION_FINISHED = 'ACTION_FINISHED'
 
 
 class ULAction():
-    '''Wrapper class for animated actions that provides additional parameters
+    '''
+    [DEPRECATED]
+
+    Wrapper class for animated actions that provides additional parameters
     and quick access properties.
 
     :param `game_object`: The `KX_GameObject` on which to play the action.
@@ -69,6 +72,7 @@ class ULAction():
         blend_mode: str = 'blend',
         keep: bool = False
     ):
+        debug('ULAction class will be renamed to "Action" in future releases!')
         self._fps_factor = bpy.context.scene.render.fps / 60
         self._locked = False
         self._speed = speed
@@ -330,3 +334,26 @@ class ULAction():
         '''Set the frame of this action.
         '''
         self.frame = frame
+
+class Action(ULAction):
+    '''Wrapper class for animated actions that provides additional parameters
+    and quick access properties.
+
+    :param `game_object`: The `KX_GameObject` on which to play the action.
+    :param `action_name`: The name of the action  of `bpy.data.actions`.
+    :param `start_frame`: The first frame of the action.
+    :param `end_frame`: The last frame of the action.
+    :param `layer`: The layer on which to play the action. Leave at -1 for
+    auto-selection.
+    :param `priority`: The priority with which to play the action (only relevant
+    for actions on the same layer).
+    :param `blendin`: Use this many frames to "blend into" the animation.
+    :param `play_mode`: Mode of playback of [`'play'`, `'loop'`, `'pingpong'`].
+    :param `speed`: Playback speed.
+    :param `intensity`: "Intensity" of the action; Use this to blend
+    animations on different layers together.
+    :param `blend_mode`: Mode of blending of [`'blend'`, `'add'`]
+    :param `keep`: Whether to keep the animation cached after playback has
+    finished. This is useful for setting animation frames regardless of the
+    action state.'''
+    pass

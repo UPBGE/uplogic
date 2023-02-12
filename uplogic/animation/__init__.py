@@ -5,5 +5,5 @@ controlling animations.
 from .actionsystem import ULActionSystem  # noqa
 from .action import ACTION_FINISHED  # noqa
 from .action import ACTION_STARTED  # noqa
-from .action import ULAction  # noqa
+from .action import ULAction, Action  # noqa
 from .sequence import ULSequence  # noqa
