@@ -9,6 +9,9 @@ from .ssao import SSAO
 from .mist import Mist
 from .levels import Levels
 from .letterbox import Letterbox
+from .distort import Distort
+from .droplets import Droplets
+from .blur import Blur
 from .chromaticaberration import ChromaticAberration
 from .shader import load_glsl
 from .shader import remove_filter

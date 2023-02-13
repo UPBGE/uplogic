@@ -7,7 +7,7 @@ class UI(Widget):
 
     def __init__(self, pos=(0, 0), size=(100, 100)):
         super().__init__(pos, size)
-        self.mouse_consumed = False
+        self._mouse_consumed = False
         self._to_evaluate = []
         # bge.logic.getCurrentScene().post_draw.append(self.evaluate)
         bge.logic.getCurrentScene().post_draw.append(self.draw)
@@ -24,7 +24,7 @@ class UI(Widget):
     def draw(self):
         gpu.state.blend_set('ALPHA')
         super().draw()
-        self.mouse_consumed = False
+        self._mouse_consumed = False
         while self._to_evaluate:
             self._to_evaluate.pop().evaluate()
 

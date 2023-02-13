@@ -1,12 +1,14 @@
 import gpu
 from gpu_extras.batch import batch_for_shader
+from bge import render
 
 
 class Widget():
     '''TODO: Documentation
     '''
-    def __init__(self, pos=(0, 0), size=(0, 0)):
+    def __init__(self, pos=(0, 0), size=(0, 0), relative={}):
         self.size = size
+        self.relative = relative
         self._children: list[Widget] = []
         self._children_reversed: list[Widget] = self.children.__reversed__()
         self.vertices = ((0, 0), (0, 0), (0, 0), (0, 0))
@@ -25,6 +27,20 @@ class Widget():
         return pa
 
     @property
+    def _recurse(self):
+        widgets = [self]
+        for w in self.children:
+            widgets.extend(w._recurse)
+        return widgets
+
+    @property
+    def childrenRecursive(self):
+        widgets = []
+        for w in self.children:
+            widgets.extend(w._recurse)
+        return widgets
+
+    @property
     def children(self):
         return self._children
 
@@ -40,7 +56,6 @@ class Widget():
     @parent.setter
     def parent(self, val):
         self._parent = val
-        print(self.z)
         self.pos = self.pos
 
     @property
@@ -55,8 +70,8 @@ class Widget():
     def pos(self, val):
         self._pos = list(val)
         self.build_shader()
-        for widget in self.children:
-            widget.pos = widget.pos
+        # for widget in self.children:
+        #     widget.pos = widget.pos
 
     @property
     def width(self):
@@ -81,18 +96,30 @@ class Widget():
     @property
     def _draw_pos(self):
         inherit_pos = self.parent.pos_abs if self.parent else [0, 0]
-        return [self.pos[0] + inherit_pos[0], self.pos[1] + inherit_pos[1]]
+        pos = [
+            self.pos[0] * render.getWindowWidth(),
+            self.pos[1] * render.getWindowHeight(),
+        ] if self.relative.get('pos') else self.pos
+        return [pos[0] + inherit_pos[0], pos[1] + inherit_pos[1]]
+
+    @property
+    def _draw_size(self):
+        return [
+            self.size[0] * render.getWindowWidth(),
+            self.size[1] * render.getWindowHeight(),
+        ] if self.relative.get('size') else self.size
 
     def start(self):
         pass
 
     def build_shader(self):
         pos = self._draw_pos
+        size = self._draw_size
         vertices = self.vertices = (
             (pos[0], pos[1]),
-            (pos[0] + self.size[0], pos[1]),
-            (pos[0] + self.size[0], pos[1] + self.size[1]),
-            (pos[0], pos[1] + self.size[1])
+            (pos[0] + size[0], pos[1]),
+            (pos[0] + size[0], pos[1] + size[1]),
+            (pos[0], pos[1] + size[1])
         )
         indices = (
             (0, 1, 2), (2, 3, 0)

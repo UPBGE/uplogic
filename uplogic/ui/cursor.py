@@ -43,6 +43,10 @@ class Cursor(Widget):
         )
 
     def draw(self):
+        scene = bge.logic.getCurrentScene()
+        if scene.post_draw[-1] is not self.draw:
+            scene.post_draw.remove(self.draw)
+            scene.post_draw.append(self.draw)
         gpu.state.blend_set('ALPHA')
         if self.show:
             self.pos = MOUSE.position

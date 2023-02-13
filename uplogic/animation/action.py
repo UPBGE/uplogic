@@ -187,8 +187,8 @@ class ULAction():
             value = 0.00000000001
         if not self.is_playing or value == self._speed:
             return
-        self._restart_action()
         self._speed = value
+        self._restart_action()
 
     def _restart_action(self):
         '''Restart action to use updated values.

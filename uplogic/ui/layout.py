@@ -4,8 +4,8 @@ import gpu
 
 class Layout(Widget):
 
-    def __init__(self, pos=[100., 100.], size=[100., 100.], color=(0, 0, 0, 0), border_width=1.0, border_color=(0, 0, 0, 0)):
-        super().__init__(pos, size)
+    def __init__(self, pos=[0., 0.], size=[100., 100.], relative={}, color=(0, 0, 0, 0), border_width=1.0, border_color=(0, 0, 0, 0)):
+        super().__init__(pos, size, relative)
         self.color = color
         self.border_width = border_width
         self.border_color = border_color
