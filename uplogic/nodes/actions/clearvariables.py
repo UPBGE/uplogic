@@ -11,8 +11,8 @@ class ULClearVariables(ULActionNode):
     def __init__(self):
         ULActionNode.__init__(self)
         self.condition = None
+        self.file_name = None
         self.path = ''
-        self.file_name = ''
         self.done = None
         self.OUT = ULOutSocket(self, self.get_done)
 
@@ -22,7 +22,7 @@ class ULClearVariables(ULActionNode):
     def write_to_json(self, path):
         data = None
         if not path.endswith('.json'):
-            path = path + f'{self.file_name}.json'
+            path = path + f'{self.get_input(self.file_name)}.json'
         if os.path.isfile(path):
             data = {}
             f = open(path, 'w')

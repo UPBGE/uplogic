@@ -13,8 +13,8 @@ class ULSaveVariableDict(ULActionNode):
         ULActionNode.__init__(self)
         self.condition = None
         self.val = None
+        self.file_name = None
         self.path = ''
-        self.file_name = ''
         self.done = None
         self.OUT = ULOutSocket(self, self.get_done)
 
@@ -23,7 +23,7 @@ class ULSaveVariableDict(ULActionNode):
 
     def write_to_json(self, path, val):
         if not path.endswith('.json'):
-            path = path + f'{self.file_name}.json'
+            path = path + f'{self.get_input(self.file_name)}.json'
         if os.path.isfile(path):
             f = open(path, 'w')
             json.dump(val, f, indent=2)

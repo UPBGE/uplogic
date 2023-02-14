@@ -9,8 +9,8 @@ import os
 class ULLoadVariableDict(ULParameterNode):
     def __init__(self):
         ULParameterNode.__init__(self)
+        self.file_name = None
         self.path = ''
-        self.file_name = ''
         self.VAR = ULOutSocket(self, self.get_var)
 
     def get_var(self):
@@ -34,7 +34,7 @@ class ULLoadVariableDict(ULParameterNode):
     def read_from_json(self, path):
         self.done = False
         if not path.endswith('.json'):
-            path = path + f'{self.file_name}.json'
+            path = path + f'{self.get_input(self.file_name)}.json'
         if not os.path.isfile(path):
             debug('No Saved Variables!')
             return

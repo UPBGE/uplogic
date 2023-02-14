@@ -14,8 +14,8 @@ class ULSaveVariable(ULActionNode):
         self.condition = None
         self.name = None
         self.val = None
+        self.file_name = None
         self.path = ''
-        self.file_name = ''
         self.done = None
         self.OUT = ULOutSocket(self, self.get_done)
 
@@ -25,7 +25,7 @@ class ULSaveVariable(ULActionNode):
     def write_to_json(self, path, name, val):
         data = None
         if not path.endswith('.json'):
-            path = path + f'{self.file_name}.json'
+            path = path + f'{self.get_input(self.file_name)}.json'
         if os.path.isfile(path):
             f = open(path, 'r')
             data = json.load(f)

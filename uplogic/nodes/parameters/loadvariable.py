@@ -13,8 +13,8 @@ class ULLoadVariable(ULParameterNode):
         ULParameterNode.__init__(self)
         self.name = None
         self.default_value = None
+        self.file_name = None
         self.path = ''
-        self.file_name = ''
         self.VAR = ULOutSocket(self, self.get_var)
 
     def get_var(self):
@@ -40,7 +40,7 @@ class ULLoadVariable(ULParameterNode):
 
     def read_from_json(self, path, name):
         if not path.endswith('.json'):
-            path = path + f'{self.file_name}.json'
+            path = path + f'{self.get_input(self.file_name)}.json'
         if path:
             f = open(path, 'r')
             data = json.load(f)
