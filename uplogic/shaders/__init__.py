@@ -12,7 +12,10 @@ from .letterbox import Letterbox
 from .distort import Distort
 from .droplets import Droplets
 from .blur import Blur
+from .dof import DoF
 from .chromaticaberration import ChromaticAberration
+from .sharpen import Sharpen
+from .ssgi import SSGI
 from .shader import load_glsl
 from .shader import remove_filter
 from .shader import toggle_filter

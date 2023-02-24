@@ -6,21 +6,22 @@ from bge import render
 class Widget():
     '''TODO: Documentation
     '''
-    def __init__(self, pos=(0, 0), size=(0, 0), relative={}):
-        self.size = size
-        self.relative = relative
+    def __init__(self, pos=(0, 0), size=(0, 0), color=(0, 0, 0, 0), relative={}):
+        self._parent = None
+        self._pos = [0, 0]
         self._children: list[Widget] = []
         self._children_reversed: list[Widget] = self.children.__reversed__()
+        self.relative = relative
+        self.size = size
+        self.pos = pos
+        self.color = color
         self.vertices = ((0, 0), (0, 0), (0, 0), (0, 0))
         self.show = True
         self.z = 0
-        self._pos = [0, 0]
-        self._parent = None
-        self.pos = pos
         self.start()
 
     @property
-    def system(self):
+    def window(self):
         pa = self
         while pa.parent is not None:
             pa = pa.parent
@@ -70,8 +71,17 @@ class Widget():
     def pos(self, val):
         self._pos = list(val)
         self.build_shader()
-        # for widget in self.children:
-        #     widget.pos = widget.pos
+        for child in self.children:
+            child.pos = child.pos
+
+    @property
+    def size(self):
+        return self._size
+    
+    @size.setter
+    def size(self, val):
+        self._size = list(val)
+        self.build_shader()
 
     @property
     def width(self):
@@ -88,6 +98,14 @@ class Widget():
     @height.setter
     def height(self, val):
         self.size[1] = val
+
+    @property
+    def opacity(self):
+        return self.color[3]
+
+    @opacity.setter
+    def opacity(self, val):
+        self.color[3] = val
 
     @property
     def child_offset(self):
@@ -133,11 +151,11 @@ class Widget():
         """This is called each frame.
         """
         if self.show:
-            self.system._to_evaluate.append(self)
+            self.window._to_evaluate.append(self)
             for widget in self.children:
                 widget.draw()
 
-    def evaluate(self):
+    def update(self):
         pass
 
     def add_widget(self, widget):

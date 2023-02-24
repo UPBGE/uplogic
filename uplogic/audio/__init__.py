@@ -5,6 +5,8 @@ from .audiosystem import set_vr_audio  # noqa
 from .audiosystem import get_audio_system  # noqa
 from .audiosystem import stop_all_audio  # noqa
 from .sound import ULSound2D  # noqa
+from .sound import Sound2D  # noqa
+from .sound import Sample  # noqa
 from .sound import ULSound3D  # noqa
 from .sound import ULSpeaker2D  # noqa
 from .sound import ULSpeaker3D  # noqa

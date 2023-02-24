@@ -134,6 +134,9 @@ class ULSound():
 
     def resume(self):
         self.sound.resume()
+    
+    def on_finish(self):
+        pass
 
 
 class ULSound2D(ULSound):
@@ -155,7 +158,7 @@ class ULSound2D(ULSound):
         volume: float = 1,
         pitch: float = 1,
         loop_count: int = 0,
-        lowpass=False,
+        lowpass = False,
         ignore_timescale = False,
         aud_sys: str = 'default'
     ):
@@ -235,8 +238,74 @@ class ULSound2D(ULSound):
         handle = self.sound
         if not handle.status:
             self.finished = True
+            self.on_finish()
             self.aud_system.remove(self)
             return
+
+
+class Sound2D(ULSound2D):
+    '''Non-spacial sound, e.g. Music or Voice-Overs.\n
+    This class allows for modification of pitch and volume while playing.
+
+    :param `file`: Path to the sound file.
+    :param `volume`: Initial volume.
+    :param `pitch`: Initial pitch.
+    :param `loop_count`: Plays the sound this many times (0 for once, -1 for endless).
+    :param `aud_sys`: Audiosystem to play this sound on.
+    '''
+    pass
+
+
+class Sample(Sound2D):
+    '''Non-spacial sample, e.g. Music or Voice-Overs.\n
+    This class allows for modification of pitch and volume while playing.
+    The played audio file can be limited to a start and end time.
+
+    :param `file`: Path to the sound file.
+    :param `volume`: Initial volume.
+    :param `pitch`: Initial pitch.
+    :param `loop_count`: Plays the sound this many times (0 for once, -1 for endless).
+    :param `aud_sys`: Audiosystem to play this sound on.
+    '''
+
+    def __init__(
+        self,
+        file: str = '',
+        sample: tuple = (0, 0),
+        volume: float = 1,
+        pitch: float = 1,
+        loop_count: int = 0,
+        lowpass = False,
+        ignore_timescale = False,
+        aud_sys: str = 'default'
+    ):
+        self.file = file
+        self._volume = 1
+        self.finished = False
+        if not (file):
+            return
+        self.aud_system = get_audio_system(aud_sys)
+        soundfile = logic.expandPath(file)
+        self.ignore_timescale = ignore_timescale
+        if not isfile(soundfile):
+            debug(f'Soundfile {soundfile} could not be loaded!')
+            return
+        sound = self.soundfile = aud.Sound(soundfile)
+        if sample[1]:
+            sound = sound.limit(sample[0], sample[1])
+        lowpass = self.aud_system.lowpass or lowpass
+        if lowpass:
+            sound = self.soundfile = sound.lowpass(lowpass, .5)
+        device = self.aud_system.device
+        self.sound = handle = device.play(sound)
+
+        handle.relative = True
+        handle.loop_count = loop_count
+        self.aud_system.add(self)
+        self.volume = volume
+        self.pitch = pitch
+        self._lowpass = False
+        self.lowpass = self.aud_system.lowpass
 
 
 class ULSound3D(ULSound):
@@ -346,12 +415,14 @@ class ULSound3D(ULSound):
         speaker = self.speaker
         if not self._is_vector and (not speaker or speaker.invalid):
             self.finished = True
+            self.on_finish()
             aud_system.remove(self)
             return
         location = speaker if self._is_vector else speaker.worldPosition
         for i, handle in enumerate(self.handles[1]):
             if not handle.status:
                 self.finished = True
+                self.on_finish()
                 aud_system.remove(self)
                 return
             handle.pitch = self.pitch * (1 if self.ignore_timescale else logic.getTimeScale())

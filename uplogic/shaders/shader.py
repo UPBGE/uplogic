@@ -89,7 +89,9 @@ class ULFilter():
 
     def set_uniform(self, name, value):
         cls = value.__class__
-        if cls is int:
+        if cls is bool:
+            self._filter.setUniform1i(name, value)
+        elif cls is int:
             self._filter.setUniform1i(name, value)
         elif cls is float:
             self._filter.setUniform1f(name, value)

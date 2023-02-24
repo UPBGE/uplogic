@@ -120,6 +120,14 @@ class Mist(ULFilter):
         self.settings['start'] = float(val)
 
     @property
+    def density(self):
+        return self.settings['density']
+
+    @density.setter
+    def density(self, val):
+        self.settings['density'] = float(val)
+
+    @property
     def power(self):
         return self.settings['power']
 

@@ -5,6 +5,16 @@ import bge, bpy
 from gpu_extras.batch import batch_for_shader
 
 
+def remove_custom_cursor():
+    scene = bge.logic.getCurrentScene()
+    to_remove = []
+    for f in scene.post_draw:
+        if f.__name__ == '_draw_custom_cursor':
+            to_remove.append(f)
+    for f in to_remove:
+        scene.post_draw.remove(f)
+
+
 class Cursor(Widget):
 
     def __init__(self, size=(20,20), texture=None, offset=(0, 0)):
@@ -13,7 +23,7 @@ class Cursor(Widget):
         self._texture = None
         self.texture = texture
         self.pos = MOUSE.position
-        bge.logic.getCurrentScene().post_draw.append(self.draw)
+        bge.logic.getCurrentScene().post_draw.append(self._draw_custom_cursor)
 
     @property
     def texture(self):
@@ -42,11 +52,11 @@ class Cursor(Widget):
             },
         )
 
-    def draw(self):
+    def _draw_custom_cursor(self):
         scene = bge.logic.getCurrentScene()
-        if scene.post_draw[-1] is not self.draw:
-            scene.post_draw.remove(self.draw)
-            scene.post_draw.append(self.draw)
+        if scene.post_draw[-1] is not self._draw_custom_cursor:
+            scene.post_draw.remove(self._draw_custom_cursor)
+            scene.post_draw.append(self._draw_custom_cursor)
         gpu.state.blend_set('ALPHA')
         if self.show:
             self.pos = MOUSE.position

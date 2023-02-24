@@ -7,7 +7,7 @@ from gpu_extras.batch import batch_for_shader
 class Image(Widget):
 
     def __init__(self, pos=[0, 0], size=(100, 100), relative={}, texture=None):
-        super().__init__(pos, size, relative)
+        super().__init__(pos, size, relative=relative)
         self.texture = texture
 
     @property
