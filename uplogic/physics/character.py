@@ -58,6 +58,14 @@ class ULCharacter():
         self.wrapper.gravity = value
 
     @property
+    def slope(self) -> Vector:
+        return self.wrapper.maxSlope
+
+    @slope.setter
+    def slope(self, value):
+        self.wrapper.maxSlope = value
+
+    @property
     def jump_count(self) -> int:
         return self.wrapper.jumpCount
 

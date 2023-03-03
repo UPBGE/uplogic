@@ -6,7 +6,9 @@ from bge import render
 class Widget():
     '''TODO: Documentation
     '''
-    def __init__(self, pos=(0, 0), size=(0, 0), color=(0, 0, 0, 0), relative={}):
+    def __init__(self, pos=(0, 0), size=(0, 0), color=(0, 0, 0, 0), relative={}, halign='left', valign='bottom'):
+        self.halign = halign
+        self.valign = valign
         self._parent = None
         self._pos = [0, 0]
         self._children: list[Widget] = []
@@ -16,12 +18,14 @@ class Widget():
         self.pos = pos
         self.color = color
         self.vertices = ((0, 0), (0, 0), (0, 0), (0, 0))
+        self._clipped = [0, 0]
         self.show = True
+        self.use_clipping = None
         self.z = 0
         self.start()
 
     @property
-    def window(self):
+    def canvas(self):
         pa = self
         while pa.parent is not None:
             pa = pa.parent
@@ -51,17 +55,36 @@ class Widget():
         self._children_reversed = val.__reversed__()
 
     @property
+    def color(self):
+        return self._color
+
+    @color.setter
+    def color(self, val):
+        val = list(val)
+        self._color = val
+
+    @property
     def parent(self):
         return self._parent
 
     @parent.setter
     def parent(self, val):
+        if self.parent is not val and self.parent:
+            self.parent.remove_widget(self)
+        if self.use_clipping is None:
+            self.use_clipping = val.use_clipping
         self._parent = val
         self.pos = self.pos
+        self.size = self.size
 
     @property
     def pos_abs(self):
-        return self.vertices[0]
+        pos = self.vertices[0]
+        # print(self._clipped)
+        return [
+            pos[0] - self._clipped[0],
+            pos[1] - self._clipped[1]
+        ]
 
     @property
     def pos(self):
@@ -70,18 +93,32 @@ class Widget():
     @pos.setter
     def pos(self, val):
         self._pos = list(val)
-        self.build_shader()
+        if self.parent:
+            self.build_shader()
         for child in self.children:
             child.pos = child.pos
 
     @property
     def size(self):
         return self._size
-    
+
     @size.setter
     def size(self, val):
         self._size = list(val)
-        self.build_shader()
+        if self.parent:
+            self.build_shader()
+
+    @property
+    def use_clipping(self):
+        return self._use_clipping
+
+    @use_clipping.setter
+    def use_clipping(self, val):
+        self._use_clipping = val
+        for widget in self.childrenRecursive:
+            widget.use_clipping = val
+        if self.parent:
+            self.build_shader()
 
     @property
     def width(self):
@@ -112,32 +149,80 @@ class Widget():
         return [0, 0]
 
     @property
+    def clipping(self):
+        pdpos = self.parent._draw_pos
+        pdsize = self.parent._draw_size
+        return [
+            pdpos[0],
+            pdpos[0] + pdsize[0],
+            pdpos[1] + pdsize[1],
+            pdpos[1]
+        ]
+
+    @property
     def _draw_pos(self):
+        if self.parent is None:
+            return [0, 0]
         inherit_pos = self.parent.pos_abs if self.parent else [0, 0]
+        pdsize = self.parent._draw_size
         pos = [
-            self.pos[0] * render.getWindowWidth(),
-            self.pos[1] * render.getWindowHeight(),
+            self.pos[0] * pdsize[0],
+            self.pos[1] * pdsize[1]
         ] if self.relative.get('pos') else self.pos
-        return [pos[0] + inherit_pos[0], pos[1] + inherit_pos[1]]
+        offset = [0, 0]
+        dsize = self._draw_size
+        if self.halign == 'center':
+            offset[0] += dsize[0] * .5
+        elif self.halign == 'right':
+            offset[0] += dsize[0]
+        if self.valign == 'center':
+            offset[1] += dsize[1] * .5
+        elif self.valign == 'top':
+            offset[1] += dsize[1]
+        return [pos[0] + inherit_pos[0] - offset[0], pos[1] + inherit_pos[1] - offset[1]]
 
     @property
     def _draw_size(self):
-        return [
-            self.size[0] * render.getWindowWidth(),
-            self.size[1] * render.getWindowHeight(),
-        ] if self.relative.get('size') else self.size
+        if self.parent is None:
+            return self.size
+        if self.relative.get('size'):
+            return [
+                self.size[0] * self.parent._draw_size[0],
+                self.size[1] * self.parent._draw_size[1]
+            ]
+        return self.size
 
     def start(self):
         pass
 
     def build_shader(self):
+        if self.parent is None:
+            return
         pos = self._draw_pos
         size = self._draw_size
+        x0 = [pos[0], pos[1]]
+        x1 = [pos[0] + size[0], pos[1]]
+        y0 = [pos[0], pos[1] + size[1]]
+        y1 = [pos[0] + size[0], pos[1] + size[1]]
+        v = [x0, x1, y0, y1]
+        if self.parent.use_clipping:
+            clip = self.clipping
+            for vert in v:
+                if vert[0] < clip[0]:
+                    self._clipped[0] = clip[0] - vert[0]
+                    vert[0] = clip[0]
+                elif vert[0] > clip[1]:
+                    vert[0] = clip[1]
+                if vert[1] < clip[3]:
+                    self._clipped[1] = clip[3] - vert[1]
+                    vert[1] = clip[3]
+                elif vert[1] > clip[2]:
+                    vert[1] = clip[2]
         vertices = self.vertices = (
-            (pos[0], pos[1]),
-            (pos[0] + size[0], pos[1]),
-            (pos[0] + size[0], pos[1] + size[1]),
-            (pos[0], pos[1] + size[1])
+            x0,
+            x1,
+            y1,
+            y0
         )
         indices = (
             (0, 1, 2), (2, 3, 0)
@@ -150,9 +235,10 @@ class Widget():
     def draw(self):
         """This is called each frame.
         """
-        if self.show:
-            self.window._to_evaluate.append(self)
-            for widget in self.children:
+        gpu.state.blend_set('ALPHA')
+        self.canvas._to_evaluate.append(self)
+        for widget in self.children:
+            if widget.show:
                 widget.draw()
 
     def update(self):
@@ -163,11 +249,18 @@ class Widget():
 
         :param `action`: `Widget` to add.
         '''
-        if widget not in self.children and widget.parent is None:
+        if widget not in self.children:
             self.children.append(widget)
-            widget.z = self.z + len(self.children)
+            self.canvas.set_z(-1)
             widget.parent = self
         self.children = sorted(self.children, key=lambda widget: widget.z, reverse=False)
+
+    def set_z(self, z):
+        z += 1
+        self.z = z
+        for c in self.children:
+            z = c.set_z(z)
+        return z
 
     def remove_widget(self, widget):
         '''Remove a `Widget`.

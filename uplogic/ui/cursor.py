@@ -3,6 +3,10 @@ from uplogic.input import MOUSE
 import gpu
 import bge, bpy
 from gpu_extras.batch import batch_for_shader
+from bge import logic
+
+
+CURSOR = None
 
 
 def remove_custom_cursor():
@@ -19,10 +23,13 @@ class Cursor(Widget):
 
     def __init__(self, size=(20,20), texture=None, offset=(0, 0)):
         self.offset = offset
+        remove_custom_cursor()
         super().__init__(MOUSE.position, size)
         self._texture = None
+        self.shader = None
         self.texture = texture
         self.pos = MOUSE.position
+        self._last_visible = logic.mouse.visible
         bge.logic.getCurrentScene().post_draw.append(self._draw_custom_cursor)
 
     @property
@@ -53,6 +60,7 @@ class Cursor(Widget):
         )
 
     def _draw_custom_cursor(self):
+        self.build_shader()
         scene = bge.logic.getCurrentScene()
         if scene.post_draw[-1] is not self._draw_custom_cursor:
             scene.post_draw.remove(self._draw_custom_cursor)

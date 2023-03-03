@@ -141,6 +141,4 @@ class Mist(ULFilter):
 
     @color.setter
     def color(self, val):
-        if not isinstance(val, Vector):
-            val = Vector(val)
-        self.settings['color'] = val
+        self.settings['color'] = Vector(val).to_3d()

@@ -101,6 +101,10 @@ class ULReverb():
             sample.cone_volume_outer = handle.cone_volume_outer
 
 
+def dummy():
+    pass
+
+
 class ULSound():
     """Base class for 2D and 3D Sounds
     """
@@ -118,7 +122,7 @@ class ULSound():
     def position(self):
         if self.sound:
             return self.sound.position
-    
+
     @position.setter
     def position(self, val):
         if self.sound:
@@ -127,6 +131,7 @@ class ULSound():
     def stop(self):
         '''TODO: Documentation
         '''
+        self.on_finish = dummy
         self.sound.stop()
 
     def pause(self):
@@ -150,8 +155,6 @@ class ULSound2D(ULSound):
     :param `aud_sys`: Audiosystem to play this sound on.
     '''
 
-    sound: aud.Handle
-
     def __init__(
         self,
         file: str = '',
@@ -159,7 +162,7 @@ class ULSound2D(ULSound):
         pitch: float = 1,
         loop_count: int = 0,
         lowpass = False,
-        ignore_timescale = False,
+        ignore_timescale = True,
         aud_sys: str = 'default'
     ):
         self.file = file
@@ -179,6 +182,7 @@ class ULSound2D(ULSound):
             sound = self.soundfile = sound.lowpass(lowpass, .5)
         device = self.aud_system.device
         self.sound = handle = device.play(sound)
+        handle.volume = 0
 
         handle.relative = True
         handle.loop_count = loop_count
@@ -298,6 +302,7 @@ class Sample(Sound2D):
             sound = self.soundfile = sound.lowpass(lowpass, .5)
         device = self.aud_system.device
         self.sound = handle = device.play(sound)
+        handle.volume = 0
 
         handle.relative = True
         handle.loop_count = loop_count
@@ -312,18 +317,17 @@ class ULSound3D(ULSound):
     '''Spacial sound, e.g. World Effects or Voices.\n
     This class allows for modification of pitch and volume as well as other attributes while playing.
     '''
-    sounds: list
-    speaker: GameObject
-    occlusion: bool
-    location: Vector
-    cone_outer_volume: float
-    transition: float
-    soundpath: str
-    reverb: bool
-    bounces: int
-    _clear_sound: float
-    _sustained: float
-    reverb_samples: ULReverb
+
+    @property
+    def position(self):
+        if self.handles:
+            return self.handles[1][0].position
+
+    @position.setter
+    def position(self, val):
+        for sound in self.handles[1]:
+            print(sound)
+            sound.position = val
 
     def __init__(
         self,
@@ -348,7 +352,7 @@ class ULSound3D(ULSound):
         self.finished = False
         if not (file and speaker):
             return
-        self._clear_sound = 1
+        self._clear_sound = 0 if occlusion else 1
         self._sustained = 1
         self.occluded = False
         self.sounds = []
@@ -370,9 +374,11 @@ class ULSound3D(ULSound):
         sound = self.soundpath = aud.Sound(soundfile).rechannel(1)
         device = self.aud_system.device
         handle = device.play(sound)
+        handle.volume = 0
         if occlusion:
             soundlow = aud.Sound.lowpass(sound, 4400 * cutoff_frequency, .5).rechannel(1)
             handlelow = device.play(soundlow)
+            handlelow.volume = 0
             self.handles = [speaker, [handle, handlelow]]
         else:
             self.handles = [speaker, [handle]]
@@ -403,8 +409,9 @@ class ULSound3D(ULSound):
                 self.handles[1][0]
             )
         self.aud_system.add(self)
+        self.update(True)
 
-    def update(self):
+    def update(self, init=False):
         '''TODO: Documentation
         '''
         # if self.volume == 0:
@@ -437,8 +444,8 @@ class ULSound3D(ULSound):
                     handle.velocity = Vector((0, 0, 0))
                 elif speaker.mass:
                     handle.velocity = getattr(speaker, 'worldLinearVelocity', Vector((0, 0, 0)))
-            if self.occlusion:
-                transition = self.transition
+            if self.occlusion and handle.status:
+                transition = 1 if init else self.transition
                 cam = self.aud_system.listener
                 occluder, point, normal = cam.rayCast(
                     location,
@@ -494,7 +501,7 @@ class ULSound3D(ULSound):
                     mult *
                     master_volume
                 )
-            else:
+            elif handle.status:
                 master_volume = self.aud_system.volume
                 handle.volume = self.volume * master_volume
                 handle.cone_volume_outer = (
@@ -509,8 +516,100 @@ class ULSound3D(ULSound):
     def stop(self):
         '''TODO: Documentation
         '''
-        for sound in self.sounds:
+        self.on_finish = dummy
+        for sound in self.handles[1]:
             sound.stop()
+
+
+class Sample3D(ULSound3D):
+    '''Spacial sound, e.g. World Effects or Voices.\n
+    This class allows for modification of pitch and volume as well as other attributes while playing.
+    '''
+
+    def __init__(
+        self,
+        speaker: GameObject or Vector = None,
+        file: str = '',
+        sample: tuple = (0, 0),
+        occlusion: bool = False,
+        transition_speed: float = .1,
+        cutoff_frequency: float = .1,
+        loop_count: int = 0,
+        pitch: float = 1,
+        volume: float = 1,
+        reverb=False,
+        attenuation: float = 1,
+        distance_ref: float = 1,
+        cone_angle: list[float] = [360, 360],
+        cone_outer_volume: float = 0,
+        ignore_timescale: bool = False,
+        aud_sys: str = 'default'
+    ):
+        self._is_vector = isinstance(speaker, Vector)
+        self.file = file
+        self.finished = False
+        if not (file and speaker):
+            return
+        self._clear_sound = 1
+        self._sustained = 1
+        self.occluded = False
+        self.sounds = []
+        self.reverb_samples = None
+        self.aud_system = get_audio_system(aud_sys)
+        self.speaker = speaker
+        self.reverb = reverb
+        self.occlusion = occlusion
+        self.volume = volume
+        self.pitch = pitch
+        self.cone_outer_volume = cone_outer_volume
+        master_volume = self.aud_system.volume
+        self.transition = transition_speed
+        self.ignore_timescale = ignore_timescale
+        soundfile = logic.expandPath(file)
+        if not isfile(soundfile):
+            debug(f'Soundfile {soundfile} could not be loaded!')
+            return
+        sound = self.soundpath = aud.Sound(soundfile).rechannel(1)
+        device = self.aud_system.device
+        if sample[1]:
+            sound = sound.limit(sample[0], sample[1])
+        handle = device.play(sound)
+        handle.volume = 0
+        if occlusion:
+            soundlow = aud.Sound.lowpass(sound, 4400 * cutoff_frequency, .5).rechannel(1)
+            handlelow = device.play(soundlow)
+            handlelow.volume = 0
+            self.handles = [speaker, [handle, handlelow]]
+        else:
+            self.handles = [speaker, [handle]]
+        for handle in self.handles[1]:
+            handle.relative = False
+            handle.location = speaker if self._is_vector else speaker.worldPosition
+            if not self._is_vector and speaker.mass:
+                handle.velocity = getattr(
+                    speaker,
+                    'worldLinearVelocity',
+                    Vector((0, 0, 0))
+                ) if speaker.blenderObject.game.physics_type != 'NO_COLLISION' else Vector((0, 0, 0))
+            handle.attenuation = attenuation
+            if not self._is_vector:
+                handle.orientation = speaker.worldOrientation.to_quaternion()
+            handle.pitch = pitch
+            handle.volume = volume * master_volume
+            handle.distance_reference = distance_ref
+            handle.distance_maximum = 1000
+            handle.cone_angle_inner = cone_angle[0]
+            handle.cone_angle_outer = cone_angle[1]
+            handle.loop_count = loop_count
+            handle.cone_volume_outer = cone_outer_volume * volume * master_volume
+        if self.reverb:
+            self.reverb_samples = ULReverb(
+                self,
+                sound,
+                self.handles[1][0]
+            )
+        self.aud_system.add(self)
+        self.update(True)
 
 
 class ULSpeaker2D(ULSound2D):

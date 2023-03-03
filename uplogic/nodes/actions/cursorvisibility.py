@@ -1,4 +1,4 @@
-from bge import logic
+from bge import logic, render
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
 from uplogic.utils import is_waiting
@@ -22,7 +22,5 @@ class ULSetCursorVisibility(ULActionNode):
             return
         self._set_ready()
         visibility_status = self.get_input(self.visibility_status)
-        if is_waiting(visibility_status):
-            return
         logic.mouse.visible = visibility_status
         self.done = True

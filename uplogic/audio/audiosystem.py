@@ -134,6 +134,7 @@ class ULAudioSystem(object):
                 self.setup(scene)
             listener = self.vr_headset if self.use_vr else scene.active_camera
             self.reverb = False
+            same_cam = listener is self.listener
             if not self.use_vr:
                 self.listener = listener
             if not self._active_sounds:
@@ -162,7 +163,7 @@ class ULAudioSystem(object):
                 if in_range:
                     self.reverb = True
                     self.bounces = ob.reverb_samples
-            listener_vel = (0, 0, 0) if self.use_vr else self.compute_listener_velocity(listener)
+            listener_vel = (0, 0, 0) if self.use_vr or not same_cam else self.compute_listener_velocity(listener)
             dev = self.device
             dev.listener_location = cpos
             dev.listener_orientation = listener.worldOrientation.to_quaternion()

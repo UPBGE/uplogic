@@ -253,7 +253,7 @@ class Droplets(ULFilter):
 
     @color.setter
     def color(self, val):
-        self.settings['color'] = Vector(val)
+        self.settings['color'] = Vector(val).to_3d()
 
     @property
     def timer(self):

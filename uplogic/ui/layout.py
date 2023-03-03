@@ -1,21 +1,33 @@
 from .widget import Widget
 import gpu
+from bge import render
 
 
 class Layout(Widget):
 
-    def __init__(self, pos=[0., 0.], size=[100., 100.], relative={}, color=(0, 0, 0, 0), border_width=1.0, border_color=(0, 0, 0, 0)):
-        super().__init__(pos, size, color, relative)
+    def __init__(
+        self,
+        pos=[0., 0.],
+        size=[100., 100.],
+        color=(0, 0, 0, 0),
+        relative={},
+        border_width=1,
+        border_color=(0, 0, 0, 0),
+        halign='left',
+        valign='bottom'
+    ):
+        super().__init__(pos, size, color, relative, halign=halign, valign=valign)
         self.border_width = border_width
         self.border_color = border_color
 
     @property
-    def color(self):
-        return self._color
+    def opacity(self):
+        return self.color[3]
 
-    @color.setter
-    def color(self, color):
-        self._color = list(color)
+    @opacity.setter
+    def opacity(self, val):
+        self.color[3] = val
+        self.border_color[3] = val
 
     @property
     def border_color(self):
@@ -24,6 +36,14 @@ class Layout(Widget):
     @border_color.setter
     def border_color(self, color):
         self._border_color = list(color)
+
+    @property
+    def border_width(self):
+        return self._border_width
+
+    @border_width.setter
+    def border_width(self, val):
+        self._border_width = int(val)
 
     def draw(self):
         gpu.state.line_width_set(self.border_width)
@@ -37,7 +57,14 @@ class Layout(Widget):
 
 
 class RelativeLayout(Layout):
-    pass
+    @property
+    def clipping(self):
+        return [
+            0,
+            render.getWindowWidth(),
+            render.getWindowHeight(),
+            0
+        ]
 
 
 class FloatLayout(Layout):
@@ -51,18 +78,41 @@ class BoxLayout(Layout):
     def __init__(
             self,
             orientation='vertical',
-            pos=[100, 100],
+            pos=[0, 0],
             size=[100, 100],
             color=(0, 0, 0, 0),
+            relative={},
             border_width=1,
-            border_color=(0, 0, 0, 0)
+            border_color=(0, 0, 0, 0),
+            spacing=0,
+            halign='left',
+            valign='bottom'
         ):
-        super().__init__(pos, size, color, border_width, border_color)
+        self.orientation = orientation
+        self.spacing = spacing
+        super().__init__(pos, size, color, relative, border_width, border_color, halign=halign, valign=valign)
+        self.use_clipping = True
+
+    def add_widget(self, widget):
+        super().add_widget(widget)
+        self.arrange()
     
-    @property
-    def offset(self):
-        return (
-            sum([widget.width for widget in self.children])
-            if self.orientation == 'horizontal' else
-            sum([widget.height for widget in self.children])
-        )
+    def remove_widget(self, widget):
+        super().remove_widget(widget)
+        self.arrange()
+
+    def arrange(self):
+        dsize = self._draw_size
+        if self.orientation == 'horizontal':
+            offset = 0
+            for widget in self.children:
+                widget.relative['pos'] = False
+                widget.pos = [offset, dsize[1] - widget._draw_size[1]]
+                offset += widget._draw_size[0] + self.spacing
+        if self.orientation == 'vertical':
+            offset = dsize[1]
+            for widget in self.children:
+                offset -= widget._draw_size[1]
+                widget.relative['pos'] = False
+                widget.pos = [0, offset]
+                offset -= self.spacing
