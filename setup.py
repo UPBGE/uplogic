@@ -8,7 +8,7 @@ def read_file(name):
         return f.read()
 
 
-version = 'v1.8'
+version = 'v1.8.1'
 shortdesc = "Uplogic utility for UPBGE."
 longdesc = '\n\n'.join([read_file(name) for name in [
     'README.md',
@@ -31,7 +31,7 @@ setup(
     author='Leopold Auersperg-Castell',
     author_email='lauersperg@gmx.at',
     url='https://github.com/UPBGE/uplogic',
-    download_url='https://github.com/UPBGE/uplogic/archive/refs/tags/v1.8.tar.gz',
+    download_url='https://github.com/UPBGE/uplogic/archive/refs/tags/v1.8.1.tar.gz',
     license='GPLv2',
     packages=[
         'uplogic',
@@ -48,6 +48,7 @@ setup(
         'uplogic.nodes.parameters',
         'uplogic.physics',
         'uplogic.shaders',
+        'uplogic.ui',
         'uplogic.utils'
     ],
     # ext_modules=cythonize([

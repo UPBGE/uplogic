@@ -93,6 +93,21 @@ class BoxLayout(Layout):
         super().__init__(pos, size, color, relative, border_width, border_color, halign=halign, valign=valign)
         self.use_clipping = True
 
+    @property
+    def parent(self):
+        return self._parent
+
+    @parent.setter
+    def parent(self, val):
+        if self.parent is not val and self.parent:
+            self.parent.remove_widget(self)
+        if self.use_clipping is None:
+            self.use_clipping = val.use_clipping
+        self._parent = val
+        self.pos = self.pos
+        self.size = self.size
+        self.arrange()
+
     def add_widget(self, widget):
         super().add_widget(widget)
         self.arrange()
