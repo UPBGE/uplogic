@@ -1,4 +1,4 @@
-from uplogic.audio import ULSound2D
+from uplogic.audio import Sound2D
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
 from uplogic.utils import is_invalid
@@ -60,7 +60,7 @@ class ULStartSound(ULActionNode):
         if is_invalid(file):
             return
 
-        self._handle = ULSound2D(
+        self._handle = Sound2D(
             file,
             volume,
             pitch,

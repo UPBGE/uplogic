@@ -1,4 +1,4 @@
-from .shader import ULFilter
+from .shader import Filter2D
 from mathutils import Vector
 
 
@@ -25,7 +25,7 @@ void main( )
 """
 
 
-class Vignette(ULFilter):
+class Vignette(Filter2D):
 
     def __init__(self, power: float = 0.25, color=(0., 0., 0.), idx: int = None) -> None:
         self.settings = {'power': float(power), 'color': Vector(color)}

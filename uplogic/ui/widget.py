@@ -6,7 +6,7 @@ from bge import render
 class Widget():
     '''TODO: Documentation
     '''
-    def __init__(self, pos=(0, 0), size=(0, 0), color=(0, 0, 0, 0), relative={}, halign='left', valign='bottom'):
+    def __init__(self, pos=(0, 0), size=(0, 0), bg_color=(0, 0, 0, 0), relative={}, halign='left', valign='bottom'):
         self.halign = halign
         self.valign = valign
         self._parent = None
@@ -16,7 +16,7 @@ class Widget():
         self.relative = relative
         self.size = size
         self.pos = pos
-        self.color = color
+        self.bg_color = bg_color
         self.vertices = ((0, 0), (0, 0), (0, 0), (0, 0))
         self._clipped = [0, 0]
         self.show = True
@@ -55,13 +55,13 @@ class Widget():
         self._children_reversed = val.__reversed__()
 
     @property
-    def color(self):
-        return self._color
+    def bg_color(self):
+        return self._bg_color
 
-    @color.setter
-    def color(self, val):
+    @bg_color.setter
+    def bg_color(self, val):
         val = list(val)
-        self._color = val
+        self._bg_color = val
 
     @property
     def parent(self):
@@ -138,11 +138,11 @@ class Widget():
 
     @property
     def opacity(self):
-        return self.color[3]
+        return self.bg_color[3]
 
     @opacity.setter
     def opacity(self, val):
-        self.color[3] = val
+        self.bg_color[3] = val
 
     @property
     def child_offset(self):
@@ -227,10 +227,10 @@ class Widget():
         indices = (
             (0, 1, 2), (2, 3, 0)
         )
-        self.shader = gpu.shader.from_builtin('2D_UNIFORM_COLOR')
-        self.batch = batch_for_shader(self.shader, 'TRIS', {"pos": vertices}, indices=indices)
-        self.batch_line = batch_for_shader(self.shader, 'LINE_LOOP', {"pos": vertices})
-        self.batch_points = batch_for_shader(self.shader, 'POINTS', {"pos": vertices})
+        self._shader = gpu.shader.from_builtin('2D_UNIFORM_COLOR')
+        self.batch = batch_for_shader(self._shader, 'TRIS', {"pos": vertices}, indices=indices)
+        self.batch_line = batch_for_shader(self._shader, 'LINE_LOOP', {"pos": vertices})
+        self.batch_points = batch_for_shader(self._shader, 'POINTS', {"pos": vertices})
 
     def draw(self):
         """This is called each frame.

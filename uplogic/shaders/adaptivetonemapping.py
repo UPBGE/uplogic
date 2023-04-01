@@ -1,4 +1,4 @@
-from .shader import ULFilter
+from .shader import Filter2D
 
 
 glsl = """
@@ -21,7 +21,7 @@ void main(void)
 }"""
 
 
-class AdaptiveToneMapping(ULFilter):
+class AdaptiveToneMapping(Filter2D):
 
     def __init__(self, power=1.0, avgL=2.0, idx: int = None) -> None:
         self.settings = {'power': float(power), 'avgL': float(avgL)}

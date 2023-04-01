@@ -1,4 +1,4 @@
-from .shader import ULFilter
+from .shader import Filter2D
 from bge import logic
 
 
@@ -300,7 +300,7 @@ void main()
 """
 
 
-class HBAO(ULFilter):
+class HBAO(Filter2D):
 
     def __init__(self, power=1.0, idx: int = None) -> None:
         cam = logic.getCurrentScene().active_camera

@@ -9,24 +9,24 @@ class Layout(Widget):
         self,
         pos=[0., 0.],
         size=[100., 100.],
-        color=(0, 0, 0, 0),
+        bg_color=(0, 0, 0, 0),
         relative={},
         border_width=1,
         border_color=(0, 0, 0, 0),
         halign='left',
         valign='bottom'
     ):
-        super().__init__(pos, size, color, relative, halign=halign, valign=valign)
+        super().__init__(pos, size, bg_color, relative, halign=halign, valign=valign)
         self.border_width = border_width
         self.border_color = border_color
 
     @property
     def opacity(self):
-        return self.color[3]
+        return self.bg_color[3]
 
     @opacity.setter
     def opacity(self, val):
-        self.color[3] = val
+        self.bg_color[3] = val
         self.border_color[3] = val
 
     @property
@@ -48,11 +48,11 @@ class Layout(Widget):
     def draw(self):
         gpu.state.line_width_set(self.border_width)
         gpu.state.point_size_set(self.border_width)
-        self.shader.uniform_float("color", self.color)
-        self.batch.draw(self.shader)
-        self.shader.uniform_float("color", self.border_color)
-        self.batch_line.draw(self.shader)
-        self.batch_points.draw(self.shader)
+        self._shader.uniform_float("color", self.bg_color)
+        self.batch.draw(self._shader)
+        self._shader.uniform_float("color", self.border_color)
+        self.batch_line.draw(self._shader)
+        self.batch_points.draw(self._shader)
         super().draw()
 
 
@@ -80,7 +80,7 @@ class BoxLayout(Layout):
             orientation='vertical',
             pos=[0, 0],
             size=[100, 100],
-            color=(0, 0, 0, 0),
+            bg_color=(0, 0, 0, 0),
             relative={},
             border_width=1,
             border_color=(0, 0, 0, 0),
@@ -90,7 +90,7 @@ class BoxLayout(Layout):
         ):
         self.orientation = orientation
         self.spacing = spacing
-        super().__init__(pos, size, color, relative, border_width, border_color, halign=halign, valign=valign)
+        super().__init__(pos, size, bg_color, relative, border_width, border_color, halign=halign, valign=valign)
         self.use_clipping = True
 
     @property

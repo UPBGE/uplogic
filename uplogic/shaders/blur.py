@@ -1,4 +1,4 @@
-from .shader import ULFilter
+from .shader import Filter2D
 
 
 glsl = """
@@ -43,7 +43,7 @@ void main()
     fragColor = color;
 }"""
 
-class Blur(ULFilter):
+class Blur(Filter2D):
 
     def __init__(self, samples=16, power=1.0, idx: int = None) -> None:
        self.settings = {'samples': float(samples), 'power': float(power)}

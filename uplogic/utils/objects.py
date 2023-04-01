@@ -174,6 +174,8 @@ class ULCurve():
     `None` to use scene collection.
     """
 
+    _deprecated = True
+
     def __init__(
         self,
         name: str,
@@ -182,6 +184,8 @@ class ULCurve():
         material: str or Material =None,
         collection: str = None
     ) -> None:
+        if self._deprecated:
+            print('[UPLOGIC] ULCurve class will be renamed to "Curve" in future releases!')
         self.object = create_curve(
             name,
             bevel_depth,
@@ -218,3 +222,7 @@ class ULCurve():
     @bevel_depth.setter
     def bevel_depth(self, val):
         self.object.blenderObject.data.bevel_depth = val
+
+
+class Curve(ULCurve):
+    _deprecated = False

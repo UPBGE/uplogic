@@ -6,6 +6,7 @@ from bge.types import KX_GameObject as GameObject
 from mathutils import Vector
 from uplogic.utils import interpolate
 from uplogic.events import schedule_callback
+from uplogic.utils import debug
 
 
 MOUSE_EVENTS = logic.mouse.inputs
@@ -152,7 +153,12 @@ def mouse_wheel(tap: bool = False) -> int:
 
 class ULMouse():
     """Mouse Wrapper for accessing mouse data."""
+
+    _deprecated = True
+
     def __init__(self) -> None:
+        if self._deprecated:
+            debug('ULMouse class will be renamed to "Mouse" in future releases!')
         self._position = get_mouse_position()
         """Staggered updated mouse position for pos difference calculation."""
         self.movement = (0, 0)
@@ -238,7 +244,10 @@ class ULMouse():
         return mouse_tap(MOUSE_BUTTONS[button])
 
 
-MOUSE = ULMouse()
+class Mouse(ULMouse):
+    _deprecated = False
+
+MOUSE = Mouse()
 
 
 class ULMouseLook():
@@ -265,6 +274,8 @@ class ULMouseLook():
     (can be changed later).
     """
 
+    _deprecated = True
+
     def __init__(
         self,
         obj: GameObject,
@@ -280,6 +291,8 @@ class ULMouseLook():
         front: int = 1,
         active: bool = True
     ) -> None:
+        if self._deprecated:
+            debug('ULMouseLook class will be renamed to "MouseLook" in future releases!')
         self.obj = obj
         self.head = head if head else obj
         self._defaults = [
@@ -451,3 +464,7 @@ class ULMouseLook():
         # if self.mouse.position != self.screen_center:
             self.mouse.position = self.screen_center
         self.done = True
+
+
+class MouseLook(ULMouseLook):
+    _deprecated = False

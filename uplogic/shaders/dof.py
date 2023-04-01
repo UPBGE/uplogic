@@ -1,4 +1,4 @@
-from .shader import ULFilter
+from .shader import Filter2D
 from bge import logic, render
 from mathutils import Vector
 
@@ -285,7 +285,7 @@ void main()
 """
 
 
-class DoF(ULFilter):
+class DoF(Filter2D):
 
         
     def __init__(self, distance=1.0, autofocus=False, power=1.0, fstop=1, samples=16, idx: int = None) -> None:

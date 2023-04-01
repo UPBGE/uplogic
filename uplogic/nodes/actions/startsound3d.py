@@ -1,4 +1,4 @@
-from uplogic.audio import ULSound3D
+from uplogic.audio import Sound3D
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
 from uplogic.utils import is_invalid
@@ -79,7 +79,7 @@ class ULStartSound3D(ULActionNode):
 
         if is_invalid(file):
             return
-        self._handle = ULSound3D(
+        self._handle = Sound3D(
             speaker,
             file,
             occlusion,

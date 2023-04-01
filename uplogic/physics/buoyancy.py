@@ -1,8 +1,9 @@
 from bge import logic
 from mathutils import Vector
+from uplogic.utils import debug
 from uplogic.utils import vec_clamp
 from uplogic.utils import raycast
-from uplogic.utils import FLOATSAM
+from uplogic.utils import FLOTSAM
 from uplogic.utils import SHIP
 from uplogic.utils import WATER
 
@@ -22,12 +23,15 @@ class ULBuoy():
         raise NotImplementedError
 
 
-class ULFloatsam(ULBuoy):
+class ULFlotsam(ULBuoy):
+    _deprecated = True
 
     def __init__(self, game_object, buoyancy=1, height=200, align=True) -> None:
+        if self._deprecated:
+            debug('ULFlotsam class will be renamed to "Flotsam" in future releases!')
         super().__init__()
         self.game_object = game_object
-        game_object[FLOATSAM] = self
+        game_object[FLOTSAM] = self
         self.height = height
         self.buoyancy = buoyancy
         self.align = align
@@ -37,11 +41,11 @@ class ULFloatsam(ULBuoy):
         if not self._active:
             return
         up = Vector((0, 0, 1))
-        floatsam = self.game_object
+        flotsam = self.game_object
         lindamp = .1
-        wpos = floatsam.worldPosition
+        wpos = flotsam.worldPosition
         obj, point, normal, direction = raycast(
-            floatsam,
+            flotsam,
             wpos,
             up,
             self.height,
@@ -53,23 +57,30 @@ class ULFloatsam(ULBuoy):
         if obj:
             lindamp = .8
             lift = (up * (wpos - point).length * self.buoyancy)
-            floatsam.applyImpulse(
+            flotsam.applyImpulse(
                 wpos,
                 vec_clamp(lift, max=self.buoyancy),
                 False
             )
             if self.align:
                 self.game_object.alignAxisToVect(normal, 2, .2)
-        floatsam.linearDamping = lindamp
-        floatsam.angularDamping = lindamp * .8
+        flotsam.linearDamping = lindamp
+        flotsam.angularDamping = lindamp * .8
 
     def destroy(self):
         logic.getCurrentScene().pre_draw.remove(self.update)
 
 
+class Flotsam(ULFlotsam):
+    _deprecated = False
+
+
 class ULShip(ULBuoy):
+    _deprecated = True
 
     def __init__(self, game_object, buoyancy=1, height=200, water=None) -> None:
+        if self._deprecated:
+            debug('ULShip class will be renamed to "Ship" in future releases!')
         super().__init__()
         self.game_object = game_object
         self.linear_damping = game_object.linearDamping
@@ -119,3 +130,7 @@ class ULShip(ULBuoy):
 
     def destroy(self):
         logic.getCurrentScene().pre_draw.remove(self.update)
+
+
+class Ship(ULShip):
+    _deprecated = False

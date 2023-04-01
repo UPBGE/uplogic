@@ -16,10 +16,8 @@ class ULValueSwitch(ULParameterNode):
 
     def _get_out_value(self):
         condition = self.get_input(self.condition)
-        val_a = self.get_input(self.val_a)
-        val_b = self.get_input(self.val_b)
         return (
-            val_a if condition is True else val_b
+            self.get_input(self.val_a) if condition is True else self.get_input(self.val_b)
         )
 
     def evaluate(self):
@@ -45,34 +43,20 @@ class ULValueSwitchList(ULParameterNode):
         self.VAL = ULOutSocket(self, self._get_out_value)
 
     def _get_out_value(self):
-        ca = self.get_input(self.ca)
-        val_a = self.get_input(self.val_a)
-        cb = self.get_input(self.cb)
-        val_b = self.get_input(self.val_b)
-        cc = self.get_input(self.cc)
-        val_c = self.get_input(self.val_c)
-        cd = self.get_input(self.cd)
-        val_d = self.get_input(self.val_d)
-        ce = self.get_input(self.ce)
-        val_e = self.get_input(self.val_e)
-        cf = self.get_input(self.cf)
-        val_f = self.get_input(self.val_f)
-        if is_waiting(ca, cb, cc, cd, ce, cf):
-            return STATUS_WAITING
-        if ca == True:
-            return val_a
-        elif cb == True:
-            return val_b
-        elif cc == True:
-            return val_c
-        elif cd == True:
-            return val_d
-        elif ce == True:
-            return val_e
-        elif cf == True:
-            return val_f
+        if self.get_input(self.ca) is True:
+            return self.get_input(self.val_a)
+        if self.get_input(self.cb) is True:
+            return self.get_input(self.val_b)
+        if self.get_input(self.cc) is True:
+            return self.get_input(self.val_c)
+        if self.get_input(self.cd) is True:
+            return self.get_input(self.val_d)
+        if self.get_input(self.ce) is True:
+            return self.get_input(self.val_e)
+        if self.get_input(self.cf) is True:
+            return self.get_input(self.val_f)
         else:
-            return
+            return STATUS_WAITING
 
     def evaluate(self):
         self._set_ready()
@@ -122,8 +106,6 @@ class ULValueSwitchListCompare(ULParameterNode):
         pf = self.get_input(self.pf)
         val_f = self.get_input(self.val_f)
         operator = self.get_input(self.operator)
-        if is_waiting(p0, pa, pb, pc, pd, pe, pf):
-            return STATUS_WAITING
         if self.is_none_if_not_eq_or_neq_operator(p0, pa):
             return
         if LOGIC_OPERATORS[operator](p0, pa):

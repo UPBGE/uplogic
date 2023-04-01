@@ -57,9 +57,9 @@ def stop_all_audio() -> None:
 
 
 class ULAudioSystem(object):
-    '''System for managing sounds started using `ULSound2D` or `ULSound3D`.
+    '''System for managing sounds started using `Sound2D` or `Sound3D`.
 
-    This is usually addressed indirectly through `ULSound2D` or `ULSound3D` and
+    This is usually addressed indirectly through `Sound2D` or `Sound3D` and
     is not intended for manual use.
     '''
     def __init__(self, name: str, mode: str = '3D'):

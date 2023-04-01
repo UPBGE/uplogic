@@ -1,4 +1,4 @@
-from .shader import ULFilter
+from .shader import Filter2D
 
 
 glsl = """
@@ -738,7 +738,7 @@ void main()
 """
 
 
-class FXAA(ULFilter):
+class FXAA(Filter2D):
 
     def __init__(self, idx: int = None) -> None:
         super().__init__(glsl, idx)

@@ -261,11 +261,15 @@ class ULGamePad():
     `'SONY'`].
     """
 
+    _deprecated = True
+
     def __init__(
         self,
         idx: int = 0,
         layout: dict = XBOX
     ) -> None:
+        if self._deprecated:
+            debug('ULGamePad class will be renamed to "Gamepad" in future releases!')
         self.idx = idx
         self.layout = layout
         if not logic.joysticks[idx]:
@@ -295,6 +299,10 @@ class ULGamePad():
         self.joystick.startVibration()
 
 
+class Gamepad(ULGamePad):
+    _deprecated = False
+
+
 class ULGamepadLook():
     """Automatically track the mouse movement and translate it to a rotate a
     body and optionally a head.
@@ -318,6 +326,7 @@ class ULGamepadLook():
     :param `active`: Whether to start this component in active or inactive mode
     (can be changed later).
     """
+    _deprecated = True
     def __init__(
         self,
         obj: GameObject,
@@ -337,6 +346,8 @@ class ULGamepadLook():
         exponent: float = 2.3,
         active=True
     ) -> None:
+        if self._deprecated:
+            debug('ULGamepadLook class will be renamed to "GamepadLook" in future releases!')
         self.obj = obj
         self.head = head if head else obj
         self._defaults = [
@@ -488,3 +499,7 @@ class ULGamepadLook():
         rot[1-self.front] = y
         game_object_y.applyRotation((*rot, ), True)
         self.done = True
+
+
+class GamepadLook(ULGamepadLook):
+    _deprecated = False

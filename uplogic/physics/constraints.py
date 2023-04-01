@@ -66,6 +66,9 @@ def remove_constraint(constraint: GameConstraint) -> None:
 
 
 class ULTrackTo():
+
+    _deprecated = True
+
     def __init__(
         self,
         game_object: GameObject,
@@ -74,6 +77,8 @@ class ULTrackTo():
         front: int = 1,
         factor: float = 1
     ) -> None:
+        if self._deprecated:
+            debug('ULTrackTo class will be renamed to "TrackTo" in future releases!')
         self._axis = None
         self._target = None
         self.game_object = game_object
@@ -120,6 +125,10 @@ class ULTrackTo():
             self.rotate_func(self.game_object, self.target, self.front, self.speed)
 
 
+class TrackTo(ULTrackTo):
+    _deprecated = False
+
+
 class ULSpring():
     """Spring Physics Constraint. The two objects connected by the string will
     be pulled towards each other if the string is streched, optionally they will
@@ -137,6 +146,9 @@ class ULSpring():
     :param `curve`: Set a curve object to fit the spring.
     :param `visualize`: Enable a visual representation of the spring.
     """
+
+    _deprecated = True
+
     def __init__(
         self,
         origin: GameObject,
@@ -152,6 +164,8 @@ class ULSpring():
         curve: GameObject or None = None,
         visualize: bool = False
     ) -> None:
+        if self._deprecated:
+            debug('ULSpring class will be renamed to "Spring" in future releases!')
         self.force = 0
         if isinstance(origin, tuple) or isinstance(origin, list):
             origin = Vector((origin))
@@ -224,3 +238,7 @@ class ULSpring():
             rbo.applyImpulse(o.worldPosition, get_direction(o, t) * force)
         if hasattr(rbt, 'blenderObject') and rbt.blenderObject.data:
             rbt.applyImpulse(o.worldPosition, get_direction(t, o) * force)
+
+
+class Spring(ULSpring):
+    _deprecated = False

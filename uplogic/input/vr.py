@@ -3,6 +3,7 @@ from mathutils import Quaternion
 from mathutils import Matrix
 from mathutils import Vector
 from bge import logic
+from uplogic.utils import debug
 from bge.types import KX_GameObject as GameObject
 from uplogic.utils.errors import NoXRSessionError
 
@@ -27,7 +28,11 @@ class ULControllerVR():
     :param `idx`: Controller index; 0 for left, 1 for right controller.
     """
 
+    _deprecated = True
+
     def __init__(self, idx: int=0) -> None:
+        if self._deprecated:
+            debug('ULControllerVR class will be renamed to "VRController" in future releases!')
         self.idx = idx
         self.stick_threshold = 0.0
         self.session = bpy.context.window_manager.xr_session_state
@@ -131,13 +136,22 @@ class ULControllerVR():
         print("Attribute 'thumbstick' of 'ULControllerVR' is read-only!")
 
 
+class VRController(ULControllerVR):
+    _deprecated = False
+
+
 class ULHeadsetVR():
     """Wrapper class for a VR Headset.
 
     This wrapper provides a `position` and an `orientation`
     attribute.
     """
+
+    _deprecated = True
+
     def __init__(self) -> None:
+        if self._deprecated:
+            debug('ULHeadsetVR class will be renamed to "VRHeadset" in future releases!')
         self.session = bpy.context.window_manager.xr_session_state
         if not self.session:
             raise NoXRSessionError
@@ -190,6 +204,10 @@ class ULHeadsetVRWrapper(ULHeadsetVR):
         return logic.getCurrentScene().active_camera.rayCast(obj_to, obj_from, distance, xray=xray)
 
 
+class VRHeadset(ULHeadsetVR):
+    _deprecated = False
+
+
 class ULCharacterVR():
     """Wrapper class for all VR Devices. This wrapper contains 2 `ULControllerVR` objects as well as one
     `ULHeadsetVR` object.
@@ -199,11 +217,14 @@ class ULCharacterVR():
 
     This class provides a `position` an `orientation` and a `scale` attribute.
     """
+    _deprecated = True
     def __init__(
         self,
         left_hand_object: GameObject = None,
         right_hand_object: GameObject = None
     ) -> None:
+        if self._deprecated:
+            debug('ULCharacterVR class will be renamed to "VRCharacter" in future releases!')
         self.session = bpy.context.window_manager.xr_session_state
         if not self.session:
             raise NoXRSessionError
@@ -246,3 +267,7 @@ class ULCharacterVR():
     @scale.setter
     def scale(self, val):
         print("Attribute 'scale' of 'ULHeadsetVR' is read-only!")
+
+
+class VRCharacter(ULCharacterVR):
+    _deprecated = False

@@ -1,4 +1,4 @@
-from .shader import ULFilter
+from .shader import Filter2D
 from mathutils import Vector
 from bge import logic, render
 
@@ -78,7 +78,7 @@ void main(void)
 """
 
 
-class Mist(ULFilter):
+class Mist(Filter2D):
 
     def __init__(self, start=.1, density=0.5, color=(0.5, 0.7, 0.9), power=1.0, idx: int = None) -> None:
         cam = logic.getCurrentScene().active_camera

@@ -1,4 +1,4 @@
-from .shader import ULFilter
+from .shader import Filter2D
 from bge import logic
 
 
@@ -71,7 +71,7 @@ void main(void)
 """
 
 
-class Sharpen(ULFilter):
+class Sharpen(Filter2D):
 
     def __init__(self, sharpness=0.0, idx: int = None) -> None:
         self.settings = {'sharpness': float(sharpness)}

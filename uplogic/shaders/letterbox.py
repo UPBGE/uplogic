@@ -1,4 +1,4 @@
-from .shader import ULFilter
+from .shader import Filter2D
 
 
 glsl = """
@@ -28,7 +28,7 @@ void main()
 """
 
 
-class Letterbox(ULFilter):
+class Letterbox(Filter2D):
 
     def __init__(self, power: float = 1.0, factor: float = 0.1, idx: int = None) -> None:
         self.settings = {'power': float(power), 'factor': float(factor)}

@@ -4,6 +4,7 @@ from bge.constraints import createVehicle
 from mathutils import Euler
 from mathutils import Vector
 from uplogic.utils import VEHICLE
+from uplogic.utils import debug
 
 FWD = 'FRONT'
 """Front Wheel Drive\n
@@ -19,6 +20,7 @@ This will adress all wheels on the vehicle."""
 
 
 class ULVehicle():
+    _deprecated = True
 
     def __init__(
         self,
@@ -31,6 +33,8 @@ class ULVehicle():
         drive: str = FWD,
         steer_axle: str = FWD
     ) -> None:
+        if self._deprecated:
+            debug('ULVehicle class will be renamed to "Vehicle" in future releases!')
         orig_ori = body.localOrientation.copy()
         body.localOrientation = Euler((0, 0, 0), 'XYZ')
         ph_id = body.getPhysicsId()
@@ -305,3 +309,7 @@ class ULVehicle():
         if wheelcount and wheelcount != self.steer_wheels:
             self.steer_wheels = wheelcount
         self.steering = power
+
+
+class Vehicle(ULVehicle):
+    _deprecated = False

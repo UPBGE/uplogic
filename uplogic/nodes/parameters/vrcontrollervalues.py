@@ -1,6 +1,6 @@
 from uplogic.nodes import ULOutSocket
 from uplogic.nodes import ULParameterNode
-from uplogic.input import ULControllerVR
+from uplogic.input import VRController
 
 
 class ULGetVRControllerValues(ULParameterNode):
@@ -23,7 +23,7 @@ class ULGetVRControllerValues(ULParameterNode):
     @index.setter
     def index(self, val):
         self._index = val
-        self.controller = ULControllerVR(self.index)
+        self.controller = VRController(self.index)
 
     def get_pos(self):
         return self.controller.position

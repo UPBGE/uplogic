@@ -1,12 +1,12 @@
 from uplogic.nodes import ULOutSocket
 from uplogic.nodes import ULParameterNode
-from uplogic.input import ULHeadsetVR
+from uplogic.input import VRHeadset
 
 
 class ULGetVRHeadsetValues(ULParameterNode):
     def __init__(self):
         ULParameterNode.__init__(self)
-        self.controller = ULHeadsetVR()
+        self.controller = VRHeadset()
         self.POS = ULOutSocket(self, self.get_pos)
         self.ORI = ULOutSocket(self, self.get_ori)
 

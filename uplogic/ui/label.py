@@ -11,7 +11,7 @@ class Label(Widget):
     def __init__(
         self,
         pos=[0, 0],
-        color=[0, 0, 0, 0],
+        bg_color=[0, 0, 0, 0],
         relative={},
         text='',
         font='',
@@ -31,7 +31,7 @@ class Label(Widget):
         :param text: the text to display (this can be changed later via the text property)
         :param font: the font to use
         :param pt_size: the point size of the text to draw (defaults to 30 if None)
-        :param color: the color to use when rendering the font
+        :param bg_color: the color to use when rendering the font
         :param pos: a tuple containing the x and y position
         :param sub_theme: name of a sub_theme defined in the theme file (similar to CSS classes)
         :param options: various other options
@@ -45,12 +45,12 @@ class Label(Widget):
         self.shadow = shadow
         self.shadow_offset = shadow_offset
         self.shadow_color = shadow_color
-        self.color = color
+        self.bg_color = bg_color
         self.font_size = font_size
         self.font_color = font_color
         self.font = font
         self.wrap = wrap
-        Widget.__init__(self, pos, (10, 10), color, relative)
+        Widget.__init__(self, pos, (10, 10), bg_color, relative)
         self.text_halign = halign
         self.text_valign = valign
 
@@ -83,11 +83,11 @@ class Label(Widget):
 
     @property
     def opacity(self):
-        return self.color[3]
+        return self.bg_color[3]
 
     @opacity.setter
     def opacity(self, val):
-        self.color[3] = val
+        self.bg_color[3] = val
         self.font_opacity = val
 
     @property

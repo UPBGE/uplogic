@@ -1,4 +1,4 @@
-from .shader import ULFilter
+from .shader import Filter2D
 from bge import logic
 
 
@@ -194,7 +194,7 @@ void main(void)
 }"""
 
 
-class Distort(ULFilter):
+class Distort(Filter2D):
 
     def __init__(self, power=1.0, speed=1.0, idx: int = None) -> None:
         now = logic.getRealTime()

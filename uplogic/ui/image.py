@@ -30,9 +30,9 @@ class Image(Widget):
             (pos[0] + size[0], pos[1] + size[1]),
             (pos[0], pos[1] + size[1])
         )
-        self.shader = gpu.shader.from_builtin('2D_IMAGE')
+        self._shader = gpu.shader.from_builtin('2D_IMAGE')
         self.batch = batch_for_shader(
-            self.shader, 'TRI_FAN',
+            self._shader, 'TRI_FAN',
             {
                 "pos": vertices,
                 "texCoord": ((0, 0), (1, 0), (1, 1), (0, 1)),
@@ -40,9 +40,9 @@ class Image(Widget):
         )
     
     def draw(self):
-        self.shader.bind()
-        self.shader.uniform_sampler("image", self.texture)
-        self.batch.draw(self.shader)
+        self._shader.bind()
+        self._shader.uniform_sampler("image", self.texture)
+        self.batch.draw(self._shader)
         super().draw()
 
 
@@ -85,7 +85,7 @@ class Icon(Image):
             (pos[0] + size[0], pos[1] + size[1]),
             (pos[0], pos[1] + size[1])
         )
-        self.shader = gpu.shader.from_builtin('2D_IMAGE')
+        self._shader = gpu.shader.from_builtin('2D_IMAGE')
         icon = self.icon
         col = icon % self.cols
         col_end = col + 1
@@ -98,7 +98,7 @@ class Icon(Image):
             (col * self._col_width, 1 - row * self._row_height)
         )
         self.batch = batch_for_shader(
-            self.shader, 'TRI_FAN',
+            self._shader, 'TRI_FAN',
             {
                 "pos": vertices,
                 "texCoord": texcoord

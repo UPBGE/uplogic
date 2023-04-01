@@ -59,7 +59,7 @@ class ULCreateUILayout(ULActionNode):
         self._widget = layouts[self.layout_type](
             pos=pos,
             size=size,
-            color=color,
+            bg_color=color,
             relative={'pos': rel_pos, 'size': rel_size},
             border_width=border_width,
             border_color=border_color,

@@ -13,7 +13,7 @@ import aud
 
 
 class ULReverb():
-    """Reverb sound added by `ULSound3D` on demand.
+    """Reverb sound added by `Sound3D` on demand.
     """
 
     volume: float
@@ -155,6 +155,8 @@ class ULSound2D(ULSound):
     :param `aud_sys`: Audiosystem to play this sound on.
     '''
 
+    _deprecated = True
+
     def __init__(
         self,
         file: str = '',
@@ -165,6 +167,8 @@ class ULSound2D(ULSound):
         ignore_timescale = True,
         aud_sys: str = 'default'
     ):
+        if self._deprecated:
+            debug('ULSound2D class will be renamed to "Sound2D" in future releases!')
         self.file = file
         self._volume = 1
         self.finished = False
@@ -257,10 +261,11 @@ class Sound2D(ULSound2D):
     :param `loop_count`: Plays the sound this many times (0 for once, -1 for endless).
     :param `aud_sys`: Audiosystem to play this sound on.
     '''
-    pass
+
+    _deprecated = False
 
 
-class Sample(Sound2D):
+class Sample2D(Sound2D):
     '''Non-spacial sample, e.g. Music or Voice-Overs.\n
     This class allows for modification of pitch and volume while playing.
     The played audio file can be limited to a start and end time.
@@ -271,6 +276,8 @@ class Sample(Sound2D):
     :param `loop_count`: Plays the sound this many times (0 for once, -1 for endless).
     :param `aud_sys`: Audiosystem to play this sound on.
     '''
+
+    _deprecated = False
 
     def __init__(
         self,
@@ -318,6 +325,8 @@ class ULSound3D(ULSound):
     This class allows for modification of pitch and volume as well as other attributes while playing.
     '''
 
+    _deprecated = True
+
     @property
     def position(self):
         if self.handles:
@@ -326,7 +335,6 @@ class ULSound3D(ULSound):
     @position.setter
     def position(self, val):
         for sound in self.handles[1]:
-            print(sound)
             sound.position = val
 
     def __init__(
@@ -347,6 +355,8 @@ class ULSound3D(ULSound):
         ignore_timescale: bool = False,
         aud_sys: str = 'default'
     ):
+        if self._deprecated:
+            debug('ULSound3D class will be renamed to "Sound3D" in future releases!')
         self._is_vector = isinstance(speaker, Vector)
         self.file = file
         self.finished = False
@@ -521,10 +531,16 @@ class ULSound3D(ULSound):
             sound.stop()
 
 
-class Sample3D(ULSound3D):
+class Sound3D(ULSound3D):
+    _deprecated = False
+
+
+class Sample3D(Sound3D):
     '''Spacial sound, e.g. World Effects or Voices.\n
     This class allows for modification of pitch and volume as well as other attributes while playing.
     '''
+
+    _deprecated = False
 
     def __init__(
         self,
@@ -614,6 +630,8 @@ class Sample3D(ULSound3D):
 
 class ULSpeaker2D(ULSound2D):
 
+    _deprecated = True
+
     def __init__(
         self,
         speaker: GameObject,
@@ -622,6 +640,8 @@ class ULSpeaker2D(ULSound2D):
         ignore_timescale: bool = False,
         aud_sys: str = 'default'
     ):
+        if self._deprecated:
+            debug('ULSpeaker2D class will be renamed to "Speaker2D" in future releases!')
         speaker_data = speaker.blenderObject.data
         ULSound2D()
         super().__init__(
@@ -635,7 +655,13 @@ class ULSpeaker2D(ULSound2D):
         )
 
 
+class Speaker2D(ULSpeaker2D):
+    _deprecated = False
+
+
 class ULSpeaker3D(ULSound3D):
+
+    _deprecated = True
 
     def __init__(
         self,
@@ -648,6 +674,8 @@ class ULSpeaker3D(ULSound3D):
         ignore_timescale: bool = False,
         aud_sys: str = 'default'
     ):
+        if self._deprecated:
+            debug('ULSpeaker3D class will be renamed to "Speaker3D" in future releases!')
         speaker_data = speaker.blenderObject.data
         super().__init__(
             speaker,
@@ -666,3 +694,7 @@ class ULSpeaker3D(ULSound3D):
             ignore_timescale,
             aud_sys
         )
+
+
+class Speaker3D(ULSpeaker3D):
+    _deprecated = False

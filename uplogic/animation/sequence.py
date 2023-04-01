@@ -1,6 +1,7 @@
 from bge import logic
 from uplogic.animation.action import PLAY_MODES
 import bpy
+from uplogic.utils import debug
 import time
 
 
@@ -18,6 +19,8 @@ class ULSequence():
     :param `mode`: Animation mode, `str` of [`play`, `loop`, `pingpong`]
     '''
 
+    _deprecated = True
+
     def __init__(
         self,
         material: str,
@@ -27,6 +30,9 @@ class ULSequence():
         fps: int = 60,
         mode: str = 'play'
     ) -> None:
+        if self._deprecated:
+            debug('ULSequence class will be renamed to "ULSequence" in future releases!')
+
         self.material = material
         """The material this sequence is played on."""
         self.node = node
@@ -163,4 +169,4 @@ class Sequence(ULSequence):
     :param `fps`: Frames per second.
     :param `mode`: Animation mode, `str` of [`play`, `loop`, `pingpong`]
     '''
-    pass
+    _deprecated = False

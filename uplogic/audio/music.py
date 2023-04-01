@@ -1,5 +1,5 @@
 from uplogic.audio.audiosystem import get_audio_system
-from .sound import ULSound2D
+from .sound import Sound2D
 from uuid import uuid4
 from uplogic.utils import debug, interpolate
 from uplogic.events import schedule_callback
@@ -49,12 +49,16 @@ class ULMusicEffect():
 class ULMusic(ULMusicEffect):
     '''Management class for controlling multiple music tracks.
 
-    :param `name`; Name of this music.'''
+    :param `name`: Name of this music.'''
+    _deprecated = True
+
     def __init__(
         self,
         name: str = '',
         audio_system: str = 'music'
     ):
+        if self._deprecated:
+            debug('ULMusic class will be renamed to "Music" in future releases!')
         super().__init__()
         self.name = name if name else uuid4()
         self.audio_system = get_audio_system(audio_system, '2D')
@@ -103,13 +107,13 @@ class ULMusic(ULMusicEffect):
 
     def add_track(
         self,
-        sound: str or ULSound2D,
+        sound: str or Sound2D,
         track_name: str = ''
     ):
         '''Add a track to this music. A track is typically one instrument or
         effect.
         
-        :param `sound`: Path to the sound file or `ULSound2D` instance.
+        :param `sound`: Path to the sound file or `Sound2D` instance.
         :param `name`: Name of this track (e.g. "Drums")'''
         if not track_name:
             track_name = uuid4()
@@ -158,6 +162,10 @@ class ULMusic(ULMusicEffect):
         self.position = 0.0
 
 
+class Music(ULMusic):
+    _deprecated = False
+
+
 class ULMusicTrack(ULMusicEffect):
     '''Track to be played on a `ULMusic` instance.
     
@@ -166,19 +174,19 @@ class ULMusicTrack(ULMusicEffect):
     :param `name`: Name of this track (e.g. "Drums).'''
     def __init__(
         self,
-        music: ULMusic,
-        sound: str or ULSound2D,
+        music: Music,
+        sound: str or Sound2D,
         name: str
     ):
         super().__init__()
         self.music = music
         self.name = name
-        sound = ULSound2D(
+        sound = Sound2D(
             sound,
             aud_sys=self.music.audio_system
         ) if isinstance(sound, str) else sound
         sound.position = music.position
-        self.sound: ULSound2D = sound
+        self.sound: Sound2D = sound
 
     @property
     def position(self):

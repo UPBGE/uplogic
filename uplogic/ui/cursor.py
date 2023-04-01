@@ -26,7 +26,7 @@ class Cursor(Widget):
         remove_custom_cursor()
         super().__init__(MOUSE.position, size)
         self._texture = None
-        self.shader = None
+        self._shader = None
         self.texture = texture
         self.pos = MOUSE.position
         self._last_visible = logic.mouse.visible
@@ -43,11 +43,11 @@ class Cursor(Widget):
             self._texture = gpu.texture.from_image(texture)
 
     def build_shader(self):
-        self.shader = gpu.shader.from_builtin('2D_IMAGE')
+        self._shader = gpu.shader.from_builtin('2D_IMAGE')
         screen_res = [bge.render.getWindowWidth(), bge.render.getWindowHeight()]
         mpos = [MOUSE.position.x * screen_res[0] + self.offset[0], (1 - MOUSE.position.y) * screen_res[1] + self.offset[1]]
         self.batch = batch_for_shader(
-            self.shader, 'TRI_FAN',
+            self._shader, 'TRI_FAN',
             {
                 "pos": (
                     (mpos[0], mpos[1] - self.size[1]),
@@ -68,6 +68,6 @@ class Cursor(Widget):
         gpu.state.blend_set('ALPHA')
         if self.show:
             self.pos = MOUSE.position
-            self.shader.bind()
-            self.shader.uniform_sampler("image", self.texture)
-            self.batch.draw(self.shader)
+            self._shader.bind()
+            self._shader.uniform_sampler("image", self.texture)
+            self.batch.draw(self._shader)

@@ -1,4 +1,4 @@
-from .shader import ULFilter
+from .shader import Filter2D
 from mathutils import Vector
 
 
@@ -31,7 +31,7 @@ void main (void)
 }
 """
 
-class Levels(ULFilter):
+class Levels(Filter2D):
 
     def __init__(self, color=(1., 1., 1.), idx: int = None) -> None:
         self.settings = {'color': Vector(color)}

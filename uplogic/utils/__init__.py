@@ -1,6 +1,6 @@
 '''TODO: Documentation
 '''
-from .lights import ULLight  # noqa
+from .lights import ULLight, Light  # noqa
 from .lights import make_unique_light  # noqa
 from .nodetrees import get_geom_socket  # noqa
 from .nodetrees import get_group_socket  # noqa
@@ -13,7 +13,7 @@ from .nodetrees import set_geom_socket  # noqa
 from .nodetrees import set_group_socket  # noqa
 from .nodetrees import set_material_socket  # noqa
 from .nodetrees import set_world_socket  # noqa
-from .objects import ULCurve  # noqa
+from .objects import ULCurve, Curve  # noqa
 from .objects import controller_brick_status  # noqa
 from .objects import controller_brick  # noqa
 from .objects import create_curve  # noqa
@@ -63,7 +63,7 @@ STATUS_INVALID = _Status("INVALID")
 # uplogic game properties
 VEHICLE = '.ulvehicleconst'
 SHIP = '.ulshipconst'
-FLOATSAM = '.ulfloatsamconst'
+FLOTSAM = '.ulflotsamconst'
 WATER = '.ulwater'
 
 STREAMTYPE_DOWNSTREAM = 0
@@ -627,7 +627,7 @@ def mouse_over(game_object: GameObject) -> bool:
     return target is game_object
 
 
-def get_local(obj, target) -> Matrix:
+def get_local(obj, target) -> Vector:
     return obj.worldTransform.inverted() @ target
 
 

@@ -8,8 +8,8 @@ from uplogic.utils import debug
 
 class Button(Widget, HoverBehavior):
 
-    def __init__(self, pos=[0., 0.], size=[100., 100.], color=(0, 0, 0, 0), relative={}, border_width=1.0, border_color=(0, 0, 0, 0), hover_color=(0, 0, 0, .5), halign='left', valign='bottom'):
-        super().__init__(pos, size, color, relative, halign=halign, valign=valign)
+    def __init__(self, pos=[0., 0.], size=[100., 100.], bg_color=(0, 0, 0, 0), relative={}, border_width=1.0, border_color=(0, 0, 0, 0), hover_color=(0, 0, 0, .5), halign='left', valign='bottom'):
+        super().__init__(pos, size, bg_color, relative, halign=halign, valign=valign)
         self.hover_color = hover_color
         self.border_width = border_width
         self.border_color = border_color
@@ -30,11 +30,11 @@ class Button(Widget, HoverBehavior):
         self._clicked = False
         gpu.state.line_width_set(self.border_width)
         gpu.state.point_size_set(self.border_width)
-        self.shader.uniform_float("color", self.hover_color if self._in_focus else self.color)
-        self.batch.draw(self.shader)
-        self.shader.uniform_float("color", self.border_color)
-        self.batch_line.draw(self.shader)
-        self.batch_points.draw(self.shader)
+        self._shader.uniform_float("color", self.hover_color if self._in_focus else self.bg_color)
+        self.batch.draw(self._shader)
+        self._shader.uniform_float("color", self.border_color)
+        self.batch_line.draw(self._shader)
+        self.batch_points.draw(self._shader)
         super().draw()
         if self._in_focus and MOUSE_EVENTS[LMB].active and not self.canvas._click_consumed:
             self.on_click()
@@ -73,7 +73,7 @@ class LabelButton(Button, HoverBehavior):
         pos=[0., 0.],
         size=[100., 100.],
         relative={},
-        color=(0, 0, 0, 0),
+        bg_color=(0, 0, 0, 0),
         border_width=1.0,
         border_color=(0, 0, 0, 0),
         hover_color=(0, 0, 0, .5),
@@ -91,7 +91,7 @@ class LabelButton(Button, HoverBehavior):
         super().__init__(
             pos,
             size,
-            color,
+            bg_color,
             relative,
             border_width=border_width,
             border_color=border_color,

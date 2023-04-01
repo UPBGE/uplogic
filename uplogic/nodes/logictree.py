@@ -12,7 +12,6 @@ from uplogic.utils import make_valid_name
 import bpy
 # from uplogic import get_mainloop
 from bge.types import SCA_PythonKeyboard as Keyboard
-from bge.types import SCA_PythonMouse as Mouse
 import collections
 import time
 import Cython
@@ -21,7 +20,7 @@ import Cython
 class ULLogicTree(ULLogicContainer):
 
     def __init__(self):
-        from ..input import ULMouse
+        from ..input import Mouse
         ULLogicContainer.__init__(self)
         self._cells: list = []
         self._iter = collections.deque()
@@ -29,8 +28,7 @@ class ULLogicTree(ULLogicContainer):
         self._owner: GameObject = None
         self._max_blocking_loop_count: int = 0
         self.keyboard: Keyboard = None
-        # self.mouse: Mouse = None
-        self.mouse: ULMouse = ULMouse()
+        self.mouse: Mouse = Mouse()
         self.keyboard_events = None
         self.active_keyboard_events = None
         self.mouse_events = None

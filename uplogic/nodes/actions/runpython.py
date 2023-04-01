@@ -35,7 +35,10 @@ class ULRunPython(ULActionNode):
         mfun = self.get_input(self.module_func)
         if is_waiting(mname, mfun):
             return
-        arg = self.get_input(self.arg)
+        args = [
+            self.get_input(arg)
+            for arg in self.arg
+        ]
         self._set_ready()
         if mname and (self._old_mod_name != mname):
             exec("import {}".format(mname))
@@ -44,8 +47,8 @@ class ULRunPython(ULActionNode):
         if self._old_mod_fun != mfun:
             self._modfun = getattr(self._module, mfun)
             self._old_mod_fun = mfun
-        if arg is STATUS_INVALID:
-            self.val = self._modfun()
+        if args:
+            self.val = self._modfun(*args)
         else:
-            self.val = self._modfun(arg)
+            self.val = self._modfun()
         self.done = True

@@ -1,4 +1,4 @@
-from .shader import ULFilter
+from .shader import Filter2D
 from .fxaa import FXAA
 from .brightness import Brightness
 from .vignette import Vignette

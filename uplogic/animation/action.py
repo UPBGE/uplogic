@@ -1,4 +1,4 @@
-'''
+'''yes
 '''
 
 from bge import logic
@@ -57,6 +57,8 @@ class ULAction():
     action state.
     '''
 
+    _deprecated = True
+
     def __init__(
         self,
         game_object: GameObject,
@@ -72,7 +74,8 @@ class ULAction():
         blend_mode: str = 'blend',
         keep: bool = False
     ):
-        debug('ULAction class will be renamed to "Action" in future releases!')
+        if self._deprecated:
+            debug('ULAction class will be renamed to "Action" in future releases!')
         self._fps_factor = bpy.context.scene.render.fps / 60
         self._locked = False
         self._speed = speed
@@ -169,12 +172,14 @@ class ULAction():
 
     @intensity.setter
     def intensity(self, value: float):
+        value = float(value)
         if not self.is_playing:
             return
         if not self.is_playing or value == self._intensity:
+            print(self.intensity)
             return
-        self._restart_action()
         self._intensity = clamp(value, 0, 1)
+        self._restart_action()
 
     @property
     def speed(self) -> float:
@@ -356,4 +361,5 @@ class Action(ULAction):
     :param `keep`: Whether to keep the animation cached after playback has
     finished. This is useful for setting animation frames regardless of the
     action state.'''
+    _deprecated = False
     pass

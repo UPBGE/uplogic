@@ -92,7 +92,7 @@ class ULCreateUIButton(ULActionNode):
         self._widget = LabelButton(
             pos=pos,
             size=size,
-            color=color,
+            bg_color=color,
             relative={'pos': rel_pos, 'size': rel_size},
             hover_color=hover_color,
             text=text,

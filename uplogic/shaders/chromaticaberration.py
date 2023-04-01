@@ -1,4 +1,4 @@
-from .shader import ULFilter
+from .shader import Filter2D
 
 glsl = """
 uniform sampler2D bgl_RenderedTexture;
@@ -21,7 +21,7 @@ void main()
 """
 
 
-class ChromaticAberration(ULFilter):
+class ChromaticAberration(Filter2D):
 
     def __init__(self, power: float = 2.0, idx: int = None) -> None:
         self.settings = {'power': float(power)}

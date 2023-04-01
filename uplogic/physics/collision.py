@@ -1,6 +1,7 @@
 from typing import Callable
 from bge import logic
 from bge.types import KX_GameObject as GameObject
+from uplogic.utils import debug
 
 
 class ULCollision():
@@ -17,6 +18,8 @@ class ULCollision():
     _old_objs = []
     done_objs = []
 
+    _deprecated = True
+
     def __init__(
         self,
         game_object: GameObject,
@@ -26,6 +29,8 @@ class ULCollision():
         tap: bool = False,
         post_call: bool = False
     ):
+        if self._deprecated:
+            debug('ULCollision class will be renamed to "Collision" in future releases!')
         self.callback: Callable = callback
         self.prop: str = prop
         self.mat: str = mat
@@ -82,6 +87,10 @@ class ULCollision():
         logic.getCurrentScene().pre_draw.remove(self.reset)
 
 
+class Collision(ULCollision):
+    _deprecated = False
+
+
 def on_collision(
     obj: GameObject,
     callback: Callable,
@@ -89,7 +98,7 @@ def on_collision(
     material: str = '',
     tap: bool = False,
     post_call: bool = False
-) -> ULCollision:
+) -> Collision:
     """Bind a callback to an object's collision detection.
 
     :param `obj`: Object whose collision detection will be monitored.
@@ -98,4 +107,4 @@ def on_collision(
     :param `material`: Only look for objects that have this material applied.
     :param `tap`: Only validate the first frame of the collision.
     """
-    return ULCollision(obj, callback, prop, material, tap, post_call)
+    return Collision(obj, callback, prop, material, tap, post_call)

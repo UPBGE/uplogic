@@ -1,4 +1,4 @@
-from .shader import ULFilter
+from .shader import Filter2D
 from bge import logic
 from mathutils import Vector
 
@@ -201,7 +201,7 @@ void main(void)
 }"""
 
 
-class Droplets(ULFilter):
+class Droplets(Filter2D):
 
     def __init__(self, color=(1, 1, 1), speed=1.0, blur=0.0, idx: int = None) -> None:
         now = logic.getRealTime()

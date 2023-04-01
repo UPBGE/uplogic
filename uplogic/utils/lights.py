@@ -25,12 +25,16 @@ class ULLight():
     :param `light`: The scene light to be converted. Leave at `None` to create new.
     """
 
+    _deprecated = True
+
     def __init__(
         self,
         name: str = '',
         type: str = 'POINT',
         light: GameObject = None
     ) -> None:
+        if self._deprecated:
+            print('[UPLOGIC] ULLight class will be renamed to "Light" in future releases!')
         if light:
             self.light = make_unique_light(light)
             """The wrapped `KX_LightObject`."""
@@ -203,3 +207,7 @@ class ULLight():
     @worldTransform.setter
     def worldTransform(self, val: Matrix):
         self.light.worldTransform = val
+
+
+class Light(ULLight):
+    _deprecated = False

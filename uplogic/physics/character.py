@@ -7,7 +7,11 @@ import bpy
 
 
 class ULCharacter():
+    _deprecated = True
+
     def __init__(self, owner: GameObject) -> None:
+        if self._deprecated:
+            debug('ULCharacter class will be renamed to "Character" in future releases!')
         self.owner = owner
         self.wrapper = getCharacter(owner)
         self._old_position = owner.worldPosition.copy()
@@ -112,3 +116,7 @@ class ULCharacter():
 
     def jump(self):
         self.wrapper.jump()
+
+
+class Character(ULCharacter):
+    _deprecated = False

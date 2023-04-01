@@ -1,4 +1,4 @@
-from .shader import ULFilter
+from .shader import Filter2D
 
 
 glsl = """
@@ -14,7 +14,7 @@ void main() {
 """
 
 
-class Brightness(ULFilter):
+class Brightness(Filter2D):
 
     def __init__(self, brightness=1.0, idx: int = None) -> None:
         self.settings = {'brightness': float(brightness)}

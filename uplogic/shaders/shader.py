@@ -32,6 +32,8 @@ class ULFilter():
     the filter in the form "key of dictionary".
     '''
 
+    _deprecated = True
+
     @property
     def active(self):
         return self._filter.enabled
@@ -49,6 +51,8 @@ class ULFilter():
         idx: int = None,
         bound_uniforms: dict = {}
     ) -> None:
+        if self._deprecated:
+            debug('ULTrackTo class will be renamed to "TrackTo" in future releases!')
         self.program = program
         self.idx = idx
         scene = logic.getCurrentScene()
@@ -127,11 +131,15 @@ class ULFilter():
                 )
 
 
+class Filter2D(ULFilter):
+    _deprecated = False
+
+
 class FilterSystem:
-    filters: dict[ULFilter] = {}
+    filters: dict[Filter2D] = {}
 
     @classmethod
-    def get_filter(cls, idx) -> ULFilter:
+    def get_filter(cls, idx) -> Filter2D:
         return cls.filters.get(idx)
         # return logic.getCurrentScene().filterManager.getFilter(idx)
 
