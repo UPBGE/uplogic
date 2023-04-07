@@ -118,7 +118,7 @@ class Label(Widget):
             col = self.shadow_color
             blf.enable(self.font, blf.SHADOW)
             blf.shadow(self.font, 0, col[0], col[1], col[2], col[3])
-            blf.shadow_offset(self.font, self.shadow_offset[0], self.shadow_offset[1])
+            blf.shadow_offset(self.font, int(self.shadow_offset[0]), int(self.shadow_offset[1]))
         blf.size(self.font, self.font_size)
         blf.color(self.font, self.font_color[0], self.font_color[1], self.font_color[2], self.font_color[3])
         charsize = blf.dimensions(self.font, 'A')

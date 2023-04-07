@@ -6,5 +6,6 @@ from .layout import FloatLayout
 from .layout import Layout
 from .layout import RelativeLayout
 from .layout import BoxLayout
+from .layout import GridLayout
 from .widget import Widget
 from .canvas import Canvas

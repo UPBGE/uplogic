@@ -21,7 +21,7 @@ class Button(Widget, HoverBehavior):
     def draw(self):
         if self.hover:
             self._in_focus = True
-            self.on_hover()
+            self.on_hover(self)
             self.canvas._hover_consumed = True
         else:
             self._in_focus = False
@@ -37,31 +37,31 @@ class Button(Widget, HoverBehavior):
         self.batch_points.draw(self._shader)
         super().draw()
         if self._in_focus and MOUSE_EVENTS[LMB].active and not self.canvas._click_consumed:
-            self.on_click()
+            self.on_click(self)
             self._clicked = True
             self.canvas._click_consumed = True
             self._down = True
         elif not MOUSE_EVENTS[LMB].active and self._down:
-            self.on_release()
+            self.on_release(self)
             self._down = False
             self._released = True
             self.canvas._click_consumed = False
         elif self._down:
-            self.on_hold()
+            self.on_hold(self)
 
-    def on_click(self):
+    def on_click(self, widget):
         pass
         # debug(f'{self} clicked.')
 
-    def on_hold(self):
+    def on_hold(self, widget):
         pass
         # debug(f'{self} is being held.')
 
-    def on_release(self):
+    def on_release(self, widget):
         pass
         # debug(f'{self} is released.')
 
-    def on_hover(self):
+    def on_hover(self, widget):
         pass
         # debug(f'{self} is hovered over.')
 

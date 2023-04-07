@@ -12,7 +12,6 @@ class Widget():
         self._parent = None
         self._pos = [0, 0]
         self._children: list[Widget] = []
-        self._children_reversed: list[Widget] = self.children.__reversed__()
         self.relative = relative
         self.size = size
         self.pos = pos
@@ -20,9 +19,16 @@ class Widget():
         self.vertices = ((0, 0), (0, 0), (0, 0), (0, 0))
         self._clipped = [0, 0]
         self.show = True
-        self.use_clipping = None
+        self.use_clipping = False
         self.z = 0
         self.start()
+
+    def toggle(self, *args):
+        self.show = not self.show
+
+    @property
+    def _children_reversed(self):
+        return self.children.__reversed__()
 
     @property
     def canvas(self):
@@ -52,7 +58,6 @@ class Widget():
     @children.setter
     def children(self, val):
         self._children = val
-        self._children_reversed = val.__reversed__()
 
     @property
     def bg_color(self):
@@ -80,7 +85,6 @@ class Widget():
     @property
     def pos_abs(self):
         pos = self.vertices[0]
-        # print(self._clipped)
         return [
             pos[0] - self._clipped[0],
             pos[1] - self._clipped[1]
@@ -127,6 +131,8 @@ class Widget():
     @width.setter
     def width(self, val):
         self.size[0] = val
+        if self.parent:
+            self.build_shader()
 
     @property
     def height(self):
@@ -135,6 +141,8 @@ class Widget():
     @height.setter
     def height(self, val):
         self.size[1] = val
+        if self.parent:
+            self.build_shader()
 
     @property
     def opacity(self):
@@ -143,6 +151,8 @@ class Widget():
     @opacity.setter
     def opacity(self, val):
         self.bg_color[3] = val
+        if self.parent:
+            self.build_shader()
 
     @property
     def child_offset(self):

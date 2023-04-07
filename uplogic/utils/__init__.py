@@ -590,7 +590,7 @@ def map_range(value: float, in_min: float, in_max: float, out_min: float, out_ma
 
 
 def world_to_screen(position: Vector = Vector((0, 0, 0))) -> Vector:
-    return logic.getCurrentScene().active_camera.getScreenPosition(position)
+    return Vector(logic.getCurrentScene().active_camera.getScreenPosition(position))
 
 
 def screen_to_world(x:float = None, y: float = None, distance: float = 10) -> Vector:

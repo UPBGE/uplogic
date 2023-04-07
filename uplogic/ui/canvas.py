@@ -10,8 +10,8 @@ class Canvas(Widget):
         super().__init__((0, 0), (0, 0))
         self._hover_consumed = False
         self._click_consumed = False
+        self.use_clipping = False
         self._to_evaluate = []
-        # bge.logic.getCurrentScene().post_draw.append(self.evaluate)
         bge.logic.getCurrentScene().post_draw.append(self.draw)
 
     @property
@@ -53,4 +53,4 @@ class Canvas(Widget):
             self._to_evaluate.pop().update()
 
     def update(self):
-        events = bge.events
+        pass

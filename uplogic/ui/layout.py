@@ -91,7 +91,7 @@ class BoxLayout(Layout):
         self.orientation = orientation
         self.spacing = spacing
         super().__init__(pos, size, bg_color, relative, border_width, border_color, halign=halign, valign=valign)
-        self.use_clipping = True
+        self.use_clipping = False
 
     @property
     def parent(self):
@@ -131,3 +131,75 @@ class BoxLayout(Layout):
                 widget.relative['pos'] = False
                 widget.pos = [0, offset]
                 offset -= self.spacing
+
+
+class GridLayout(BoxLayout):
+
+
+    def __init__(
+        self,
+        orientation='vertical',
+        pos=[0, 0],
+        size=[100, 100],
+        bg_color=(0, 0, 0, 0),
+        relative={},
+        border_width=1,
+        border_color=(0, 0, 0, 0),
+        spacing=0,
+        cols=2,
+        rows=2,
+        halign='left',
+        valign='bottom'
+    ):
+        super().__init__(
+            orientation,
+            pos,
+            size,
+            bg_color,
+            relative,
+            border_width,
+            border_color,
+            spacing,
+            halign,
+            valign
+        )
+        self.rows = rows
+        self.cols = cols
+
+    def add_widget(self, widget):
+        max = self.rows * self.cols
+        print(len(self.children), max)
+        if len(self.children) < max:
+            super().add_widget(widget)
+            self.arrange()
+
+    def arrange(self):
+        dsize = self._draw_size
+        idx = 0
+        if self.orientation == 'horizontal':
+            row = 0
+            offset = 0
+            for widget in self.children:
+                offset_y = self._draw_size[1] / (self.rows) * row
+                widget.relative['pos'] = False
+                widget.pos = [offset, dsize[1] - widget._draw_size[1] - offset_y]
+                offset += widget._draw_size[0] + self.spacing
+                idx += 1
+                if idx >= self.cols:
+                    idx = 0
+                    row += 1
+                    offset = 0
+        if self.orientation == 'vertical':
+            col = 0
+            offset = dsize[1]
+            for widget in self.children:
+                offset_x = self._draw_size[0] / (self.cols - 1) * col
+                offset -= widget._draw_size[0]
+                widget.relative['pos'] = False
+                widget.pos = [offset_x, offset]
+                offset -= self.spacing
+                idx += 1
+                if idx >= self.cols:
+                    idx = 0
+                    col += 1
+                    offset = dsize[1]

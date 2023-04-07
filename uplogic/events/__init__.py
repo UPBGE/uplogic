@@ -7,17 +7,20 @@ from uplogic.physics import on_collision  # noqa
 
 
 def on_pre_draw(callback):
-    logic.getCurrentScene().pre_draw.append(callback)
+    ULEventManager.update_on.append(callback)
 
 
 def on_post_draw(callback):
-    logic.getCurrentScene().post_draw.append(callback)
+    ULEventManager.update_on.append(callback)
 
 
 def get_event_manager():
-    scene = logic.getCurrentScene()
-    if ULEventManager.update not in scene.post_draw:
-        scene.post_draw.append(ULEventManager.update)
+    if ULEventManager.update not in ULEventManager.update_on:
+        ULEventManager.update_on.append(ULEventManager.update)
+
+
+def set_update_loop(loop):
+    ULEventManager.set_update_on(loop)
 
 
 class ULEventManager():
@@ -26,6 +29,20 @@ class ULEventManager():
     events = {}
     callbacks = []
     done = []
+    update_on = logic.getCurrentScene().post_draw
+
+    @classmethod
+    def set_update_on(cls, li):
+        if cls.update in cls.update_on:
+            cls.update_on.remove(cls.update)
+        if cls.update not in li:
+            li.append(cls.update)
+        cls.update_on = li
+
+    @classmethod
+    def update(cls):
+        for cb in cls.callbacks.copy():
+            cb()
 
     @classmethod
     def update(cls):

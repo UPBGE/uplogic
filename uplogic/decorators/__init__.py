@@ -67,7 +67,7 @@ def state_machine(cls: KX_PythonComponent) -> KX_PythonComponent:
     return deco(cls)
 
 
-def game_props(prop_names) -> KX_PythonComponent:
+def game_props(*prop_names) -> KX_PythonComponent:
     """Decorator for `KX_PythonComponent` or `KX_GameObject` classes and subclasses.
 
     Automatically adds property handlers for this class to use the `game_object[prop]`
@@ -114,7 +114,7 @@ def game_props(prop_names) -> KX_PythonComponent:
     return deco
 
 
-def bl_attrs(attr_names) -> KX_PythonComponent:
+def bl_attrs(*attr_names) -> KX_PythonComponent:
     """Decorator for `KX_PythonComponent` or `KX_GameObject` classes and subclasses.
 
     Automatically adds attribute handlers for this class to use the
@@ -164,17 +164,13 @@ def bl_attrs(attr_names) -> KX_PythonComponent:
     return deco
 
 
-def global_dict(prop_names) -> KX_PythonComponent:
-    """Decorator for `KX_PythonComponent` or `KX_GameObject` classes and subclasses.
-
-    Automatically adds property handlers for this class to use the `bge.logic.globalDict[key]`
+def global_dict(*prop_names):
+    """Automatically adds property handlers for this class to use the `bge.logic.globalDict[key]`
     syntax instead of saving values on the instance itself.
 
     :param `prop_names`: Keys as a list.
     """
-    def deco(cls: KX_PythonComponent or KX_GameObject) -> KX_PythonComponent or KX_GameObject:
-        if not (issubclass(cls, KX_PythonComponent) or issubclass(cls, KX_GameObject)):
-            raise TypeMismatchError('Decorator only viable for KX_PythonComponent or KX_GameObject subclasses!')
+    def deco(cls):
         if not (isinstance(prop_names, list) or isinstance(prop_names, tuple)):
             raise TypeMismatchError('Expected property names as a list or tuple!')
         for game_prop in prop_names:
@@ -192,7 +188,7 @@ def global_dict(prop_names) -> KX_PythonComponent:
     return deco
 
 
-def scene_props(prop_names):
+def scene_props(*prop_names):
     """Decorator for `KX_PythonComponent` or `KX_GameObject` classes and subclasses.
 
     Automatically adds property handlers for this class to use the `game_object.scene[prop]`
