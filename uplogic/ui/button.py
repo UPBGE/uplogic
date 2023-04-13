@@ -31,10 +31,10 @@ class Button(Widget, HoverBehavior):
         gpu.state.line_width_set(self.border_width)
         gpu.state.point_size_set(self.border_width)
         self._shader.uniform_float("color", self.hover_color if self._in_focus else self.bg_color)
-        self.batch.draw(self._shader)
+        self._batch.draw(self._shader)
         self._shader.uniform_float("color", self.border_color)
-        self.batch_line.draw(self._shader)
-        self.batch_points.draw(self._shader)
+        self._batch_line.draw(self._shader)
+        self._batch_points.draw(self._shader)
         super().draw()
         if self._in_focus and MOUSE_EVENTS[LMB].active and not self.canvas._click_consumed:
             self.on_click(self)

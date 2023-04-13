@@ -21,7 +21,7 @@ def remove_custom_cursor():
 
 class Cursor(Widget):
 
-    def __init__(self, size=(20,20), texture=None, offset=(0, 0)):
+    def __init__(self, texture=None, size=(20,20), offset=(0, 0)):
         self.offset = offset
         remove_custom_cursor()
         super().__init__(MOUSE.position, size)
@@ -46,7 +46,7 @@ class Cursor(Widget):
         self._shader = gpu.shader.from_builtin('2D_IMAGE')
         screen_res = [bge.render.getWindowWidth(), bge.render.getWindowHeight()]
         mpos = [MOUSE.position.x * screen_res[0] + self.offset[0], (1 - MOUSE.position.y) * screen_res[1] + self.offset[1]]
-        self.batch = batch_for_shader(
+        self._batch = batch_for_shader(
             self._shader, 'TRI_FAN',
             {
                 "pos": (
@@ -70,4 +70,4 @@ class Cursor(Widget):
             self.pos = MOUSE.position
             self._shader.bind()
             self._shader.uniform_sampler("image", self.texture)
-            self.batch.draw(self._shader)
+            self._batch.draw(self._shader)
