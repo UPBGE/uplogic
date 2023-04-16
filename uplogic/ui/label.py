@@ -105,8 +105,9 @@ class Label(Widget):
         return blf.dimensions(self.font, self.text)
 
     def draw(self):
+        super()._setup_draw()
         if self.parent.use_clipping:
-            verts = self.parent.vertices
+            verts = self.parent._vertices
             blf.enable(self.font, blf.CLIPPING)
             blf.clipping(self.font, verts[0][0], verts[0][1], verts[2][0], verts[2][1])
         else:

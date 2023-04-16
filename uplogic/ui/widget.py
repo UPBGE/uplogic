@@ -14,12 +14,14 @@ class Widget():
         self._pos = [0, 0]
         self._children: list[Widget] = []
         self.relative = relative
+        self._rebuild = True 
         self.size = size
         self.pos = pos
         self.bg_color = bg_color
         self._vertices = ((0, 0), (0, 0), (0, 0), (0, 0))
         self._clipped = [0, 0]
         self.use_clipping = False
+        self.build_shader()
         self.z = 0
         self.start()
 
@@ -35,7 +37,7 @@ class Widget():
         if val != self._show:
             self._show = val
             if val:
-                self.build_shader()
+                self._rebuild = True
                 for child in self.children:
                     child.pos = child.pos
 
@@ -94,6 +96,7 @@ class Widget():
         self._parent = val
         self.pos = self.pos
         self.size = self.size
+        self.build_shader()
 
     @property
     def pos_abs(self):
@@ -113,7 +116,7 @@ class Widget():
         if not self.show:
             return
         if self.parent and self.show:
-            self.build_shader()
+            self._rebuild = True
         for child in self.children:
             child.pos = child.pos
 
@@ -125,7 +128,7 @@ class Widget():
     def size(self, val):
         self._size = list(val)
         if self.parent and self.show:
-            self.build_shader()
+            self._rebuild = True 
 
     @property
     def use_clipping(self):
@@ -135,9 +138,9 @@ class Widget():
     def use_clipping(self, val):
         self._use_clipping = val
         for widget in self.childrenRecursive:
-            widget.use_clipping = val
+            widget._use_clipping = val
         if self.parent and self.show:
-            self.build_shader()
+            self._rebuild = True
 
     @property
     def width(self):
@@ -147,7 +150,7 @@ class Widget():
     def width(self, val):
         self.size[0] = val
         if self.parent and self.show:
-            self.build_shader()
+            self._rebuild = True
 
     @property
     def height(self):
@@ -157,7 +160,7 @@ class Widget():
     def height(self, val):
         self.size[1] = val
         if self.parent and self.show:
-            self.build_shader()
+            self._rebuild = True
 
     @property
     def opacity(self):
@@ -167,7 +170,7 @@ class Widget():
     def opacity(self, val):
         self.bg_color[3] = val
         if self.parent and self.show:
-            self.build_shader()
+            self._rebuild = True
 
     @property
     def child_offset(self):
@@ -256,6 +259,11 @@ class Widget():
         self._batch = batch_for_shader(self._shader, 'TRIS', {"pos": vertices}, indices=indices)
         self._batch_line = batch_for_shader(self._shader, 'LINE_LOOP', {"pos": vertices})
         self._batch_points = batch_for_shader(self._shader, 'POINTS', {"pos": vertices})
+
+    def _setup_draw(self):
+        if self._rebuild is True:
+            self.build_shader()
+            self._rebuild = False
 
     def draw(self):
         """This is called each frame.

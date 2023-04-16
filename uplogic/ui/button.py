@@ -19,6 +19,7 @@ class Button(Widget, HoverBehavior):
         self._down = False
 
     def draw(self):
+        super()._setup_draw()
         if self.hover:
             self._in_focus = True
             self.on_hover(self)

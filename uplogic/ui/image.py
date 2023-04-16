@@ -40,6 +40,7 @@ class Image(Widget):
         )
     
     def draw(self):
+        super()._setup_draw()
         self._shader.bind()
         self._shader.uniform_sampler("image", self.texture)
         self._batch.draw(self._shader)
