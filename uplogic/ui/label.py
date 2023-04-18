@@ -1,5 +1,4 @@
 from .widget import Widget
-
 import blf
 from bge import render
 from bpy.types import VectorFont
@@ -39,7 +38,7 @@ class Label(Widget):
         """
         self._parent = None
         self._children = None
-        self._font_color = [1, 1, 1, 1]
+        self._font_color = font_color
         self.text = text
         self.line_height = line_height
         self.shadow = shadow
@@ -50,7 +49,7 @@ class Label(Widget):
         self.font_color = font_color
         self.font = font
         self.wrap = wrap
-        Widget.__init__(self, pos, (10, 10), bg_color, relative)
+        Widget.__init__(self, pos, (0, 0), bg_color, relative)
         self.text_halign = halign
         self.text_valign = valign
 

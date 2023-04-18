@@ -127,8 +127,12 @@ class Widget():
     @size.setter
     def size(self, val):
         self._size = list(val)
+        if not self.show:
+            return
         if self.parent and self.show:
-            self._rebuild = True 
+            self._rebuild = True
+        for child in self.children:
+            child.pos = child.pos
 
     @property
     def use_clipping(self):
@@ -303,3 +307,8 @@ class Widget():
         if widget in self.children:
             self.children.remove(widget)
             widget.parent = None
+
+    def clear(self):
+        to_remove = self.children.copy()
+        for child in to_remove:
+            self.remove_widget(child)
