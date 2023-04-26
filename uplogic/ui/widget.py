@@ -10,21 +10,36 @@ class Widget():
         self.halign = halign
         self.valign = valign
         self._parent = None
+        self._show = True
         self._pos = [0, 0]
         self._children: list[Widget] = []
         self.relative = relative
+        self._rebuild = True 
         self.size = size
         self.pos = pos
         self.bg_color = bg_color
-        self.vertices = ((0, 0), (0, 0), (0, 0), (0, 0))
+        self._vertices = ((0, 0), (0, 0), (0, 0), (0, 0))
         self._clipped = [0, 0]
-        self.show = True
         self.use_clipping = False
+        self.build_shader()
         self.z = 0
         self.start()
 
     def toggle(self, *args):
         self.show = not self.show
+
+    @property
+    def show(self):
+        return self._show
+
+    @show.setter
+    def show(self, val):
+        if val != self._show:
+            self._show = val
+            if val:
+                self._rebuild = True
+                for child in self.children:
+                    child.pos = child.pos
 
     @property
     def _children_reversed(self):
@@ -81,10 +96,11 @@ class Widget():
         self._parent = val
         self.pos = self.pos
         self.size = self.size
+        self.build_shader()
 
     @property
     def pos_abs(self):
-        pos = self.vertices[0]
+        pos = self._vertices[0]
         return [
             pos[0] - self._clipped[0],
             pos[1] - self._clipped[1]
@@ -93,12 +109,14 @@ class Widget():
     @property
     def pos(self):
         return self._pos
-    
+
     @pos.setter
     def pos(self, val):
         self._pos = list(val)
-        if self.parent:
-            self.build_shader()
+        if not self.show:
+            return
+        if self.parent and self.show:
+            self._rebuild = True
         for child in self.children:
             child.pos = child.pos
 
@@ -109,8 +127,12 @@ class Widget():
     @size.setter
     def size(self, val):
         self._size = list(val)
-        if self.parent:
-            self.build_shader()
+        if not self.show:
+            return
+        if self.parent and self.show:
+            self._rebuild = True
+        for child in self.children:
+            child.pos = child.pos
 
     @property
     def use_clipping(self):
@@ -120,9 +142,9 @@ class Widget():
     def use_clipping(self, val):
         self._use_clipping = val
         for widget in self.childrenRecursive:
-            widget.use_clipping = val
-        if self.parent:
-            self.build_shader()
+            widget._use_clipping = val
+        if self.parent and self.show:
+            self._rebuild = True
 
     @property
     def width(self):
@@ -131,8 +153,8 @@ class Widget():
     @width.setter
     def width(self, val):
         self.size[0] = val
-        if self.parent:
-            self.build_shader()
+        if self.parent and self.show:
+            self._rebuild = True
 
     @property
     def height(self):
@@ -141,8 +163,8 @@ class Widget():
     @height.setter
     def height(self, val):
         self.size[1] = val
-        if self.parent:
-            self.build_shader()
+        if self.parent and self.show:
+            self._rebuild = True
 
     @property
     def opacity(self):
@@ -151,8 +173,8 @@ class Widget():
     @opacity.setter
     def opacity(self, val):
         self.bg_color[3] = val
-        if self.parent:
-            self.build_shader()
+        if self.parent and self.show:
+            self._rebuild = True
 
     @property
     def child_offset(self):
@@ -228,7 +250,7 @@ class Widget():
                     vert[1] = clip[3]
                 elif vert[1] > clip[2]:
                     vert[1] = clip[2]
-        vertices = self.vertices = (
+        vertices = self._vertices = (
             x0,
             x1,
             y1,
@@ -238,9 +260,14 @@ class Widget():
             (0, 1, 2), (2, 3, 0)
         )
         self._shader = gpu.shader.from_builtin('2D_UNIFORM_COLOR')
-        self.batch = batch_for_shader(self._shader, 'TRIS', {"pos": vertices}, indices=indices)
-        self.batch_line = batch_for_shader(self._shader, 'LINE_LOOP', {"pos": vertices})
-        self.batch_points = batch_for_shader(self._shader, 'POINTS', {"pos": vertices})
+        self._batch = batch_for_shader(self._shader, 'TRIS', {"pos": vertices}, indices=indices)
+        self._batch_line = batch_for_shader(self._shader, 'LINE_LOOP', {"pos": vertices})
+        self._batch_points = batch_for_shader(self._shader, 'POINTS', {"pos": vertices})
+
+    def _setup_draw(self):
+        if self._rebuild is True:
+            self.build_shader()
+            self._rebuild = False
 
     def draw(self):
         """This is called each frame.
@@ -280,3 +307,8 @@ class Widget():
         if widget in self.children:
             self.children.remove(widget)
             widget.parent = None
+
+    def clear(self):
+        to_remove = self.children.copy()
+        for child in to_remove:
+            self.remove_widget(child)

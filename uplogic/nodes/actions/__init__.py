@@ -2,7 +2,7 @@ from .cursorbehavior import ULCursorBehavior  # noqa
 from .cursorvisibility import ULSetCursorVisibility  # noqa
 from .endgame import ULEndGame  # noqa
 from .gamepadvibration import ULGamepadVibration  # noqa
-from .keylogger import ULKeyLogger  # noqa
+from .instream import ULKeyLogger  # noqa
 from .loadblendfile import ULLoadBlendFile  # noqa
 from .loadgame import ULLoadGame  # noqa
 from .mouselook import ULMouseLook  # noqa

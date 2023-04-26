@@ -7,14 +7,14 @@ class Layout(Widget):
 
     def __init__(
         self,
-        pos=[0., 0.],
-        size=[100., 100.],
-        bg_color=(0, 0, 0, 0),
-        relative={},
-        border_width=1,
-        border_color=(0, 0, 0, 0),
-        halign='left',
-        valign='bottom'
+        pos: list = [0., 0.],
+        size: list = [100., 100.],
+        bg_color: list = [0, 0, 0, 0],
+        relative: dict = {},
+        border_width: int = 1,
+        border_color: list = [0, 0, 0, 0],
+        halign: str = 'left',
+        valign: str = 'bottom'
     ):
         super().__init__(pos, size, bg_color, relative, halign=halign, valign=valign)
         self.border_width = border_width
@@ -46,13 +46,14 @@ class Layout(Widget):
         self._border_width = int(val)
 
     def draw(self):
+        super()._setup_draw()
         gpu.state.line_width_set(self.border_width)
         gpu.state.point_size_set(self.border_width)
         self._shader.uniform_float("color", self.bg_color)
-        self.batch.draw(self._shader)
+        self._batch.draw(self._shader)
         self._shader.uniform_float("color", self.border_color)
-        self.batch_line.draw(self._shader)
-        self.batch_points.draw(self._shader)
+        self._batch_line.draw(self._shader)
+        self._batch_points.draw(self._shader)
         super().draw()
 
 
@@ -77,16 +78,16 @@ class FloatLayout(Layout):
 class BoxLayout(Layout):
     def __init__(
             self,
-            orientation='vertical',
-            pos=[0, 0],
-            size=[100, 100],
-            bg_color=(0, 0, 0, 0),
-            relative={},
-            border_width=1,
-            border_color=(0, 0, 0, 0),
-            spacing=0,
-            halign='left',
-            valign='bottom'
+            orientation: str = 'horizontal',
+            pos: list = [0, 0],
+            size: list = [100, 100],
+            bg_color: list = (0, 0, 0, 0),
+            relative: dict = {},
+            border_width: int = 1,
+            border_color: list = (0, 0, 0, 0),
+            spacing: int = 0,
+            halign: str = 'left',
+            valign: str = 'bottom'
         ):
         self.orientation = orientation
         self.spacing = spacing
@@ -138,18 +139,18 @@ class GridLayout(BoxLayout):
 
     def __init__(
         self,
-        orientation='vertical',
-        pos=[0, 0],
-        size=[100, 100],
-        bg_color=(0, 0, 0, 0),
-        relative={},
-        border_width=1,
-        border_color=(0, 0, 0, 0),
-        spacing=0,
-        cols=2,
-        rows=2,
-        halign='left',
-        valign='bottom'
+        orientation: str = 'vertical',
+        pos: list = [0, 0],
+        size: list = [100, 100],
+        bg_color: list = [0, 0, 0, 0],
+        relative: dict = {},
+        border_width: int = 1,
+        border_color: list = [0, 0, 0, 0],
+        spacing: int = 0,
+        cols: int = 2,
+        rows: int = 2,
+        halign: str = 'left',
+        valign: str = 'bottom'
     ):
         super().__init__(
             orientation,
