@@ -35,7 +35,7 @@ class ULRunPython(ULActionNode):
         mfun = self.get_input(self.module_func)
         if is_waiting(mname, mfun):
             return
-        args = [
+        args = None if self.arg is STATUS_INVALID else [
             self.get_input(arg)
             for arg in self.arg
         ]

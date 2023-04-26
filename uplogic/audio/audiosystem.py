@@ -149,20 +149,21 @@ class ULAudioSystem(object):
                         continue
                     else:
                         distances[dist] = obj
-                min_dist = distances[min(distances.keys())]
-                obj = min_dist
-                ob = obj.blenderObject
-                r = ob.empty_display_size
-                wpos = obj.worldPosition
-                sca = ob.scale
-                in_range = (
-                    wpos.x - r*sca.x < cpos.x < wpos.x + r*sca.x and
-                    wpos.y - r*sca.y < cpos.y < wpos.y + r*sca.y and
-                    wpos.z - r*sca.z < cpos.z < wpos.z + r*sca.z
-                )
-                if in_range:
-                    self.reverb = True
-                    self.bounces = ob.reverb_samples
+                if distances:
+                    min_dist = distances[min(distances.keys())]
+                    obj = min_dist
+                    ob = obj.blenderObject
+                    r = ob.empty_display_size
+                    wpos = obj.worldPosition
+                    sca = ob.scale
+                    in_range = (
+                        wpos.x - r*sca.x < cpos.x < wpos.x + r*sca.x and
+                        wpos.y - r*sca.y < cpos.y < wpos.y + r*sca.y and
+                        wpos.z - r*sca.z < cpos.z < wpos.z + r*sca.z
+                    )
+                    if in_range:
+                        self.reverb = True
+                        self.bounces = ob.reverb_samples
             listener_vel = (0, 0, 0) if self.use_vr or not same_cam else self.compute_listener_velocity(listener)
             dev = self.device
             dev.listener_location = cpos
