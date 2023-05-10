@@ -9,7 +9,7 @@ from uplogic.utils import DISCONNECT_MSG
 
 class Server:
 
-    def __init__(self, ip=None, port=8303):
+    def __init__(self, ip=None, port=8303, start=False):
         if ip is None:
             ip = socket.gethostbyname(socket.gethostname())
         self.ip = ip
@@ -18,9 +18,11 @@ class Server:
         self.port = port
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.scene = bge.logic.getCurrentScene()
-        self.startup()
+        self.active = False
+        if start:
+            self.start()
 
-    def startup(self):
+    def start(self):
         print('Starting server...')
         try:
             bge.logic.getCurrentScene().onRemove.append(self.shutdown)
@@ -28,6 +30,7 @@ class Server:
             self.socket.settimeout(.0001)
             self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             self.socket.bind((self.ip, self.port))
+            self.active = True
             thread = threading.Thread(target=self.update)
             thread.start()
         except socket.error as e:
@@ -47,21 +50,23 @@ class Server:
         if self.shutdown in scene.onRemove:
             scene.onRemove.remove(self.shutdown)
         try:
-            self.socket.shutdown(socket.SHUT_WR)
-            self.socket.close()
             for conn in self.clients:
                 conn.close()
             self.clients = []
+            self.socket.shutdown(socket.SHUT_WR)
+            self.socket.close()
+            self.active = False
             # if self.update in bge.logic.getCurrentScene().pre_draw:
             #     bge.logic.getCurrentScene().pre_draw.remove(self.update)
             print('Success.')
         except Exception as e:
+            self.active = False
             print(e)
             print('Runtime Exit.')
 
     def restart(self):
         self.shutdown()
-        self.startup()
+        self.start()
 
     def threaded_client(self, conn, addr):
         connected = True
@@ -77,11 +82,11 @@ class Server:
                     # if dat['id'] in bpy.data.objects:
                     if entity['streamtype']:
                         self.entities[conn][entity['id']] = entity
-                            # bobj = bpy.data.objects[dat['id']]
-                            # game_object = scene.getGameObjectFromObject(bobj)
-                            # attrs = dat['set_attrs']
-                            # for i, (attr, val) in enumerate(attrs.items()):
-                            #     setattr(game_object, attr, val)
+                        bobj = bpy.data.objects[entity['id']]
+                        game_object = self.scene.getGameObjectFromObject(bobj)
+                        attrs = entity['set_attrs']
+                        for i, (attr, val) in enumerate(attrs.items()):
+                            setattr(game_object, attr, val)
                     else:
                         pass
             except socket.error as e:
@@ -95,6 +100,8 @@ class Server:
                 connected = False
         print('Closing Connection...')
         conn.close()
+        print(f'[ACTIVE CONNECTIONS] {threading.active_count() - 2}')
+        return
 
     def sync(self):
         # print(self.entities)
@@ -112,26 +119,27 @@ class Server:
                         setattr(game_object, attr, val)
 
     def update(self):
-        active = True
-        while active:
+        while self.active:
             try:
                 conn, add = self.socket.accept()
                 print("Connected to:", add)
                 thread = threading.Thread(target=self.threaded_client, args=(conn, add))
                 thread.start()
                 self.entities[conn] = {}
-                print(f'[ACTIVE CONNECTIONS] {threading.activeCount() - 2}')
+                print(f'[ACTIVE CONNECTIONS] {threading.active_count() - 2}')
             except BlockingIOError:
-                pass
-            except TimeoutError:
                 pass
             except socket.timeout:
                 pass
+            except TimeoutError:
+                pass
             except OSError as e:
                 print(e, 'OSError')
-                active = False
+                self.active = False
                 self.shutdown()
             except Exception as e:
                 print(e, 'Exception')
-                active = False
+                self.active = False
                 self.shutdown()
+        print('Server Shut Down')
+        return

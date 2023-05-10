@@ -107,9 +107,9 @@ class ULAction():
         '''Blending Mode of the animation.'''
         if layer == -1:
             ULActionSystem.find_free_layer(self)
-        elif ULActionSystem.check_layer(self):
-            self.finished = True
-            return
+        # elif ULActionSystem.check_layer(self):
+            # self.finished = True
+            # return
         layer = self.layer
         same_action = game_object.getActionName(layer) == action_name
         self.on_start()
@@ -176,7 +176,6 @@ class ULAction():
         if not self.is_playing:
             return
         if not self.is_playing or value == self._intensity:
-            print(self.intensity)
             return
         self._intensity = clamp(value, 0, 1)
         self._restart_action()

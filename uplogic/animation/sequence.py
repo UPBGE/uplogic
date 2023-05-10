@@ -6,7 +6,7 @@ import time
 
 
 class ULSequence():
-    '''[DEPRECATED]
+    '''[DEPRECATED] Use `uplogic.animation.Sequence` instead
 
     Play an image animation through a material node.
 

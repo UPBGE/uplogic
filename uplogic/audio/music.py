@@ -47,7 +47,9 @@ class ULMusicEffect():
 
 
 class ULMusic(ULMusicEffect):
-    '''Management class for controlling multiple music tracks.
+    '''[DEPRECATED] Use `uplogic.audio.Music` instead
+
+    Management class for controlling multiple music tracks.
 
     :param `name`: Name of this music.'''
     _deprecated = True
@@ -167,17 +169,23 @@ class Music(ULMusic):
 
 
 class ULMusicTrack(ULMusicEffect):
-    '''Track to be played on a `ULMusic` instance.
+    '''[DEPRECATED] Use `uplogic.audio.MusicTrack` instead
+
+    Track to be played on a `ULMusic` instance.
     
     :param `music`: The music object this track will be played on.
     :param `sound`: Path to the soundfile of this track.
     :param `name`: Name of this track (e.g. "Drums).'''
+    _deprecated = True
+
     def __init__(
         self,
         music: Music,
         sound: str or Sound2D,
         name: str
     ):
+        if self._deprecated:
+            debug('ULMusic class will be renamed to "Music" in future releases!')
         super().__init__()
         self.music = music
         self.name = name
@@ -224,3 +232,7 @@ class ULMusicTrack(ULMusicEffect):
         '''Stop and remove this track from its `ULMusic` object.'''
         self.sound.stop()
         self.music.tracks.remove(self)
+
+
+class MusicTrack(ULMusicTrack):
+    _deprecated = False

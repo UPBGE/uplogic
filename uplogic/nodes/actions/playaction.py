@@ -88,6 +88,7 @@ class ULPlayAction(ULActionNode):
         action = self._action
         has_action = action is not None
         play_mode = self.get_input(self.play_mode)
+        # print(play_mode)
         self.action_evt = receive(self._action)
         if not_met(condition):
             self._set_ready()
@@ -98,6 +99,7 @@ class ULPlayAction(ULActionNode):
                     self._action = None
                     self.in_use = False
                 elif play_mode > 2:
+                    # print('AAA')
                     self._action.remove()
                     self._action = None
                     self.in_use = False
@@ -142,6 +144,7 @@ class ULPlayAction(ULActionNode):
             self._action = None
             self.in_use = False
 
+        # print('STATATASTSA')
         self._action = Action(
             game_object,
             action_name,

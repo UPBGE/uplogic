@@ -461,7 +461,6 @@ class ULMouseLook():
         if not self.axis_lock[1]:
             game_object_y.applyRotation((*rot, ), True)
         if (Vector(self.mouse.position) - Vector(self.screen_center)).length > .00001:
-        # if self.mouse.position != self.screen_center:
             self.mouse.position = self.screen_center
         self.done = True
 

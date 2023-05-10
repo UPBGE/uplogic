@@ -32,5 +32,5 @@ class ULSetCustomCursor(ULActionNode):
         remove_custom_cursor()
         texture = self.get_input(self.texture)
         size = self.get_input(self.size)
-        self._cursor = Cursor(size, texture)
+        self._cursor = Cursor(texture=texture, size=size)
         self.done = True
