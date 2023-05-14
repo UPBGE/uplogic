@@ -1,6 +1,6 @@
 from bge.types import KX_GameObject
 import pickle
-from uplogic.utils import STREAMTYPE_DOWNSTREAM, STREAMTYPE_UPSTREAM
+from uplogic.utils.constants import STREAMTYPE_DOWNSTREAM, STREAMTYPE_UPSTREAM
 
 
 class Entity:

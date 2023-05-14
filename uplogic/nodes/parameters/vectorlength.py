@@ -1,7 +1,7 @@
 from mathutils import Vector
 from uplogic.nodes import ULOutSocket
 from uplogic.nodes import ULParameterNode
-from uplogic.utils import STATUS_WAITING, is_invalid
+from uplogic.utils.constants import STATUS_WAITING, is_invalid
 
 
 class ULVectorLength(ULParameterNode):

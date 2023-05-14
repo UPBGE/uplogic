@@ -4,7 +4,6 @@ from mathutils import Vector
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
 from uplogic.utils import is_invalid
-from uplogic.utils import debug
 from uplogic.utils import not_met
 
 
@@ -41,7 +40,6 @@ class ULGamepadLook(ULActionNode):
         if is_invalid(head_obj):
             head_obj = main_obj
         if is_invalid(axis):
-            debug('Gamepad Sticks Node: Invalid Controller Stick!')
             return
         inverted: bool = self.get_input(self.inverted)
         index: int = self.get_input(self.index)
@@ -61,7 +59,6 @@ class ULGamepadLook(ULActionNode):
         if logic.joysticks[index]:
             joystick = logic.joysticks[index]
         else:
-            debug('Gamepad Sticks Node: No Joystick at that Index!')
             return
         if is_invalid(joystick):
             return

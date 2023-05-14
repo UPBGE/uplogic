@@ -3,7 +3,7 @@ from uplogic.nodes import ULOutSocket
 from uplogic.utils import is_waiting
 from uplogic.utils import not_met
 from uplogic.utils import debug
-from uplogic.utils import interpolate
+from uplogic.utils.math import interpolate
 
 
 class ULSlowFollow(ULActionNode):

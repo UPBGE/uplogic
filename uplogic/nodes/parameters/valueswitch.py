@@ -1,7 +1,7 @@
 from uplogic.nodes import ULParameterNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import LOGIC_OPERATORS
-from uplogic.utils import STATUS_WAITING
+from uplogic.utils.constants import LOGIC_OPERATORS
+from uplogic.utils.constants import STATUS_WAITING
 from uplogic.utils import is_waiting
 
 

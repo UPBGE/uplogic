@@ -6,11 +6,11 @@ from uplogic.animation import ACTION_FINISHED
 from uplogic.events import receive
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import STATUS_INVALID, STATUS_WAITING
+from uplogic.utils.constants import STATUS_INVALID, STATUS_WAITING
 from uplogic.utils import is_invalid
 from uplogic.utils import is_waiting
 from uplogic.utils import not_met
-from uplogic.utils import clamp
+from uplogic.utils.math import clamp
 
 
 class ULPlayAction(ULActionNode):

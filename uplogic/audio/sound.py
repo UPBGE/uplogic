@@ -8,7 +8,7 @@ from mathutils import Vector
 from uplogic.audio import ULAudioSystem
 from uplogic.audio import get_audio_system
 from uplogic.events import schedule_callback
-from uplogic.utils import debug, interpolate
+from uplogic.utils.math import interpolate
 import aud
 
 
@@ -145,7 +145,9 @@ class ULSound():
 
 
 class ULSound2D(ULSound):
-    '''Non-spacial sound, e.g. Music or Voice-Overs.\n
+    '''[DEPRECATED] Use `uplogic.audio.Sound2D` instead
+    
+    Non-spacial sound, e.g. Music or Voice-Overs.\n
     This class allows for modification of pitch and volume while playing.
 
     :param `file`: Path to the sound file.
@@ -168,7 +170,7 @@ class ULSound2D(ULSound):
         aud_sys: str = 'default'
     ):
         if self._deprecated:
-            debug('ULSound2D class will be renamed to "Sound2D" in future releases!')
+            print('Warning: ULSound2D class will be renamed to "Sound2D" in future releases!')
         self.file = file
         self._volume = 1
         self.finished = False
@@ -178,7 +180,7 @@ class ULSound2D(ULSound):
         soundfile = logic.expandPath(file)
         self.ignore_timescale = ignore_timescale
         if not isfile(soundfile):
-            debug(f'Soundfile {soundfile} could not be loaded!')
+            print(f'Soundfile {soundfile} could not be loaded!')
             return
         sound = self.soundfile = aud.Sound(soundfile)
         lowpass = self.aud_system.lowpass or lowpass
@@ -252,7 +254,9 @@ class ULSound2D(ULSound):
 
 
 class Sound2D(ULSound2D):
-    '''Non-spacial sound, e.g. Music or Voice-Overs.\n
+    '''[DEPRECATED] Use `uplogic.audio.MusicTrack` instead
+    
+    Non-spacial sound, e.g. Music or Voice-Overs.\n
     This class allows for modification of pitch and volume while playing.
 
     :param `file`: Path to the sound file.
@@ -299,7 +303,7 @@ class Sample2D(Sound2D):
         soundfile = logic.expandPath(file)
         self.ignore_timescale = ignore_timescale
         if not isfile(soundfile):
-            debug(f'Soundfile {soundfile} could not be loaded!')
+            print(f'Soundfile {soundfile} could not be loaded!')
             return
         sound = self.soundfile = aud.Sound(soundfile)
         if sample[1]:
@@ -356,7 +360,7 @@ class ULSound3D(ULSound):
         aud_sys: str = 'default'
     ):
         if self._deprecated:
-            debug('ULSound3D class will be renamed to "Sound3D" in future releases!')
+            print('Warning: ULSound3D class will be renamed to "Sound3D" in future releases!')
         self._is_vector = isinstance(speaker, Vector)
         self.file = file
         self.finished = False
@@ -379,7 +383,7 @@ class ULSound3D(ULSound):
         self.ignore_timescale = ignore_timescale
         soundfile = logic.expandPath(file)
         if not isfile(soundfile):
-            debug(f'Soundfile {soundfile} could not be loaded!')
+            print(f'Soundfile {soundfile} could not be loaded!')
             return
         sound = self.soundpath = aud.Sound(soundfile).rechannel(1)
         device = self.aud_system.device
@@ -583,7 +587,7 @@ class Sample3D(Sound3D):
         self.ignore_timescale = ignore_timescale
         soundfile = logic.expandPath(file)
         if not isfile(soundfile):
-            debug(f'Soundfile {soundfile} could not be loaded!')
+            print(f'Soundfile {soundfile} could not be loaded!')
             return
         sound = self.soundpath = aud.Sound(soundfile).rechannel(1)
         device = self.aud_system.device
@@ -641,7 +645,7 @@ class ULSpeaker2D(ULSound2D):
         aud_sys: str = 'default'
     ):
         if self._deprecated:
-            debug('ULSpeaker2D class will be renamed to "Speaker2D" in future releases!')
+            print('Warning: ULSpeaker2D class will be renamed to "Speaker2D" in future releases!')
         speaker_data = speaker.blenderObject.data
         ULSound2D()
         super().__init__(
@@ -675,7 +679,7 @@ class ULSpeaker3D(ULSound3D):
         aud_sys: str = 'default'
     ):
         if self._deprecated:
-            debug('ULSpeaker3D class will be renamed to "Speaker3D" in future releases!')
+            print('Warning: ULSpeaker3D class will be renamed to "Speaker3D" in future releases!')
         speaker_data = speaker.blenderObject.data
         super().__init__(
             speaker,

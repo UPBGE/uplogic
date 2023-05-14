@@ -1,5 +1,6 @@
 from uplogic.nodes import ULConditionNode
-from uplogic.utils import STATUS_WAITING, is_waiting
+from uplogic.utils.constants import STATUS_WAITING
+from uplogic.utils import is_waiting
 
 
 class ULOr(ULConditionNode):

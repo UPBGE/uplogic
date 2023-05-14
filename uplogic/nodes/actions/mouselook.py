@@ -5,7 +5,7 @@ from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
 from uplogic.utils import is_invalid
 from uplogic.utils import not_met
-from uplogic.utils import interpolate
+from uplogic.utils.math import interpolate
 import cython
 
 

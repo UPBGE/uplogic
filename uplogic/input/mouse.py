@@ -4,9 +4,8 @@ from bge import events
 from bge import render
 from bge.types import KX_GameObject as GameObject
 from mathutils import Vector
-from uplogic.utils import interpolate
+from uplogic.utils.math import interpolate
 from uplogic.events import schedule_callback
-from uplogic.utils import debug
 
 
 MOUSE_EVENTS = logic.mouse.inputs
@@ -158,7 +157,7 @@ class ULMouse():
 
     def __init__(self) -> None:
         if self._deprecated:
-            debug('ULMouse class will be renamed to "Mouse" in future releases!')
+            print('Warning: ULMouse class will be renamed to "Mouse" in future releases!')
         self._position = get_mouse_position()
         """Staggered updated mouse position for pos difference calculation."""
         self.movement = (0, 0)
@@ -292,7 +291,7 @@ class ULMouseLook():
         active: bool = True
     ) -> None:
         if self._deprecated:
-            debug('ULMouseLook class will be renamed to "MouseLook" in future releases!')
+            print('Warning: ULMouseLook class will be renamed to "MouseLook" in future releases!')
         self.obj = obj
         self.head = head if head else obj
         self._defaults = [

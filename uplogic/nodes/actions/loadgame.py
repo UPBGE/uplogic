@@ -2,7 +2,6 @@ from bge import logic, constraints
 from mathutils import Euler
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import debug
 from uplogic.utils import is_waiting
 from uplogic.utils import not_met
 import bpy
@@ -60,7 +59,7 @@ class ULLoadGame(ULActionNode):
                     else:
                         game_obj = scene.convertBlenderObject(bpy.data.objects[obj['name']])
                         # game_obj = scene.addObject(game_obj)
-                        # debug(
+                        # print(
                         #     'Could not load Object {}: Not in active Scene!'
                         #     .format(obj['name'])
                         # )
@@ -107,7 +106,7 @@ class ULLoadGame(ULActionNode):
                     for prop in obj['data']['props']:
                         game_obj[prop['name']] = prop['value']
         except Exception as e:
-            debug(
+            print(
                 f'Load Game Node: Could not load saved game on slot {slot}!\n{e}'
             )
 

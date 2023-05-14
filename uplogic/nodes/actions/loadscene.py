@@ -1,7 +1,7 @@
 from bge import logic
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import SceneLoader
+from uplogic.utils.scene import SceneLoader
 
 
 class ULLoadScene(ULActionNode):

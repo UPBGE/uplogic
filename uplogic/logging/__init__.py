@@ -5,7 +5,7 @@ from bgui.bgui_utils import System
 from bgui.label import Label
 from io import StringIO
 from uplogic.data import GlobalDB
-from uplogic.utils import lerp
+from uplogic.utils.math import lerp
 from uplogic.events import schedule_callback
 import sys
 

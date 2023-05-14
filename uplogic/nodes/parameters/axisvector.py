@@ -1,7 +1,7 @@
 from uplogic.nodes import ULOutSocket
 from uplogic.nodes import ULParameterNode
-from uplogic.utils import LO_AXIS_TO_VECTOR
-from uplogic.utils import STATUS_WAITING
+from uplogic.utils.constants import LO_AXIS_TO_VECTOR
+from uplogic.utils.constants import STATUS_WAITING
 from uplogic.utils import is_invalid
 
 

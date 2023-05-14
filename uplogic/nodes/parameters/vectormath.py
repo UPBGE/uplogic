@@ -1,6 +1,6 @@
 from uplogic.nodes import ULParameterNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import STATUS_WAITING
+from uplogic.utils.constants import STATUS_WAITING
 from uplogic.utils import is_waiting
 from uplogic.utils import is_invalid
 
@@ -95,7 +95,7 @@ class ULVectorMath(ULParameterNode):
         return (vec * vec2) + vec3
 
     def get_divide(self, vec, vec2, vec3, fac, scale):
-        return vec / vec2
+        return vec / fac
 
     def get_multiply(self, vec, vec2, vec3, fac, scale):
         return vec * vec2

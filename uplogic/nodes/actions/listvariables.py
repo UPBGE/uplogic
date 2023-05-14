@@ -1,6 +1,5 @@
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import debug
 from uplogic.utils import is_waiting
 from uplogic.utils import not_met
 import bpy
@@ -34,7 +33,7 @@ class ULListVariables(ULActionNode):
             f = open(path, 'r')
             data = json.load(f)
             if len(data) == 0:
-                debug('There are no saved variables')
+                print('There are no saved variables')
                 return
             li = []
             for x in data:
@@ -43,7 +42,7 @@ class ULListVariables(ULActionNode):
                 li.append(x)
             self.items = li
         else:
-            debug('There are no saved variables')
+            print('There are no saved variables')
         f.close()
 
     def get_custom_path(self, path):

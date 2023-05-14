@@ -4,7 +4,7 @@ from mathutils import Quaternion
 from mathutils import Vector
 from uplogic.nodes import ULOutSocket
 from uplogic.nodes import ULParameterNode
-from uplogic.utils import NO_VALUE
+from uplogic.utils.constants import NO_VALUE
 from uplogic.utils import is_invalid
 
 

@@ -1,6 +1,6 @@
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import STATUS_INVALID
+from uplogic.utils.constants import STATUS_INVALID
 from uplogic.utils import is_waiting
 from uplogic.utils import not_met
 

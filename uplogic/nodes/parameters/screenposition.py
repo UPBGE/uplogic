@@ -1,6 +1,6 @@
 from uplogic.nodes import ULParameterNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import STATUS_WAITING, is_invalid
+from uplogic.utils.constants import STATUS_WAITING, is_invalid
 from mathutils import Vector
 
 

@@ -1,7 +1,7 @@
 from mathutils import Vector
 from uplogic.nodes import ULOutSocket
 from uplogic.nodes import ULParameterNode
-from uplogic.utils import STATUS_READY
+from uplogic.utils.constants import STATUS_READY
 
 
 class ULMouseData(ULParameterNode):

@@ -1,10 +1,9 @@
-from uplogic.utils import debug
 import bge
 import bpy
 import pickle
 import socket
 import threading
-from uplogic.utils import DISCONNECT_MSG
+from uplogic.utils.constants import DISCONNECT_MSG
 
 
 class Server:

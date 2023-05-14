@@ -9,7 +9,7 @@ from uplogic.animation import ULActionSystem
 from uplogic.animation.actionsystem import get_action_system
 from uplogic.events import schedule
 import bpy
-from uplogic.utils import clamp, debug
+from uplogic.utils.math import clamp
 
 
 PLAY_MODES = {
@@ -33,7 +33,7 @@ ACTION_FINISHED = 'ACTION_FINISHED'
 
 class ULAction():
     '''
-    [DEPRECATED]
+    [DEPRECATED] Use `uplogic.animation.action` instead.
 
     Wrapper class for animated actions that provides additional parameters
     and quick access properties.
@@ -75,7 +75,7 @@ class ULAction():
         keep: bool = False
     ):
         if self._deprecated:
-            debug('ULAction class will be renamed to "Action" in future releases!')
+            print('Warning: ULAction class will be renamed to "Action" in future releases!')
         self._fps_factor = bpy.context.scene.render.fps / 60
         self._locked = False
         self._speed = speed

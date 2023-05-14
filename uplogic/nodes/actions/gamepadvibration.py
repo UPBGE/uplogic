@@ -3,7 +3,6 @@ from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
 from uplogic.utils import not_met
 from uplogic.utils import is_waiting
-from uplogic.utils import debug
 
 
 class ULGamepadVibration(ULActionNode):
@@ -36,7 +35,7 @@ class ULGamepadVibration(ULActionNode):
             return
         joystick = logic.joysticks[index]
         if not joystick.hasVibration:
-            debug('Joystick at index {} has no vibration!'.format(index))
+            print('Joystick at index {} has no vibration!'.format(index))
             return
 
         joystick.strengthLeft = left

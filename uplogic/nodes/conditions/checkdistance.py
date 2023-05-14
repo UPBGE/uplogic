@@ -1,6 +1,6 @@
 from mathutils import Vector
 from uplogic.nodes import ULConditionNode
-from uplogic.utils import LOGIC_OPERATORS
+from uplogic.utils.constants import LOGIC_OPERATORS
 from uplogic.utils import is_invalid
 from uplogic.utils import is_waiting
 from uplogic.utils import compute_distance

@@ -1,7 +1,7 @@
 import socket
 import pickle
 import bge
-from uplogic.utils import debug, STREAMTYPE_DOWNSTREAM, STREAMTYPE_UPSTREAM
+from uplogic.utils.constants import STREAMTYPE_DOWNSTREAM, STREAMTYPE_UPSTREAM
 
 
 class Client:

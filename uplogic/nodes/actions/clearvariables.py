@@ -1,6 +1,5 @@
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import debug
 from uplogic.utils import not_met
 import bpy
 import json
@@ -28,7 +27,7 @@ class ULClearVariables(ULActionNode):
             f = open(path, 'w')
             json.dump(data, f, indent=2)
         else:
-            debug('File does not exist - creating...')
+            print('File does not exist - creating...')
             f = open(path, 'w')
             data = {}
             json.dump(data, f, indent=2)

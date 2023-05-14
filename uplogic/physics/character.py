@@ -2,7 +2,6 @@ from bge import logic
 from bge.constraints import getCharacter
 from bge.types import KX_GameObject as GameObject
 from mathutils import Vector
-from uplogic.utils import debug
 import bpy
 
 
@@ -11,7 +10,7 @@ class ULCharacter():
 
     def __init__(self, owner: GameObject) -> None:
         if self._deprecated:
-            debug('ULCharacter class will be renamed to "Character" in future releases!')
+            print('Warning: ULCharacter class will be renamed to "Character" in future releases!')
         self.owner = owner
         self.wrapper = getCharacter(owner)
         self._old_position = owner.worldPosition.copy()

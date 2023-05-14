@@ -1,7 +1,7 @@
 from uplogic.audio.audiosystem import get_audio_system
 from .sound import Sound2D
 from uuid import uuid4
-from uplogic.utils import debug, interpolate
+from uplogic.utils.math import interpolate
 from uplogic.events import schedule_callback
 
 
@@ -60,7 +60,7 @@ class ULMusic(ULMusicEffect):
         audio_system: str = 'music'
     ):
         if self._deprecated:
-            debug('ULMusic class will be renamed to "Music" in future releases!')
+            print('Warning: ULMusic class will be renamed to "Music" in future releases!')
         super().__init__()
         self.name = name if name else uuid4()
         self.audio_system = get_audio_system(audio_system, '2D')
@@ -135,7 +135,7 @@ class ULMusic(ULMusicEffect):
                 if t.name == track:
                     t.remove()
                     return
-            debug(f'Track "{track}" not found!')
+            print(f'Track "{track}" not found!')
         else:
             self.tracks[track].remove()
 
@@ -185,7 +185,7 @@ class ULMusicTrack(ULMusicEffect):
         name: str
     ):
         if self._deprecated:
-            debug('ULMusic class will be renamed to "Music" in future releases!')
+            print('Warning: ULMusic class will be renamed to "Music" in future releases!')
         super().__init__()
         self.music = music
         self.name = name

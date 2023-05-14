@@ -2,8 +2,7 @@ from bge import logic
 from bge.types import KX_GameObject as GameObject
 from math import pi
 from mathutils import Vector
-from uplogic.utils import debug
-from uplogic.utils import interpolate
+from uplogic.utils.math import interpolate
 from uplogic.events import schedule_callback
 
 
@@ -243,7 +242,7 @@ def gamepad_vibrate(idx: int = 0, strength: tuple = (.5, .5), time: float = 1.0)
     """
     joystick = logic.joysticks[idx]
     if not joystick or not joystick.hasVibration:
-        debug(f'Joystick at index {idx} has no vibration!')
+        print(f'Joystick at index {idx} has no vibration!')
     joystick.strengthLeft = strength[0]
     joystick.strengthRight = strength[1]
     joystick.duration = int(round(time * 1000))
@@ -269,11 +268,11 @@ class ULGamePad():
         layout: dict = XBOX
     ) -> None:
         if self._deprecated:
-            debug('ULGamePad class will be renamed to "Gamepad" in future releases!')
+            print('Warning: ULGamePad class will be renamed to "Gamepad" in future releases!')
         self.idx = idx
         self.layout = layout
         if not logic.joysticks[idx]:
-            debug(f'No Joystick found at index: {idx}')
+            print(f'No Joystick found at index: {idx}')
         self.joystick = logic.joysticks[idx]
 
     def button_down(self, button: str):
@@ -290,7 +289,7 @@ class ULGamePad():
     
     def vibrate(self, strength: tuple = (.5, .5), time: float = 1.0):
         if not self.joystick.hasVibration:
-            debug('Joystick at index {} has no vibration!'.format(self.idx))
+            print('Joystick at index {} has no vibration!'.format(self.idx))
             return
         self.joystick.strengthLeft = strength[0]
         self.joystick.strengthRight = strength[1]
@@ -347,7 +346,7 @@ class ULGamepadLook():
         active=True
     ) -> None:
         if self._deprecated:
-            debug('ULGamepadLook class will be renamed to "GamepadLook" in future releases!')
+            print('Warning: ULGamepadLook class will be renamed to "GamepadLook" in future releases!')
         self.obj = obj
         self.head = head if head else obj
         self._defaults = [

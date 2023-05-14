@@ -5,7 +5,7 @@ from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
 from uplogic.utils import is_waiting
 from uplogic.utils import not_met
-from uplogic.utils import raycast_projectile
+from uplogic.utils.raycasting import raycast_projectile
 
 
 class ULProjectileRayCast(ULActionNode):

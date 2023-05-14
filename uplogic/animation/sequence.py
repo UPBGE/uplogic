@@ -1,7 +1,6 @@
 from bge import logic
 from uplogic.animation.action import PLAY_MODES
 import bpy
-from uplogic.utils import debug
 import time
 
 
@@ -31,7 +30,7 @@ class ULSequence():
         mode: str = 'play'
     ) -> None:
         if self._deprecated:
-            debug('ULSequence class will be renamed to "ULSequence" in future releases!')
+            print('Warning: ULSequence class will be renamed to "ULSequence" in future releases!')
 
         self.material = material
         """The material this sequence is played on."""

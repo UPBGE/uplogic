@@ -1,7 +1,7 @@
 from uplogic.nodes import ULActionNode
 from uplogic.utils import is_waiting
 from uplogic.utils import not_met
-from uplogic.utils import move_to
+from uplogic.utils.objects import move_to
 
 
 # Action "Move To": an object will follow a point

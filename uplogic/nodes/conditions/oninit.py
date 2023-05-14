@@ -1,5 +1,5 @@
 from uplogic.nodes import ULConditionNode
-from uplogic.utils import STATUS_READY
+from uplogic.utils.constants import STATUS_READY
 
 
 class ULOnInit(ULConditionNode):

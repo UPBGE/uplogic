@@ -3,6 +3,153 @@ from bge.types import KX_GameObject as GameObject
 import bpy
 from bpy.types import Material
 from .errors import LogicControllerNotSupportedError
+from .constants import LO_AXIS_TO_VECTOR
+from .math import project_vector3
+from .math import clamp
+
+
+def xrot_to(
+    rotating_object,
+    target_pos,
+    front_axis_code=1,
+    factor=1
+):
+    front_vector = LO_AXIS_TO_VECTOR[front_axis_code]
+    vec = rotating_object.getVectTo(target_pos)[1]
+    vec = project_vector3(vec, 1, 2)
+    vec.normalize()
+    front_vector = rotating_object.getAxisVect(front_vector)
+    front_vector = project_vector3(front_vector, 1, 2)
+    signed_angle = vec.angle_signed(front_vector, None)
+    if signed_angle is None:
+        return
+    abs_angle = abs(signed_angle)
+    if abs_angle < 0.01:
+        return True
+    angle_sign = (signed_angle > 0) - (signed_angle < 0)
+    drot = angle_sign * abs_angle * clamp(factor)
+    eulers = rotating_object.localOrientation.to_euler()
+    eulers[0] += drot
+    rotating_object.localOrientation = eulers
+    return False
+
+
+def yrot_to(
+    rotating_object,
+    target_pos,
+    front_axis_code=1,
+    factor=1
+):
+    front_vector = LO_AXIS_TO_VECTOR[front_axis_code]
+    vec = rotating_object.getVectTo(target_pos)[1]
+    vec = project_vector3(vec, 2, 0)
+    vec.normalize()
+    front_vector = rotating_object.getAxisVect(front_vector)
+    front_vector = project_vector3(front_vector, 2, 0)
+    signed_angle = vec.angle_signed(front_vector, None)
+    if signed_angle is None:
+        return
+    abs_angle = abs(signed_angle)
+    if abs_angle < 0.01:
+        return True
+    angle_sign = (signed_angle > 0) - (signed_angle < 0)
+    drot = angle_sign * abs_angle * clamp(factor)
+    eulers = rotating_object.localOrientation.to_euler()
+    eulers[1] += drot
+    rotating_object.localOrientation = eulers
+    return False
+
+
+def zrot_to(
+    rotating_object,
+    target_pos,
+    front_axis_code=1,
+    factor=1
+):
+    front_vector = LO_AXIS_TO_VECTOR[front_axis_code]
+    vec = rotating_object.getVectTo(target_pos)[1]
+    vec = project_vector3(vec, 0, 1)
+    vec.normalize()
+    front_vector = rotating_object.getAxisVect(front_vector)
+    front_vector = project_vector3(front_vector, 0, 1)
+    signed_angle = vec.angle_signed(front_vector, None)
+    if signed_angle is None:
+        return True
+    abs_angle = abs(signed_angle)
+    if abs_angle < 0.01:
+        return True
+    angle_sign = (signed_angle > 0) - (signed_angle < 0)
+    drot = angle_sign * abs_angle * clamp(factor)
+    eulers = rotating_object.localOrientation.to_euler()
+    eulers[2] += drot
+    rotating_object.localOrientation = eulers
+    return False
+
+
+def rot_to(
+    rot_axis_index,
+    rotating_object,
+    target_pos,
+    front_axis_code,
+    factor=1
+):
+    if rot_axis_index == 0:
+        return xrot_to(
+            rotating_object,
+            target_pos,
+            front_axis_code,
+            factor
+        )
+    elif rot_axis_index == 1:
+        return yrot_to(
+            rotating_object,
+            target_pos,
+            front_axis_code,
+            factor
+        )
+    elif rot_axis_index == 2:
+        return zrot_to(
+            rotating_object,
+            target_pos,
+            front_axis_code,
+            factor
+        )
+
+
+def move_to(
+    moving_object,
+    destination_point,
+    speed,
+    time_per_frame,
+    dynamic,
+    distance
+):
+    if dynamic:
+        direction = (
+            destination_point -
+            moving_object.worldPosition)
+        dst = direction.length
+        if(dst <= distance):
+            return True
+        direction.z = 0
+        direction.normalize()
+        velocity = direction * speed
+        velocity.z = moving_object.worldLinearVelocity.z
+        moving_object.worldLinearVelocity = velocity
+        return False
+    else:
+        direction = (
+            destination_point -
+            moving_object.worldPosition
+            )
+        dst = direction.length
+        if(dst <= distance):
+            return True
+        direction.normalize()
+        displacement = speed * time_per_frame
+        motion = direction * displacement
+        moving_object.worldPosition += motion
+        return False
 
 
 def controller_brick_status(owner, controller_name):

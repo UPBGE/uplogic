@@ -6,7 +6,6 @@ from uplogic.data import GlobalDB
 from uplogic.nodes import STATUS_READY
 from uplogic.nodes import STATUS_WAITING
 from uplogic.nodes import ULLogicContainer
-from uplogic.utils import debug
 from uplogic.utils import load_user_module
 from uplogic.utils import make_valid_name
 import bpy
@@ -84,7 +83,7 @@ class ULLogicTree(ULLogicContainer):
                     db.put(v.name, val, v.persistent)
 
             if msg:
-                debug(f'Globals Initialized:{msg[:-1]}')
+                print(f'Globals Initialized:{msg[:-1]}')
             bpy.types.Scene.nl_globals_initialized = True
 
     def ray_cast(
@@ -206,11 +205,11 @@ class ULLogicTree(ULLogicContainer):
         max_blocking_loop_count = self._max_blocking_loop_count
         while cells:
             if loop_index == max_blocking_loop_count:
-                debug(
+                print(
                     "Network found a blocking condition" +
                     " (due to unconnected or non responsive cell)"
                 )
-                debug("Stopping network...")
+                print("Stopping network...")
                 self.stop()
                 return
             cell = cells.popleft()
@@ -225,7 +224,7 @@ class ULLogicTree(ULLogicContainer):
             loop_index += 1
         done_cells = []
         if(loop_index > max_loop_count):
-            debug(
+            print(
                 "Wrong sorting alghorithm!",
                 loop_index,
                 max_loop_count

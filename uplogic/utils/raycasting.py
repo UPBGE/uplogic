@@ -305,11 +305,11 @@ def raycast_projectile(
         vel = vel * t
         return half + vel + pos
 
+    if not local:
+        aim = aim - origin
     aim.normalize()
     aim *= power
     origin = getattr(origin, 'worldPosition', origin)
-    if local:
-        origin = origin + caster.worldPosition
 
     points: list = [origin]
     color: list = [1, 0, 0]

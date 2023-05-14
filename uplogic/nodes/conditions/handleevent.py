@@ -2,7 +2,7 @@ from uplogic.events import receive
 from uplogic.events import ULEvent
 from uplogic.nodes import ULConditionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import STATUS_WAITING
+from uplogic.utils.constants import STATUS_WAITING
 from uplogic.utils import is_invalid
 
 

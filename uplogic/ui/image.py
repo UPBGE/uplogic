@@ -50,10 +50,10 @@ class Image(Widget):
 class Icon(Image):
 
     def __init__(self, pos=[0, 0], size=(100, 100), relative={}, texture=None, icon=0, rows=1, cols=1, halign='left', valign='bottom'):
-        super().__init__(pos, size, relative, texture, halign=halign, valign=valign)
         self.icon = icon
         self.rows = rows
         self.cols = cols
+        super().__init__(pos, size, relative, texture, halign=halign, valign=valign)
 
     @property
     def rows(self):

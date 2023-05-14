@@ -3,7 +3,6 @@ from mathutils import Quaternion
 from mathutils import Matrix
 from mathutils import Vector
 from bge import logic
-from uplogic.utils import debug
 from bge.types import KX_GameObject as GameObject
 from uplogic.utils.errors import NoXRSessionError
 
@@ -32,7 +31,7 @@ class ULControllerVR():
 
     def __init__(self, idx: int=0) -> None:
         if self._deprecated:
-            debug('ULControllerVR class will be renamed to "VRController" in future releases!')
+            print('Warning: ULControllerVR class will be renamed to "VRController" in future releases!')
         self.idx = idx
         self.stick_threshold = 0.0
         self.session = bpy.context.window_manager.xr_session_state
@@ -151,7 +150,7 @@ class ULHeadsetVR():
 
     def __init__(self) -> None:
         if self._deprecated:
-            debug('ULHeadsetVR class will be renamed to "VRHeadset" in future releases!')
+            print('Warning: ULHeadsetVR class will be renamed to "VRHeadset" in future releases!')
         self.session = bpy.context.window_manager.xr_session_state
         if not self.session:
             raise NoXRSessionError
@@ -224,7 +223,7 @@ class ULCharacterVR():
         right_hand_object: GameObject = None
     ) -> None:
         if self._deprecated:
-            debug('ULCharacterVR class will be renamed to "VRCharacter" in future releases!')
+            print('Warning: ULCharacterVR class will be renamed to "VRCharacter" in future releases!')
         self.session = bpy.context.window_manager.xr_session_state
         if not self.session:
             raise NoXRSessionError

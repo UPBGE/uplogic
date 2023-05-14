@@ -3,8 +3,8 @@ from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
 from uplogic.utils import is_invalid
 from uplogic.utils import not_met
-from uplogic.utils import rot_to
-from uplogic.utils import move_to
+from uplogic.utils.objects import rot_to
+from uplogic.utils.objects import move_to
 
 
 class ULFollowPath(ULActionNode):

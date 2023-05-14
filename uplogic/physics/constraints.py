@@ -4,11 +4,11 @@ from bge import render
 from bge.types import KX_ConstraintWrapper as GameConstraint
 from bge.types import KX_GameObject as GameObject
 from mathutils import Vector
-from uplogic.utils import debug, get_direction
-from uplogic.utils import set_curve_points
-from uplogic.utils import xrot_to
-from uplogic.utils import yrot_to
-from uplogic.utils import zrot_to
+from uplogic.utils.math import get_direction
+from uplogic.utils.objects import set_curve_points
+from uplogic.utils.objects import xrot_to
+from uplogic.utils.objects import yrot_to
+from uplogic.utils.objects import zrot_to
 
 
 CONSTRAINT_TYPES = {

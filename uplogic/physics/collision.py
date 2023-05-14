@@ -1,7 +1,6 @@
 from typing import Callable
 from bge import logic
 from bge.types import KX_GameObject as GameObject
-from uplogic.utils import debug
 
 
 class ULCollision():
@@ -30,7 +29,7 @@ class ULCollision():
         post_call: bool = False
     ):
         if self._deprecated:
-            debug('ULCollision class will be renamed to "Collision" in future releases!')
+            print('Warning: ULCollision class will be renamed to "Collision" in future releases!')
         self.callback: Callable = callback
         self.prop: str = prop
         self.mat: str = mat

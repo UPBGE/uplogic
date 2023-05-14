@@ -1,11 +1,10 @@
 from bge import logic
 from mathutils import Vector
-from uplogic.utils import debug
-from uplogic.utils import vec_clamp
-from uplogic.utils import raycast
-from uplogic.utils import FLOTSAM
-from uplogic.utils import SHIP
-from uplogic.utils import WATER
+from uplogic.utils.math import vec_clamp
+from uplogic.utils.raycasting import raycast
+from uplogic.utils.constants import FLOTSAM
+from uplogic.utils.constants import SHIP
+from uplogic.utils.constants import WATER
 
 
 class ULBuoy():
@@ -28,7 +27,7 @@ class ULFlotsam(ULBuoy):
 
     def __init__(self, game_object, buoyancy=1, height=200, align=True) -> None:
         if self._deprecated:
-            debug('ULFlotsam class will be renamed to "Flotsam" in future releases!')
+            print('ULFlotsam class will be renamed to "Flotsam" in future releases!')
         super().__init__()
         self.game_object = game_object
         game_object[FLOTSAM] = self
@@ -80,7 +79,7 @@ class ULShip(ULBuoy):
 
     def __init__(self, game_object, buoyancy=1, height=200, water=None) -> None:
         if self._deprecated:
-            debug('ULShip class will be renamed to "Ship" in future releases!')
+            print('ULShip class will be renamed to "Ship" in future releases!')
         super().__init__()
         self.game_object = game_object
         self.linear_damping = game_object.linearDamping

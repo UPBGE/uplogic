@@ -1,6 +1,6 @@
 from uplogic.nodes import ULParameterNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import STATUS_READY
+from uplogic.utils.constants import STATUS_READY
 from bge import logic
 
 
