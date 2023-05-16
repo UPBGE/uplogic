@@ -4,6 +4,7 @@ import pickle
 import socket
 import threading
 from uplogic.utils.constants import DISCONNECT_MSG
+from uplogic.logging import error, success, debug
 
 
 class Server:
@@ -17,115 +18,113 @@ class Server:
         self.port = port
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.scene = bge.logic.getCurrentScene()
-        self.active = False
+        self.running = False
         if start:
             self.start()
 
     def start(self):
-        print('Starting server...')
+        if self.running:
+            print('Server already running.')
+            return
         try:
+            print('Starting server...')
+            self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             bge.logic.getCurrentScene().onRemove.append(self.shutdown)
             self.socket.setblocking(False)
             self.socket.settimeout(.0001)
             self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             self.socket.bind((self.ip, self.port))
-            self.active = True
+            self.running = True
             thread = threading.Thread(target=self.update)
             thread.start()
         except socket.error as e:
-            print(e, 'SocketError')
+            error(e)
             self.shutdown()
             return
         except Exception as e:
-            print(e, 'Exception')
+            error(e)
             self.shutdown()
             return
         self.socket.listen()
-        print('Success.')
+        success('[SUCCESS]')
 
     def shutdown(self):
+        if not self.running:
+            print("Server offline.")
+            return
         print('Stopping server...')
         scene = bge.logic.getCurrentScene()
         if self.shutdown in scene.onRemove:
             scene.onRemove.remove(self.shutdown)
         try:
+            self.running = False
             for conn in self.clients:
                 conn.close()
+            if self.clients:
+                self.socket.shutdown(socket.SHUT_WR)
             self.clients = []
-            self.socket.shutdown(socket.SHUT_WR)
             self.socket.close()
-            self.active = False
-            # if self.update in bge.logic.getCurrentScene().pre_draw:
-            #     bge.logic.getCurrentScene().pre_draw.remove(self.update)
-            print('Success.')
+            success('[SUCCESS]')
         except Exception as e:
-            self.active = False
-            print(e)
-            print('Runtime Exit.')
+            self.running = False
+            self.clients = []
+            self.socket.close()
+            error(e)
+            error('Runtime Exit.')
 
     def restart(self):
         self.shutdown()
         self.start()
 
+    def on_receive(self, msg):
+        pass
+
+    def send(self, msg, subject=''):
+        if self.socket and self.running:
+            msg = {
+                'subject': subject,
+                'content': msg
+            }
+            for conn in self.clients:
+                conn.send(pickle.dumps(msg))
+
     def threaded_client(self, conn, addr):
         connected = True
         self.clients.append(conn)
-        while connected:
+        while connected and self.running:
             try:
-                msg = conn.recv(2**14)
-                if not msg or msg == DISCONNECT_MSG:
+                bmsg = conn.recv(2**14)
+                msg = pickle.loads(bmsg)
+                if not bmsg or msg == DISCONNECT_MSG:
                     print('Client disconnected.')
+                    self.clients.remove(conn)
                     connected = False
                 else:
-                    entity = pickle.loads(msg)
-                    # if dat['id'] in bpy.data.objects:
-                    if entity['streamtype']:
-                        self.entities[conn][entity['id']] = entity
-                        bobj = bpy.data.objects[entity['id']]
-                        game_object = self.scene.getGameObjectFromObject(bobj)
-                        attrs = entity['set_attrs']
-                        for i, (attr, val) in enumerate(attrs.items()):
-                            setattr(game_object, attr, val)
-                    else:
-                        pass
+                    self.on_receive(msg)
             except socket.error as e:
-                pass  # print('SocketError:', e)
+                error(f'{e.__class__.__name__}: {e}')
                 connected = False
             except pickle.UnpicklingError as e:
-                pass  # print('PickleError:', e)
+                pass
             except Exception as e:
-                print(e)
-                print('Threaded Client error')
+                error(f'{e.__class__.__name__}: {e}')
+                error('Threaded Client Error')
                 connected = False
+        conn.send(pickle.dumps(DISCONNECT_MSG))
         print('Closing Connection...')
         conn.close()
-        print(f'[ACTIVE CONNECTIONS] {threading.active_count() - 2}')
+        debug(f'[ACTIVE CONNECTIONS] {len(self.clients)}')
         return
 
-    def sync(self):
-        # print(self.entities)
-        for connection in self.entities.copy():
-            data = self.entities[connection]
-            for entity_id in self.entities[connection]:
-                # name = entity['id']
-                entity = data[entity_id]
-                print(data)
-                bobj = bpy.data.objects.get(entity_id)
-                if bobj is not None:
-                    game_object = self.scene.getGameObjectFromObject(bobj)
-                    attrs = entity['set_attrs']
-                    for i, (attr, val) in enumerate(attrs.items()):
-                        setattr(game_object, attr, val)
-
     def update(self):
-        while self.active:
+        while self.running:
             try:
                 conn, add = self.socket.accept()
-                print("Connected to:", add)
+                print(f"Connected to: {add}")
                 thread = threading.Thread(target=self.threaded_client, args=(conn, add))
                 thread.start()
                 self.entities[conn] = {}
-                print(f'[ACTIVE CONNECTIONS] {threading.active_count() - 2}')
+                debug(f'[ACTIVE CONNECTIONS] {len(self.clients)}') # {threading.active_count() - 2}')
             except BlockingIOError:
                 pass
             except socket.timeout:
@@ -133,12 +132,10 @@ class Server:
             except TimeoutError:
                 pass
             except OSError as e:
-                print(e, 'OSError')
-                self.active = False
+                self.running = False
                 self.shutdown()
             except Exception as e:
                 print(e, 'Exception')
-                self.active = False
+                self.running = False
                 self.shutdown()
         print('Server Shut Down')
-        return

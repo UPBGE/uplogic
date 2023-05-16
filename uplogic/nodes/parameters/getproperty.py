@@ -1,5 +1,6 @@
 from uplogic.nodes import ULOutSocket, ULParameterNode
-from uplogic.utils.constants import STATUS_WAITING, is_invalid
+from uplogic.utils.constants import STATUS_WAITING
+from uplogic.utils import is_invalid
 
 
 class ULGetProperty(ULParameterNode):

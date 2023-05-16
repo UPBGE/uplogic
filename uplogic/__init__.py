@@ -62,6 +62,7 @@ from collections import deque
 
 from .utils import load_user_module
 from .input import key_tap
+from .logging import enable
 import bge
 import bpy
 import signal

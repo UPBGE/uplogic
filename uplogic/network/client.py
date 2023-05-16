@@ -1,8 +1,10 @@
 import socket
 import pickle
+import threading
 import bge
-from uplogic.utils.constants import STREAMTYPE_DOWNSTREAM, STREAMTYPE_UPSTREAM
-
+from uplogic.utils.constants import STREAMTYPE_DOWNSTREAM, STREAMTYPE_UPSTREAM, DISCONNECT_MSG
+from uplogic.logging import error, success
+from uplogic.serialize import *
 
 class Client:
 
@@ -20,41 +22,79 @@ class Client:
         if self.connected:
             print('Client Already Connected! Aborting.')
             return
+        print(f'Connecting to {self.server}...')
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
+            if self.disconnect not in self.scene.onRemove:
+                self.scene.onRemove.append(self.disconnect)
             self.socket.connect((self.server, self.port))
-            if self.update not in self.scene.pre_draw:
-                self.scene.pre_draw.append(self.update)
             self.connected = True
+            thread = threading.Thread(target=self.update)
+            thread.start()
+            success('[SUCCESS]')
         except socket.error as e:
-            print(e)
-            self.disconnect()
+            error('[ERROR]')
+            error(e)
             return
 
-    def disconnect(self):
-        if self.socket is None:
+    def disconnect(self, flag=True):
+        if not self.connected or self.socket is None:
             print('Client Not Connected!')
             return
-        self.socket.shutdown(socket.SHUT_WR)
-        self.socket.close()
+        print(f'Disconnecting from {self.server}...')
+        if flag:
+            self.socket.send(pickle.dumps(DISCONNECT_MSG))
+            self.socket.shutdown(socket.SHUT_WR)
+            self.socket.close()
         self.socket = None
-        if self.update in self.scene.pre_draw:
-            self.scene.pre_draw.remove(self.update)
         self.connected = False
+        success('[SUCCESS]')
 
     def add_entity(self, entity):
         self.entities.append(entity)
 
-    def send(self):
+    def send(self, msg, subject=''):
+        if self.connected and self.socket is not None:
+            try:
+                msg = {
+                    'subject': subject,
+                    'content': msg
+                }
+                self.socket.send(pickle.dumps(msg))
+            except pickle.PicklingError:
+                error(f'Cannot serialize {msg}!')
+            except TypeError:
+                error(f'Cannot serialize {msg}!')
+            except socket.error:
+                error('Server unreachable')
+                self.disconnect()
+            except Exception as e:
+                error(f'Exception: {e}')
+                self.disconnect()
+
+    def send_entities(self):
         try:
             for entity in self.entities:
                 dat = entity.get_data()
                 if dat['streamtype']:
                     self.socket.send(pickle.dumps(dat))
-
         except Exception as e:
+            error('Server unreachable')
             self.disconnect()
 
+    def on_receive(self, msg):
+        pass
+
     def update(self):
-        if self.connected:
-            self.send()
+        while self.connected and self.socket:
+            try:
+                bmsg = self.socket.recv(2048)
+                msg = pickle.loads(bmsg)
+                if not bmsg or msg == DISCONNECT_MSG:
+                    self.connected = False
+                else:
+                    self.on_receive(msg)
+            except Exception as e:
+                self.connected = False
+        self.disconnect(False)
+        print('Closing')

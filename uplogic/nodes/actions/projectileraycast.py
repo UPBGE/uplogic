@@ -15,6 +15,7 @@ class ULProjectileRayCast(ULActionNode):
         self.condition = None
         self.origin = None
         self.destination = None
+        self.local: bool = None
         self.power: float = None
         self.resolution: float = None
         self.property_name: str = None
@@ -81,6 +82,7 @@ class ULProjectileRayCast(ULActionNode):
             caster=owner,
             origin=Vector(origin),
             aim=Vector(destination),
+            local=self.get_input(self.local),
             power=power,
             distance=distance,
             resolution=resolution,

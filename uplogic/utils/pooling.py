@@ -106,31 +106,35 @@ class SimpleBullet(Spawn):
     
     def update(self):
         target = self.position + Vector((0, self.speed, 0)) @ self.transform.inverted()
-        dat = raycast(self.scene.active_camera, self.position, target)
+        dat = raycast(
+            self.game_object if self.game_object else self.scene.active_camera,
+            self.position,
+            target
+        )
         
         if not dat.obj:
             self.position = target
         else:
-            self.hit()
+            self.hit(dat)
             self.destroy()
     
-    def hit(self):
+    def hit(self, data):
         pass
 
 
 class PhysicsBullet(Spawn):
-    power = 300
+    speed = 30
     
     def start(self):
         self.target = Vector((0, 1, 0)) @ self.transform.inverted()
     
     def update(self):
         dat = raycast_projectile(
-            self.scene.active_camera,
+            self.game_object if self.game_object else self.scene.active_camera,
             self.position,
             self.target,
-            power=self.power,
-            distance=self.power * .1,
+            power=self.speed * 10,
+            distance=self.speed,
             visualize=self._visualize,
             local=True
         )
@@ -141,10 +145,10 @@ class PhysicsBullet(Spawn):
             self.position = dat.points[-1]
             self.target = dat.points[-1] - dat.points[-2]
         else:
-            self.hit()
+            self.hit(dat)
             self.destroy()
     
-    def hit(self):
+    def hit(self, data):
         pass
 
 

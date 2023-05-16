@@ -98,6 +98,10 @@ class Label(Widget):
         self._font_color[3] = val * self.opacity
 
     @property
+    def dimensions(self):
+        return blf.dimensions(self.font, self.text)
+
+    @property
     def _draw_size(self):
         # if self.parent is None:
         #     return [0, 0]
@@ -105,23 +109,23 @@ class Label(Widget):
 
     def draw(self):
         super()._setup_draw()
+        blf.size(self.font, self.font_size)
+        blf.color(self.font, self.font_color[0], self.font_color[1], self.font_color[2], self.font_color[3])
+        charsize = blf.dimensions(self.font, 'A')
         if self.parent.use_clipping:
             verts = self.parent._vertices
             blf.enable(self.font, blf.CLIPPING)
-            blf.clipping(self.font, verts[0][0], verts[0][1], verts[2][0], verts[2][1])
+            blf.clipping(self.font, verts[0][0], verts[0][1] + charsize[1], verts[2][0], verts[2][1])
         else:
             blf.disable(self.font, blf.CLIPPING)
-        if self.wrap:
+        if self.wrap and self.parent:
             blf.enable(self.font, blf.WORD_WRAP)
-            blf.word_wrap(self.font, self.size[0])
+            blf.word_wrap(self.font, self.parent._draw_size[0])
         if self.shadow:
             col = self.shadow_color
             blf.enable(self.font, blf.SHADOW)
             blf.shadow(self.font, 0, col[0], col[1], col[2], col[3])
             blf.shadow_offset(self.font, int(self.shadow_offset[0]), int(self.shadow_offset[1]))
-        blf.size(self.font, self.font_size)
-        blf.color(self.font, self.font_color[0], self.font_color[1], self.font_color[2], self.font_color[3])
-        charsize = blf.dimensions(self.font, 'A')
         lines = [t for t in self.text.split('\n')]
         if len(lines) > 1:
             for i, txt in enumerate(lines):

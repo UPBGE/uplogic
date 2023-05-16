@@ -16,9 +16,9 @@ class Layout(Widget):
         halign: str = 'left',
         valign: str = 'bottom'
     ):
-        super().__init__(pos, size, bg_color, relative, halign=halign, valign=valign)
         self.border_width = border_width
         self.border_color = border_color
+        super().__init__(pos, size, bg_color, relative, halign=halign, valign=valign)
 
     @property
     def opacity(self):

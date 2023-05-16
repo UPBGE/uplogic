@@ -266,8 +266,16 @@ class RayCastProjectileData(tuple):
         return self[2]
 
     @property
-    def points(self) -> list:
+    def points(self) -> list[Vector]:
         return self[3]
+
+    @property
+    def direction(self) -> Vector:
+        p = self.points
+        if len(p) > 1:
+            return (p[-1] - p[-2]).normalized()
+        else:
+            return Vector((0, 0, 0))
 
 
 def raycast_projectile(
