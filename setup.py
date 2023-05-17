@@ -8,7 +8,7 @@ def read_file(name):
         return f.read()
 
 
-version = 'v1.9'
+version = 'v1.9-hotfix'
 shortdesc = "Uplogic utility for UPBGE."
 longdesc = '\n\n'.join([read_file(name) for name in [
     'README.md',
@@ -31,7 +31,7 @@ setup(
     author='Leopold Auersperg-Castell',
     author_email='lauersperg@gmx.at',
     url='https://github.com/UPBGE/uplogic',
-    download_url='https://github.com/UPBGE/uplogic/archive/refs/tags/v1.9.tar.gz',
+    download_url='https://github.com/UPBGE/uplogic/archive/refs/tags/v1.9-hotfix.tar.gz',
     license='GPLv2',
     packages=[
         'uplogic',
@@ -42,11 +42,13 @@ setup(
         'uplogic.events',
         'uplogic.input',
         'uplogic.logging',
+        'uplogic.network',
         'uplogic.nodes',
         'uplogic.nodes.actions',
         'uplogic.nodes.conditions',
         'uplogic.nodes.parameters',
         'uplogic.physics',
+        'uplogic.serialize',
         'uplogic.shaders',
         'uplogic.ui',
         'uplogic.utils'

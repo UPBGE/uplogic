@@ -153,6 +153,7 @@ class PhysicsBullet(Spawn):
 
 
 class SpawnPool:
+    _spawn_idx = 0
 
     def __init__(
         self,
@@ -165,7 +166,7 @@ class SpawnPool:
         visualize: bool = False
     ):
         self.spawn_cls = spawn
-        self._spawn_idx = 0
+        # self._spawn_idx = 0
         self.spawner = spawner
         self._amount = amount # clamp(amount, 0, 10)
         self._lifetime = lifetime
@@ -190,6 +191,6 @@ class SpawnPool:
         spawn_obj = self.scene.objects[f'{self._spawn_name}{self._spawn_idx}']
         spawn = self.spawn_cls(spawn_obj, self)
         spawn._visualize = self.visualize
-        self._spawn_idx = cycle(self._spawn_idx + 1, 0, self._amount - 1)
+        self.__class__._spawn_idx = cycle(self._spawn_idx + 1, 0, self._amount - 1)
         return spawn
 

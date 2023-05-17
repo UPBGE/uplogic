@@ -52,8 +52,8 @@ class ULGamepadLook(ULActionNode):
         lowercapX: float = -cap_x.y
         use_cap_y: Vector = self.get_input(self.use_cap_y)
         cap_y: Vector = self.get_input(self.cap_y)
-        uppercapY: float = cap_y.x
-        lowercapY: float = -cap_y.y
+        uppercapY: float = cap_y.y
+        lowercapY: float = cap_y.x
 
         self._set_ready()
         if logic.joysticks[index]:
@@ -68,7 +68,7 @@ class ULGamepadLook(ULActionNode):
         elif axis == 1:
             x, y = raw_values[2], raw_values[3]
         neg_x = -1 if x < 0 else 1
-        neg_y = -1 if y < 0 else 1
+        neg_y = 1 if y < 0 else -1
 
         if -threshold < x < threshold:
             x = 0
@@ -82,13 +82,13 @@ class ULGamepadLook(ULActionNode):
         if x == y == 0:
             self.done = True
             return
+        print(x, y)
 
         x *= neg_x
         y *= neg_y
 
         x = -x if inverted['x'] else x
         y = -y if inverted['y'] else y
-
         x *= sensitivity
         if use_cap_x:
             objectRotation = main_obj.localOrientation.to_euler()
@@ -105,16 +105,16 @@ class ULGamepadLook(ULActionNode):
         y *= sensitivity
         if use_cap_y:
             objectRotation = head_obj.localOrientation.to_euler()
-            if objectRotation.y + y > uppercapY:
+            if objectRotation.x + y > uppercapY:
                 y = 0
-                objectRotation.y = uppercapY
+                objectRotation.x = uppercapY
                 head_obj.localOrientation = objectRotation.to_matrix()
 
-            if objectRotation.y + y < lowercapY:
+            if objectRotation.x + y < lowercapY:
                 y = 0
-                objectRotation.y = lowercapY
+                objectRotation.x = lowercapY
                 head_obj.localOrientation = objectRotation.to_matrix()
 
         main_obj.applyRotation(Vector((0, 0, x)), True)
-        head_obj.applyRotation(Vector((0, y, 0)), True)
+        head_obj.applyRotation(Vector((y, 0, 0)), True)
         self.done = True
