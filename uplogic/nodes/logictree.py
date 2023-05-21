@@ -13,7 +13,6 @@ import bpy
 from bge.types import SCA_PythonKeyboard as Keyboard
 import collections
 import time
-import Cython
 
 
 class ULLogicTree(ULLogicContainer):
