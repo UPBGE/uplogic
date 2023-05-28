@@ -159,7 +159,7 @@ class SpawnPool:
         self,
         object_name: str,
         amount: int = 10,
-        lifetime: int = 5,
+        lifetime: float = 5,
         spawner = None,
         spawn = Spawn,
         inactive_pos: Vector = Vector((0, 0, -100)),

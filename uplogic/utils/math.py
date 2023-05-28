@@ -236,3 +236,34 @@ def get_collision_bitmask(
 
 def project_vector3(v, xi, yi):
     return Vector((v[xi], v[yi]))
+
+
+def rotate2d(origin, pivot, angle):
+    angle = math.radians(angle)
+    return Vector((
+        ((origin[0] - pivot[0]) * math.cos(angle)) - ((origin[1] - pivot[1]) * math.sin(angle)) + pivot[0],
+        ((origin[0] - pivot[0]) * math.sin(angle)) + ((origin[1] - pivot[1]) * math.cos(angle)) + pivot[1]
+    ))
+
+
+def rotate3d(origin, pivot, angle, axis=2):
+    angle = math.radians(angle)
+    if axis == 0:
+        return Vector((
+            origin[0],
+            ((origin[1] - pivot[1]) * math.cos(angle)) - ((origin[2] - pivot[2]) * math.sin(angle)) + pivot[1],
+            ((origin[1] - pivot[1]) * math.sin(angle)) + ((origin[2] - pivot[2]) * math.cos(angle)) + pivot[2]
+        ))
+    elif axis == 1:
+        return Vector((
+            ((origin[0] - pivot[0]) * math.cos(angle)) - ((origin[2] - pivot[2]) * math.sin(angle)) + pivot[0],
+            origin[1],
+            ((origin[0] - pivot[0]) * math.sin(angle)) + ((origin[2] - pivot[2]) * math.cos(angle)) + pivot[2]
+        ))
+    elif axis == 2:
+        return Vector((
+            ((origin[0] - pivot[0]) * math.cos(angle)) - ((origin[1] - pivot[1]) * math.sin(angle)) + pivot[0],
+            ((origin[0] - pivot[0]) * math.sin(angle)) + ((origin[1] - pivot[1]) * math.cos(angle)) + pivot[1],
+            origin[2]
+        ))
+    return origin

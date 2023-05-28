@@ -90,15 +90,18 @@ class ULCollision(ULConditionNode):
             new_monitored_object = None
         if self._last_monitored_object == new_monitored_object:
             return
+        lmo = self._last_monitored_object
+        valid = False if lmo is None else not lmo.invalid
         if not isinstance(new_monitored_object, KX_GameObject):
-            if self._last_monitored_object is not None:
-                self._last_monitored_object.collisionCallbacks.remove(
+            if lmo is not None and valid:
+                lmo.collisionCallbacks.remove(
                     self._collision_callback
                 )
                 self._last_monitored_object = None
         else:
-            if self._last_monitored_object is not None:
-                self._last_monitored_object.collisionCallbacks.remove(
+            lmo = self._last_monitored_object
+            if lmo is not None and valid:
+                lmo.collisionCallbacks.remove(
                     self._collision_callback
                 )
             if new_monitored_object is not None:

@@ -1,5 +1,6 @@
 from uplogic.nodes import ULParameterNode
 from uplogic.nodes import ULOutSocket
+from uplogic.utils import not_met
 
 
 class ULStoreValue(ULParameterNode):
@@ -7,15 +8,20 @@ class ULStoreValue(ULParameterNode):
         ULParameterNode.__init__(self)
         self.value = None
         self.initialize = True
-        self._value = None
+        self.condition = None
+        self._stored_value = None
         self.OUT = ULOutSocket(self, self.get_done)
 
     def get_done(self):
-        return self._value
+        return self._stored_value
 
     def evaluate(self):
         self._set_ready()
         condition = self.get_input(self.condition)
-        if condition or self.initialize:
+        if self.initialize:
             self.initialize = False
-            self._value = self.get_input(self.value)
+            condition = True
+        if not_met(condition):
+            return
+        print('STORING')
+        self._stored_value = self.get_input(self.value)
