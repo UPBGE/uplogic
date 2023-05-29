@@ -73,6 +73,22 @@ class ULLight():
         self.light.blenderObject.data.use_shadow = val
 
     @property
+    def shadow_clip_start(self) -> float:
+        return self.light.blenderObject.data.shadow_buffer_clip_start
+
+    @shadow_clip_start.setter
+    def shadow_clip_start(self, val: float):
+        self.light.blenderObject.data.shadow_buffer_clip_start = val
+
+    @property
+    def shadow_bias(self) -> float:
+        return self.light.blenderObject.data.shadow_buffer_bias
+
+    @shadow_bias.setter
+    def shadow_bias(self, val: float):
+        self.light.blenderObject.data.shadow_buffer_bias = val
+
+    @property
     def use_custom_distance(self) -> bool:
         return self.light.blenderObject.data.use_custom_distance
 
