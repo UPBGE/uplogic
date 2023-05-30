@@ -37,7 +37,7 @@ class ULLight():
         if self._deprecated:
             print('[UPLOGIC] ULLight class will be renamed to "Light" in future releases!')
         if light:
-            self.light = make_unique_light(light)
+            self.game_object = make_unique_light(light)
             """The wrapped `KX_LightObject`."""
             return
         game_scene = logic.getCurrentScene()
@@ -45,200 +45,200 @@ class ULLight():
         light = bpy.data.lights.new(name, type)
         light = bpy.data.objects.new(name, light)
         scene.collection.objects.link(light)
-        self.light = game_scene.convertBlenderObject(light)
+        self.game_object = game_scene.convertBlenderObject(light)
         """The wrapped `KX_LightObject`."""
         self.energy = 10
 
     @property
     def blenderObject(self) -> Object:
-        return self.light.blenderObject
+        return self.game_object.blenderObject
 
     @property
     def energy(self) -> float:
-        return self.light.blenderObject.data.energy
+        return self.game_object.blenderObject.data.energy
 
     @energy.setter
     def energy(self, val: float):
-        self.light.blenderObject.data.energy = val
+        self.game_object.blenderObject.data.energy = val
 
     @property
     def color(self) -> Color:
-        return self.light.blenderObject.data.color
+        return self.game_object.blenderObject.data.color
 
     @color.setter
     def color(self, val: Color):
-        self.light.blenderObject.data.color = val
+        self.game_object.blenderObject.data.color = val
 
     @property
     def use_shadow(self) -> bool:
-        return self.light.blenderObject.data.use_shadow
+        return self.game_object.blenderObject.data.use_shadow
 
     @use_shadow.setter
     def use_shadow(self, val: bool):
-        self.light.blenderObject.data.use_shadow = val
+        self.game_object.blenderObject.data.use_shadow = val
 
     @property
     def shadow_clip_start(self) -> float:
-        return self.light.blenderObject.data.shadow_buffer_clip_start
+        return self.game_object.blenderObject.data.shadow_buffer_clip_start
 
     @shadow_clip_start.setter
     def shadow_clip_start(self, val: float):
-        self.light.blenderObject.data.shadow_buffer_clip_start = val
+        self.game_object.blenderObject.data.shadow_buffer_clip_start = val
 
     @property
     def shadow_bias(self) -> float:
-        return self.light.blenderObject.data.shadow_buffer_bias
+        return self.game_object.blenderObject.data.shadow_buffer_bias
 
     @shadow_bias.setter
     def shadow_bias(self, val: float):
-        self.light.blenderObject.data.shadow_buffer_bias = val
+        self.game_object.blenderObject.data.shadow_buffer_bias = val
 
     @property
     def use_custom_distance(self) -> bool:
-        return self.light.blenderObject.data.use_custom_distance
+        return self.game_object.blenderObject.data.use_custom_distance
 
     @use_custom_distance.setter
     def use_custom_distance(self, val: bool):
-        self.light.blenderObject.data.use_custom_distance = val
+        self.game_object.blenderObject.data.use_custom_distance = val
 
     @property
     def distance(self) -> float:
-        return self.light.blenderObject.data.cutoff_distance
+        return self.game_object.blenderObject.data.cutoff_distance
 
     @distance.setter
     def distance(self, val: float):
-        self.light.blenderObject.data.cutoff_distance = val
+        self.game_object.blenderObject.data.cutoff_distance = val
 
     @property
     def angle(self)-> float:
-        return self.light.blenderObject.data.angle
+        return self.game_object.blenderObject.data.angle
 
     @angle.setter
     def angle(self, val: float):
-        self.light.blenderObject.data.angle = val
+        self.game_object.blenderObject.data.angle = val
 
     @property
     def spot_size(self) -> float:
-        return self.light.blenderObject.data.spot_size
+        return self.game_object.blenderObject.data.spot_size
 
     @spot_size.setter
     def spot_size(self, val: float):
-        self.light.blenderObject.data.spot_size = val
+        self.game_object.blenderObject.data.spot_size = val
 
     @property
     def spot_blend(self) -> float:
-        return self.light.blenderObject.data.spot_blend
+        return self.game_object.blenderObject.data.spot_blend
 
     @spot_blend.setter
     def spot_blend(self, val: float):
-        self.light.blenderObject.data.spot_blend = val
+        self.game_object.blenderObject.data.spot_blend = val
 
     @property
     def radius(self) -> float:
-        return self.light.blenderObject.data.shadow_soft_size
+        return self.game_object.blenderObject.data.shadow_soft_size
 
     @radius.setter
     def radius(self, val: float):
-        self.light.blenderObject.data.shadow_soft_size = val
+        self.game_object.blenderObject.data.shadow_soft_size = val
 
     @property
     def parent(self) -> GameObject:
-        return self.light.parent
+        return self.game_object.parent
 
     @parent.setter
     def parent(self, val: GameObject):
-        self.light.setParent(val)
+        self.game_object.setParent(val)
 
     def set_parent(self, parent):
-        self.light.setParent(parent)
+        self.game_object.setParent(parent)
 
     @property
     def worldPosition(self) -> Vector:
-        return self.light.worldPosition
+        return self.game_object.worldPosition
 
     @worldPosition.setter
     def worldPosition(self, val: Vector):
-        self.light.worldPosition = val
+        self.game_object.worldPosition = val
 
     @property
     def localPosition(self) -> Vector:
-        return self.light.localPosition
+        return self.game_object.localPosition
 
     @localPosition.setter
     def localPosition(self, val: Vector):
-        self.light.localPosition = val
+        self.game_object.localPosition = val
 
     @property
     def worldOrientation(self) -> Matrix:
-        return self.light.worldOrientation
+        return self.game_object.worldOrientation
 
     @worldOrientation.setter
     def worldOrientation(self, val: Matrix):
-        self.light.worldOrientation = val
+        self.game_object.worldOrientation = val
 
     @property
     def localOrientation(self) -> Matrix:
-        return self.light.localOrientation
+        return self.game_object.localOrientation
 
     @localOrientation.setter
     def localOrientation(self, val: Matrix):
-        self.light.localOrientation = val
+        self.game_object.localOrientation = val
 
     @property
     def worldScale(self) -> Vector:
-        return self.light.worldScale
+        return self.game_object.worldScale
 
     @worldScale.setter
     def worldScale(self, val: Vector):
-        self.light.worldScale = val
+        self.game_object.worldScale = val
 
     @property
     def localScale(self) -> Vector:
-        return self.light.localScale
+        return self.game_object.localScale
 
     @localScale.setter
     def localScale(self, val: Vector):
-        self.light.localScale = val
+        self.game_object.localScale = val
 
     @property
     def worldLinearVelocity(self) -> Vector:
-        return self.light.worldLinearVelocity
+        return self.game_object.worldLinearVelocity
 
     @worldLinearVelocity.setter
     def worldLinearVelocity(self, val: Vector):
-        self.light.worldLinearVelocity = val
+        self.game_object.worldLinearVelocity = val
 
     @property
     def localLinearVelocity(self) -> Vector:
-        return self.light.localLinearVelocity
+        return self.game_object.localLinearVelocity
 
     @localLinearVelocity.setter
     def localLinearVelocity(self, val: Vector):
-        self.light.localLinearVelocity = val
+        self.game_object.localLinearVelocity = val
 
     @property
     def worldAngularVelocity(self) -> Vector:
-        return self.light.worldAngularVelocity
+        return self.game_object.worldAngularVelocity
 
     @worldAngularVelocity.setter
     def worldAngularVelocity(self, val: Vector):
-        self.light.worldAngularVelocity = val
+        self.game_object.worldAngularVelocity = val
 
     @property
     def localAngularVelocity(self) -> Vector:
-        return self.light.localAngularVelocity
+        return self.game_object.localAngularVelocity
 
     @localAngularVelocity.setter
     def localAngularVelocity(self, val: Vector):
-        self.light.localAngularVelocity = val
+        self.game_object.localAngularVelocity = val
 
     @property
     def worldTransform(self) -> Matrix:
-        return self.light.worldTransform
+        return self.game_object.worldTransform
 
     @worldTransform.setter
     def worldTransform(self, val: Matrix):
-        self.light.worldTransform = val
+        self.game_object.worldTransform = val
 
 
 class Light(ULLight):
