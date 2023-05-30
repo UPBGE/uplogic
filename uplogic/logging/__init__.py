@@ -1,3 +1,4 @@
+from collections.abc import Iterable
 from bge import logic
 from bge import render
 from io import StringIO
@@ -18,8 +19,8 @@ def set_depth(depth):
     LoggerLayout.max_msg = depth
 
 
-def enable():
-    get_logger(True)
+def enable(toggle_key='BACKSLASH', visible=False):
+    get_logger(True, toggle_key=toggle_key, visible=visible)
     sys.stdout = Logger()
     log('On-Screen Logging active; Check System Console for Errors.')
 
@@ -33,6 +34,9 @@ def disable():
 
 
 class Logger(StringIO):
+
+    # def writelines(self, __lines: Iterable[str]) -> None:
+    #     log(__lines, newline=False)
 
     def write(self, __s: str) -> int:
         log(__s)
@@ -58,9 +62,10 @@ class LoggerLayout(Canvas):
     padding = [5, 10]
     toggle_key = 'BACKSLASH'
 
-    def __init__(self):
+    def __init__(self, toggle_key='BACKSLASH', visible=False):
+        self.toggle_key = toggle_key
         super().__init__()
-        if not getattr(bpy.context.scene, 'screen_console_open', False):
+        if not getattr(bpy.context.scene, 'screen_console_open', False) and not visible:
             self.show = False
         self.messages: list[Label] = []
         self.layout = RelativeLayout(relative={'size': True, 'pos': True}, pos=[0, 0], size=(1, .4), bg_color=[0, 0, 0, .3])
@@ -68,6 +73,7 @@ class LoggerLayout(Canvas):
         self.add_widget(self.layout)
         self.fade_event = None
         self._toggle_key = False
+        self._prev_msg = None
         scene = logic.getCurrentScene()
         if disable not in scene.onRemove:
             scene.onRemove.append(disable)
@@ -97,12 +103,16 @@ class LoggerLayout(Canvas):
         else:
             self.fade_event = None
 
-    def add_message(self, msg, type='INFO'):
+    def add_message(self, msg, type='INFO', time=True):
+        if (msg == ' ' or self._prev_msg == ' ') and len(self.layout.children):
+            self.layout.children[-1].text += msg
+            self._prev_msg = msg
+            return
         if len(self.layout.children) > self.max_msg -1:
             self.layout.remove_widget(self.layout.children[0])
         now = datetime.now()
-        current_time = now.strftime("%H:%M:%S")
-        self.layout.add_widget(Label(text=f'>[{current_time}]  {msg}', pos=[5, 10], font_color=self.colors[type]))
+        current_time = f'[{now.strftime("%H:%M:%S")}]' if time else "\t\t\t\t\t\t".replace('\t', '    ')
+        self.layout.add_widget(Label(text=f'>{current_time}  {msg}', pos=[5, 10], font_color=self.colors[type]))
         dim = self.layout.children[0].dimensions[1]
         lheight = self.layout._draw_size[1]
         amount = lheight / dim
@@ -111,13 +121,14 @@ class LoggerLayout(Canvas):
             if child.pos[1] > lheight - dim:
                 self.layout.remove_widget(child)
             child.opacity = 1 - (i * (1/amount))
+        self._prev_msg = msg
 
 
-def get_logger(create=False) -> LoggerLayout:
+def get_logger(create=False, toggle_key='BACKSLASH', visible=False) -> LoggerLayout:
     loggers = GlobalDB.retrieve('uplogic.loggers')
     logger = loggers.get('default')
     if logger is None and create:
-        logger = LoggerLayout()
+        logger = LoggerLayout(toggle_key=toggle_key, visible=visible)
         loggers.put('default', logger)
     return logger
 
@@ -127,10 +138,13 @@ def log(msg, type='INFO'):
     if logger is None:
         print(msg)
         return
-    for msg in str(msg).split('\n'):
+    # msg = ''.join([str(e) for e in msg])
+    show_time = True
+    for msg in msg.split('\n'):
         if msg:
             msg = msg.replace('  ', '    ')
-            logger.add_message(f'{msg}', type)
+            logger.add_message(f'{msg}', type, time=show_time)
+            show_time = False
 
 
 def warning(msg):

@@ -1,5 +1,6 @@
 from bge.types import KX_GameObject as GameObject
 from bge import logic
+from bpy.types import Object
 import bpy
 from mathutils import Vector, Matrix, Color
 
@@ -47,6 +48,10 @@ class ULLight():
         self.light = game_scene.convertBlenderObject(light)
         """The wrapped `KX_LightObject`."""
         self.energy = 10
+
+    @property
+    def blenderObject(self) -> Object:
+        return self.light.blenderObject
 
     @property
     def energy(self) -> float:
@@ -129,12 +134,23 @@ class ULLight():
         self.light.blenderObject.data.spot_blend = val
 
     @property
+    def radius(self) -> float:
+        return self.light.blenderObject.data.shadow_soft_size
+
+    @radius.setter
+    def radius(self, val: float):
+        self.light.blenderObject.data.shadow_soft_size = val
+
+    @property
     def parent(self) -> GameObject:
         return self.light.parent
 
     @parent.setter
     def parent(self, val: GameObject):
         self.light.setParent(val)
+
+    def set_parent(self, parent):
+        self.light.setParent(parent)
 
     @property
     def worldPosition(self) -> Vector:

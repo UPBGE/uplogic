@@ -2,7 +2,7 @@ import socket
 import pickle
 import threading
 import bge
-from uplogic.utils.constants import STREAMTYPE_DOWNSTREAM, STREAMTYPE_UPSTREAM, DISCONNECT_MSG
+from uplogic.utils.constants import DISCONNECT_MSG
 from uplogic.logging import error, success
 from uplogic.serialize import *
 
