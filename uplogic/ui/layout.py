@@ -14,11 +14,12 @@ class Layout(Widget):
         border_width: int = 1,
         border_color: list = [0, 0, 0, 0],
         halign: str = 'left',
-        valign: str = 'bottom'
+        valign: str = 'bottom',
+        angle=0
     ):
         self.border_width = border_width
         self.border_color = border_color
-        super().__init__(pos, size, bg_color, relative, halign=halign, valign=valign)
+        super().__init__(pos, size, bg_color, relative, halign=halign, valign=valign, angle=angle)
 
     @property
     def opacity(self):
@@ -87,11 +88,12 @@ class BoxLayout(Layout):
             border_color: list = (0, 0, 0, 0),
             spacing: int = 0,
             halign: str = 'left',
-            valign: str = 'bottom'
+            valign: str = 'bottom',
+            angle=0
         ):
         self.orientation = orientation
         self.spacing = spacing
-        super().__init__(pos, size, bg_color, relative, border_width, border_color, halign=halign, valign=valign)
+        super().__init__(pos, size, bg_color, relative, border_width, border_color, halign=halign, valign=valign, angle=angle)
         self.use_clipping = False
 
     @property
@@ -150,7 +152,8 @@ class GridLayout(BoxLayout):
         cols: int = 2,
         rows: int = 2,
         halign: str = 'left',
-        valign: str = 'bottom'
+        valign: str = 'bottom',
+        angle=0
     ):
         super().__init__(
             orientation,
@@ -162,14 +165,14 @@ class GridLayout(BoxLayout):
             border_color,
             spacing,
             halign,
-            valign
+            valign,
+            angle=angle
         )
         self.rows = rows
         self.cols = cols
 
     def add_widget(self, widget):
         max = self.rows * self.cols
-        print(len(self.children), max)
         if len(self.children) < max:
             super().add_widget(widget)
             self.arrange()

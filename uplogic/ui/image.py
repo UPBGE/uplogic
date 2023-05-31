@@ -2,13 +2,15 @@ from .widget import Widget
 import gpu
 import bge, bpy
 from math import ceil
+from uplogic.utils.math import rotate2d
 from gpu_extras.batch import batch_for_shader
+from mathutils import Vector
 
 
 class Image(Widget):
 
-    def __init__(self, pos=[0, 0], size=(100, 100), relative={}, texture=None, halign='left', valign='bottom'):
-        super().__init__(pos, size, relative=relative, halign=halign, valign=valign)
+    def __init__(self, pos=[0, 0], size=(100, 100), relative={}, texture=None, halign='left', valign='bottom', angle=0):
+        super().__init__(pos, size, relative=relative, halign=halign, valign=valign, angle=angle)
         self.texture = texture
 
     @property
@@ -24,18 +26,26 @@ class Image(Widget):
     def build_shader(self):
         pos = self._draw_pos
         size = self._draw_size
+        x0 = Vector((pos[0], pos[1]))
+        x1 = Vector((pos[0] + size[0], pos[1]))
+        y1 = Vector((pos[0] + size[0], pos[1] + size[1]))
+        y0 = Vector((pos[0], pos[1] + size[1]))
+        pivot = self._get_pivot(x0, x1, y0, y1)
+
+        if self._draw_angle and self._vertices is not None:
+            x0 = rotate2d(x0, pivot, self._draw_angle)
+            x1 = rotate2d(x1, pivot, self._draw_angle)
+            y0 = rotate2d(y0, pivot, self._draw_angle)
+            y1 = rotate2d(y1, pivot, self._draw_angle)
         vertices = self._vertices = (
-            (pos[0], pos[1]),
-            (pos[0] + size[0], pos[1]),
-            (pos[0] + size[0], pos[1] + size[1]),
-            (pos[0], pos[1] + size[1])
+            x0, x1, y1, y0
         )
         self._shader = gpu.shader.from_builtin('2D_IMAGE')
         self._batch = batch_for_shader(
             self._shader, 'TRI_FAN',
             {
                 "pos": vertices,
-                "texCoord": ((0, 0), (1, 0), (1, 1), (0, 1)),
+                "texCoord": ((0.0001, 0.0001), (.9999, .0001), (.9999, .9999), (.0001, .9999)),
             },
         )
     
@@ -80,11 +90,23 @@ class Icon(Image):
     def build_shader(self):
         pos = self._draw_pos
         size = self._draw_size
+        x0 = Vector((pos[0], pos[1]))
+        x1 = Vector((pos[0] + size[0], pos[1]))
+        y1 = Vector((pos[0] + size[0], pos[1] + size[1]))
+        y0 = Vector((pos[0], pos[1] + size[1]))
+        pivot = self._get_pivot(x0, x1, y0, y1)
+
+        if self._draw_angle and self._vertices is not None:
+            x0 = rotate2d(x0, pivot, self._draw_angle)
+            x1 = rotate2d(x1, pivot, self._draw_angle)
+            y0 = rotate2d(y0, pivot, self._draw_angle)
+            y1 = rotate2d(y1, pivot, self._draw_angle)
+
         vertices = self._vertices = (
-            (pos[0], pos[1]),
-            (pos[0] + size[0], pos[1]),
-            (pos[0] + size[0], pos[1] + size[1]),
-            (pos[0], pos[1] + size[1])
+            x0,
+            x1,
+            y1,
+            y0
         )
         self._shader = gpu.shader.from_builtin('2D_IMAGE')
         icon = self.icon

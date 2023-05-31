@@ -19,6 +19,10 @@ class Canvas(Widget):
         return [0, 0]
 
     @property
+    def pivot(self):
+        return (0, 0)
+
+    @property
     def _draw_size(self):
         return [
             render.getWindowWidth(),

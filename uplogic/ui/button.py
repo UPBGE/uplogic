@@ -8,8 +8,8 @@ from uplogic.utils import debug
 
 class Button(Widget, HoverBehavior):
 
-    def __init__(self, pos=[0., 0.], size=[100., 100.], bg_color=(0, 0, 0, 0), relative={}, border_width=1.0, border_color=(0, 0, 0, 0), hover_color=(0, 0, 0, .5), halign='left', valign='bottom'):
-        super().__init__(pos, size, bg_color, relative, halign=halign, valign=valign)
+    def __init__(self, pos=[0., 0.], size=[100., 100.], bg_color=(0, 0, 0, 0), relative={}, border_width=1.0, border_color=(0, 0, 0, 0), hover_color=(0, 0, 0, .5), halign='left', valign='bottom', angle=0):
+        super().__init__(pos, size, bg_color, relative, halign=halign, valign=valign, angle=angle)
         self.hover_color = hover_color
         self.border_width = border_width
         self.border_color = border_color
@@ -87,19 +87,9 @@ class LabelButton(Button, HoverBehavior):
         halign='left',
         valign='bottom',
         halign_text='center',
-        valign_text='center'
+        valign_text='center',
+        angle=0
     ):
-        super().__init__(
-            pos,
-            size,
-            bg_color,
-            relative,
-            border_width=border_width,
-            border_color=border_color,
-            hover_color=hover_color,
-            halign=halign,
-            valign=valign
-        )
         self.label = Label(
             relative={'pos': True},
             pos=text_pos,
@@ -111,8 +101,25 @@ class LabelButton(Button, HoverBehavior):
             font_size=font_size,
             line_height=line_height
         )
+        super().__init__(
+            pos,
+            size,
+            bg_color,
+            relative,
+            border_width=border_width,
+            border_color=border_color,
+            hover_color=hover_color,
+            halign=halign,
+            valign=valign,
+            angle=angle
+        )
         self.add_widget(self.label)
         self._in_focus = False
+
+    # def _rebuild_tree(self):
+    #     # self.label.angle = self.angle
+    #     print('HOO')
+    #     super()._rebuild_tree()
 
     @property
     def text(self):

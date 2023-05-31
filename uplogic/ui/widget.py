@@ -1,12 +1,14 @@
 import gpu
 from gpu_extras.batch import batch_for_shader
 from bge import render
+from uplogic.utils.math import rotate2d, lerp
+from mathutils import Vector
 
 
 class Widget():
     '''TODO: Documentation
     '''
-    def __init__(self, pos=(0, 0), size=(0, 0), bg_color=(0, 0, 0, 0), relative={}, halign='left', valign='bottom'):
+    def __init__(self, pos=(0, 0), size=(0, 0), bg_color=(0, 0, 0, 0), relative={}, halign='left', valign='bottom', angle=0):
         self.halign = halign
         self.valign = valign
         self._parent = None
@@ -18,10 +20,11 @@ class Widget():
         self.size = size
         self.pos = pos
         self.bg_color = bg_color
-        self._vertices = ((0, 0), (0, 0), (0, 0), (0, 0))
+        self._vertices = None # (Vector((0, 0)), Vector((0, 0)), Vector((0, 0)), Vector((0, 0)))
+        self.angle = angle
+        self.build_shader()
         self._clipped = [0, 0]
         self.use_clipping = False
-        self.build_shader()
         self.z = 0
         self.start()
 
@@ -51,6 +54,33 @@ class Widget():
         while pa.parent is not None:
             pa = pa.parent
         return pa
+
+    @property
+    def pivot(self):
+        if self.parent is None:
+            return (0, 0)
+        v = self._vertices
+        x0 = Vector(v[0])
+        x1 = Vector(v[1])
+        y1 = Vector(v[2])
+        y0 = Vector(v[3])
+        return self._get_pivot(x0, x1, y0, y1)
+
+    @property
+    def _draw_angle(self):
+        if self.parent:
+            return self._angle + self.parent._draw_angle
+        return self._angle
+
+    @property
+    def angle(self):
+        return self._angle
+
+    @angle.setter
+    def angle(self, val):
+        self._angle = val
+        if self.parent:
+            self._rebuild_tree()
 
     @property
     def _recurse(self):
@@ -100,6 +130,8 @@ class Widget():
 
     @property
     def pos_abs(self):
+        if self._vertices is None:
+            return [0, 0]
         pos = self._vertices[0]
         return [
             pos[0] - self._clipped[0],
@@ -201,6 +233,8 @@ class Widget():
             self.pos[0] * pdsize[0],
             self.pos[1] * pdsize[1]
         ] if self.relative.get('pos') else self.pos
+        if self.parent and self.parent._draw_angle and self._vertices is not None:
+            pos = rotate2d(pos, (0, 0), self.parent._draw_angle)
         offset = [0, 0]
         dsize = self._draw_size
         if self.halign == 'center':
@@ -211,7 +245,8 @@ class Widget():
             offset[1] += dsize[1] * .5
         elif self.valign == 'top':
             offset[1] += dsize[1]
-        return [pos[0] + inherit_pos[0] - offset[0], pos[1] + inherit_pos[1] - offset[1]]
+        pos = [pos[0] + inherit_pos[0] - offset[0], pos[1] + inherit_pos[1] - offset[1]]
+        return pos
 
     @property
     def _draw_size(self):
@@ -227,15 +262,47 @@ class Widget():
     def start(self):
         pass
 
+    def _get_pivot(self, x0, x1, y0, y1):
+        halign = self.halign
+        valign = self.valign
+        if self.parent is None:
+            return (0, 0)
+        if halign == 'center' and valign == 'center':
+            return x0.lerp(y1, .5)
+        elif halign == 'left' and valign == 'bottom':
+            return x0
+        elif halign == 'center' and valign == 'top':
+            return y0.lerp(y1, .5)
+        elif halign == 'center' and valign == 'bottom':
+            return x0.lerp(x1, .5)
+        elif halign == 'left' and valign == 'center':
+            return x0.lerp(y0, .5)
+        elif halign == 'left' and valign == 'top':
+            return y0
+        elif halign == 'right' and valign == 'bottom':
+            return x1
+        elif halign == 'right' and valign == 'center':
+            return x1.lerp(y1, .5)
+        elif halign == 'right' and valign == 'top':
+            return y1
+        return x0
+
+
     def build_shader(self):
         if self.parent is None:
             return
         pos = self._draw_pos
         size = self._draw_size
-        x0 = [pos[0], pos[1]]
-        x1 = [pos[0] + size[0], pos[1]]
-        y0 = [pos[0], pos[1] + size[1]]
-        y1 = [pos[0] + size[0], pos[1] + size[1]]
+        x0 = Vector([pos[0], pos[1]])
+        x1 = Vector([pos[0] + size[0], pos[1]])
+        y0 = Vector([pos[0], pos[1] + size[1]])
+        y1 = Vector([pos[0] + size[0], pos[1] + size[1]])
+        pivot = self._get_pivot(x0, x1, y0, y1)
+        if self._draw_angle and self._vertices is not None:
+            x0 = rotate2d(x0, pivot, self._draw_angle)
+            x1 = rotate2d(x1, pivot, self._draw_angle)
+            y0 = rotate2d(y0, pivot, self._draw_angle)
+            y1 = rotate2d(y1, pivot, self._draw_angle)
         v = [x0, x1, y0, y1]
         if self.parent.use_clipping:
             clip = self.clipping
@@ -251,10 +318,10 @@ class Widget():
                 elif vert[1] > clip[2]:
                     vert[1] = clip[2]
         vertices = self._vertices = (
-            x0,
-            x1,
-            y1,
-            y0
+            Vector(x0),
+            Vector(x1),
+            Vector(y1),
+            Vector(y0)
         )
         indices = (
             (0, 1, 2), (2, 3, 0)
@@ -268,6 +335,11 @@ class Widget():
         if self._rebuild is True:
             self.build_shader()
             self._rebuild = False
+
+    def _rebuild_tree(self):
+        self.build_shader()
+        for c in self.children:
+            c._rebuild_tree()
 
     def draw(self):
         """This is called each frame.

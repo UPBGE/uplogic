@@ -2,6 +2,13 @@ from bge import render
 from mathutils import Vector
 
 
+# def draw_screen_line(origin: Vector, target: Vector, color: list = [1, 1, 1, 1]):
+#     shader = gpu.shader.from_builtin('2D_UNIFORM_COLOR')
+#     batch = batch_for_shader(self._shader, 'TRIS', {"pos": vertices}, indices=indices)
+#     batch_line = batch_for_shader(self._shader, 'LINE_LOOP', {"pos": vertices})
+#     batch_points = batch_for_shader(self._shader, 'POINTS', {"pos": vertices})
+
+
 def draw_line(origin: Vector, target: Vector, color: list = [1, 1, 1, 1]):
     render.drawLine(
         origin,

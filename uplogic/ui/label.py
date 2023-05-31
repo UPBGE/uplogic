@@ -2,6 +2,8 @@ from .widget import Widget
 import blf
 from bge import render
 from bpy.types import VectorFont
+from uplogic.utils.math import rotate2d
+import math
 
 
 class Label(Widget):
@@ -22,7 +24,8 @@ class Label(Widget):
         shadow_color=[0, 0, 0, .6],
         halign='left',
         valign='bottom',
-        wrap=False
+        wrap=False,
+        angle=0
     ):
         """
         :param parent: the widget's parent
@@ -49,7 +52,7 @@ class Label(Widget):
         self.font_color = font_color
         self.font = font
         self.wrap = wrap
-        Widget.__init__(self, pos, (0, 0), bg_color, relative)
+        Widget.__init__(self, pos, (0, 0), bg_color, relative, angle=angle)
         self.text_halign = halign
         self.text_valign = valign
 
@@ -112,6 +115,9 @@ class Label(Widget):
         blf.size(self.font, self.font_size)
         blf.color(self.font, self.font_color[0], self.font_color[1], self.font_color[2], self.font_color[3])
         charsize = blf.dimensions(self.font, 'A')
+        if self.angle or self.parent._draw_angle:
+            blf.enable(self.font, blf.ROTATION)
+            blf.rotation(self.font, math.radians(self._draw_angle))
         if self.parent.use_clipping:
             verts = self.parent._vertices
             blf.enable(self.font, blf.CLIPPING)
@@ -142,11 +148,14 @@ class Label(Widget):
                     pos[1] += (.5 * lheight * (len(lines) - 1)) - (.5 * lheight)
                 elif self.text_valign == 'bottom':
                     pos[1] += (lheight * (len(lines) -2))
+                if self.parent and self.parent._draw_angle:
+                    pos = rotate2d(pos, self.pivot, self.parent.angle)
                 blf.position(self.font, pos[0], pos[1] - (charsize[1] * i * self.line_height), 0)
                 blf.draw(self.font, txt)
         else:
             dimensions = blf.dimensions(self.font, self.text)
             pos = self._draw_pos.copy()
+
             if self.text_halign == 'center':
                 pos[0] -= (dimensions[0] * .5)
             elif self.text_halign == 'right':
@@ -155,9 +164,12 @@ class Label(Widget):
                 pos[1] -= dimensions[1]
             elif self.text_valign == 'center':
                 pos[1] -= (.5 * dimensions[1])
+            if self.parent and self.parent._draw_angle:
+                pos = rotate2d(pos, self.pivot, self.parent.angle)
             blf.position(self.font, pos[0], pos[1], 0)
             blf.draw(self.font, self.text)
 
         blf.disable(self.font, blf.WORD_WRAP)
         blf.disable(self.font, blf.SHADOW)
+        blf.disable(self.font, blf.ROTATION)
         super().draw()
