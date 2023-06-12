@@ -56,10 +56,11 @@ class Client:
     def send(self, msg, subject=''):
         if self.connected and self.socket is not None:
             try:
-                msg = {
-                    'subject': subject,
-                    'content': msg
-                }
+                if subject:
+                    msg = {
+                        'subject': subject,
+                        'content': msg
+                    }
                 self.socket.send(pickle.dumps(msg))
             except pickle.PicklingError:
                 error(f'Cannot serialize {msg}!')

@@ -140,7 +140,7 @@ def log(msg, type='INFO'):
         return
     # msg = ''.join([str(e) for e in msg])
     show_time = True
-    for msg in msg.split('\n'):
+    for msg in str(msg).split('\n'):
         if msg:
             msg = msg.replace('  ', '    ')
             logger.add_message(f'{msg}', type, time=show_time)

@@ -13,8 +13,8 @@ class ULListGlobalValues(ULActionNode):
         self.print_d = None
         self.gv_dict = None
         self.done = False
-        self.OUT = ULOutSocket(self.get_done)
-        self.VALUE = ULOutSocket(self.get_dict)
+        self.OUT = ULOutSocket(self, self.get_done)
+        self.VALUE = ULOutSocket(self, self.get_dict)
 
     def get_done(self):
         return self.done

@@ -49,6 +49,10 @@ from .math import map_range
 from .math import mouse_over
 from .math import screen_to_world
 from .math import world_to_screen
+from .objects import xrot_to
+from .objects import yrot_to
+from .objects import zrot_to
+from .objects import rot_to
 from .constants import STATUS_INVALID
 from .constants import STATUS_WAITING
 from .constants import STATUS_READY

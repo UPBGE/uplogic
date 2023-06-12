@@ -1,4 +1,4 @@
-from bge import logic
+from bge import logic, types
 from uplogic.nodes import ULParameterNode
 from uplogic.nodes import ULOutSocket
 from uplogic.utils import is_invalid
@@ -36,7 +36,7 @@ class ULGamepadSticks(ULParameterNode):
         index = self.get_input(self.index)
 
         if logic.joysticks[index]:
-            joystick = logic.joysticks[index]
+            joystick: types.SCA_PythonJoystick = logic.joysticks[index]
         else:
             self._x_axis_values = 0
             self._y_axis_values = 0
