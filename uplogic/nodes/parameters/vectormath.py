@@ -51,6 +51,7 @@ class ULVectorMath(ULParameterNode):
             'add': self.get_add,
             'normalize': self.get_normalize,
             'lerp': self.get_lerp,
+            'slerp': self.get_slerp,
             'negate': self.get_negate,
         }
         if vector:
@@ -111,6 +112,9 @@ class ULVectorMath(ULParameterNode):
 
     def get_lerp(self, vec, vec2, vec3, fac, scale):
         return vec.lerp(vec2, fac)
+
+    def get_slerp(self, vec, vec2, vec3, fac, scale):
+        return vec.slerp(vec2, fac, vec3)
 
     def get_negate(self, vec, vec2, vec3, fac, scale):
         vec.negate()
