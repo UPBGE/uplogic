@@ -11,6 +11,7 @@ class ULObjectAttribute(ULParameterNode):
         ULParameterNode.__init__(self)
         self.game_object = None
         self.attribute_name = None
+        self.OUT = ULOutSocket(self, self.get_done)
         self.VAL = ULOutSocket(self, self.get_done)
         self.VEC = ULOutSocket(self, self.get_done)
         self.BOOL = ULOutSocket(self, self.get_done)
