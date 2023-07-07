@@ -23,5 +23,4 @@ class ULStoreValue(ULParameterNode):
             condition = True
         if not_met(condition):
             return
-        print('STORING')
         self._stored_value = self.get_input(self.value)

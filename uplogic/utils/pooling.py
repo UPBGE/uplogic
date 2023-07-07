@@ -14,7 +14,7 @@ class Spawn:
         self._pool = pool
         self._object = None
         self.scene = logic.getCurrentScene()
-        if object['spawn'] is None:
+        if object and object['spawn'] is None:
             self._object = object
             object.worldPosition = (0, 0, 0)
             object.worldScale = (1, 1, 1)
@@ -170,25 +170,29 @@ class SpawnPool:
         self.spawner = spawner
         self._amount = amount # clamp(amount, 0, 10)
         self._lifetime = lifetime
-        bobj = bpy.data.objects[object_name]
-        self._spawn_name = f'Projectile{bobj.data.name}'
-        self.scene = logic.getCurrentScene()
-        self._reset_pos = inactive_pos
+        
         self.visualize = visualize
-        for x in range(self._amount):
-            if self.scene.objects.get(f'{self._spawn_name}{x}'):
-                continue
-            bspawn = bpy.data.objects.new(f'{self._spawn_name}{x}', bobj.data)
-            bpy.context.collection.objects.link(bspawn)
-            bspawn.location = Vector(inactive_pos)
-            bspawn.scale = Vector((.001, .001, .001))
-            bspawn.game.physics_type = bobj.game.physics_type
-            gobj = self.scene.convertBlenderObject(bspawn)
-            gobj['spawn'] = None
-            gobj.suspendPhysics()
+        if object_name:
+            bobj = bpy.data.objects[object_name]
+            self._spawn_name = f'Projectile{bobj.data.name}'
+            self.scene = logic.getCurrentScene()
+            self._reset_pos = inactive_pos
+            for x in range(self._amount):
+                if self.scene.objects.get(f'{self._spawn_name}{x}'):
+                    continue
+                bspawn = bpy.data.objects.new(f'{self._spawn_name}{x}', bobj.data)
+                bpy.context.collection.objects.link(bspawn)
+                bspawn.location = Vector(inactive_pos)
+                bspawn.scale = Vector((.001, .001, .001))
+                bspawn.game.physics_type = bobj.game.physics_type
+                gobj = self.scene.convertBlenderObject(bspawn)
+                gobj['spawn'] = None
+                gobj.suspendPhysics()
+        else:
+            self._spawn_name = None
 
     def spawn(self):
-        spawn_obj = self.scene.objects[f'{self._spawn_name}{self._spawn_idx}']
+        spawn_obj = self.scene.objects[f'{self._spawn_name}{self._spawn_idx}'] if self._spawn_name else None
         spawn = self.spawn_cls(spawn_obj, self)
         spawn._visualize = self.visualize
         self.__class__._spawn_idx = cycle(self._spawn_idx + 1, 0, self._amount - 1)

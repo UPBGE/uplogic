@@ -111,7 +111,8 @@ class ULAction():
             # self.finished = True
             # return
         layer = self.layer
-        same_action = game_object.getActionName(layer) == action_name
+        layer_action_name = game_object.getActionName(layer)
+        same_action = layer_action_name == action_name
         self.on_start()
         if (not same_action and self.is_playing):
             game_object.stopAction(layer)

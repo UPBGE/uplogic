@@ -81,10 +81,11 @@ class Server:
 
     def send(self, msg, subject=''):
         if self.socket and self.running:
-            msg = {
-                'subject': subject,
-                'content': msg
-            }
+            if subject:
+                msg = {
+                    'subject': subject,
+                    'content': msg
+                }
             for conn in self.clients:
                 conn.send(pickle.dumps(msg))
 

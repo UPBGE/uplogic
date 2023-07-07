@@ -1,6 +1,8 @@
 from bge import logic
 from bge.constraints import getCharacter
 from bge.types import KX_GameObject as GameObject
+from uplogic.utils.constants import FRAMETIME_COMPARE
+# from uplogic.logging import warning
 from mathutils import Vector
 import bpy
 
@@ -42,7 +44,8 @@ class ULCharacter():
 
     @on_ground.setter
     def on_ground(self, value):
-        debug('ULCharacter.on_ground is Read-Only!')
+        # warning('ULCharacter.on_ground is Read-Only!')
+        pass
 
     @property
     def max_jumps(self) -> int:
@@ -74,16 +77,23 @@ class ULCharacter():
 
     @jump_count.setter
     def jump_count(self, value):
-        debug('Character.jump_count is Read-Only!')
+        # warning('Character.jump_count is Read-Only!')
+        pass
 
     @property
     def walk(self) -> Vector:
-        return ((self.wrapper.walkDirection @ self.owner.worldOrientation) * self._phys_step) / self.speed
+        fps = logic.getAverageFrameRate()
+        frametime = 1 / fps if fps > 0 else FRAMETIME_COMPARE
+        fps_factor = frametime / FRAMETIME_COMPARE
+        return ((self.wrapper.walkDirection @ self.owner.worldOrientation) * self._phys_step) / self.speed / fps_factor
 
     @walk.setter
     def walk(self, value):
+        fps = logic.getAverageFrameRate()
+        frametime = 1 / fps if fps > 0 else FRAMETIME_COMPARE
+        fps_factor = frametime / FRAMETIME_COMPARE
         self.is_walking = True
-        self.wrapper.walkDirection = ((self.owner.worldOrientation @ value) / self._phys_step) * self.speed
+        self.wrapper.walkDirection = ((self.owner.worldOrientation @ value) / self._phys_step) * self.speed * fps_factor
 
     @property
     def velocity(self) -> Vector:

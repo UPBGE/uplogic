@@ -165,6 +165,7 @@ class Widget():
             self._rebuild = True
         for child in self.children:
             child.pos = child.pos
+            child.size = child.size
 
     @property
     def use_clipping(self):
@@ -260,6 +261,8 @@ class Widget():
         return self.size
 
     def start(self):
+        """Put your custom startup logic here.
+        """
         pass
 
     def _get_pivot(self, x0, x1, y0, y1):
@@ -351,12 +354,14 @@ class Widget():
                 widget.draw()
 
     def update(self):
+        """Put your custom update logic here.
+        """
         pass
 
     def add_widget(self, widget):
         '''Add a `Widget`.
 
-        :param `action`: `Widget` to add.
+        :param `widget`: `Widget` to add.
         '''
         if widget not in self.children:
             self.children.append(widget)
@@ -374,7 +379,7 @@ class Widget():
     def remove_widget(self, widget):
         '''Remove a `Widget`.
 
-        :param `action`: `Widget` which to remove.
+        :param `widget`: `Widget` which to remove.
         '''
         if widget in self.children:
             self.children.remove(widget)

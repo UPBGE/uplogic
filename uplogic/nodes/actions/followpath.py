@@ -3,7 +3,7 @@ from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
 from uplogic.utils import is_invalid
 from uplogic.utils import not_met
-from uplogic.utils.objects import rot_to
+from uplogic.utils.objects import rotate_to
 from uplogic.utils.objects import move_to
 
 
@@ -107,7 +107,7 @@ class ULFollowPath(ULActionNode):
         if next_point:
             tpf = self.network.time_per_frame
             if look_at:
-                rot_to(
+                rotate_to(
                     rot_axis,
                     rotating_object,
                     next_point,

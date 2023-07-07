@@ -2,6 +2,7 @@ from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
 from uplogic.ui import Label
 from uplogic.utils import not_met
+from math import degrees
 import bpy
 
 
@@ -13,6 +14,7 @@ class ULCreateUILabel(ULActionNode):
         self.rel_pos = None
         self.pos = None
         self.rel_size = None
+        self.angle = None
         self.text = None
         self.text_pos = None
         self.font = None
@@ -45,6 +47,7 @@ class ULCreateUILabel(ULActionNode):
         parent = ipt(self.parent)
         rel_pos = ipt(self.rel_pos)
         pos = ipt(self.pos)
+        angle = degrees(ipt(self.angle))
         text = ipt(self.text)
         font = ipt(self.font)
         font_size = ipt(self.font_size)
@@ -74,7 +77,8 @@ class ULCreateUILabel(ULActionNode):
             font_color=font_color,
             shadow=use_shadow,
             shadow_offset=shadow_offset,
-            shadow_color=shadow_color
+            shadow_color=shadow_color,
+            angle=angle
         )
         if parent:
             parent.add_widget(self._widget)

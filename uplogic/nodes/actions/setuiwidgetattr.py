@@ -10,6 +10,7 @@ attrs = {
     "opacity": 'alpha_value',
     "pos": 'vec2_value',
     "size": 'vec2_value',
+    "angle": 'angle_value',
     "width": 'float_value',
     "height": 'float_value',
     "use_clipping": 'bool_value',

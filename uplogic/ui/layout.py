@@ -111,6 +111,20 @@ class BoxLayout(Layout):
         self.size = self.size
         self.arrange()
 
+    @property
+    def show(self):
+        return self._show
+
+    @show.setter
+    def show(self, val):
+        if val != self._show:
+            self._show = val
+            if val:
+                self._rebuild = True
+                for child in self.children:
+                    child.pos = child.pos
+        self.arrange()
+
     def add_widget(self, widget):
         super().add_widget(widget)
         self.arrange()
@@ -137,7 +151,6 @@ class BoxLayout(Layout):
 
 
 class GridLayout(BoxLayout):
-
 
     def __init__(
         self,

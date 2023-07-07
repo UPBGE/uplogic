@@ -28,9 +28,7 @@ def xrot_to(
         return True
     angle_sign = (signed_angle > 0) - (signed_angle < 0)
     drot = angle_sign * abs_angle * clamp(factor)
-    eulers = rotating_object.localOrientation.to_euler()
-    eulers[0] += drot
-    rotating_object.localOrientation = eulers
+    rotating_object.applyRotation((drot, 0, 0), True)
     return False
 
 
@@ -54,9 +52,7 @@ def yrot_to(
         return True
     angle_sign = (signed_angle > 0) - (signed_angle < 0)
     drot = angle_sign * abs_angle * clamp(factor)
-    eulers = rotating_object.localOrientation.to_euler()
-    eulers[1] += drot
-    rotating_object.localOrientation = eulers
+    rotating_object.applyRotation((0, drot, 0), True)
     return False
 
 
@@ -80,13 +76,11 @@ def zrot_to(
         return True
     angle_sign = (signed_angle > 0) - (signed_angle < 0)
     drot = angle_sign * abs_angle * clamp(factor)
-    eulers = rotating_object.localOrientation.to_euler()
-    eulers[2] += drot
-    rotating_object.localOrientation = eulers
+    rotating_object.applyRotation((0, 0, drot), True)
     return False
 
 
-def rot_to(
+def rotate_to(
     rot_axis_index,
     rotating_object,
     target_pos,

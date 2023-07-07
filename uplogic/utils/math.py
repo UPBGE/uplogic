@@ -75,7 +75,7 @@ def interpolate(a: float, b: float, fac: float, threshold: float = 0.001) -> flo
     return (fac * b) + ((1-fac) * a)
 
 
-def lerp(a: float, b: float, fac: float) -> float:
+def lerp(a: float, b: float, fac: float, threshold: float = 0.001) -> float:
     """Interpolate between 2 values using a factor.
 
     :param a: starting value
@@ -86,6 +86,8 @@ def lerp(a: float, b: float, fac: float) -> float:
     """
     if isinstance(a, Vector) or isinstance(b, Vector):
         print('[UPLOGIC] Warning: utils.lerp() will not work for Vector anymore; Use mathutils.Vector.lerp(vec2, fac) instead!')
+    if -threshold < a-b < threshold:
+        return b
     return (fac * b) + ((1-fac) * a)
 
 
@@ -213,25 +215,15 @@ def get_local(obj, target) -> Vector:
 
 
 def get_collision_bitmask(
-    slot_0: float = 1,
-    slot_1: float = 1,
-    slot_2: float = 1,
-    slot_3: float = 1,
-    slot_4: float = 1,
-    slot_5: float = 1,
-    slot_6: float = 1,
-    slot_7: float = 1,
-    slot_8: float = 1,
-    slot_9: float = 1,
-    slot_10: float = 1,
-    slot_11: float = 1,
-    slot_12: float = 1,
-    slot_13: float = 1,
-    slot_14: float = 1,
-    slot_15: float = 1
+    *slots, all=False
 ) -> int:
-    slots = [slot_0, slot_1, slot_2, slot_3, slot_4, slot_5, slot_6, slot_7, slot_8, slot_9, slot_10, slot_11, slot_12, slot_13, slot_14, slot_15]
-    return sum([slots[idx] * (2**idx) for idx in range(16)])
+    if not all and not slots:
+        return 0
+
+    mask = 0
+    for slot in range(16) if all else slots:
+        mask += 1 << slot
+    return mask
 
 
 def project_vector3(v, xi, yi):

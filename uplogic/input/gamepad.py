@@ -136,7 +136,7 @@ def gamepad_axis(
 def gamepad_trigger(
     trigger: str = 'LT',
     idx: int = 0,
-    threshold: float = .07
+    threshold: float = .1
 ) -> float:
     """Retrieve gamepad trigger values.
 
@@ -153,8 +153,8 @@ def gamepad_trigger(
 def gamepad_stick(
     stick: str = LS,
     idx: int = 0,
-    threshold: float = .07
-) -> set:
+    threshold: float = .1
+) -> Vector:
     '''Retrieve stick values.
 
     :param stick: which stick to use.
@@ -168,7 +168,7 @@ def gamepad_stick(
     yaxis = STICKS[stick][1]
     return Vector((
         gamepad_axis(xaxis, idx, threshold=threshold),
-        gamepad_axis(yaxis, idx, threshold=threshold)
+        -gamepad_axis(yaxis, idx, threshold=threshold)
     ))
 
 

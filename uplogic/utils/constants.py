@@ -1,6 +1,6 @@
 import operator
 from mathutils import Vector
-
+from bge import logic
 
 class _Status(object):
     def __init__(self, name):
@@ -61,3 +61,12 @@ LO_AXIS_TO_VECTOR = {
     2: Vector((0, 0, 1)), 3: Vector((-1, 0, 0)),
     4: Vector((0, -1, 0)), 5: Vector((0, 0, -1)),
 }
+
+
+FRAMETIME_COMPARE = 1 / 60
+
+
+def FPS_FACTOR() -> float:
+    fps = logic.getAverageFrameRate()
+    frametime = 1 / fps if fps > 0 else FRAMETIME_COMPARE
+    return frametime / FRAMETIME_COMPARE

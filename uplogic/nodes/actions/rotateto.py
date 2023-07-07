@@ -5,6 +5,7 @@ from uplogic.utils.math import get_local
 from uplogic.utils import is_invalid
 from uplogic.utils import is_waiting
 from uplogic.utils import not_met
+from uplogic.utils import rotate_to
 
 
 class ULActionRotateTo(ULActionNode):
@@ -40,21 +41,5 @@ class ULActionRotateTo(ULActionNode):
             return
         self._set_ready()
         aim = get_local(moving_object, target_point)
-        if front_axis > 2:
-            speed = -speed
-            front_axis -= 3
-        if rot_axis == front_axis:
-            return
-        if rot_axis == 0:
-            aim = aim.yz.normalized()
-            rot = -aim.x if front_axis == 2 else aim.y
-            moving_object.applyRotation((rot * speed, 0, 0), True)
-        elif rot_axis == 1:
-            aim = aim.xz.normalized()
-            rot = aim.x if front_axis == 2 else -aim.y
-            moving_object.applyRotation((0, rot * speed, 0), True)
-        elif rot_axis == 2:
-            aim = aim.xy.normalized()
-            rot = -aim.x if front_axis == 1 else aim.y
-            moving_object.applyRotation((0, 0, rot * speed), True)
+        rotate_to(rot_axis, moving_object, target_point, front_axis, speed)
         self._done = True

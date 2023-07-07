@@ -52,13 +52,15 @@ from .math import world_to_screen
 from .objects import xrot_to
 from .objects import yrot_to
 from .objects import zrot_to
-from .objects import rot_to
+from .objects import rotate_to
 from .constants import STATUS_INVALID
 from .constants import STATUS_WAITING
 from .constants import STATUS_READY
 from .constants import WATER
 from .constants import OPERATORS
 from .constants import LOGIC_OPERATORS
+from .constants import FRAMETIME_COMPARE
+from .constants import FPS_FACTOR
 from bge import logic
 from bge.types import KX_GameObject as GameObject
 from mathutils import Matrix

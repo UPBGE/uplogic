@@ -3,7 +3,7 @@ from bge.types import KX_GameObject as GameObject
 from uplogic.nodes import ULActionNode, ULOutSocket
 from uplogic.utils import is_invalid
 from uplogic.utils import not_met
-from uplogic.utils.objects import rot_to
+from uplogic.utils.objects import rotate_to
 from uplogic.utils.objects import move_to
 
 
@@ -120,7 +120,7 @@ class ULMoveToWithNavmesh(ULActionNode):
         if next_point:
             tpf = self.network.time_per_frame
             if look_at and (rotating_object is not None):
-                rot_to(
+                rotate_to(
                     rot_axis,
                     rotating_object,
                     next_point,

@@ -114,6 +114,53 @@ def game_props(*prop_names) -> KX_PythonComponent:
     return deco
 
 
+def instance_props(*prop_names) -> KX_PythonComponent:
+    """Decorator for `KX_PythonComponent` or `KX_GameObject` classes and subclasses.
+
+    Automatically adds property handlers for this class to use the `game_object[prop]`
+    syntax instead of saving values on the instance itself.
+
+    :param `prop_names`: Names of game properties as a list.
+    """
+
+    def on_attr(self, val):
+        pass
+
+    def deco(cls: KX_PythonComponent or KX_GameObject) -> KX_PythonComponent or KX_GameObject:
+        if not (issubclass(cls, KX_PythonComponent) or issubclass(cls, KX_GameObject)):
+            raise TypeMismatchError('Decorator only viable for KX_PythonComponent or KX_GameObject subclasses!')
+        if not (isinstance(prop_names, list) or isinstance(prop_names, tuple)):
+            raise TypeMismatchError('Expected property names as a list or tuple!')
+        for game_prop in prop_names:
+
+            def getPropComponent(self, attr_name=game_prop):
+                return self.object.groupObject.get(attr_name)
+
+            def setPropComponent(self, value, attr_name=game_prop):
+                getattr(self, f'on_{game_prop}')(value)
+                self.object.groupObject[attr_name] = value
+
+            def getPropObject(self, attr_name=game_prop):
+                return self.groupObject.get(attr_name)
+
+            def setPropObject(self, value, attr_name=game_prop):
+                getattr(self, f'on_{game_prop}')(value)
+                self.groupObject[attr_name] = value
+
+            if issubclass(cls, KX_PythonComponent):
+                prop = property(getPropComponent, setPropComponent)
+            elif issubclass(cls, KX_GameObject):
+                prop = property(getPropObject, setPropObject)
+            else:
+                return
+
+            setattr(cls, game_prop, prop)
+            if not hasattr(cls, f'on_{game_prop}'):
+                setattr(cls, f'on_{game_prop}', on_attr)
+        return cls
+    return deco
+
+
 def bl_attrs(*attr_names) -> KX_PythonComponent:
     """Decorator for `KX_PythonComponent` or `KX_GameObject` classes and subclasses.
 

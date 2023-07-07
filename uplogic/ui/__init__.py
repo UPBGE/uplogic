@@ -1,6 +1,6 @@
 from .button import Button, LabelButton
 from .cursor import Cursor, remove_custom_cursor
-from .image import Image, Icon
+from .image import Image, Sprite
 from .label import Label
 from .layout import FloatLayout
 from .layout import Layout

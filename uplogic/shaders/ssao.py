@@ -39,14 +39,14 @@ uniform float power;
 //user variables
 int samples = 32; //ao sample count
 
-float radius = 10.0; //ao radius
+float radius = 5.0; //ao radius
 float aoclamp = 0.5; //depth clamp - reduces haloing at screen edges
 bool noise = true; //use noise instead of pattern for sample dithering
 float noiseamount = 0.0002; //dithering amount
 
 float diffarea = 0.4; //self-shadowing reduction
-float gdisplace = 0.4; //gauss bell center
-float aowidth = 8.0; //gauss bell width
+float gdisplace = 0.5; //gauss bell center
+float aowidth = 1.0; //gauss bell width
 
 bool mist = true; //use mist?
 float miststart = 0.0; //mist start
@@ -89,11 +89,10 @@ float compareDepths(in float depth1, in float depth2,inout int far)
 	float garea = aowidth; //gauss bell width    
 	float diff = (depth1 - depth2)*100.0; //depth difference (0-100)
 	//reduce left bell width to avoid self-shadowing 
-	if (diff<gdisplace)
-	{
-	garea = diffarea;
-	}else{
-	far = 1;
+	if (diff<gdisplace) {
+		garea = diffarea;
+	} else {
+		far = 1;
 	}
 	
 	float gauss = pow(2.7182,-2.0*(diff-gdisplace)*(diff-gdisplace)/(garea*garea));

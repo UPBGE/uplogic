@@ -2,6 +2,7 @@ from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
 from uplogic.ui import RelativeLayout, FloatLayout, BoxLayout
 from uplogic.utils import not_met
+from math import degrees
 
 
 layouts = {
@@ -52,6 +53,7 @@ class ULCreateUILayout(ULActionNode):
         pos = ipt(self.pos)
         rel_size = ipt(self.rel_size)
         size = ipt(self.size)
+        angle = degrees(ipt(self.angle))
         color = ipt(self.color)
         border_width = ipt(self.border_width)
         border_color = ipt(self.border_color)
@@ -64,7 +66,8 @@ class ULCreateUILayout(ULActionNode):
             border_width=border_width,
             border_color=border_color,
             halign=self.halign_type,
-            valign=self.valign_type
+            valign=self.valign_type,
+            angle=angle
         )
         if self.layout_type == 'BoxLayout':
             self._widget.orientation = self.boxlayout_type

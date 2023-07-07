@@ -57,10 +57,10 @@ class Image(Widget):
         super().draw()
 
 
-class Icon(Image):
+class Sprite(Image):
 
-    def __init__(self, pos=[0, 0], size=(100, 100), relative={}, texture=None, icon=0, rows=1, cols=1, halign='left', valign='bottom'):
-        self.icon = icon
+    def __init__(self, pos=[0, 0], size=(100, 100), relative={}, texture=None, idx=0, rows=1, cols=1, halign='left', valign='bottom'):
+        self.idx = idx
         self.rows = rows
         self.cols = cols
         super().__init__(pos, size, relative, texture, halign=halign, valign=valign)
@@ -109,10 +109,10 @@ class Icon(Image):
             y0
         )
         self._shader = gpu.shader.from_builtin('2D_IMAGE')
-        icon = self.icon
-        col = icon % self.cols
+        idx = self.idx
+        col = idx % self.cols
         col_end = col + 1
-        row = ceil((icon + 1) / self.cols) - 1
+        row = ceil((idx + 1) / self.cols) - 1
         row_end = row + 1
         texcoord = (
             (col * self._col_width, 1 - row_end * self._row_height),
