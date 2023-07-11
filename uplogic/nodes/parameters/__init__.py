@@ -38,6 +38,7 @@ from .gettimescale import ULGetTimeScale  # noqa
 from .interpolate import ULInterpolate  # noqa
 from .keycode import ULKeyCode  # noqa
 from .limitrange import ULLimitRange  # noqa
+from .maprange import ULMapRange  # noqa
 from .listduplicate import ULListDuplicate  # noqa
 from .listfromitems import ULListFromItems  # noqa
 from .listindex import ULListIndex  # noqa
