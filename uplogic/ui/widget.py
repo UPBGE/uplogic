@@ -353,6 +353,9 @@ class Widget():
             if widget.show:
                 widget.draw()
 
+    def _evaluate(self):
+        pass
+
     def update(self):
         """Put your custom update logic here.
         """

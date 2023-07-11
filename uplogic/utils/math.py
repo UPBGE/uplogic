@@ -172,8 +172,11 @@ def map_range(value: float, in_min: float, in_max: float, out_min: float, out_ma
     return result
 
 
-def world_to_screen(position: Vector = Vector((0, 0, 0))) -> Vector:
-    return Vector(logic.getCurrentScene().active_camera.getScreenPosition(position))
+def world_to_screen(position: Vector = Vector((0, 0, 0)), inv_y: bool = True) -> Vector:
+    pos = Vector(logic.getCurrentScene().active_camera.getScreenPosition(position))
+    if inv_y:
+        pos[1] = 1 - pos[1]
+    return pos
 
 
 def screen_to_world(x:float = None, y: float = None, distance: float = 10) -> Vector:
@@ -215,11 +218,14 @@ def get_local(obj, target) -> Vector:
 
 
 def get_collision_bitmask(
-    *slots, all=False
+    *slots: int, all=False
 ) -> int:
+    """Get the collision bitmask value for the provided slot indices. Slots range from 0 to 15.
+    
+    :param `slots`: Arbitrary arguments, slots from 0-15 as int.
+    :param `all`: Get the bitmask value of all slots combined, ignores `slots` argument."""
     if not all and not slots:
         return 0
-
     mask = 0
     for slot in range(16) if all else slots:
         mask += 1 << slot

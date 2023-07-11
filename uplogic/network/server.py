@@ -5,6 +5,7 @@ import socket
 import threading
 from uplogic.utils.constants import DISCONNECT_MSG
 from uplogic.logging import error, success, debug
+import time
 
 
 class Server:
@@ -14,7 +15,6 @@ class Server:
             ip = socket.gethostbyname(socket.gethostname())
         self.ip = ip
         self.clients = []
-        self.entities = {'server': []}
         self.port = port
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.scene = bge.logic.getCurrentScene()
@@ -93,6 +93,7 @@ class Server:
         connected = True
         self.clients.append(conn)
         while connected and self.running:
+            print(time.time())
             try:
                 bmsg = conn.recv(2**14)
                 msg = pickle.loads(bmsg)
@@ -124,7 +125,6 @@ class Server:
                 print(f"Connected to: {add}")
                 thread = threading.Thread(target=self.threaded_client, args=(conn, add))
                 thread.start()
-                self.entities[conn] = {}
                 debug(f'[ACTIVE CONNECTIONS] {len(self.clients)}') # {threading.active_count() - 2}')
             except BlockingIOError:
                 pass

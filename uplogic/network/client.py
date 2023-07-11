@@ -14,7 +14,6 @@ class Client:
         self.socket = None
         self.port = port
         self.connected = False
-        self.entities = []
         if connect:
             self.connect()
 
@@ -50,9 +49,6 @@ class Client:
         self.connected = False
         success('[SUCCESS]')
 
-    def add_entity(self, entity):
-        self.entities.append(entity)
-
     def send(self, msg, subject=''):
         if self.connected and self.socket is not None:
             try:
@@ -72,16 +68,6 @@ class Client:
             except Exception as e:
                 error(f'Exception: {e}')
                 self.disconnect()
-
-    def send_entities(self):
-        try:
-            for entity in self.entities:
-                dat = entity.get_data()
-                if dat['streamtype']:
-                    self.socket.send(pickle.dumps(dat))
-        except Exception as e:
-            error('Server unreachable')
-            self.disconnect()
 
     def on_receive(self, msg):
         pass

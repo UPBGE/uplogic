@@ -8,7 +8,7 @@ from uplogic.utils import debug
 
 class Button(Widget, HoverBehavior):
 
-    def __init__(self, pos=[0., 0.], size=[100., 100.], bg_color=(0, 0, 0, 0), relative={}, border_width=1.0, border_color=(0, 0, 0, 0), hover_color=(0, 0, 0, .5), halign='left', valign='bottom', angle=0):
+    def __init__(self, pos=[0., 0.], size=[100., 100.], bg_color=(0, 0, 0, 0), relative={}, border_width=1.0, border_color=(0, 0, 0, 0), hover_color=(0, 0, 0, .5), halign='left', valign='bottom', angle=0, on_press=None):
         super().__init__(pos, size, bg_color, relative, halign=halign, valign=valign, angle=angle)
         self.hover_color = hover_color
         self.border_width = border_width
@@ -17,15 +17,11 @@ class Button(Widget, HoverBehavior):
         self._released = False
         self._in_focus = False
         self._down = False
+        if on_press is not None:
+            self.on_press = on_press
 
     def draw(self):
         super()._setup_draw()
-        if self.hover:
-            self._in_focus = True
-            self.on_hover(self)
-            self.canvas._hover_consumed = True
-        else:
-            self._in_focus = False
 
         self._released = False
         self._clicked = False
@@ -37,8 +33,17 @@ class Button(Widget, HoverBehavior):
         self._batch_line.draw(self._shader)
         self._batch_points.draw(self._shader)
         super().draw()
+
+    def _evaluate(self):
+        if self.hover:
+            self._in_focus = True
+            self.on_hover(self)
+            self.canvas._hover_consumed = True
+        else:
+            self._in_focus = False
         if self._in_focus and MOUSE_EVENTS[LMB].active and not self.canvas._click_consumed:
             self.on_click(self)
+            self.on_press(self)
             self._clicked = True
             self.canvas._click_consumed = True
             self._down = True
@@ -49,10 +54,14 @@ class Button(Widget, HoverBehavior):
             self.canvas._click_consumed = False
         elif self._down:
             self.on_hold(self)
+        
 
     def on_click(self, widget):
         pass
         # debug(f'{self} clicked.')
+
+    def on_press(self, widget):
+        pass
 
     def on_hold(self, widget):
         pass
@@ -88,7 +97,8 @@ class LabelButton(Button, HoverBehavior):
         valign='bottom',
         halign_text='center',
         valign_text='center',
-        angle=0
+        angle=0,
+        on_press=None
     ):
         self.label = Label(
             relative={'pos': True},
@@ -111,15 +121,11 @@ class LabelButton(Button, HoverBehavior):
             hover_color=hover_color,
             halign=halign,
             valign=valign,
-            angle=angle
+            angle=angle,
+            on_press=on_press
         )
         self.add_widget(self.label)
         self._in_focus = False
-
-    # def _rebuild_tree(self):
-    #     # self.label.angle = self.angle
-    #     print('HOO')
-    #     super()._rebuild_tree()
 
     @property
     def text(self):

@@ -65,6 +65,10 @@ class Label(Widget):
         self._text = str(val)
 
     @property
+    def pos_abs(self):
+        return self._draw_pos
+
+    @property
     def font(self):
         return self._font
 

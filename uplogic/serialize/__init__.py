@@ -76,26 +76,25 @@ class Mat4(list):
 
 class GameObj(dict):
 
-
     def __init__(self, game_obj: KX_GameObject):
         self['name'] = game_obj.name
+        self['data_id'] = game_obj.blenderObject.data.name
 
         self['worldPosition'] = Vec3(game_obj.worldPosition)
         self['worldOrientation'] = Mat3(game_obj.worldOrientation)
         self['worldScale'] = Vec3(game_obj.worldScale)
-        self['worldLinearVelocity'] = Vec3(game_obj.worldLinearVelocity)
-        self['worldAngularVelocity'] = Vec3(game_obj.worldAngularVelocity)
+        # self['worldLinearVelocity'] = Vec3(game_obj.worldLinearVelocity)
+        # self['worldAngularVelocity'] = Vec3(game_obj.worldAngularVelocity)
         self['worldTransform'] = Mat4(game_obj.worldTransform)
 
         self['localPosition'] = Vec3(game_obj.localPosition)
         self['localOrientation'] = Mat3(game_obj.localOrientation)
         self['localScale'] = Vec3(game_obj.localScale)
-        self['localLinearVelocity'] = Vec3(game_obj.localLinearVelocity)
-        self['localAngularVelocity'] = Vec3(game_obj.localAngularVelocity)
+        # self['localLinearVelocity'] = Vec3(game_obj.localLinearVelocity)
+        # self['localAngularVelocity'] = Vec3(game_obj.localAngularVelocity)
         self['localTransform'] = Mat4(game_obj.localTransform)
         props = self['properties'] = {}
         for prop in game_obj.getPropertyNames():
             if game_obj[prop].__class__ in [int, float, bool, str]:
                 props[prop] = game_obj[prop]
         
-        self['data_id'] = game_obj.blenderObject.data.name
