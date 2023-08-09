@@ -1,67 +1,27 @@
-from mathutils import Vector
+from uplogic.nodes import ULOutSocket
 from uplogic.nodes import ULConditionNode
 from uplogic.utils.constants import LOGIC_OPERATORS
-from uplogic.utils import is_invalid
-from uplogic.utils import is_waiting
-from uplogic.utils import compute_distance
+from mathutils import Vector
 
 
 class ULCheckDistance(ULConditionNode):
     def __init__(self):
         ULConditionNode.__init__(self)
+        self.operation = 0
         self.param_a = None
         self.param_b = None
-        self.operator = None
         self.dist = None
-        self.hyst = None
-        self._check = self._strict_check
+        self._distance = 0
+        self.OUT = ULOutSocket(self, self.get_result)
+        self.DIST = ULOutSocket(self, self.get_distance)
 
-    def _strict_check(self, opindex, value, hyst, threshold):
-        v = LOGIC_OPERATORS[opindex](value, threshold)
-        if v is True:
-            self._set_value(True)
-        else:
-            self._set_value(False)
-            self._check = self._hyst_check
+    def get_result(self):
+        dist = self.get_input(self.dist)
+        return LOGIC_OPERATORS[self.operation](self._distance, dist)
 
-    def _hyst_check(self, opindex, value, hyst, threshold):
-        if (opindex == 2) or (opindex == 4):
-            v = LOGIC_OPERATORS[opindex](value, threshold + hyst)
-            if v is True:
-                self._set_value(True)
-                self._check = self._strict_check
-            else:
-                self._set_value(False)
-        elif (opindex == 3) or (opindex == 5):
-            v = LOGIC_OPERATORS[opindex](value, threshold - hyst)
-            if v is True:
-                self._set_value(True)
-                self._check = self._strict_check
-            else:
-                self._set_value(False)
+    def get_distance(self):
+        return self._distance
 
     def evaluate(self):
-        a = self.get_input(self.param_a)
-        b = self.get_input(self.param_b)
-        op = self.get_input(self.operator)
-        dist = self.get_input(self.dist)
-        hyst = self.get_input(self.hyst)
-        if is_waiting(a, b, op, dist, hyst):
-            return
+        self._distance = (Vector(self.get_input(self.param_a)) - Vector(self.get_input(self.param_b))).length
         self._set_ready()
-        if is_invalid(a) or not isinstance(a, Vector):
-            return
-        if is_invalid(b) or not isinstance(b, Vector):
-            return
-        if op is None:
-            return
-        if dist is None:
-            return
-        distance = compute_distance(a, b)
-        if distance is None:
-            return self._set_value(False)
-        if hyst is None:  # plain check, no threshold
-            v = LOGIC_OPERATORS[op](distance, dist)
-            self._set_value(v)
-        else:  # check with hysteresys value, if >, >=, <, <=
-            self._check(op, distance, hyst, dist)

@@ -24,6 +24,7 @@ class ULLogicTree(ULLogicContainer):
         self._iter = collections.deque()
         self._lastuid: int = 0
         self._owner: GameObject = None
+        self._initialized = False
         self._max_blocking_loop_count: int = 0
         self.keyboard: Keyboard = None
         self.mouse: Mouse = Mouse()
@@ -232,6 +233,7 @@ class ULLogicTree(ULLogicContainer):
             cell.reset()
             if cell.has_status(STATUS_WAITING):
                 cells.append(cell)
+        self._initialized = True
         # pulse subnetworks
         for network in self.sub_networks:
             if network._owner.invalid:

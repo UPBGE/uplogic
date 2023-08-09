@@ -45,6 +45,9 @@ class ULFilter():
         else:
             self.pause()
 
+    def toggle(self):
+        self.active = not self.active
+
     def __init__(
         self,
         program: str,

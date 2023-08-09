@@ -21,9 +21,6 @@ class ULSetVSync(ULActionNode):
         condition = self.get_input(self.condition)
         if not_met(condition):
             return
-        vsync_mode = self.get_input(self.vsync_mode)
-        if is_waiting(vsync_mode):
-            return
         self._set_ready()
-        render.setVsync(vsync_mode)
+        render.setVsync(self.vsync_mode)
         self.done = True

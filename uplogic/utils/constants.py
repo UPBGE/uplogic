@@ -67,6 +67,5 @@ FRAMETIME_COMPARE = 1 / 60
 
 
 def FPS_FACTOR() -> float:
-    fps = logic.getAverageFrameRate()
-    frametime = 1 / fps if fps > 0 else FRAMETIME_COMPARE
-    return frametime / FRAMETIME_COMPARE
+    avg = logic.getAverageFrameRate()
+    return (60 / avg) if 0 < avg < 10000 else 1

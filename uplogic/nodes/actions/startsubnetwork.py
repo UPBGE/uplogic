@@ -41,5 +41,7 @@ class ULStartSubNetwork(ULActionNode):
                 True
             )
         else:
+            if network.stopped:
+                network._initialized = False
             network.stopped = False
         self.done = True

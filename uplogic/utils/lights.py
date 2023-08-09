@@ -1,11 +1,12 @@
-from bge.types import KX_GameObject as GameObject
+from bge.types import KX_GameObject
 from bge import logic
 from bpy.types import Object
 import bpy
 from mathutils import Vector, Matrix, Color
+from .objects import GameObject
 
 
-def make_unique_light(light: GameObject) -> GameObject:
+def make_unique_light(light: KX_GameObject) -> KX_GameObject:
     '''Make a copy of this light to allow for unique modifications.
 
     :param `light`: The `KX_LightObject` of which to copy the data.
@@ -18,7 +19,7 @@ def make_unique_light(light: GameObject) -> GameObject:
     return light
 
 
-class ULLight():
+class ULLight(GameObject):
     """Wrapper for `KX_LightObject`. Can either convert a given scene light or create a new one.
 
     :param `name`: The name of the new light (only relevant if `light` argument is None).
@@ -32,7 +33,7 @@ class ULLight():
         self,
         name: str = '',
         type: str = 'POINT',
-        light: GameObject = None
+        light: KX_GameObject = None
     ) -> None:
         if self._deprecated:
             print('[UPLOGIC] ULLight class will be renamed to "Light" in future releases!')
@@ -48,10 +49,6 @@ class ULLight():
         self.game_object = game_scene.convertBlenderObject(light)
         """The wrapped `KX_LightObject`."""
         self.energy = 10
-
-    @property
-    def blenderObject(self) -> Object:
-        return self.game_object.blenderObject
 
     @property
     def energy(self) -> float:
@@ -140,105 +137,6 @@ class ULLight():
     @radius.setter
     def radius(self, val: float):
         self.game_object.blenderObject.data.shadow_soft_size = val
-
-    @property
-    def parent(self) -> GameObject:
-        return self.game_object.parent
-
-    @parent.setter
-    def parent(self, val: GameObject):
-        self.game_object.setParent(val)
-
-    def set_parent(self, parent):
-        self.game_object.setParent(parent)
-
-    @property
-    def worldPosition(self) -> Vector:
-        return self.game_object.worldPosition
-
-    @worldPosition.setter
-    def worldPosition(self, val: Vector):
-        self.game_object.worldPosition = val
-
-    @property
-    def localPosition(self) -> Vector:
-        return self.game_object.localPosition
-
-    @localPosition.setter
-    def localPosition(self, val: Vector):
-        self.game_object.localPosition = val
-
-    @property
-    def worldOrientation(self) -> Matrix:
-        return self.game_object.worldOrientation
-
-    @worldOrientation.setter
-    def worldOrientation(self, val: Matrix):
-        self.game_object.worldOrientation = val
-
-    @property
-    def localOrientation(self) -> Matrix:
-        return self.game_object.localOrientation
-
-    @localOrientation.setter
-    def localOrientation(self, val: Matrix):
-        self.game_object.localOrientation = val
-
-    @property
-    def worldScale(self) -> Vector:
-        return self.game_object.worldScale
-
-    @worldScale.setter
-    def worldScale(self, val: Vector):
-        self.game_object.worldScale = val
-
-    @property
-    def localScale(self) -> Vector:
-        return self.game_object.localScale
-
-    @localScale.setter
-    def localScale(self, val: Vector):
-        self.game_object.localScale = val
-
-    @property
-    def worldLinearVelocity(self) -> Vector:
-        return self.game_object.worldLinearVelocity
-
-    @worldLinearVelocity.setter
-    def worldLinearVelocity(self, val: Vector):
-        self.game_object.worldLinearVelocity = val
-
-    @property
-    def localLinearVelocity(self) -> Vector:
-        return self.game_object.localLinearVelocity
-
-    @localLinearVelocity.setter
-    def localLinearVelocity(self, val: Vector):
-        self.game_object.localLinearVelocity = val
-
-    @property
-    def worldAngularVelocity(self) -> Vector:
-        return self.game_object.worldAngularVelocity
-
-    @worldAngularVelocity.setter
-    def worldAngularVelocity(self, val: Vector):
-        self.game_object.worldAngularVelocity = val
-
-    @property
-    def localAngularVelocity(self) -> Vector:
-        return self.game_object.localAngularVelocity
-
-    @localAngularVelocity.setter
-    def localAngularVelocity(self, val: Vector):
-        self.game_object.localAngularVelocity = val
-
-    @property
-    def worldTransform(self) -> Matrix:
-        return self.game_object.worldTransform
-
-    @worldTransform.setter
-    def worldTransform(self, val: Matrix):
-        self.game_object.worldTransform = val
 
 
 class Light(ULLight):

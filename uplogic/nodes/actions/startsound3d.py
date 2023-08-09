@@ -93,6 +93,7 @@ class ULStartSound3D(ULActionNode):
             distance_ref,
             [cone_angle.x, cone_angle.y],
             cone_outer_volume,
-            ignore_timescale
+            ignore_timescale,
+            'ln_audio_system'
         )
         self.done = True

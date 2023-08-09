@@ -153,3 +153,4 @@ from .spawnpool import ULSpawnPool
 from .localserver import ULLocalServer
 from .localclient import ULLocalClient
 from .sendnetworkmessage import ULSendNetworkMessage
+from .createuislider import ULCreateUISlider

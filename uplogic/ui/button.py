@@ -1,6 +1,8 @@
 from .widget import Widget
 from .behaviors import HoverBehavior
 from .label import Label
+from .image import Image
+from .image import Sprite
 import gpu
 from uplogic.input.mouse import MOUSE_EVENTS, LMB, RMB
 from uplogic.utils import debug
@@ -8,7 +10,20 @@ from uplogic.utils import debug
 
 class Button(Widget, HoverBehavior):
 
-    def __init__(self, pos=[0., 0.], size=[100., 100.], bg_color=(0, 0, 0, 0), relative={}, border_width=1.0, border_color=(0, 0, 0, 0), hover_color=(0, 0, 0, .5), halign='left', valign='bottom', angle=0, on_press=None):
+    def __init__(
+        self,
+        pos=[0., 0.],
+        size=[100., 100.],
+        bg_color=(0, 0, 0, 0),
+        relative={},
+        border_width=1.0,
+        border_color=(0, 0, 0, 0),
+        hover_color=(0, 0, 0, .5),
+        halign='left',
+        valign='bottom',
+        on_press=None,
+        angle=0
+    ):
         super().__init__(pos, size, bg_color, relative, halign=halign, valign=valign, angle=angle)
         self.hover_color = hover_color
         self.border_width = border_width
@@ -97,8 +112,8 @@ class LabelButton(Button, HoverBehavior):
         valign='bottom',
         halign_text='center',
         valign_text='center',
-        angle=0,
-        on_press=None
+        on_press=None,
+        angle=0
     ):
         self.label = Label(
             relative={'pos': True},
@@ -190,3 +205,72 @@ class LabelButton(Button, HoverBehavior):
     @valign_text.setter
     def valign_text(self, val):
         self.label.valign = val
+
+
+class ImageButton(Button, HoverBehavior):
+
+    def __init__(
+        self,
+        pos=[0., 0.],
+        size=[100., 100.],
+        bg_color=(0, 0, 0, 0),
+        border_color=(0, 0, 0, 0),
+        hover_color=(0, 0, 0, .0),
+        relative={},
+        halign='left',
+        valign='bottom',
+        on_press=None,
+        texture=None,
+        angle=0
+    ):
+        super().__init__(pos, size, bg_color, relative, halign=halign, valign=valign, angle=angle, on_press=on_press, hover_color=hover_color, border_color=border_color)
+        self.image = Image(relative={'size': True}, size=(1, 1), texture=texture)
+        self.add_widget(self.image)
+
+    @property
+    def texture(self):
+        return self.image.texture
+
+    @texture.setter
+    def texture(self, val):
+        self.image.texture = val
+
+
+class SpriteButton(Button, HoverBehavior):
+
+    def __init__(
+        self,
+        pos=[0., 0.],
+        size=[100., 100.],
+        bg_color=(0, 0, 0, 0),
+        border_color=(0, 0, 0, 0),
+        hover_color=(0, 0, 0, .0),
+        relative={},
+        halign='left',
+        valign='bottom',
+        texture=None,
+        idx=0,
+        rows=1,
+        cols=1,
+        on_press=None,
+        angle=0
+    ):
+        super().__init__(pos, size, bg_color, relative, halign=halign, valign=valign, angle=angle, on_press=on_press, hover_color=hover_color, border_color=border_color)
+        self.image = Sprite(relative={'size': True}, size=(1, 1), texture=texture, rows=rows, cols=cols, idx=idx)
+        self.add_widget(self.image)
+
+    @property
+    def texture(self):
+        return self.image.texture
+
+    @texture.setter
+    def texture(self, val):
+        self.image.texture = val
+
+    @property
+    def idx(self):
+        return self.image.idx
+
+    @idx.setter
+    def idx(self, val):
+        self.image.idx = val

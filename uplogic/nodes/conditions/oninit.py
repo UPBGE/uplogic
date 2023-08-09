@@ -6,10 +6,14 @@ class ULOnInit(ULConditionNode):
     def __init__(self):
         ULConditionNode.__init__(self)
         self._set_status(STATUS_READY)
-        self._value = True
 
-    def reset(self):
-        self._value = False
+    @property
+    def _value(self):
+        return not self.network._initialized
+
+    @_value.setter
+    def _value(self, val):
+        pass
 
     def evaluate(self):
-        pass
+        self._set_ready()

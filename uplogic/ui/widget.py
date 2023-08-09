@@ -153,6 +153,34 @@ class Widget():
             child.pos = child.pos
 
     @property
+    def x(self):
+        return self._pos[0]
+
+    @x.setter
+    def x(self, val):
+        self._pos = [val, self.pos[1]]
+        if not self.show:
+            return
+        if self.parent and self.show:
+            self._rebuild = True
+        for child in self.children:
+            child.pos = child.pos
+
+    @property
+    def y(self):
+        return self._pos[1]
+
+    @y.setter
+    def y(self, val):
+        self._pos = [self._pos[0], val]
+        if not self.show:
+            return
+        if self.parent and self.show:
+            self._rebuild = True
+        for child in self.children:
+            child.pos = child.pos
+
+    @property
     def size(self):
         return self._size
 

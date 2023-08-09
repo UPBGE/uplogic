@@ -1,11 +1,12 @@
 from bge import logic
-from bge.types import KX_GameObject as GameObject
+from bge.types import KX_GameObject
 import bpy
-from bpy.types import Material
+from bpy.types import Material, Object
 from .errors import LogicControllerNotSupportedError
 from .constants import LO_AXIS_TO_VECTOR
 from .math import project_vector3
 from .math import clamp
+from mathutils import Vector, Matrix
 
 
 def xrot_to(
@@ -247,7 +248,7 @@ def create_curve(
     dimensions: int = 3,
     material: str or Material = None,
     collection: str = None
-) -> GameObject:
+) -> KX_GameObject:
     """Create a `KX_GameObject` containing a `bpy.types.Curve` object.
 
     :param `name`: Name of the new `KX_GameObject`.
@@ -279,7 +280,7 @@ def create_curve(
 
 
 def set_curve_points(
-    curve: GameObject,
+    curve: KX_GameObject,
     points: list
 ) -> None:
     """Set the curve points of a `KX_GameObject` containing a `bpy.types.Curve` object.
@@ -302,7 +303,116 @@ def set_curve_points(
         ] + [1.0])
 
 
-class ULCurve():
+class GameObject:
+
+    def __init__(self) -> None:
+        self.game_object: KX_GameObject
+
+    @property
+    def blenderObject(self) -> Object:
+        return self.game_object.blenderObject
+
+    @property
+    def parent(self) -> KX_GameObject:
+        return self.game_object.parent
+
+    @parent.setter
+    def parent(self, val: KX_GameObject):
+        self.game_object.setParent(val)
+
+    def set_parent(self, parent):
+        self.game_object.setParent(parent)
+
+    @property
+    def worldPosition(self) -> Vector:
+        return self.game_object.worldPosition
+
+    @worldPosition.setter
+    def worldPosition(self, val: Vector):
+        self.game_object.worldPosition = val
+
+    @property
+    def localPosition(self) -> Vector:
+        return self.game_object.localPosition
+
+    @localPosition.setter
+    def localPosition(self, val: Vector):
+        self.game_object.localPosition = val
+
+    @property
+    def worldOrientation(self) -> Matrix:
+        return self.game_object.worldOrientation
+
+    @worldOrientation.setter
+    def worldOrientation(self, val: Matrix):
+        self.game_object.worldOrientation = val
+
+    @property
+    def localOrientation(self) -> Matrix:
+        return self.game_object.localOrientation
+
+    @localOrientation.setter
+    def localOrientation(self, val: Matrix):
+        self.game_object.localOrientation = val
+
+    @property
+    def worldScale(self) -> Vector:
+        return self.game_object.worldScale
+
+    @worldScale.setter
+    def worldScale(self, val: Vector):
+        self.game_object.worldScale = val
+
+    @property
+    def localScale(self) -> Vector:
+        return self.game_object.localScale
+
+    @localScale.setter
+    def localScale(self, val: Vector):
+        self.game_object.localScale = val
+
+    @property
+    def worldLinearVelocity(self) -> Vector:
+        return self.game_object.worldLinearVelocity
+
+    @worldLinearVelocity.setter
+    def worldLinearVelocity(self, val: Vector):
+        self.game_object.worldLinearVelocity = val
+
+    @property
+    def localLinearVelocity(self) -> Vector:
+        return self.game_object.localLinearVelocity
+
+    @localLinearVelocity.setter
+    def localLinearVelocity(self, val: Vector):
+        self.game_object.localLinearVelocity = val
+
+    @property
+    def worldAngularVelocity(self) -> Vector:
+        return self.game_object.worldAngularVelocity
+
+    @worldAngularVelocity.setter
+    def worldAngularVelocity(self, val: Vector):
+        self.game_object.worldAngularVelocity = val
+
+    @property
+    def localAngularVelocity(self) -> Vector:
+        return self.game_object.localAngularVelocity
+
+    @localAngularVelocity.setter
+    def localAngularVelocity(self, val: Vector):
+        self.game_object.localAngularVelocity = val
+
+    @property
+    def worldTransform(self) -> Matrix:
+        return self.game_object.worldTransform
+
+    @worldTransform.setter
+    def worldTransform(self, val: Matrix):
+        self.game_object.worldTransform = val
+
+
+class ULCurve(GameObject):
     """Wrapper class for creating and handling curves more easily.
 
     :param `name`: Name of this curve object.
@@ -327,7 +437,7 @@ class ULCurve():
     ) -> None:
         if self._deprecated:
             print('[UPLOGIC] ULCurve class will be renamed to "Curve" in future releases!')
-        self.object = create_curve(
+        self.game_object = create_curve(
             name,
             bevel_depth,
             dimensions,
@@ -338,7 +448,7 @@ class ULCurve():
     @property
     def name(self):
         """Name of the game object (Read-Only)."""
-        return self.object.name
+        return self.game_object.name
 
     @name.setter
     def name(self, val):
@@ -347,22 +457,27 @@ class ULCurve():
     @property
     def points(self):
         """Points of the curve. These points use global coordinates."""
-        splines = self.object.blenderObject.data.splines
+        splines = self.game_object.blenderObject.data.splines
         return splines[0].points if len(splines) > 0 else []
 
     @points.setter
     def points(self, val):
         if val != self.points:
-            set_curve_points(self.object, val)
+            set_curve_points(self.game_object, val)
 
     @property
     def bevel_depth(self):
         """Thickness of the curve geometry."""
-        return self.object.blenderObject.data.bevel_depth
+        return self.game_object.blenderObject.data.bevel_depth
 
     @bevel_depth.setter
     def bevel_depth(self, val):
-        self.object.blenderObject.data.bevel_depth = val
+        self.game_object.blenderObject.data.bevel_depth = val
+
+    @property
+    def length(self):
+        depsgraph = bpy.context.evaluated_depsgraph_get()
+        return sum(s.calc_length() for s in self.blenderObject.evaluated_get(depsgraph).data.splines)
 
 
 class Curve(ULCurve):

@@ -16,7 +16,7 @@ class Image(Widget):
     @property
     def texture(self):
         return self._texture
-        
+
     @texture.setter
     def texture(self, val):
         texture = bpy.data.images.get(val)
@@ -60,10 +60,19 @@ class Image(Widget):
 class Sprite(Image):
 
     def __init__(self, pos=[0, 0], size=(100, 100), relative={}, texture=None, idx=0, rows=1, cols=1, halign='left', valign='bottom'):
-        self.idx = idx
+        self._idx = idx
         self.rows = rows
         self.cols = cols
         super().__init__(pos, size, relative, texture, halign=halign, valign=valign)
+
+    @property
+    def idx(self):
+        return self._idx
+
+    @idx.setter
+    def idx(self, val):
+        self._idx = val
+        self.build_shader()
 
     @property
     def rows(self):

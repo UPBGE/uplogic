@@ -65,6 +65,8 @@ class ULStartSound(ULActionNode):
             volume,
             pitch,
             loop_count,
-            ignore_timescale=ignore_timescale
+            False,
+            ignore_timescale,
+            'ln_audio_system'
         )
         self.done = True

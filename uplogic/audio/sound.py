@@ -9,6 +9,7 @@ from uplogic.audio import ULAudioSystem
 from uplogic.audio import get_audio_system
 from uplogic.events import schedule_callback
 from uplogic.utils.math import interpolate
+import bpy
 import aud
 
 
@@ -254,8 +255,7 @@ class ULSound2D(ULSound):
 
 
 class Sound2D(ULSound2D):
-    '''[DEPRECATED] Use `uplogic.audio.MusicTrack` instead
-    
+    '''
     Non-spacial sound, e.g. Music or Voice-Overs.\n
     This class allows for modification of pitch and volume while playing.
 
@@ -381,7 +381,11 @@ class ULSound3D(ULSound):
         master_volume = self.aud_system.volume
         self.transition = transition_speed
         self.ignore_timescale = ignore_timescale
-        soundfile = logic.expandPath(file)
+        soundfile = bpy.data.sounds.get(file)
+        if soundfile:
+            soundfile = soundfile.filepath
+        else:
+            soundfile = logic.expandPath(file)
         if not isfile(soundfile):
             print(f'Soundfile {soundfile} could not be loaded!')
             return

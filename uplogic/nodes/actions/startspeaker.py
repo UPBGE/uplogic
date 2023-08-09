@@ -4,6 +4,7 @@ from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
 from uplogic.utils import is_invalid
 from uplogic.utils import not_met
+import os
 
 
 class ULStartSpeaker(ULActionNode):
@@ -13,6 +14,8 @@ class ULStartSpeaker(ULActionNode):
         self.occlusion = None
         self.transition = None
         self.cutoff = None
+        self.loop_count = None
+        self.ignore_timescale = None
         self.speaker = None
         self.done = None
         self.on_finish = False
@@ -49,6 +52,7 @@ class ULStartSpeaker(ULActionNode):
         occlusion = self.get_input(self.occlusion)
         cutoff = self.get_input(self.cutoff)
         loop_count = self.get_input(self.loop_count)
+        ignore_timescale = self.get_input(self.ignore_timescale)
         bl_speaker = speaker.blenderObject.data
         file = bl_speaker.sound.filepath
         if not file:
@@ -61,22 +65,25 @@ class ULStartSpeaker(ULActionNode):
         cone_outer = bl_speaker.cone_angle_outer
         cone_outer_volume = bl_speaker.cone_volume_outer
         self._set_ready()
+        print(cone_inner, cone_outer)
 
         if is_invalid(file):
             return
         self._handle = Sound3D(
-            file,
             speaker,
-            'ln_audio_system',
+            file,
             occlusion,
             transition,
             cutoff,
-            volume,
+            loop_count,
             pitch,
+            volume,
+            False,
             attenuation,
             distance_ref,
             [cone_inner, cone_outer],
             cone_outer_volume,
-            loop_count
+            ignore_timescale,
+            'ln_audio_system'
         )
         self.done = True

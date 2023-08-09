@@ -1,13 +1,14 @@
 from uplogic.nodes import ULParameterNode
 from uplogic.nodes import ULOutSocket
 from uplogic.utils.constants import STATUS_READY
+from uplogic.nodes.logictree import ULLogicTree
 from bge import logic
 
 
 class ULTimeData(ULParameterNode):
     def __init__(self):
         ULParameterNode.__init__(self)
-        self.network = None
+        self.network: ULLogicTree = None
         self.TIME_PER_FRAME = ULOutSocket(
             self,
             self.get_time_per_frame

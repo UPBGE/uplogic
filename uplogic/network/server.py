@@ -93,7 +93,6 @@ class Server:
         connected = True
         self.clients.append(conn)
         while connected and self.running:
-            print(time.time())
             try:
                 bmsg = conn.recv(2**14)
                 msg = pickle.loads(bmsg)
