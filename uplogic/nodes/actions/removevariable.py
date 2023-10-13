@@ -1,8 +1,6 @@
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
 from uplogic.utils import debug
-from uplogic.utils import not_met
-from uplogic.utils import is_waiting
 import bpy
 import json
 import os
@@ -44,14 +42,9 @@ class ULRemoveVariable(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition = self.get_input(self.condition)
-        if not_met(condition):
+        if not self.get_input(self.condition):
             return
         name = self.get_input(self.name)
-        if is_waiting(name):
-            return
-        self._set_ready()
-
         cust_path = self.get_custom_path(self.path)
 
         path = (

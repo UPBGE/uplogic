@@ -1,11 +1,8 @@
-from uplogic.nodes import ULConditionNode
-from uplogic.utils import is_waiting
-from uplogic.utils import not_met
+from uplogic.nodes import ULConditionNode, ULOutSocket
+from bge.logic import getRealTime
 
 
 class ULBarrier(ULConditionNode):
-    consumed: bool
-    trigger: float
 
     def __init__(self):
         ULConditionNode.__init__(self)
@@ -13,25 +10,24 @@ class ULBarrier(ULConditionNode):
         self.time = None
         self.consumed = False
         self.trigger = 0
+        self.result = False
+        self.OUT = ULOutSocket(self, self.get_done)
+
+    def get_done(self):
+        return self.result
 
     def evaluate(self):
-        condition = self.get_input(self.condition)
+        self.result = False
         time = self.get_input(self.time)
-        if is_waiting(time):
-            return
-
-        self._set_ready()
-
-        now = self.network.timeline
-
-        if not not_met(condition):
+        now = getRealTime()
+        if self.get_input(self.condition):
             if not self.consumed:
                 self.consumed = True
                 self.trigger = now + time
 
             if now >= self.trigger:
-                self._set_value(True)
+                self.result = True
 
         else:
-            self._set_value(False)
+            self.result = False
             self.consumed = False

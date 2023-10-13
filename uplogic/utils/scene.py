@@ -142,8 +142,8 @@ class SceneLoader():
         logic.getCurrentScene().pre_draw.remove(self.load_next)
         self.object.endObject()
         bpy.data.materials.remove(self.temp_map)
-        bpy.data.meshes.remove(self.bmesh)
         bpy.data.objects.remove(self.bobj)
+        bpy.data.meshes.remove(self.bmesh)
         self.finished = True
         self.on_finish()
 

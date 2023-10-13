@@ -23,11 +23,11 @@ def draw_points(points: list, color: list = [1, 1, 1, 1]):
             draw_line(p, points[i+1], color)
 
 
-def draw_cube(origin: Vector, width: float, color: list = [1, 1, 1, 1], centered=False):
+def draw_cube(origin: Vector, width: float = 1, color: list = [1, 1, 1, 1], centered: bool = False):
     draw_box(origin, width, width, width, color, centered)
 
 
-def draw_box(origin: Vector, length: float, width: float, height: float, color: list = [1, 1, 1, 1], centered=False):
+def draw_box(origin: Vector, length: float, width: float, height: float, color: list = [1, 1, 1, 1], centered: bool = False):
     if centered:
         origin = origin.copy() - Vector((length * .5, width * .5, height * .5))
 

@@ -3,8 +3,6 @@ from bge import logic
 from mathutils import Vector
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_waiting
-from uplogic.utils import not_met
 from uplogic.nodes.logictree import ULLogicTree
 import json
 import os
@@ -29,13 +27,9 @@ class ULSaveGame(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition = self.get_input(self.condition)
-        if not_met(condition):
+        if not self.get_input(self.condition):
             return
         slot = self.get_input(self.slot)
-        if is_waiting(slot):
-            return
-        self._set_ready()
         cust_path = self.get_custom_path(self.path)
 
         path = (

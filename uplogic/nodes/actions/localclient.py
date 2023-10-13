@@ -69,7 +69,6 @@ class ULLocalClient(ULActionNode):
             else:
                 self._disconnect = True
             self._was_connected = self._client.connected
-        self._set_ready()
         if self.get_input(self.connect_cond):
             self._client.connect()
         if self.get_input(self.disconnect_cond):

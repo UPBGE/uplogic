@@ -1,7 +1,5 @@
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.ui import Canvas
-from uplogic.utils import not_met
 
 
 class ULAddUIWidget(ULActionNode):
@@ -18,10 +16,8 @@ class ULAddUIWidget(ULActionNode):
 
     def evaluate(self):
         self._done = False
-        condition = self.get_input(self.condition)
-        if not_met(condition):
+        if not self.get_input(self.condition):
             return
-        self._set_ready()
         self.get_input(self.parent_widget).add_widget(self.get_input(self.child_widget))
         self._done = True
         

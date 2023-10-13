@@ -1,9 +1,6 @@
 from bge import constraints
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_invalid
-from uplogic.utils import is_waiting
-from uplogic.utils import not_met
 
 
 class ULAddPhysicsConstraint(ULActionNode):
@@ -27,8 +24,7 @@ class ULAddPhysicsConstraint(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition = self.get_input(self.condition)
-        if not_met(condition):
+        if not self.get_input(self.condition):
             return
         target = self.get_input(self.target)
         child = self.get_input(self.child)
@@ -39,22 +35,6 @@ class ULAddPhysicsConstraint(ULActionNode):
         use_world = self.get_input(self.use_world)
         axis_limits = self.get_input(self.axis_limits)
         linked_col = self.get_input(self.linked_col)
-        if is_invalid(
-            target,
-            child,
-        ):
-            return
-        if is_waiting(
-            name,
-            constraint,
-            pivot,
-            use_limit,
-            use_world,
-            axis_limits,
-            linked_col
-        ):
-            return
-        self._set_ready()
         flag = 0 if linked_col else 128
         if use_world:
             pivot.x -= target.localPosition.x

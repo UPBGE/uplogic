@@ -1,8 +1,6 @@
 from bge import logic
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_invalid
-from uplogic.utils import not_met
 import bpy
 
 
@@ -20,13 +18,6 @@ class ULSetEeveeSMAA(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition = self.get_input(self.condition)
-        if not_met(condition):
-            return
-        value = self.get_input(self.value)
-        if is_invalid(value):
-            return
-        self._set_ready()
-        scene = logic.getCurrentScene()
-        bpy.data.scenes[scene.name].eevee.use_eevee_smaa = value
-        self.done = True
+        if self.get_input(self.condition):
+            print("SMAA has been removed from UPBGE. Delete 'Set SMAA' node to avoid issues.")
+            self.done = True

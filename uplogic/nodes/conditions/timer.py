@@ -1,6 +1,5 @@
-from uplogic.nodes import ULConditionNode
-from uplogic.utils import is_waiting
-from uplogic.utils import not_met
+from uplogic.nodes import ULConditionNode, ULOutSocket
+from bge.logic import getRealTime
 
 
 class ULTimer(ULConditionNode):
@@ -11,23 +10,24 @@ class ULTimer(ULConditionNode):
         self.delta_time = None
         self._trigger = -1
         self.network = None
+        self.OUT = ULOutSocket(self, self.get_out)
+
+    def get_out(self):
+        return self.result
 
     def setup(self, network):
         self.network = network
 
     def evaluate(self):
+        self.result = False
         condition = self.get_input(self.condition)
         delta_time = self.get_input(self.delta_time)
-        if is_waiting(delta_time):
-            return
-        self._set_ready()
-        now = self.network.timeline
+        now = getRealTime()
 
-        if not not_met(condition):
+        if condition:
             self._trigger = now + delta_time
-
         if self._trigger == -1 or now < self._trigger:
-            self._set_value(False)
+            self.result = False
         else:
-            self._set_value(True)
+            self.result = True
             self._trigger = -1

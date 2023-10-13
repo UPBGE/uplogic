@@ -1,8 +1,6 @@
 from bge import logic
 from uplogic.nodes import ULOutSocket
 from uplogic.nodes import ULParameterNode
-from uplogic.utils.constants import STATUS_WAITING
-from uplogic.utils import is_invalid
 
 
 class ULActiveCamera(ULParameterNode):
@@ -12,9 +10,4 @@ class ULActiveCamera(ULParameterNode):
 
     def get_camera(self):
         scene = logic.getCurrentScene()
-        if is_invalid(scene):
-            return STATUS_WAITING
         return scene.active_camera
-
-    def evaluate(self):
-        self._set_ready()

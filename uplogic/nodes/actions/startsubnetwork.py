@@ -1,8 +1,6 @@
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_waiting, make_valid_name
-from uplogic.utils import is_invalid
-from uplogic.utils import not_met
+from uplogic.utils import make_valid_name
 
 
 class ULStartSubNetwork(ULActionNode):
@@ -22,16 +20,10 @@ class ULStartSubNetwork(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition = self.get_input(self.condition)
-        if not_met(condition):
+        if not self.get_input(self.condition):
             return
         game_object = self.get_input(self.game_object)
         logic_network_name = self.get_input(self.logic_network_name)
-        if is_waiting(game_object, logic_network_name):
-            return
-        self._set_ready()
-        if is_invalid(game_object):
-            return
         tree_name = make_valid_name(logic_network_name)
         network = game_object.get(f'IGNLTree_{tree_name}')
         if network is None:

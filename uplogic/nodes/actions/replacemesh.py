@@ -1,6 +1,7 @@
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_invalid
+from bge.types import KX_GameObject
+from bpy.types import Mesh
 
 
 class ULReplaceMesh(ULActionNode):
@@ -19,23 +20,13 @@ class ULReplaceMesh(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition = self.get_input(self.condition)
-        self._set_ready()
-        if not condition:
+        if not self.get_input(self.condition):
             return
-        target = self.get_input(self.target_game_object)
-        mesh = self.get_input(self.new_mesh_name)
-        display = self.get_input(self.use_display)
-        physics = self.get_input(self.use_physics)
-        if is_invalid(target):
-            return
-        if mesh is None:
-            return
-        if display is None:
-            return
-        if physics is None:
-            return
-        target.replaceMesh(mesh, display, physics)
+        target: KX_GameObject = self.get_input(self.target_game_object)
+        mesh: Mesh = self.get_input(self.new_mesh_name)
+        display: bool = self.get_input(self.use_display)
+        physics: bool = self.get_input(self.use_physics)
+        target.replaceMesh(mesh.name, display, physics)
         if physics:
             target.reinstancePhysicsMesh()
         self.done = True

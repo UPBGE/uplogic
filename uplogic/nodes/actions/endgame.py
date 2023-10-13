@@ -1,6 +1,5 @@
 from bge import logic
 from uplogic.nodes import ULActionNode
-from uplogic.utils import not_met
 from uplogic import get_mainloop
 
 
@@ -10,9 +9,7 @@ class ULEndGame(ULActionNode):
         self.condition = None
 
     def evaluate(self):
-        self._set_ready()
-        condition = self.get_input(self.condition)
-        if not_met(condition):
+        if not self.get_input(self.condition):
             return
         mainloop = get_mainloop()
         if mainloop:

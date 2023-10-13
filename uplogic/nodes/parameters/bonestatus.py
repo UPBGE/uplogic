@@ -4,8 +4,6 @@ from mathutils import Quaternion
 from mathutils import Vector
 from uplogic.nodes import ULOutSocket
 from uplogic.nodes import ULParameterNode
-from uplogic.utils.constants import NO_VALUE
-from uplogic.utils import is_invalid
 
 
 class ULBoneStatus(ULParameterNode):
@@ -13,8 +11,8 @@ class ULBoneStatus(ULParameterNode):
         ULParameterNode.__init__(self)
         self.armature = None
         self.bone_name = None
-        self._prev_armature = NO_VALUE
-        self._prev_bone = NO_VALUE
+        self._prev_armature = None
+        self._prev_bone = None
         self._channel = None
         self._pos = Vector((0, 0, 0))
         self._rot = Euler((0, 0, 0), "XYZ")
@@ -35,9 +33,6 @@ class ULBoneStatus(ULParameterNode):
     def evaluate(self):
         armature = self.get_input(self.armature)
         bone_name = self.get_input(self.bone_name)
-        if is_invalid(armature, bone_name):
-            return
-        self._set_ready()
         channel = None
         if (
             (armature is self._prev_armature) and

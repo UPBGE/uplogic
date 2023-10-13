@@ -1,7 +1,5 @@
 from uplogic.nodes import ULOutSocket
 from uplogic.nodes import ULActionNode
-from uplogic.utils import is_waiting
-from uplogic.utils import not_met
 
 
 class ULSetSensorValue(ULActionNode):
@@ -21,19 +19,15 @@ class ULSetSensorValue(ULActionNode):
 
     def evaluate(self):
         self.done = False
+        if not self.get_input(self.condition):
+            return
         game_obj = self.get_input(self.game_obj)
         sens_name = self.get_input(self.sens_name)
-        condition = self.get_input(self.condition)
-        if not_met(condition):
-            return
         # sensor = game_obj.blenderObject.game.sensors.get(sens_name)
         sensor = game_obj.sensors.get(sens_name)
         if not sensor:
             return
-        self._set_ready()
         field = self.get_input(self.field)
         value = self.get_input(self.value)
-        if is_waiting(field, value):
-            return
         setattr(sensor, field, value)
         self.done = True

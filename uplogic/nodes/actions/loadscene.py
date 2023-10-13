@@ -2,6 +2,7 @@ from bge import logic
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
 from uplogic.utils.scene import SceneLoader
+from bpy.types import Scene
 
 
 class ULLoadScene(ULActionNode):
@@ -38,9 +39,8 @@ class ULLoadScene(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition = self.get_input(self.condition)
-        scene = self.get_input(self.scene)
-        self._set_ready()
+        condition: bool = self.get_input(self.condition)
+        scene: Scene = self.get_input(self.scene)
         if condition and self.loader is None:
             self.loader = SceneLoader(scene)
         if self.loader:

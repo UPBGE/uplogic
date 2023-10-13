@@ -1,7 +1,4 @@
 from uplogic.nodes import ULActionNode, ULOutSocket
-from uplogic.utils import is_waiting
-from uplogic.utils import not_met
-
 
 class ULSendNetworkMessage(ULActionNode):
     def __init__(self):
@@ -18,9 +15,7 @@ class ULSendNetworkMessage(ULActionNode):
 
     def evaluate(self):
         self._done = False
-        condition = self.get_input(self.condition)
-        if not_met(condition):
-            self._set_ready()
+        if not self.get_input(self.condition):
             return
         entity = self.get_input(self.entity)
         if entity:

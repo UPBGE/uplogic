@@ -1,9 +1,6 @@
 from uplogic.nodes import ULParameterNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils.constants import STATUS_WAITING
-from uplogic.utils import is_invalid
-from uplogic.utils import is_waiting
-import bpy
+from bpy.types import NodeTree
 
 
 class ULGetNodeAttribute(ULParameterNode):
@@ -16,28 +13,14 @@ class ULGetNodeAttribute(ULParameterNode):
         self.OUT = ULOutSocket(self, self._get_val)
 
     def _get_val(self):
-        socket = self.get_output('val')
-        if socket is None:
-            mat_name = self.get_input(self.mat_name)
-            node_name = self.get_input(self.node_name)
-            if is_invalid(mat_name, node_name):
-                return STATUS_WAITING
-            internal = self.get_input(self.internal)
-            attribute = self.get_input(self.attribute)
-            if is_waiting(mat_name):
-                return STATUS_WAITING
-            target = (
-                bpy.data
-                .node_groups[mat_name]
-                .nodes[node_name]
-            )
-            if internal:
-                target = getattr(target, internal, target)
-            return self.set_output(
-                'val',
-                getattr(target, attribute, None)
-            )
-        return socket
-
-    def evaluate(self):
-        self._set_ready()
+        tree: NodeTree = self.get_input(self.mat_name)
+        node_name = self.get_input(self.node_name)
+        internal = self.get_input(self.internal)
+        attribute = self.get_input(self.attribute)
+        target = (
+            tree
+            .nodes[node_name]
+        )
+        if internal:
+            target = getattr(target, internal, target)
+        return getattr(target, attribute, None)

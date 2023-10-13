@@ -3,10 +3,12 @@ from bge.types import KX_GameObject
 import bpy
 from bpy.types import Material, Object
 from .errors import LogicControllerNotSupportedError
-from .constants import LO_AXIS_TO_VECTOR
+from .constants import FRONT_AXIS_VECTOR_SIGNED
 from .math import project_vector3
 from .math import clamp
+from .math import get_local
 from mathutils import Vector, Matrix
+from math import degrees
 
 
 def xrot_to(
@@ -15,22 +17,15 @@ def xrot_to(
     front_axis_code=1,
     factor=1
 ):
-    front_vector = LO_AXIS_TO_VECTOR[front_axis_code]
-    vec = rotating_object.getVectTo(target_pos)[1]
-    vec = project_vector3(vec, 1, 2)
-    vec.normalize()
-    front_vector = rotating_object.getAxisVect(front_vector)
-    front_vector = project_vector3(front_vector, 1, 2)
-    signed_angle = vec.angle_signed(front_vector, None)
-    if signed_angle is None:
+    local = get_local(rotating_object, target_pos)
+    front = Vector((1, 0)) if front_axis_code == 1 else Vector((0, 1))
+    if front_axis_code > 2:
+        front.negate()
+    angle = Vector((local.y, local.z))
+    if angle.length < .001:
         return
-    abs_angle = abs(signed_angle)
-    if abs_angle < 0.01:
-        return True
-    angle_sign = (signed_angle > 0) - (signed_angle < 0)
-    drot = angle_sign * abs_angle * clamp(factor)
-    rotating_object.applyRotation((drot, 0, 0), True)
-    return False
+    angle = angle.angle_signed(front)
+    rotating_object.applyRotation((angle*factor, 0, 0), True)
 
 
 def yrot_to(
@@ -39,22 +34,15 @@ def yrot_to(
     front_axis_code=1,
     factor=1
 ):
-    front_vector = LO_AXIS_TO_VECTOR[front_axis_code]
-    vec = rotating_object.getVectTo(target_pos)[1]
-    vec = project_vector3(vec, 2, 0)
-    vec.normalize()
-    front_vector = rotating_object.getAxisVect(front_vector)
-    front_vector = project_vector3(front_vector, 2, 0)
-    signed_angle = vec.angle_signed(front_vector, None)
-    if signed_angle is None:
+    local = get_local(rotating_object, target_pos)
+    front = Vector((1, 0)) if front_axis_code == 0 else Vector((0, 1))
+    if front_axis_code > 2:
+        front.negate()
+    angle = Vector((local.x, local.z))
+    if angle.length < .001:
         return
-    abs_angle = abs(signed_angle)
-    if abs_angle < 0.01:
-        return True
-    angle_sign = (signed_angle > 0) - (signed_angle < 0)
-    drot = angle_sign * abs_angle * clamp(factor)
-    rotating_object.applyRotation((0, drot, 0), True)
-    return False
+    angle = angle.angle_signed(front)
+    rotating_object.applyRotation((0, angle*factor, 0), True)
 
 
 def zrot_to(
@@ -63,50 +51,49 @@ def zrot_to(
     front_axis_code=1,
     factor=1
 ):
-    front_vector = LO_AXIS_TO_VECTOR[front_axis_code]
-    vec = rotating_object.getVectTo(target_pos)[1]
-    vec = project_vector3(vec, 0, 1)
-    vec.normalize()
-    front_vector = rotating_object.getAxisVect(front_vector)
-    front_vector = project_vector3(front_vector, 0, 1)
-    signed_angle = vec.angle_signed(front_vector, None)
-    if signed_angle is None:
-        return True
-    abs_angle = abs(signed_angle)
-    if abs_angle < 0.01:
-        return True
-    angle_sign = (signed_angle > 0) - (signed_angle < 0)
-    drot = angle_sign * abs_angle * clamp(factor)
-    rotating_object.applyRotation((0, 0, drot), True)
-    return False
+    local = get_local(rotating_object, target_pos)
+    front = Vector((1, 0)) if front_axis_code == 0 else Vector((0, 1))
+    if front_axis_code > 2:
+        front.negate()
+    angle = Vector((local.x, local.y))
+    if angle.length < .001:
+        return
+    angle = angle.angle_signed(front)
+    rotating_object.applyRotation((0, 0, angle*factor), True)
 
 
 def rotate_to(
-    rot_axis_index,
-    rotating_object,
-    target_pos,
-    front_axis_code,
-    factor=1
+    object: KX_GameObject,
+    target: Vector,
+    rotation_axis: int = 2,
+    front_axis: int = 1,
+    factor:float = 1
 ):
-    if rot_axis_index == 0:
-        return xrot_to(
-            rotating_object,
-            target_pos,
-            front_axis_code,
+    """Rotate an object around a local axis towards a point"""
+    front = front_axis
+    if front > 2:
+        front -= 3
+    if rotation_axis == front:
+        return
+    if rotation_axis == 0:
+        xrot_to(
+            object,
+            target,
+            front_axis,
             factor
         )
-    elif rot_axis_index == 1:
-        return yrot_to(
-            rotating_object,
-            target_pos,
-            front_axis_code,
+    elif rotation_axis == 1:
+        yrot_to(
+            object,
+            target,
+            front_axis,
             factor
         )
-    elif rot_axis_index == 2:
-        return zrot_to(
-            rotating_object,
-            target_pos,
-            front_axis_code,
+    elif rotation_axis == 2:
+        zrot_to(
+            object,
+            target,
+            front_axis,
             factor
         )
 
@@ -412,6 +399,11 @@ class GameObject:
         self.game_object.worldTransform = val
 
 
+def get_curve_length(curve: KX_GameObject):
+    depsgraph = bpy.context.evaluated_depsgraph_get()
+    return sum(s.calc_length() for s in curve.blenderObject.evaluated_get(depsgraph).data.splines)
+
+
 class ULCurve(GameObject):
     """Wrapper class for creating and handling curves more easily.
 
@@ -452,7 +444,7 @@ class ULCurve(GameObject):
 
     @name.setter
     def name(self, val):
-        print('ULCurve.name is read-only!')
+        print('Curve.name is read-only!')
 
     @property
     def points(self):
@@ -478,6 +470,18 @@ class ULCurve(GameObject):
     def length(self):
         depsgraph = bpy.context.evaluated_depsgraph_get()
         return sum(s.calc_length() for s in self.blenderObject.evaluated_get(depsgraph).data.splines)
+
+    @length.setter
+    def length(self, val):
+        print('Curve.length is read-only!')
+
+    @property
+    def path_duration(self):
+        return self.blenderObject.data.path_duration
+
+    @path_duration.setter
+    def path_duration(self, val):
+        self.game_object.blenderObject.data.path_duration = val
 
 
 class Curve(ULCurve):

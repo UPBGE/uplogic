@@ -1,7 +1,6 @@
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
 from uplogic.ui import Image
-from uplogic.utils import not_met
 from math import degrees
 
 
@@ -33,9 +32,7 @@ class ULCreateUIImage(ULActionNode):
 
     def evaluate(self):
         self._done = False
-        condition = self.get_input(self.condition)
-        self._set_ready()
-        if not_met(condition):
+        if not self.get_input(self.condition):
             return
         ipt = self.get_input
         parent = ipt(self.parent)
@@ -49,7 +46,7 @@ class ULCreateUIImage(ULActionNode):
         self._widget = Image(
             pos=pos,
             size=size,
-            texture=texture,
+            texture=texture.name,
             relative={'pos': rel_pos, 'size': rel_size},
             halign=self.halign_type,
             valign=self.valign_type,

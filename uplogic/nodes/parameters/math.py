@@ -1,8 +1,6 @@
 from mathutils import Vector
 from uplogic.nodes import ULParameterNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils.constants import STATUS_WAITING
-from uplogic.utils import is_invalid
 
 
 class ULMath(ULParameterNode):
@@ -15,29 +13,9 @@ class ULMath(ULParameterNode):
         self.OUT = ULOutSocket(self, self.get_done)
 
     def get_done(self):
-        socket = self.get_output('done')
-        if socket is None:
-            a = self.get_input(self.operand_a)
-            b = self.get_input(self.operand_b)
-            if is_invalid(a, b):
-                return STATUS_WAITING
-            if (a is None) or (b is None):
-                return STATUS_WAITING
-            else:
-                if (
-                    isinstance(a, Vector) and
-                    isinstance(b, Vector)
-                ):
-                    return self.get_vec_vec_calc(a, b)
-                elif isinstance(a, Vector):
-                    return self.get_vec_calc(a, b)
-                elif isinstance(b, Vector):
-                    return self.get_vec_calc(b, a)
-                return self.set_output('done', self.operator(a, b))
-        return socket
-
-    def evaluate(self):
-        self._set_ready()
+        a = self.get_input(self.operand_a)
+        b = self.get_input(self.operand_b)
+        return self.operator(a, b)
 
     def get_vec_calc(self, vec, num):
         if len(vec) == 4:

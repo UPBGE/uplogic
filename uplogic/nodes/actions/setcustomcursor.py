@@ -2,7 +2,7 @@ from bge import render
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
 from uplogic.ui import Cursor, remove_custom_cursor
-from uplogic.utils import not_met
+from bpy.types import Image
 
 
 class ULSetCustomCursor(ULActionNode):
@@ -24,13 +24,10 @@ class ULSetCustomCursor(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition = self.get_input(self.condition)
-        if not_met(condition):
-            self._set_ready()
+        if not self.get_input(self.condition):
             return
-        self._set_ready()
         remove_custom_cursor()
-        texture = self.get_input(self.texture)
+        texture: Image = self.get_input(self.texture)
         size = self.get_input(self.size)
-        self._cursor = Cursor(texture=texture, size=size)
+        self._cursor = Cursor(texture=texture.name, size=size)
         self.done = True

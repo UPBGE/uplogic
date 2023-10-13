@@ -1,8 +1,6 @@
 from bge import logic
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_waiting
-from uplogic.utils import not_met
 
 
 class ULAddObject(ULActionNode):
@@ -27,16 +25,12 @@ class ULAddObject(ULActionNode):
     def evaluate(self):
         self.done = False
         condition = self.get_input(self.condition)
-        if not_met(condition):
+        if not condition:
             return
         life = self.get_input(self.life)
         name = self.get_input(self.name)
-        name = getattr(name, 'name', name)
         full_copy = self.get_input(self.full_copy)
-        self._set_ready()
         reference = self.get_input(self.reference)
         scene = logic.getCurrentScene()
-        if is_waiting(life, name, reference):
-            return
         self.obj = scene.addObject(name, reference, life, full_copy)
         self.done = True

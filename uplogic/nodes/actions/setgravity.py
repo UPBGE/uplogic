@@ -1,9 +1,6 @@
 from bge import logic
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_waiting
-from uplogic.utils import is_invalid
-from uplogic.utils import not_met
 
 
 class ULSetGravity(ULActionNode):
@@ -20,14 +17,8 @@ class ULSetGravity(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition = self.get_input(self.condition)
-        if not_met(condition):
+        if not self.get_input(self.condition):
             return
         gravity = self.get_input(self.gravity)
-        if is_waiting(gravity):
-            return
-        self._set_ready()
-        if is_invalid(gravity):
-            return
         logic.setGravity(gravity)
         self.done = True

@@ -1,7 +1,5 @@
 from uplogic.nodes import ULConditionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils.constants import STATUS_WAITING
-from uplogic.utils import is_waiting
 from bge import logic
 
 
@@ -14,29 +12,15 @@ class ULMouseReleased(ULConditionNode):
         self.OUT = ULOutSocket(self, self.get_changed)
 
     def get_changed(self):
-        socket = self.get_output('changed')
-        if socket is None:
-            mouse_button = self.get_input(self.mouse_button_code)
-            if is_waiting(mouse_button):
-                return STATUS_WAITING
-            mstat = logic.mouse.inputs[mouse_button]
-            if self.pulse:
-                return self.set_output(
-                    'changed',
-                    (
-                        mstat.released or
-                        mstat.inactive
-                    )
+        mouse_button = self.get_input(self.mouse_button_code)
+        mstat = logic.mouse.inputs[mouse_button]
+        if self.pulse:
+            return (
+                    mstat.released or
+                    mstat.inactive
                 )
-            else:
-                return self.set_output(
-                    'changed',
-                    (mstat.released)
-                )
-        return socket
+        else:
+            return (mstat.released)
 
     def setup(self, network):
         self.network = network
-
-    def evaluate(self):
-        self._set_ready()

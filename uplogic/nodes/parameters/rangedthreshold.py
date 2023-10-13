@@ -1,7 +1,6 @@
 from uplogic.nodes import ULParameterNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils.constants import STATUS_WAITING
-from uplogic.utils import is_waiting
+from mathutils import Vector
 
 
 class ULRangedThreshold(ULParameterNode):
@@ -10,25 +9,22 @@ class ULRangedThreshold(ULParameterNode):
         ULParameterNode.__init__(self)
         self.value = None
         self.threshold = None
+        self.min_value = None
+        self.max_value = None
         self.operator = None
         self.OUT = ULOutSocket(self, self.get_done)
 
     def get_done(self):
         v = self.get_input(self.value)
-        t = self.get_input(self.threshold)
-        if is_waiting(v, t):
-            return STATUS_WAITING
-        value = self.calc_threshold(self.operator, v, t)
-        if (v is None) or (t is None):
-            return STATUS_WAITING
+        if self.min_value is not None:
+            t = Vector((self.get_input(self.min_value), self.get_input(self.max_value)))
         else:
-            return value
+            t = self.get_input(self.threshold)
+        value = self.calc_threshold(self.operator, v, t)
+        return value
 
     def calc_threshold(self, op, v, t):
         if op == 'OUTSIDE':
             return v if (v < t.x or v > t.y) else 0
         if op == 'INSIDE':
             return v if (t.x < v < t.y) else 0
-
-    def evaluate(self):
-        self._set_ready()

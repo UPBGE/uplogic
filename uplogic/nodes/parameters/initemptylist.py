@@ -2,7 +2,6 @@
 
 from uplogic.nodes import ULOutSocket
 from uplogic.nodes import ULParameterNode
-from uplogic.utils import is_waiting
 
 
 class ULInitEmptyList(ULParameterNode):
@@ -15,9 +14,4 @@ class ULInitEmptyList(ULParameterNode):
 
     def get_list(self):
         length = self.get_input(self.length)
-        if is_waiting(length):
-            return
         return [None for x in range(length)]
-
-    def evaluate(self):
-        self._set_ready()

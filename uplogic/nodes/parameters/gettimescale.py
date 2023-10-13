@@ -10,6 +10,3 @@ class ULGetTimeScale(ULParameterNode):
 
     def get_done(self):
         return logic.getTimeScale()
-
-    def evaluate(self):
-        self._set_ready()

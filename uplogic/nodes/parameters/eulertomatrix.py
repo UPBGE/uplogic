@@ -13,13 +13,7 @@ class ULEulerToMatrix(ULParameterNode):
         self.OUT = ULOutSocket(self, self.get_matrix)
 
     def get_matrix(self):
-        socket = self.get_output('matrix')
-        if socket is None:
-            vec = self.get_input(self.input_e)
-            if isinstance(vec, Vector):
-                vec = Euler((vec.x, vec.y, vec.z), 'XYZ')
-            return self.set_output('matrix', vec.to_matrix())
-        return socket
-
-    def evaluate(self):
-        self._set_ready()
+        vec = self.get_input(self.input_e)
+        if isinstance(vec, Vector):
+            vec = Euler((vec.x, vec.y, vec.z), 'XYZ')
+        return vec.to_matrix()

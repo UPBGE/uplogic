@@ -16,13 +16,7 @@ class ULGetUIWidgetAttr(ULParameterNode):
         self.FLOAT = ULOutSocket(self, self._get_attr)
         self.FONT = ULOutSocket(self, self._get_attr)
         self.IMG = ULOutSocket(self, self._get_attr)
-        
-    def _get_attr(self):
-        socket = self.get_output('attr')
-        if socket is None:
-            widget = self.get_input(self.widget)
-            return self.set_output('attr', getattr(widget, self.widget_attr, None))
-        return socket
 
-    def evaluate(self):
-        self._set_ready()
+    def _get_attr(self):
+        widget = self.get_input(self.widget)
+        return getattr(widget, self.widget_attr, None)

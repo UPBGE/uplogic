@@ -1,7 +1,5 @@
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_waiting
-from uplogic.utils import not_met
 
 
 class ULApplyTorque(ULActionNode):
@@ -19,15 +17,11 @@ class ULApplyTorque(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition = self.get_input(self.condition)
-        if not_met(condition):
+        if not self.get_input(self.condition):
             return
         game_object = self.get_input(self.game_object)
         torque = self.get_input(self.torque)
         local = self.local
-        if is_waiting(game_object, torque):
-            return
-        self._set_ready()
         if torque:
             game_object.applyTorque(torque, local)
         self.done = True

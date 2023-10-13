@@ -1,9 +1,7 @@
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
 from uplogic.ui import Label
-from uplogic.utils import not_met
 from math import degrees
-import bpy
 
 
 class ULCreateUILabel(ULActionNode):
@@ -39,9 +37,7 @@ class ULCreateUILabel(ULActionNode):
 
     def evaluate(self):
         self._done = False
-        condition = self.get_input(self.condition)
-        self._set_ready()
-        if not_met(condition):
+        if not self.get_input(self.condition):
             return
         ipt = self.get_input
         parent = ipt(self.parent)
@@ -60,8 +56,9 @@ class ULCreateUILabel(ULActionNode):
         else:
             shadow_offset = [0, 0]
             shadow_color = [0, 0, 0, 0]
+
         
-        font = bpy.data.fonts[font].filepath.replace('\\', '/') if font else 0
+        font = font.filepath.replace('\\', '/') if font else 0
 
         print(rel_pos)
 

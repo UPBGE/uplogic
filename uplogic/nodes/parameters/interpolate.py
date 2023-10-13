@@ -1,8 +1,6 @@
 from uplogic.nodes import ULParameterNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils.constants import STATUS_WAITING
 from uplogic.utils import lerp
-from uplogic.utils import is_invalid
 
 
 class ULInterpolate(ULParameterNode):
@@ -15,15 +13,7 @@ class ULInterpolate(ULParameterNode):
         self.OUT = ULOutSocket(self, self.get_done)
 
     def get_done(self):
-        socket = self.get_output('val')
-        if socket is None:
-            a = self.get_input(self.a)
-            b = self.get_input(self.b)
-            fac = self.get_input(self.fac)
-            if is_invalid(a, b, fac):
-                return STATUS_WAITING
-            return self.set_output('val', lerp(a, b, fac))
-        return socket
-
-    def evaluate(self):
-        self._set_ready()
+        a = self.get_input(self.a)
+        b = self.get_input(self.b)
+        fac = self.get_input(self.fac)
+        return lerp(a, b, fac)

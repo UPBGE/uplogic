@@ -1,6 +1,5 @@
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import not_met
 from uplogic.shaders import FXAA
 from uplogic.shaders import HBAO
 from uplogic.shaders import SSAO
@@ -35,7 +34,7 @@ class ULAddFilter(ULActionNode):
         self.done = False
         condition = self.get_input(self.condition)
         ftype = self.filter_type
-        if not_met(condition) or self.filter:
+        if not condition or self.filter:
             if self.filter:
                 if ftype == 'VIGNETTE':
                     self.filter.settings['power'] = self.get_input(self.power)
@@ -56,7 +55,6 @@ class ULAddFilter(ULActionNode):
                 elif ftype in ['HBAO', 'SSAO']:
                     self.filter.settings['power'] = self.get_input(self.power)
             return
-        self._set_ready()
 
         if ftype == 'FXAA':
             self.filter = FXAA(self.get_input(self.pass_idx))

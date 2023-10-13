@@ -1,8 +1,5 @@
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_invalid
-from uplogic.utils import is_waiting
-from uplogic.utils import not_met
 
 
 class ULAlignAxisToVector(ULActionNode):
@@ -20,20 +17,12 @@ class ULAlignAxisToVector(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition = self.get_input(self.condition)
-        self._set_ready()
-        if not_met(condition):
+        if not self.get_input(self.condition):
             return
         game_object = self.get_input(self.game_object)
         v = self.get_input(self.vector)
         axis = self.get_input(self.axis)
         factor = self.get_input(self.factor)
-        if is_invalid(game_object):
-            return
-        # length = v.length :
-        if is_waiting(axis, factor, v):# or v.length <= 0:
-            return
-        v = getattr(v, 'worldPosition', v).copy()
         if not self.local:
             v -= game_object.worldPosition
         if axis > 2:

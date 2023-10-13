@@ -38,7 +38,6 @@ class ULLoadFileContent(ULActionNode):
     def evaluate(self):
         self.done = False
         condition = self.get_input(self.condition)
-        self._set_ready()
         if condition and self.loader is None:
             self.loader = FileLoader()
         if self.loader:

@@ -1,8 +1,6 @@
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
 from uplogic.utils import debug
-from uplogic.utils import is_invalid
-from uplogic.utils import not_met
 
 
 class ULRemoveListValue(ULActionNode):
@@ -24,14 +22,10 @@ class ULRemoveListValue(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition = self.get_input(self.condition)
-        if not_met(condition):
+        if not self.get_input(self.condition):
             return
         list_d = self.get_input(self.items)
         val = self.get_input(self.val)
-        if is_invalid(list_d, val):
-            return
-        self._set_ready()
         if val in list_d:
             list_d.remove(val)
         else:

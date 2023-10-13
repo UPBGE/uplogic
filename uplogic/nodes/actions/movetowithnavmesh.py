@@ -1,8 +1,6 @@
 from bge import render
 from bge.types import KX_GameObject as GameObject
 from uplogic.nodes import ULActionNode, ULOutSocket
-from uplogic.utils import is_invalid
-from uplogic.utils import not_met
 from uplogic.utils.objects import rotate_to
 from uplogic.utils.objects import move_to
 
@@ -61,9 +59,7 @@ class ULMoveToWithNavmesh(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition: bool = self.get_input(self.condition)
-        if not_met(condition):
-            self._set_ready()
+        if not self.get_input(self.condition):
             return
         moving_object: GameObject = self.get_input(self.moving_object)
         rotating_object: GameObject = self.get_input(self.rotating_object)
@@ -77,23 +73,6 @@ class ULMoveToWithNavmesh(ULActionNode):
         front_axis: int = self.get_input(self.front_axis)
         rot_speed: float = self.get_input(self.rot_speed)
         visualize: bool = self.get_input(self.visualize)
-        if is_invalid(
-            destination_point,
-            move_dynamic,
-            linear_speed,
-            reach_threshold,
-            look_at,
-            rot_axis,
-            front_axis,
-            rot_speed,
-            visualize
-        ):
-            return
-        if is_invalid(moving_object, navmesh_object):
-            return
-        if is_invalid(rotating_object):
-            rotating_object = None
-        self._set_ready()
         self.finished = False
         if (
             (self._motion_path is None) or
@@ -121,9 +100,9 @@ class ULMoveToWithNavmesh(ULActionNode):
             tpf = self.network.time_per_frame
             if look_at and (rotating_object is not None):
                 rotate_to(
-                    rot_axis,
                     rotating_object,
                     next_point,
+                    rot_axis,
                     front_axis,
                     rot_speed
                 )

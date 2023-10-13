@@ -15,6 +15,7 @@ from .keyboard import key_pulse  # noqa
 from .keyboard import key_press  # noqa
 from .keyboard import key_tap  # noqa
 from .keyboard import key_up  # noqa
+from .keyboard import record_keyboard  # noqa
 from .mouse import LMB  # noqa
 from .mouse import MMB  # noqa
 from .mouse import MOUSE_EVENTS  # noqa

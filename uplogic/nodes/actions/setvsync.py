@@ -1,8 +1,6 @@
 from bge import render
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_waiting
-from uplogic.utils import not_met
 
 
 class ULSetVSync(ULActionNode):
@@ -18,9 +16,7 @@ class ULSetVSync(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition = self.get_input(self.condition)
-        if not_met(condition):
+        if not self.get_input(self.condition):
             return
-        self._set_ready()
         render.setVsync(self.vsync_mode)
         self.done = True

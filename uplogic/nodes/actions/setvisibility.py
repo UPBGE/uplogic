@@ -1,9 +1,9 @@
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_waiting
-from uplogic.utils import is_invalid
-from uplogic.utils import not_met
 from uplogic.utils import logic
+from bpy.types import Collection
+from bge.types import KX_GameObject
+from bge.types import KX_Scene
 import bpy
 
 
@@ -22,22 +22,11 @@ class ULSetVisibility(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition = self.get_input(self.condition)
-        if not_met(condition):
-            self._set_ready()
+        if not self.get_input(self.condition):
             return
-        game_object = self.get_input(self.game_object)
+        game_object: KX_GameObject = self.get_input(self.game_object)
         visible: bool = self.get_input(self.visible)
         recursive: bool = self.get_input(self.recursive)
-        if is_waiting(visible, recursive):
-            return
-        if is_invalid(game_object):
-            return
-        self._set_ready()
-        if visible is None:
-            return
-        if recursive is None:
-            return
         game_object.setVisible(visible, recursive)
         self.done = True
 
@@ -55,10 +44,16 @@ class ULSetCollectionVisibility(ULActionNode):
     def get_done(self):
         return self.done
 
-    def set_collection_visible(self, visible, recursive, scene, collection):
+    def set_collection_visible(
+        self,
+        visible,
+        recursive,
+        scene: KX_Scene,
+        collection:Collection
+    ):
         for o in collection.objects:
             gameObject = scene.getGameObjectFromObject(o)
-            if not is_invalid(gameObject):
+            if gameObject:
                 gameObject.setVisible(visible, True)
         if recursive:
             if len(collection.children) <= 0:
@@ -68,21 +63,11 @@ class ULSetCollectionVisibility(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition = self.get_input(self.condition)
-        collection = self.get_input(self.collection)
-        if not_met(condition):
-            self._set_ready()
+        if not self.get_input(self.condition):
             return
+        collection: Collection = self.get_input(self.collection)
         visible: bool = self.get_input(self.visible)
         recursive: bool = self.get_input(self.recursive)
-        if is_waiting(visible, collection):
-            return
-        self._set_ready()
-        if visible is None:
-            return
-        if recursive is None:
-            return
-        col = bpy.data.collections.get(collection)
         scene = logic.getCurrentScene()
-        self.set_collection_visible(visible, recursive, scene, col)
+        self.set_collection_visible(visible, recursive, scene, collection)
         self.done = True

@@ -1,5 +1,5 @@
-from uplogic.nodes import ULConditionNode
-from uplogic.utils import is_waiting
+from uplogic.nodes import ULConditionNode, ULOutSocket
+from bge.logic import keyboard
 
 
 class ULKeyReleased(ULConditionNode):
@@ -8,20 +8,14 @@ class ULKeyReleased(ULConditionNode):
         self.pulse = False
         self.key_code = None
         self.network = None
+        self.OUT = ULOutSocket(self, self.get_out)
 
-    def setup(self, network):
-        self.network = network
-
-    def evaluate(self):
+    def get_out(self):
         keycode = self.get_input(self.key_code)
-        if is_waiting(keycode):
-            return
-        self._set_ready()
-        keystat = self.network.keyboard_events[keycode]
+        keystat = keyboard.activeInputs[keycode]
         if self.pulse:
-            self._set_value(
+            return (
                 keystat.released or
                 keystat.inactive
             )
-        else:
-            self._set_value(keystat.released)
+        return keystat.released

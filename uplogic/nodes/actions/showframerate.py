@@ -1,8 +1,6 @@
 from bge import render
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_waiting
-from uplogic.utils import not_met
 
 
 class ULShowFramerate(ULActionNode):
@@ -18,12 +16,8 @@ class ULShowFramerate(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition = self.get_input(self.condition)
-        if not_met(condition):
+        if not self.get_input(self.condition):
             return
         use_framerate = self.get_input(self.use_framerate)
-        if is_waiting(use_framerate):
-            return
-        self._set_ready()
         render.showFramerate(use_framerate)
         self.done = True

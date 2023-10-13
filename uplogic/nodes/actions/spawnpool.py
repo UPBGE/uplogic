@@ -1,7 +1,9 @@
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils.pooling import SpawnPool, Spawn, SimpleBullet, PhysicsBullet
+from uplogic.utils.pooling import SpawnPool, Spawn, SimpleBullet, PhysicsBullet, SpawnedInstance
 from uplogic.events import send, receive
+from uplogic.utils import get_bitmask
+from bge.types import KX_GameObject
 
 
 class ULSpawnPool(ULActionNode):
@@ -14,6 +16,7 @@ class ULSpawnPool(ULActionNode):
         self.object_instance = None
         self.life = None
         self.speed = None
+        self.bitmask = get_bitmask(all=True)
         self.visualize = None
         self.create_on_init = True
         self.spawn_type = 'Simple'
@@ -46,6 +49,10 @@ class ULSpawnPool(ULActionNode):
             'Simple': NodeSimple,
             'SimpleBullet': NodeSimpleBullet,
             'PhysicsBullet': NodePhysicsBullet,
+            0: NodeSimple,
+            1: NodeSimpleBullet,
+            2: NodePhysicsBullet,
+            3: SpawnedInstance
         }
 
     def get_done(self):
@@ -77,12 +84,14 @@ class ULSpawnPool(ULActionNode):
 
     def setup(self, tree):
         if self.create_on_init:
+            inst = self.get_input(self.object_instance)
             self._pool = SpawnPool(
-                self.get_input(self.object_instance),
-                self.get_input(self.amount),
-                self.get_input(self.life),
-                self.get_input(self.spawner),
-                self.spawn_types[self.get_input(self.spawn_type)],
+                object_name=getattr(inst, 'name', inst),
+                amount=self.get_input(self.amount),
+                lifetime=self.get_input(self.life),
+                spawner=self.get_input(self.spawner),
+                spawn=self.spawn_types[self.get_input(self.spawn_type)],
+                raycast_mask=self.get_input(self.bitmask),
                 visualize=self.get_input(self.visualize)
             )
         self.done = True
@@ -90,7 +99,6 @@ class ULSpawnPool(ULActionNode):
     def evaluate(self):
         self.done = False
         spawn = self.get_input(self.spawn)
-        self._set_ready()
         if self._pool:
             self._hit_evt = receive(self._pool)
         if spawn and self._pool:
@@ -99,8 +107,9 @@ class ULSpawnPool(ULActionNode):
             self._spawned = True
 
         if self.get_input(self.condition):
+            inst: KX_GameObject = self.get_input(self.object_instance)
             self._pool = SpawnPool(
-                self.get_input(self.object_instance),
+                getattr(inst, 'name', inst),
                 self.get_input(self.amount),
                 self.get_input(self.life),
                 self.get_input(self.spawner),

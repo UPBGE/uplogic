@@ -1,7 +1,5 @@
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_waiting
-from uplogic.utils import not_met
 from uplogic.utils import debug
 
 
@@ -28,14 +26,10 @@ class ULPopDictKey(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition = self.get_input(self.condition)
-        if not_met(condition):
+        if not self.get_input(self.condition):
             return
         dictionary = self.get_input(self.dict)
         key = self.get_input(self.key)
-        if is_waiting(dictionary, key):
-            return
-        self._set_ready()
         if key in dictionary:
             self.value = dictionary.pop(key)
         else:

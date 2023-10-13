@@ -1,8 +1,6 @@
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import not_met
 import bpy
-
 
 attrs = {
     "show": 'bool_value',
@@ -64,15 +62,11 @@ class ULSetUIWidgetAttr(ULActionNode):
 
     def evaluate(self):
         self._done = False
-        condition = self.get_input(self.condition)
-        self._set_ready()
-        if not_met(condition):
+        if not self.get_input(self.condition):
             return
         widget = self.get_input(self.widget)
         value = self.get_input(getattr(self, attrs.get(self.widget_attr, 0)))
-        if self.widget_attr == 'font':
-            value = bpy.data.fonts[value].filepath.replace('\\', '/') if value else 0
-        if self.widget_attr == 'texture':
-            value = bpy.data.images[value].filepath.replace('\\', '/') if value else 0
+        if self.widget_attr in ['font', 'texture']:
+            value = value.filepath.replace('\\', '/') if value else 0
         setattr(widget, self.widget_attr, value)
         self._done = True

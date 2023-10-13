@@ -1,5 +1,4 @@
 from uplogic.nodes import ULConditionNode
-from uplogic.utils import is_waiting
 from uplogic.nodes import ULOutSocket
 
 
@@ -21,6 +20,3 @@ class ULMouseScrolled(ULConditionNode):
 
     def get_diff(self):
         return self.network.mouse.wheel
-
-    def evaluate(self):
-        self._set_ready()

@@ -1,20 +1,21 @@
-from uplogic.nodes import ULActionNode
+from uplogic.nodes import ULActionNode, ULOutSocket
 from uplogic.data import GlobalDB
-from uplogic.utils import not_met
 
 
 class ULStopAllSounds(ULActionNode):
     def __init__(self):
         ULActionNode.__init__(self)
         self.condition = None
+        self.done = False
+        self.OUT = ULOutSocket(self, self.get_done)
+
+    def get_done(self):
+        return self.done
 
     def evaluate(self):
-        condition = self.get_input(self.condition)
-        if not_met(condition):
+        self.done = False
+        if not self.get_input(self.condition):
             return
-        aud_sys = GlobalDB.retrieve('.uplogic_audio').get('nl_audio_system')
-        if not aud_sys:
-            return
-        self._set_ready()
+        aud_sys = GlobalDB.retrieve('uplogic.audio').get('default')
         aud_sys.device.stopAll()
-        self._set_value(True)
+        self.done = True

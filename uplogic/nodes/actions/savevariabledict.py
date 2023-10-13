@@ -1,8 +1,6 @@
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
 from uplogic.utils import debug
-from uplogic.utils import is_waiting
-from uplogic.utils import not_met
 import bpy
 import json
 import os
@@ -40,13 +38,9 @@ class ULSaveVariableDict(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition = self.get_input(self.condition)
-        if not_met(condition):
+        if not self.get_input(self.condition):
             return
         val = self.get_input(self.val)
-        if is_waiting(val):
-            return
-        self._set_ready()
 
         cust_path = self.get_custom_path(self.path)
         path = (

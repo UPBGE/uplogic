@@ -1,28 +1,20 @@
 from uplogic.nodes import ULConditionNode
-from uplogic.utils import is_waiting
+from uplogic.nodes import ULOutSocket
+from uplogic.input import key_tap
+from uplogic.input import key_down
+from uplogic.input import key_up
 
 
 class ULKeyPressed(ULConditionNode):
-    def __init__(self, pulse=False, key_code=None):
+    def __init__(self):
         ULConditionNode.__init__(self)
-        self.pulse = pulse
-        self.key_code = key_code
+        self.pulse = False
+        self.input_type = 1 if self.pulse else 0
+        self.key_code = 0
         self.network = None
+        self.OUT = ULOutSocket(self, self.get_pressed)
 
-    def setup(self, network):
-        self.network = network
-
-    def evaluate(self):
+    def get_pressed(self):
         keycode = self.get_input(self.key_code)
-        if is_waiting(keycode):
-            return
-        self._set_ready()
-        keystat = self.network.keyboard_events[keycode]
-        if self.pulse:
-            self._set_value(
-                (
-                    keystat.active or keystat.activated
-                )
-            )
-        else:
-            self._set_value(keystat.activated)
+        funcs = [key_tap, key_down, key_up]
+        return funcs[self.input_type](keycode)

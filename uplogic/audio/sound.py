@@ -531,6 +531,20 @@ class ULSound3D(ULSound):
         if self.reverb_samples:
             self.reverb_samples.update()
 
+    def pause(self):
+        '''TODO: Documentation
+        '''
+        self.on_finish = dummy
+        for sound in self.handles[1]:
+            sound.pause()
+
+    def resume(self):
+        '''TODO: Documentation
+        '''
+        self.on_finish = dummy
+        for sound in self.handles[1]:
+            sound.resume()
+
     def stop(self):
         '''TODO: Documentation
         '''

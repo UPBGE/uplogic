@@ -1,6 +1,5 @@
 from uplogic.nodes import ULParameterNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import not_met
 
 
 class ULStoreValue(ULParameterNode):
@@ -16,11 +15,10 @@ class ULStoreValue(ULParameterNode):
         return self._stored_value
 
     def evaluate(self):
-        self._set_ready()
         condition = self.get_input(self.condition)
         if self.initialize:
             self.initialize = False
             condition = True
-        if not_met(condition):
+        if not condition:
             return
         self._stored_value = self.get_input(self.value)

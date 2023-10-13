@@ -14,22 +14,16 @@ class ULLoadVariableDict(ULParameterNode):
         self.VAR = ULOutSocket(self, self.get_var)
 
     def get_var(self):
-        socket = self.get_output('variables')
-        if socket is None:
-            cust_path = self.get_custom_path(self.path)
+        cust_path = self.get_custom_path(self.path)
 
-            path = (
-                bpy.path.abspath('//Data/')
-                if self.path == ''
-                else bpy.path.abspath(cust_path)
-            )
-            os.makedirs(path, exist_ok=True)
+        path = (
+            bpy.path.abspath('//Data/')
+            if self.path == ''
+            else bpy.path.abspath(cust_path)
+        )
+        os.makedirs(path, exist_ok=True)
 
-            return self.set_output(
-                'variables',
-                self.read_from_json(path)
-            )
-        return socket
+        return self.read_from_json(path)
 
     def read_from_json(self, path):
         self.done = False
@@ -47,6 +41,3 @@ class ULLoadVariableDict(ULParameterNode):
         if not path.endswith('/') and not path.endswith('json'):
             path = path + '/'
         return path
-
-    def evaluate(self):
-        self._set_ready()

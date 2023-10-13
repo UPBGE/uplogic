@@ -1,8 +1,8 @@
 from uplogic.audio import Sound3D
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_invalid
-from uplogic.utils import not_met
+from mathutils import Vector
+from bpy.types import Sound
 
 
 class ULStartSound3D(ULActionNode):
@@ -10,20 +10,20 @@ class ULStartSound3D(ULActionNode):
         ULActionNode.__init__(self)
         self.condition = None
         self.sound = None
-        self.occlusion = None
-        self.reverb = None
-        self.transition = None
-        self.cutoff = None
+        self.occlusion = False
+        self.reverb = False
+        self.transition = .1
+        self.cutoff = .1
         self.speaker = None
         self.device = None
         self.loop_count = None
-        self.pitch = None
-        self.volume = None
-        self.attenuation = None
-        self.distance_ref = None
-        self.cone_angle = None
-        self.cone_outer_volume = None
-        self.ignore_timescale = None
+        self.pitch = 1.0
+        self.volume = 1.0
+        self.attenuation = 1.0
+        self.distance_ref = 1.0
+        self.cone_angle = Vector((360, 360))
+        self.cone_outer_volume = 1.0
+        self.ignore_timescale = True
         self.done = None
         self.on_finish = False
         self._clear_sound = 1
@@ -59,9 +59,7 @@ class ULStartSound3D(ULActionNode):
         if self._handle:
             self._handle.volume = volume
             self._handle.pitch = pitch
-        condition = self.get_input(self.condition)
-        if not_met(condition):
-            self._set_ready()
+        if not self.get_input(self.condition):
             return
         speaker = self.get_input(self.speaker)
         transition = self.get_input(self.transition)
@@ -70,18 +68,15 @@ class ULStartSound3D(ULActionNode):
         cone_outer_volume = self.get_input(self.cone_outer_volume)
         attenuation = self.get_input(self.attenuation)
         cutoff = self.get_input(self.cutoff)
-        file = self.get_input(self.sound)
+        file: Sound = self.get_input(self.sound)
         loop_count = self.get_input(self.loop_count)
         distance_ref = self.get_input(self.distance_ref)
         cone_angle = self.get_input(self.cone_angle)
         ignore_timescale = self.get_input(self.ignore_timescale)
-        self._set_ready()
 
-        if is_invalid(file):
-            return
         self._handle = Sound3D(
             speaker,
-            file,
+            file.filepath,
             occlusion,
             transition,
             cutoff,

@@ -15,6 +15,3 @@ class ULGetVRHeadsetValues(ULParameterNode):
     
     def get_ori(self):
         return self.controller.orientation.to_euler()
-
-    def evaluate(self):
-        self._set_ready()

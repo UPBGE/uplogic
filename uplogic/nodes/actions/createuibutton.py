@@ -1,9 +1,7 @@
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
 from uplogic.ui import LabelButton
-from uplogic.utils import not_met
 from math import degrees
-import bpy
 
 
 class ULCreateUIButton(ULActionNode):
@@ -68,8 +66,7 @@ class ULCreateUIButton(ULActionNode):
     def evaluate(self):
         self._done = False
         condition = self.get_input(self.condition)
-        self._set_ready()
-        if not_met(condition):
+        if not condition:
             return
         ipt = self.get_input
         parent = ipt(self.parent)
@@ -89,7 +86,7 @@ class ULCreateUIButton(ULActionNode):
         font_color = ipt(self.font_color)
         line_height = ipt(self.line_height)
 
-        font = bpy.data.fonts[font].filepath.replace('\\', '/') if font else 0
+        font = font.filepath.replace('\\', '/') if font else 0
 
         self._widget = LabelButton(
             pos=pos,

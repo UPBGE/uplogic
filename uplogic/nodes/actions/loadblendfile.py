@@ -16,9 +16,8 @@ class ULLoadBlendFile(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        self._set_ready()
-        condition = self.get_input(self.condition)
+        if not self.get_input(self.condition):
+            return
         file_name = self.get_input(self.file_name)
-        if condition:
-            logic.startGame(file_name)
+        logic.startGame(file_name)
         self.done = True

@@ -1,8 +1,6 @@
 from bge import render
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_waiting
-from uplogic.utils import not_met
 
 
 class ULSetResolution(ULActionNode):
@@ -19,13 +17,9 @@ class ULSetResolution(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition = self.get_input(self.condition)
-        if not_met(condition):
+        if not self.get_input(self.condition):
             return
         x_res = self.get_input(self.x_res)
         y_res = self.get_input(self.y_res)
-        if is_waiting(x_res, y_res):
-            return
-        self._set_ready()
         render.setWindowSize(x_res, y_res)
         self.done = True

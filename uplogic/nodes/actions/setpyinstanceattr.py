@@ -1,6 +1,4 @@
-from uplogic.nodes import ULActionNode
-from uplogic.utils import is_waiting
-from uplogic.utils import not_met
+from uplogic.nodes import ULActionNode, ULOutSocket
 
 
 class ULSetPyInstanceAttr(ULActionNode):
@@ -10,15 +8,18 @@ class ULSetPyInstanceAttr(ULActionNode):
         self.instance = None
         self.attr = None
         self.value = None
+        self.done = False
+        self.OUT = ULOutSocket(self, self.get_out)
+
+    def get_out(self):
+        return self.done
 
     def evaluate(self):
-        condition = self.get_input(self.condition)
-        if not_met(condition):
+        self.done = False
+        if not self.get_input(self.condition):
             return
         instance = self.get_input(self.instance)
         attr = self.get_input(self.attr)
         value = self.get_input(self.value)
-        if is_waiting(instance, attr, value):
-            return
-        self._set_ready()
         setattr(instance, attr, value)
+        self.done = True

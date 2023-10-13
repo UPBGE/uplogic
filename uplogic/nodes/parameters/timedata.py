@@ -1,6 +1,5 @@
 from uplogic.nodes import ULParameterNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils.constants import STATUS_READY
 from uplogic.nodes.logictree import ULLogicTree
 from bge import logic
 
@@ -29,9 +28,6 @@ class ULTimeData(ULParameterNode):
 
     def setup(self, network):
         self.network = network
-
-    def has_status(self, status):
-        return status is STATUS_READY
 
     def evaluate(self):
         pass

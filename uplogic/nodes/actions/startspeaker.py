@@ -2,9 +2,6 @@ from bge import logic
 from uplogic.audio import Sound3D
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_invalid
-from uplogic.utils import not_met
-import os
 
 
 class ULStartSpeaker(ULActionNode):
@@ -43,9 +40,7 @@ class ULStartSpeaker(ULActionNode):
     def evaluate(self):
         self.done = False
         self.on_finish = False
-        condition = self.get_input(self.condition)
-        if not_met(condition):
-            self._set_ready()
+        if not self.get_input(self.condition):
             return
         speaker = self.get_input(self.speaker)
         transition = self.get_input(self.transition)
@@ -64,11 +59,6 @@ class ULStartSpeaker(ULActionNode):
         cone_inner = bl_speaker.cone_angle_inner
         cone_outer = bl_speaker.cone_angle_outer
         cone_outer_volume = bl_speaker.cone_volume_outer
-        self._set_ready()
-        print(cone_inner, cone_outer)
-
-        if is_invalid(file):
-            return
         self._handle = Sound3D(
             speaker,
             file,

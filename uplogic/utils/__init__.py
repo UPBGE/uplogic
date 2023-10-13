@@ -13,6 +13,7 @@ from .nodetrees import set_geom_socket  # noqa
 from .nodetrees import set_group_socket  # noqa
 from .nodetrees import set_material_socket  # noqa
 from .nodetrees import set_world_socket  # noqa
+from .objects import get_curve_length
 from .objects import ULCurve, Curve  # noqa
 from .objects import controller_brick_status  # noqa
 from .objects import controller_brick  # noqa
@@ -41,6 +42,7 @@ from .math import vec_clamp
 from .math import interpolate
 from .math import lerp
 from .math import get_angle
+from .math import get_bitmask
 from .math import get_collision_bitmask
 from .math import get_direction
 from .math import get_local
@@ -49,17 +51,25 @@ from .math import map_range
 from .math import mouse_over
 from .math import screen_to_world
 from .math import world_to_screen
+from .math import rotate2d
+from .math import rotate3d
+from .math import rotate_by_axis
 from .objects import xrot_to
 from .objects import yrot_to
 from .objects import zrot_to
 from .objects import rotate_to
-from .constants import STATUS_INVALID
-from .constants import STATUS_WAITING
-from .constants import STATUS_READY
 from .constants import WATER
 from .constants import OPERATORS
 from .constants import LOGIC_OPERATORS
-from .constants import FRAMETIME_COMPARE
+from .constants import RED
+from .constants import GREEN
+from .constants import BLUE
+from .constants import YELLOW
+from .constants import PURPLE
+from .constants import TORQUISE
+from .constants import WHITE
+from .constants import BLACK
+from .constants import GREY
 from .constants import FPS_FACTOR
 from bge import logic
 from bge.types import KX_GameObject as GameObject
@@ -146,7 +156,7 @@ def debug(message: str):
 
 def is_invalid(*a) -> bool:
     for ref in a:
-        if ref is None or ref is STATUS_WAITING or ref == '':
+        if ref is None or ref == '':
             return True
         if not hasattr(ref, "invalid"):
             continue
@@ -155,15 +165,9 @@ def is_invalid(*a) -> bool:
     return False
 
 
-def is_waiting(*args) -> bool:
-    if STATUS_WAITING in args:
-        return True
-    return False
-
-
 def make_valid_name(name):
     valid_characters = (
-        "abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "_abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     )
     clsname = name.replace(' ', '_')
     stripped_name = "".join(
@@ -175,7 +179,6 @@ def make_valid_name(name):
 def not_met(*conditions) -> bool:
     for c in conditions:
         if (
-            c is STATUS_WAITING or
             c is None or
             c is False
         ):

@@ -1,8 +1,5 @@
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_invalid
-from uplogic.utils import is_waiting
-from uplogic.utils import not_met
 from uplogic.utils import clamp
 
 
@@ -13,7 +10,7 @@ class ULClampedModifyProperty(ULActionNode):
         self.game_object = None
         self.property_name = None
         self.property_value = None
-        self.mode = 'GAME'
+        self.mode = 0
         self.operator = None
         self.range = None
         self.done = False
@@ -24,19 +21,13 @@ class ULClampedModifyProperty(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition = self.get_input(self.condition)
+        if not self.get_input(self.condition):
+            return
         game_object = self.get_input(self.game_object)
-        if not_met(condition):
-            return
-        if is_invalid(game_object):
-            return
         property_name = self.get_input(self.property_name)
         property_value = self.get_input(self.property_value)
         val_range = self.get_input(self.range)
-        if is_waiting(property_name, property_value):
-            return
-        self._set_ready()
-        obj = game_object if self.mode == 'GAME' else game_object.blenderObject
+        obj = game_object.blenderObject if self.mode else game_object
         value = obj.get(property_name, 0)
         new_val = self.operator(value, property_value)
         obj[property_name] = (

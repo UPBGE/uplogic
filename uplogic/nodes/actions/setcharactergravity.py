@@ -1,9 +1,6 @@
 from bge import constraints
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_invalid
-from uplogic.utils import is_waiting
-from uplogic.utils import not_met
 
 
 class ULSetCharacterGravity(ULActionNode):
@@ -20,16 +17,10 @@ class ULSetCharacterGravity(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition = self.get_input(self.condition)
-        if not_met(condition):
+        if not self.get_input(self.condition):
             return
         game_object = self.get_input(self.game_object)
         gravity = self.get_input(self.gravity)
-        if is_waiting(gravity):
-            return
-        self._set_ready()
-        if is_invalid(game_object):
-            return
         physics = constraints.getCharacter(game_object)
         if physics:
             physics.gravity = gravity

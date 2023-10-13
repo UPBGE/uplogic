@@ -1,8 +1,7 @@
 from bge import logic
 from uplogic.nodes import ULConditionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_invalid
-from uplogic.utils import is_waiting
+from uplogic.utils.raycasting import raycast_mouse
 
 
 class ULMouseOver(ULConditionNode):
@@ -38,30 +37,11 @@ class ULMouseOver(ULConditionNode):
 
     def evaluate(self):
         game_object = self.get_input(self.game_object)
-        if is_waiting(game_object):
-            return
-        self._set_ready()
-        if is_invalid(game_object):
-            self._mouse_entered_status = False
-            self._mouse_exited_status = False
-            self._mouse_over_status = False
-            self._point = None
-            self._normal = None
-            return
         scene = game_object.scene
         camera = scene.active_camera
         distance = 2.0 * camera.getDistanceTo(game_object)
-        mouse = logic.mouse
-        mouse_position = mouse.position
-        vec = 10.0 * camera.getScreenVect(*mouse_position)
-        ray_target = camera.worldPosition - vec
-        target, point, normal = self.network.ray_cast(
-            camera,
-            None,
-            ray_target,
-            None,
-            False,
-            distance
+        target, point, normal, dir, face, uv = raycast_mouse(
+            distance=distance
         )
         if not (target is self._last_target):  # mouse over a new object
             # was target, now it isn't -> exited

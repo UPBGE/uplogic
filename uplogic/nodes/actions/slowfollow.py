@@ -1,9 +1,5 @@
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_waiting
-from uplogic.utils import not_met
-from uplogic.utils import debug
-from uplogic.utils.math import interpolate
 
 
 class ULSlowFollow(ULActionNode):
@@ -22,15 +18,12 @@ class ULSlowFollow(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition = self.get_input(self.condition)
-        if not_met(condition):
+        if not self.get_input(self.condition):
             return
         game_object = self.get_input(self.game_object)
         target = self.get_input(self.target)
         attribute = self.get_input(self.value_type)
         factor = self.get_input(self.factor)
-        if is_waiting(game_object, target, attribute, factor):
-            return
         data = getattr(game_object, attribute)
         t_data = getattr(target, attribute)
         setattr(

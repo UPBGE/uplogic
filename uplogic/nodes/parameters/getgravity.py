@@ -11,6 +11,3 @@ class ULGetGravity(ULParameterNode):
 
     def get_gravity(self):
         return logic.getCurrentScene().gravity
-
-    def evaluate(self):
-        self._set_ready()

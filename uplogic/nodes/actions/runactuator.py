@@ -1,7 +1,5 @@
 from uplogic.nodes import ULOutSocket
 from uplogic.nodes import ULActionNode
-from uplogic.utils import is_waiting
-from uplogic.utils import not_met
 
 
 class ULRunActuator(ULActionNode):
@@ -23,16 +21,11 @@ class ULRunActuator(ULActionNode):
         game_obj = self.get_input(self.game_obj)
         cont_name = self.get_input(self.cont_name)
         act_name = self.get_input(self.act_name)
-        if is_waiting(act_name, cont_name):
-            return
         controller = game_obj.controllers[cont_name]
         if act_name not in controller.actuators:
             return
         actuator = controller.actuators[act_name]
-        condition = self.get_input(self.condition)
-        self._set_ready()
-        if not_met(condition):
-            # controller.deactivate(actuator)
+        if not self.get_input(self.condition):
             return
         controller.activate(actuator)
         self.done = True

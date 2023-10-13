@@ -2,6 +2,9 @@ from bge import logic
 from uplogic.animation.action import PLAY_MODES
 import bpy
 import time
+from bpy.types import ShaderNodeSpritesAnimation
+from bpy.types import ShaderNodeTexImage
+from bpy.types import Material
 
 
 class ULSequence():
@@ -20,6 +23,20 @@ class ULSequence():
 
     _deprecated = True
 
+    @property
+    def frame(self):
+        if self._node_type:
+            return self._player.frame_offset
+        return round(self._player.inputs[0].default_value)
+
+    @frame.setter
+    def frame(self, frame):
+        if self._node_type:
+            self._player.frame_offset = round(frame)
+        else:
+            self._player.inputs[0].default_value = frame
+        self.material.update_tag()
+
     def __init__(
         self,
         material: str,
@@ -32,21 +49,21 @@ class ULSequence():
         if self._deprecated:
             print('Warning: ULSequence class will be renamed to "ULSequence" in future releases!')
 
-        self.material = material
+        self.material = bpy.data.materials[material]
         """The material this sequence is played on."""
         self.node = node
         """Name of the node the image animation is loaded on."""
         self.start_frame = start_frame
         """Starting frame of the animation."""
-        self.end_frame = end_frame
+        self.end_frame = end_frame - .01  # .01 because the sprite node shows the next frame when numer is round
         """End frame of the animation."""
         self.fps = fps
         """Frames per second."""
-        self.mode = PLAY_MODES.get(mode, 0)
+        self.mode = mode
         """Animation mode, `str` of [`play`, `loop`, `pingpong`]"""
         self.time = 0.0
         """Animation progress."""
-        self.frame = 0
+        # self.frame = 0
         """Current frame of the animation."""
         self.on_start = False
         """`True` when animation started."""
@@ -56,14 +73,24 @@ class ULSequence():
         self._reverse = False
         self._running = True
         self._consumed = False
+        self._node_type = 0
         self._pause = False
         self._time_then = time.time()
-        self._player = (
-            bpy.data.materials[material]
+        node = (
+            self.material
             .node_tree
             .nodes[node]
-        ).image_user
+        )
+        self._player = node
 
+
+        if isinstance(node, ShaderNodeSpritesAnimation):
+            self._node_type = 0
+        elif isinstance(node, ShaderNodeTexImage):
+            self._node_type = 1
+        else:
+            return
+        self.frame = start_frame
         logic.getCurrentScene().pre_draw.append(self.update)
 
     def stop(self):
@@ -88,7 +115,6 @@ class ULSequence():
     def update(self):
         '''This is called each frame.'''
         now = time.time()
-        player = self._player
         self.time += now - self._time_then
         self._time_then = now
         fps = self.fps
@@ -104,14 +130,14 @@ class ULSequence():
         start_frame = self.end_frame if self._reverse else self.start_frame
         end_frame = self.start_frame if self._reverse else self.end_frame
         if not self._initialized:
-            player.frame_offset = round(start_frame)
+            self.frame = start_frame
             self._initialized = True
         inverted = (start_frame > end_frame)
-        frame = self.frame = player.frame_offset
+        frame = self.frame = self.frame
         reset_cond = (frame <= end_frame) if inverted else (frame >= end_frame)
         if not running:
             if reset_cond:
-                player.frame_offset = round(start_frame) if inverted else round(end_frame)
+                self.frame = start_frame if inverted else end_frame
             self.on_start = True
             self._consumed = False
 
@@ -119,8 +145,8 @@ class ULSequence():
 
         if start_cond:
             self._running = True
-            player.frame_offset = round(start_frame)
-        frame = player.frame_offset
+            self.frame = start_frame
+        frame = self.frame
         run_cond = (frame > end_frame) if inverted else (frame < end_frame)
         if run_cond:
             self._running = True
@@ -132,11 +158,11 @@ class ULSequence():
                         span = start_frame - end_frame
                         while leftover > span:
                             leftover -= span
-                        player.frame_offset = round(start_frame - leftover)
+                        self.frame = start_frame - leftover
                     else:
-                        player.frame_offset = round(end_frame)
+                        self.frame = end_frame
                 else:
-                    player.frame_offset -= round(s)
+                    self.frame -= s
             else:
                 if frame + s > end_frame:
                     if play_mode == 1:
@@ -144,13 +170,14 @@ class ULSequence():
                         span = end_frame - start_frame
                         while leftover > span:
                             leftover -= span
-                        player.frame_offset = round(start_frame + leftover)
+                        self.frame = start_frame + leftover
+                        print('Restart')
                     else:
-                        player.frame_offset = round(end_frame)
+                        self.frame = end_frame
                 else:
-                    player.frame_offset += round(s)
+                    self.frame += s
         elif play_mode == 1:
-            player.frame_offset = round(end_frame) if inverted else round(start_frame)
+            self.frame = end_frame if inverted else start_frame
         elif play_mode == 2:
             self._reverse = not self._reverse
         else:

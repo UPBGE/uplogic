@@ -1,7 +1,6 @@
 from uplogic.nodes import ULOutSocket
 from uplogic.nodes import ULParameterNode
-from uplogic.utils.constants import STATUS_WAITING
-from uplogic.utils import is_invalid
+from bge.types import KX_GameObject
 
 
 class ULChildByName(ULParameterNode):
@@ -12,17 +11,9 @@ class ULChildByName(ULParameterNode):
         self.CHILD = ULOutSocket(self, self.get_child)
 
     def get_child(self):
-        socket = self.get_output('child')
-        if socket is None:
-            parent = self.get_input(self.from_parent)
-            child_name = self.get_input(self.child)
-            if is_invalid(parent, child_name):
-                return STATUS_WAITING
-            return self.set_output(
-                'child',
-                parent.childrenRecursive.get(child_name)
-            )
-        return socket
+        parent: KX_GameObject = self.get_input(self.from_parent)
+        child: KX_GameObject = self.get_input(self.child)
+        return parent.childrenRecursive.get(child.name)
 
     def evaluate(self):
-        self._set_ready()
+        pass

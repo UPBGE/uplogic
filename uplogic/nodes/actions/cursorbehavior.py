@@ -1,8 +1,6 @@
 from bge import logic
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_invalid
-from uplogic.utils import not_met
 
 
 class ULCursorBehavior(ULActionNode):
@@ -19,12 +17,8 @@ class ULCursorBehavior(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        self._set_ready()
         cursor_object = self.get_input(self.cursor_object)
-        if is_invalid(cursor_object):
-            return
-        condition = self.get_input(self.condition)
-        if not_met(condition):
+        if not self.get_input(self.condition):
             if cursor_object.visible:
                 cursor_object.setVisible(False, True)
             return

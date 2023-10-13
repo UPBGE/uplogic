@@ -1,12 +1,13 @@
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_invalid, make_valid_name
+from uplogic.utils import make_valid_name
 
 
 class ULExecuteSubNetwork(ULActionNode):
     def __init__(self):
         ULActionNode.__init__(self)
         self.condition = None
+        self._condition = None
         self.target_object = None
         self.tree_name = None
         self._network = None
@@ -22,18 +23,17 @@ class ULExecuteSubNetwork(ULActionNode):
     def evaluate(self):
         self.done = False
         condition = self.get_input(self.condition)
-        target_object = self.get_input(self.target_object)
-        tree_name = self.get_input(self.tree_name)
-        self._set_ready()
-        if is_invalid(target_object):
-            return
-        tree_name = make_valid_name(tree_name)
-        network = target_object.get(f'IGNLTree_{tree_name}', None)
-        if network is None:
-            network = self._network.install_subnetwork(
-                target_object,
-                tree_name,
-                True
-            )
-        network.stopped = not condition
-        self.done = True
+        if condition != self._condition:
+            target_object = self.get_input(self.target_object)
+            tree_name = self.get_input(self.tree_name)
+            tree_name = make_valid_name(tree_name)
+            network = target_object.get(f'IGNLTree_{tree_name}', None)
+            if network is None:
+                network = self._network.install_subnetwork(
+                    target_object,
+                    tree_name,
+                    True
+                )
+            network.stopped = not condition
+            self._condition = condition
+            self.done = True

@@ -43,7 +43,7 @@ class Cursor(Widget):
             self._texture = gpu.texture.from_image(texture)
 
     def build_shader(self):
-        self._shader = gpu.shader.from_builtin('2D_IMAGE')
+        self._shader = gpu.shader.from_builtin('IMAGE_COLOR')
         screen_res = [bge.render.getWindowWidth(), bge.render.getWindowHeight()]
         mpos = [MOUSE.position.x * screen_res[0] + self.offset[0], (1 - MOUSE.position.y) * screen_res[1] + self.offset[1]]
         self._batch = batch_for_shader(

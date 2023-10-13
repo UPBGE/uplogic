@@ -1,8 +1,6 @@
 from mathutils import Vector
 from uplogic.nodes import ULOutSocket
 from uplogic.nodes import ULParameterNode
-from uplogic.utils.constants import STATUS_WAITING
-from uplogic.utils import is_invalid
 
 
 class ULVectorAbsolute(ULParameterNode):
@@ -14,13 +12,8 @@ class ULVectorAbsolute(ULParameterNode):
 
     def get_out_v(self):
         vec = self.get_input(self.input_v)
-        if is_invalid(vec):
-            return STATUS_WAITING
         vec = vec.copy()
         vec.x = abs(vec.x)
         vec.y = abs(vec.y)
         vec.z = abs(vec.z)
         return vec
-
-    def evaluate(self):
-        self._set_ready()

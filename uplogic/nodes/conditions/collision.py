@@ -2,8 +2,8 @@ from bge.types import KX_GameObject
 from uplogic.nodes import ULConditionNode
 from uplogic.nodes import ULLogicContainer
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_invalid
-from uplogic.utils import is_waiting
+from bpy.types import Material
+from mathutils import Vector
 
 
 class ULCollision(ULConditionNode):
@@ -13,19 +13,23 @@ class ULCollision(ULConditionNode):
         self.use_mat = None
         self.prop = None
         self.material = None
-        self._set_value("False")
+        self._collision = False
         self.pulse = False
         self._target = None
         self._point = None
         self._normal = None
         self._collision_triggered = False
         self._consumed = False
-        self._last_monitored_object = None
+        self._game_object = None
         self._objects = []
+        self.COLLISION = ULOutSocket(self, self.get_collision)
         self.TARGET = ULOutSocket(self, self.get_target)
         self.POINT = ULOutSocket(self, self.get_point)
         self.NORMAL = ULOutSocket(self, self.get_normal)
         self.OBJECTS = ULOutSocket(self, self.get_objects)
+        
+    def get_collision(self):
+        return self._collision
 
     def get_point(self):
         return self._point
@@ -39,15 +43,15 @@ class ULCollision(ULConditionNode):
     def get_objects(self):
         return self._objects
 
-    def _collision_callback(self, obj, point, normal):
+    def _collision_callback(self, obj: KX_GameObject, point: Vector, normal: Vector):
         self._objects.append(obj)
         use_mat = self.get_input(self.use_mat)
         if use_mat:
-            material = self.get_input(self.material)
+            material: Material = self.get_input(self.material)
             if material:
                 for obj in self._objects:
                     bo = obj.blenderObject
-                    if material not in [
+                    if material.name not in [
                         slot.material.name for
                         slot in
                         bo.material_slots
@@ -85,31 +89,16 @@ class ULCollision(ULConditionNode):
         self._collision_triggered = False
         self._objects = []
 
-    def _reset_last_monitored_object(self, new_monitored_object):
-        if is_invalid(new_monitored_object):
-            new_monitored_object = None
-        if self._last_monitored_object == new_monitored_object:
-            return
-        lmo = self._last_monitored_object
-        valid = False if lmo is None else not lmo.invalid
-        if not isinstance(new_monitored_object, KX_GameObject):
-            if lmo is not None and valid:
-                lmo.collisionCallbacks.remove(
-                    self._collision_callback
-                )
-                self._last_monitored_object = None
-        else:
-            lmo = self._last_monitored_object
-            if lmo is not None and valid:
-                lmo.collisionCallbacks.remove(
-                    self._collision_callback
-                )
-            if new_monitored_object is not None:
-                new_monitored_object.collisionCallbacks.append(
-                    self._collision_callback
-                )
-                self._last_monitored_object = new_monitored_object
-        self._set_value(False)
+    def _reset_game_object(self, game_object: KX_GameObject):
+        if self._game_object:
+            self._game_object.collisionCallbacks.remove(
+                self._collision_callback
+            )
+        game_object.collisionCallbacks.append(
+            self._collision_callback
+        )
+        self._game_object = game_object
+        self._collision = False
         self._target = None
         self._point = None
         self._normal = None
@@ -118,18 +107,16 @@ class ULCollision(ULConditionNode):
     def evaluate(self):
         last_target = self._target
         game_object = self.get_input(self.game_object)
-        self._reset_last_monitored_object(game_object)
-        if is_waiting(game_object):
-            return
-        self._set_ready()
+        if game_object is not self._game_object:
+            self._reset_game_object(game_object)
         collision = self._collision_triggered
         if last_target is not self._target:
             self._consumed = False
         if collision and not self.pulse:
-            self._set_value(collision and not self._consumed)
+            self._collision = collision and not self._consumed
             self._consumed = True
         elif self.pulse:
-            self._set_value(collision)
+            self._collision = collision
         else:
             self._consumed = False
-            self._set_value(False)
+            self._collision = False

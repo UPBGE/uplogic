@@ -43,6 +43,17 @@ class RayCastData(tuple):
         return self[3]
 
 
+class RayCastDataPoly(RayCastData):
+
+    @property
+    def face(self) -> KX_PolyProxy:
+        return self[4]
+
+    @property
+    def uv(self) -> Vector:
+        return self[5]
+
+
 def raycast(
     caster: GameObject,
     origin: Vector,
@@ -54,8 +65,9 @@ def raycast(
     xray: bool = False,
     local: bool = False,
     mask: int = 65535,
-    visualize: bool = False
-) -> RayCastData[GameObject, Vector, Vector, Vector]:
+    visualize: bool = False,
+    face_data: bool = False
+) -> RayCastData[GameObject, Vector, Vector, Vector, KX_PolyProxy, Vector]:
     """Raycast from any point to any target
 
     :param `caster`: casting object, this object will be ignored by the ray.
@@ -71,21 +83,24 @@ def raycast(
     :param `mask`: Collision Mask for this ray.
     :param `visualize`: show the raycast.
 
-    :returns: (`obj`, `point`, `normal`, `direction`)
+    :returns: (`obj`, `point`, `normal`, `direction`, `face`, `uv`)
     """
     if exclude:
         exclude_prop, prop = prop, ''
     origin = getattr(origin, 'worldPosition', Vector(origin)).copy()
     dest = getattr(dest, 'worldPosition', Vector(dest)).copy()
     direction, distance, dest = ray_data(origin, dest, local, distance)
-    obj, point, normal = caster.rayCast(
+    ret_dat = [None, None, None, direction, None, None]
+    data = caster.rayCast(
         dest,
         origin,
         distance,
         prop,
         xray=xray,
-        mask=mask
+        mask=mask,
+        poly=2 if face_data else 0
     )
+    obj, point = data[0], data[1]
     if (material and point) or (obj and exclude and exclude_prop in obj):
         bo = obj.blenderObject
         leftover_dist = distance - (origin - point).length
@@ -102,25 +117,29 @@ def raycast(
             ]
         ) and leftover_dist > 0:
             if not xray:
-                obj, point, normal = None, None, None
+                data = [None, None, None, direction, None, None]
                 break
             elif point:
                 old_point = point
-                obj, point, normal = obj.rayCast(
+                data = obj.rayCast(
                     dest,
                     point,
                     leftover_dist,
                     prop,
-                    xray=xray
+                    xray=xray,
+                    mask=mask,
+                    poly=2 if face_data else 0
                 )
+                obj, point = data[0], data[1]
                 if not obj:
                     break
                 bo = obj.blenderObject
                 leftover_dist -= (origin - old_point).length
             else:
-                obj, point, normal = None, None, None
+                data = [None, None, None, direction, None, None]
                 break
-
+    for i, e in enumerate(data):
+        ret_dat[i] = e
     if visualize:
         line_dest: Vector = direction.copy()
         line_dest.x *= distance
@@ -139,17 +158,11 @@ def raycast(
                 point,
                 [0, 1, 0, 1]
             )
-    return RayCastData((obj, point, normal, direction))
+    return RayCastDataPoly(ret_dat)
 
 
 class RayCastFaceData(RayCastData):
-    @property
-    def poly(self) -> KX_PolyProxy:
-        return self[4]
-
-    @property
-    def uv(self) -> Vector:
-        return self[5]
+    pass
 
 
 def raycast_face(
@@ -165,7 +178,8 @@ def raycast_face(
     mask: int = 65535,
     visualize: bool = False
 ) -> RayCastFaceData[GameObject, Vector, Vector, Vector, KX_PolyProxy, Vector]:
-    """Raycast from any point to any target. Returns additional face data.
+    """[DEPRECATED]\n
+    Raycast from any point to any target. Returns additional face data.
 
     :param `caster`: casting object, this object will be ignored by the ray.
     :param `origin`: origin point; any vector or list.
@@ -182,6 +196,7 @@ def raycast_face(
 
     :returns: (`obj`, `point`, `normal`, `direction`, `face`, `uv`)
     """
+    print("'uplogic.utils.raycasting.raycast_face()' is deprecated, use '...raycasting.raycast()' instead")
     if exclude:
         exclude_prop, prop = prop, ''
     direction, distance, dest = ray_data(origin, dest, local, distance)
@@ -387,17 +402,14 @@ def raycast_camera(
         vec = 10 * camera.getScreenVect(aim[0], aim[1])
         ray_target = camera.worldPosition - vec
         aim = ray_target
-    if prop:
-        obj, point, normal = camera.rayCast(
-            aim,
-            None,
-            distance,
-            prop,
-            xray=xray,
-            mask=mask
-        )
-    else:
-        obj, point, normal = camera.rayCast(aim, None, distance)
+    obj, point, normal = camera.rayCast(
+        aim,
+        None,
+        distance,
+        prop,
+        xray=xray,
+        mask=mask
+    )
     return RayCastCameraData((obj, point, normal))
 
 
@@ -408,7 +420,7 @@ def raycast_mouse(
     exclude: bool = False,
     xray: bool = False,
     mask: int = 65535
-) -> RayCastData:
+) -> RayCastDataPoly:
     """Raycast from the active camera to world cursor coordinates.
 
     :param `distance`: distance the ray will be cast
@@ -418,7 +430,7 @@ def raycast_mouse(
     :param `xray`: look for objects behind others.
     :param `mask`: Collision Mask for this ray.
 
-    :returns: (`obj`, `point`, `normal`, `direction`)
+    :returns: (`obj`, `point`, `normal`, `direction`, `None`, `None`)
     """
     camera = logic.getCurrentScene().active_camera
     mpos = logic.mouse.position

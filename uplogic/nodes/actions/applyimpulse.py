@@ -1,8 +1,5 @@
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_waiting
-from uplogic.utils import is_invalid
-from uplogic.utils import not_met
 
 
 class ULApplyImpulse(ULActionNode):
@@ -20,18 +17,12 @@ class ULApplyImpulse(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition = self.get_input(self.condition)
-        if not_met(condition):
+        if not self.get_input(self.condition):
             return
         game_object = self.get_input(self.game_object)
         point = self.get_input(self.point)
         impulse = self.get_input(self.impulse)
         local = self.local
-        if hasattr(point, 'worldPosition'):
-            point = point.worldPosition
-        if is_waiting(point, impulse) or is_invalid(game_object):
-            return
-        self._set_ready()
         if impulse:
             game_object.applyImpulse(point, impulse, local)
         self.done = True

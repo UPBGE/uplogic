@@ -1,8 +1,5 @@
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_waiting
-from uplogic.utils import is_invalid
-from uplogic.utils import not_met
 
 
 class ULApplyRotation(ULActionNode):
@@ -20,17 +17,11 @@ class ULApplyRotation(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition = self.get_input(self.condition)
-        if not_met(condition):
+        if not self.get_input(self.condition):
             return
         game_object = self.get_input(self.game_object)
         rotation = self.get_input(self.rotation)
         local = self.local
-        if is_waiting(game_object, rotation, local):
-            return
-        self._set_ready()
-        if is_invalid(game_object):
-            return
         if rotation:
             if len(rotation) == 3:
                 game_object.applyRotation(rotation, local)

@@ -1,6 +1,4 @@
-from uplogic.nodes import ULActionNode
-from uplogic.utils import is_waiting
-from uplogic.utils import not_met
+from uplogic.nodes import ULActionNode, ULOutSocket
 
 
 class ULResumeSound(ULActionNode):
@@ -8,16 +6,16 @@ class ULResumeSound(ULActionNode):
         ULActionNode.__init__(self)
         self.condition = None
         self.sound = None
+        self.done = False
+        self.OUT = ULOutSocket(self, self.get_done)
+
+    def get_done(self):
+        return self.done
 
     def evaluate(self):
-        condition = self.get_input(self.condition)
-        if not_met(condition):
+        self.done = False
+        if not self.get_input(self.condition):
             return
         sound = self.get_input(self.sound)
-        if is_waiting(sound):
-            return
-        self._set_ready()
-        if sound is None:
-            return
         sound.resume()
-        self._set_value(True)
+        self.done = True

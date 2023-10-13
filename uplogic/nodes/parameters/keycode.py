@@ -1,12 +1,11 @@
-from uplogic.nodes import ULParameterNode
+from uplogic.nodes import ULOutSocket, ULParameterNode
 
 
 class ULKeyCode(ULParameterNode):
     def __init__(self):
         ULParameterNode.__init__(self)
         self.key_code = None
+        self.OUT = ULOutSocket(self, self.get_out)
 
-    def evaluate(self):
-        self._set_ready()
-        key_code = self.get_input(self.key_code)
-        self._set_value(key_code)
+    def get_out(self):
+        return self.get_input(self.key_code)

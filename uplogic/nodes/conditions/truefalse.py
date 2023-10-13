@@ -14,6 +14,3 @@ class ULTrueFalse(ULConditionNode):
 
     def get_false_value(self):
         return not self.get_input(self.state)
-
-    def evaluate(self):
-        self._set_ready()

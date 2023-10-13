@@ -1,8 +1,6 @@
 from bge import render
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_waiting
-from uplogic.utils import not_met
 
 
 class ULSetFullscreen(ULActionNode):
@@ -18,12 +16,8 @@ class ULSetFullscreen(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition = self.get_input(self.condition)
-        if not_met(condition):
+        if not self.get_input(self.condition):
             return
         use_fullscreen = self.get_input(self.use_fullscreen)
-        if is_waiting(use_fullscreen):
-            return
-        self._set_ready()
         render.setFullScreen(use_fullscreen)
         self.done = True

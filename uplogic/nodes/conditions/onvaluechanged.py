@@ -17,17 +17,14 @@ class ULOnValueChanged(ULConditionNode):
         self.NEW = ULOutSocket(self, self.get_current_value)
 
     def get_changed(self):
-        socket = self.get_output('changed')
-        if socket is None:
-            curr = self.get_input(self.current_value)
-            if not self.initialize:
-                self.initialize = True
-                self.old = self.new = curr
-                return self.set_output('changed', False)
-            elif self.old != curr:
-                self.new = curr
-                return self.set_output('changed', True)
-        return socket
+        curr = self.get_input(self.current_value)
+        if not self.initialize:
+            self.initialize = True
+            self.old = self.new = curr
+            return False
+        elif self.old != curr:
+            self.new = curr
+            return True
 
     def get_previous_value(self):
         return self.old
@@ -38,6 +35,3 @@ class ULOnValueChanged(ULConditionNode):
     def reset(self):
         super().reset()
         self.old = self.new
-
-    def evaluate(self):
-        self._set_ready()

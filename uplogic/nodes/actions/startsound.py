@@ -1,8 +1,7 @@
 from uplogic.audio import Sound2D
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_invalid
-from uplogic.utils import not_met
+from bpy.types import Sound
 
 
 class ULStartSound(ULActionNode):
@@ -43,25 +42,18 @@ class ULStartSound(ULActionNode):
     def evaluate(self):
         self.done = False
         self.on_finish = False
-        self._set_ready()
         pitch = self.get_input(self.pitch)
         volume = self.get_input(self.volume)
         if self._handle:
             self._handle.pitch = pitch
             self._handle.volume = volume
-        condition = self.get_input(self.condition)
-        if not_met(condition):
-            self._set_ready()
+        if not self.get_input(self.condition):
             return
-        file = self.get_input(self.sound)
+        file: Sound = self.get_input(self.sound)
         loop_count = self.get_input(self.loop_count)
         ignore_timescale = self.get_input(self.ignore_timescale)
-
-        if is_invalid(file):
-            return
-
         self._handle = Sound2D(
-            file,
+            file.filepath,
             volume,
             pitch,
             loop_count,

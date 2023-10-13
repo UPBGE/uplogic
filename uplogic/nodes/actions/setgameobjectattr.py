@@ -1,7 +1,5 @@
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_waiting
-from uplogic.utils import not_met
 from uplogic.utils import debug
 
 
@@ -21,19 +19,15 @@ class ULSetGameObjectAttribue(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition = self.get_input(self.condition)
-        if not_met(condition):
+        if not self.get_input(self.condition):
             return
         xyz = self.get_input(self.xyz)
         game_object = self.get_input(self.game_object)
         attribute = self.get_input(self.value_type)
         value = self.get_input(self.attribute_value)
-        if is_waiting(xyz, game_object, attribute, value):
-            return
 
         if hasattr(value, attribute):
             value = getattr(value, attribute).copy()
-        self._set_ready()
         if not hasattr(game_object, attribute):
             debug(
                 'Set Object Data Node: {} has no attribute {}!'

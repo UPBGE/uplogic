@@ -23,6 +23,3 @@ class ULSerializeData(ULParameterNode):
         if self.serialize_as == 'builtin':
             return dat
         return self.dattypes[self.serialize_as](dat)
-
-    def evaluate(self):
-        self._set_ready()

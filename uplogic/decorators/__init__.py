@@ -117,8 +117,8 @@ def game_props(*prop_names) -> KX_PythonComponent:
 def instance_props(*prop_names) -> KX_PythonComponent:
     """Decorator for `KX_PythonComponent` or `KX_GameObject` classes and subclasses.
 
-    Automatically adds property handlers for this class to use the `game_object[prop]`
-    syntax instead of saving values on the instance itself.
+    Automatically adds property handlers for this class to use the `game_object.GroupObject[prop]`
+    syntax instead of saving values on the instance itself. 
 
     :param `prop_names`: Names of game properties as a list.
     """

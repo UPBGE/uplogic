@@ -1,8 +1,5 @@
 from uplogic.nodes import ULConditionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils.constants import STATUS_WAITING
-from uplogic.utils import is_invalid
-from uplogic.utils import is_waiting
 
 
 class ULLogicTreeStatus(ULConditionNode):
@@ -17,37 +14,20 @@ class ULLogicTreeStatus(ULConditionNode):
         self.IFSTOPPED = ULOutSocket(self, self.get_stopped)
 
     def get_running(self):
-        socket = self.get_output('running')
-        if socket is None:
-            tree = self.tree
-            if not tree:
-                return STATUS_WAITING
-            return self.set_output(
-                'running',
-                tree.is_running()
-            )
-        return socket
+        tree = self.tree
+        if not tree:
+            return False
+        return tree.is_running()
 
     def get_stopped(self):
-        socket = self.get_output('stopped')
-        if socket is None:
-            tree = self.tree
-            if not tree:
-                return STATUS_WAITING
-            return self.set_output(
-                'stopped',
-                tree.is_stopped()
-            )
-        return socket
+        tree = self.tree
+        if not tree:
+            return False
+        return tree.is_stopped()
 
     def evaluate(self):
         game_object = self.get_input(self.game_object)
         tree_name = self.get_input(self.tree_name)
-        if is_waiting(game_object, tree_name):
-            return
-        self._set_ready()
         self._running = False
         self._stopped = False
-        if is_invalid(game_object):
-            return
         self.tree = game_object.get(f'IGNLTree_{tree_name}')

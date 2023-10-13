@@ -1,9 +1,13 @@
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
 from bge import events
+from bge.logic import keyboard
 
 
 class ULKeyLogger(ULActionNode):
+    '''DEPRECATED
+    This node has been moved to `parameters`, this is for legacy support.
+    '''
     def __init__(self, pulse=False):
         ULActionNode.__init__(self)
         self.condition = None
@@ -31,12 +35,10 @@ class ULKeyLogger(ULActionNode):
         self._character = None
 
     def evaluate(self):
-        self._set_ready()
-        condition = self.get_input(self.condition)
-        if not condition:
+        if not self.get_input(self.condition):
             return
         network = self.network
-        keyboard_status = network.keyboard_events
+        keyboard_status = keyboard.inputs.copy()
         left_shift_status = keyboard_status[events.LEFTSHIFTKEY].active
         right_shift_status = keyboard_status[events.RIGHTSHIFTKEY].active
         shift_down = (
@@ -44,7 +46,7 @@ class ULKeyLogger(ULActionNode):
             right_shift_status or
             network.capslock_pressed
         )
-        active_events = network.active_keyboard_events
+        active_events = keyboard.activeInputs.copy()
         active = (
             'active' if self.pulse
             else 'activated'

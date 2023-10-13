@@ -1,7 +1,6 @@
 import gpu
 from gpu_extras.batch import batch_for_shader
-from bge import render
-from uplogic.utils.math import rotate2d, lerp
+from uplogic.utils.math import rotate2d
 from mathutils import Vector
 
 
@@ -318,7 +317,6 @@ class Widget():
             return y1
         return x0
 
-
     def build_shader(self):
         if self.parent is None:
             return
@@ -357,7 +355,7 @@ class Widget():
         indices = (
             (0, 1, 2), (2, 3, 0)
         )
-        self._shader = gpu.shader.from_builtin('2D_UNIFORM_COLOR')
+        self._shader = gpu.shader.from_builtin('UNIFORM_COLOR')
         self._batch = batch_for_shader(self._shader, 'TRIS', {"pos": vertices}, indices=indices)
         self._batch_line = batch_for_shader(self._shader, 'LINE_LOOP', {"pos": vertices})
         self._batch_points = batch_for_shader(self._shader, 'POINTS', {"pos": vertices})

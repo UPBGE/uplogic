@@ -1,7 +1,5 @@
 from uplogic.nodes import ULOutSocket
 from uplogic.nodes import ULParameterNode
-from uplogic.utils.constants import STATUS_WAITING
-from uplogic.utils import is_waiting
 
 
 class ULInitNewDict(ULParameterNode):
@@ -14,9 +12,4 @@ class ULInitNewDict(ULParameterNode):
     def get_dict(self):
         key = self.get_input(self.key)
         value = self.get_input(self.val)
-        if is_waiting(key, value):
-            return STATUS_WAITING
         return {str(key): value}
-
-    def evaluate(self):
-        self._set_ready()

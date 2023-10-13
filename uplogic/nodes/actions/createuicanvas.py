@@ -1,7 +1,6 @@
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
 from uplogic.ui import Canvas
-from uplogic.utils import not_met
 
 
 class ULCreateUICanvas(ULActionNode):
@@ -21,9 +20,7 @@ class ULCreateUICanvas(ULActionNode):
 
     def evaluate(self):
         self._done = False
-        condition = self.get_input(self.condition)
-        self._set_ready()
-        if not_met(condition):
+        if not self.get_input(self.condition):
             return
         self._canvas = Canvas()
         self._done = True

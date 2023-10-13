@@ -2,7 +2,6 @@ from bge import constraints
 from bge import logic
 from uplogic.nodes import ULOutSocket
 from uplogic.nodes import ULParameterNode
-from uplogic.utils import is_invalid
 import bpy
 
 
@@ -32,28 +31,19 @@ class ULCharacterInfo(ULParameterNode):
         return self.physics.gravity
 
     def get_walk_dir(self):
-        socket = self.get_output('walk_dir')
-        if socket is None:
-            physics = self.physics
-            wdir = (
-                physics.walkDirection @ self.owner.worldOrientation
-                if self.local else
-                physics.walkDirection
-            )
-            return self.set_output(
-                'walk_dir',
-                wdir * bpy.data.scenes[
-                    logic.getCurrentScene().name
-                ].game_settings.physics_step_sub
-            )
-        return socket
+        physics = self.physics
+        wdir = (
+            physics.walkDirection @ self.owner.worldOrientation
+            if self.local else
+            physics.walkDirection
+        )
+        return wdir * bpy.data.scenes[
+            logic.getCurrentScene().name
+        ].game_settings.physics_step_sub
 
     def get_on_ground(self):
         return self.physics.onGround
 
     def evaluate(self):
         game_object = self.owner = self.get_input(self.game_object)
-        if is_invalid(game_object):
-            return
         self.physics = constraints.getCharacter(game_object)
-        self._set_ready()

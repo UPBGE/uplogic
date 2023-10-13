@@ -3,10 +3,8 @@ from uplogic.animation.action import Action
 from uplogic.data import GlobalDB
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_invalid
-from uplogic.utils import is_waiting
-from uplogic.utils import not_met
-import bpy
+from bpy.types import Action as BPYAction
+from bge.types import KX_GameObject
 
 
 class ULSetActionFrame(ULActionNode):
@@ -23,7 +21,7 @@ class ULSetActionFrame(ULActionNode):
         self.done = None
         self.act_system = self.get_act_system()
         self.OUT = ULOutSocket(self, self.get_done)
-        
+
     def get_act_system(self):
         act_systems = GlobalDB.retrieve('uplogic.animation')
         if act_systems.check('default'):
@@ -36,37 +34,22 @@ class ULSetActionFrame(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition = self.get_input(self.condition)
-        if not_met(condition):
-            self._set_ready()
+        if not self.get_input(self.condition):
             return
-        game_object = self.get_input(self.game_object)
+        game_object: KX_GameObject = self.get_input(self.game_object)
         action_layer = self.get_input(self.action_layer)
         action_frame = self.get_input(self.action_frame)
         freeze = self.get_input(self.freeze)
-        action_name = self.get_input(self.action_name)
+        bpy_action: BPYAction = self.get_input(self.action_name)
         intensity = self.get_input(self.layer_weight)
-        self._set_ready()
-        if is_waiting(
-            action_layer,
-            action_frame,
-            intensity
-        ):
-            return
-        if is_invalid(
-            game_object,
-        ):
-            return
-
-        action = self.act_system.get_layer(game_object, action_layer)
-        same_action = action is not None and action.name == action_name
+        action: Action = self.act_system.get_layer(game_object, action_layer)
+        same_action = action is not None and action.name == bpy_action.name
         if not same_action or action is None:
-            action = bpy.data.actions[action_name]
-            start_frame = action.frame_range[0]
-            end_frame = action.frame_range[1]
+            start_frame = bpy_action.frame_range[0]
+            end_frame = bpy_action.frame_range[1]
             action = Action(
                 game_object,
-                action_name,
+                bpy_action.name,
                 start_frame,
                 end_frame,
                 action_layer,
@@ -74,7 +57,8 @@ class ULSetActionFrame(ULActionNode):
             )
 
         game_object.setActionFrame(action_frame, action_layer)
+        action._intensity = intensity
         if freeze:
-            action.speed = 0
-        action.intensity = intensity
+            action._speed=.00000000001
+        action._restart_action()
         self.done = True

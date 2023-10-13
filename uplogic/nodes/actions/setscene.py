@@ -1,8 +1,7 @@
 from uplogic.nodes import ULOutSocket
 from uplogic.nodes import ULActionNode
-from uplogic.utils import is_waiting
-from uplogic.utils import not_met
 from bge import logic
+from bpy.types import Scene
 
 
 class ULSetScene(ULActionNode):
@@ -19,12 +18,8 @@ class ULSetScene(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition = self.get_input(self.condition)
-        if not_met(condition):
+        if not self.get_input(self.condition):
             return
-        scene = self.get_input(self.scene)
-        if is_waiting(scene):
-            return
-        self._set_ready()
-        logic.getCurrentScene().replace(scene)
+        scene: Scene = self.get_input(self.scene)
+        logic.getCurrentScene().replace(scene.name)
         self.done = True

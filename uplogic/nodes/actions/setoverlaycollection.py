@@ -1,9 +1,8 @@
 from bge import logic
 from uplogic.nodes import ULActionNode
-from uplogic.utils import is_invalid
-from uplogic.utils import not_met
-import bpy
-
+from uplogic.nodes import ULOutSocket
+from bpy.types import Collection
+from bge.types import KX_Camera
 
 class ULSetOverlayCollection(ULActionNode):
     def __init__(self):
@@ -11,18 +10,17 @@ class ULSetOverlayCollection(ULActionNode):
         self.condition = None
         self.camera = None
         self.collection = None
+        self.done = False
+        self.OUT = ULOutSocket(self, self.get_out)
+
+    def get_out(self):
+        return self.done
 
     def evaluate(self):
-        condition = self.get_input(self.condition)
-        if not_met(condition):
+        self.done = False
+        if not self.get_input(self.condition):
             return
-        collection = self.get_input(self.collection)
-        camera = self.get_input(self.camera)
-        if is_invalid(camera, collection):
-            return
-        self._set_ready()
-        col = bpy.data.collections.get(collection)
-        if not col:
-            return
-        logic.getCurrentScene().addOverlayCollection(camera, col)
-        self._set_value(True)
+        collection:Collection = self.get_input(self.collection)
+        camera: KX_Camera = self.get_input(self.camera)
+        logic.getCurrentScene().addOverlayCollection(camera, collection)
+        self.done = True

@@ -12,6 +12,3 @@ class ULInitEmptyDict(ULParameterNode):
 
     def get_dict(self):
         return {}
-
-    def evaluate(self):
-        self._set_ready()

@@ -67,7 +67,6 @@ class ULLocalServer(ULActionNode):
             else:
                 self._stopped = True
             self._was_running = self._server.running
-        self._set_ready()
         if self.get_input(self.start_cond):
             self._server.start()
         if self.get_input(self.stop_cond):

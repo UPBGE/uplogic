@@ -1,15 +1,10 @@
 from uplogic.nodes import ULConditionNode
-from uplogic.utils.constants import STATUS_READY
-
+from uplogic.nodes import ULOutSocket
 
 class ULOnUpdate(ULConditionNode):
     def __init__(self):
         ULConditionNode.__init__(self)
-        self._set_status(STATUS_READY)
-        self._value = True
+        self.OUT = ULOutSocket(self, self.get_out)
 
-    def reset(self):
-        self._value = True
-
-    def evaluate(self):
-        pass
+    def get_out(self):
+        return True

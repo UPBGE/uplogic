@@ -40,7 +40,7 @@ class Image(Widget):
         vertices = self._vertices = (
             x0, x1, y1, y0
         )
-        self._shader = gpu.shader.from_builtin('2D_IMAGE')
+        self._shader = gpu.shader.from_builtin('IMAGE_COLOR')
         self._batch = batch_for_shader(
             self._shader, 'TRI_FAN',
             {
@@ -117,7 +117,7 @@ class Sprite(Image):
             y1,
             y0
         )
-        self._shader = gpu.shader.from_builtin('2D_IMAGE')
+        self._shader = gpu.shader.from_builtin('IMAGE_COLOR')
         idx = self.idx
         col = idx % self.cols
         col_end = col + 1

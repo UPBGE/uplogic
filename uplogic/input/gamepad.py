@@ -186,7 +186,7 @@ def gamepad_tap(
 
     :returns: float or boolean
     '''
-    btn_idx = layout[button]
+    btn_idx = layout.get(button, button)
     if button in ['R2', 'L2', 'RT', 'LT']:
         return gamepad_axis(btn_idx, idx, True)
     else:
@@ -207,7 +207,7 @@ def gamepad_down(
 
     :returns: float or boolean
     '''
-    btn_idx = layout[button]
+    btn_idx = layout.get(button, button)
     if button in ['R2', 'L2', 'RT', 'LT']:
         return gamepad_axis(btn_idx, idx)
     else:
@@ -228,7 +228,7 @@ def gamepad_up(
 
     :returns: float or boolean
     '''
-    btn_idx = layout[button]
+    btn_idx = layout.get(button, button)
     if button in ['R2', 'L2', 'RT', 'LT']:
         return gamepad_axis(btn_idx, idx, True, True)
     else:
@@ -335,7 +335,7 @@ class ULGamepadLook():
         cap_x: tuple = (0, 0),
         use_cap_y: bool = False,
         cap_y: tuple = (-89, 89),
-        invert: tuple = (True, True),
+        invert: tuple = (False, False),
         smoothing: float = 0.0,
         local: bool = True,
         front: int = 1,
@@ -425,13 +425,9 @@ class ULGamepadLook():
     def update(self):
         game_object_x = self.obj
         game_object_y = self.head
-        sensitivity = self.sensitivity * 10
+        sensitivity = self.sensitivity
         cap_x = self.cap_x
-        lowercapX = cap_x[0] * pi / 180
-        uppercapX = cap_x[1] * pi / 180
         cap_y = self.cap_y
-        lowercapY = cap_y[0] * pi / 180
-        uppercapY = cap_y[1] * pi / 180
         invert = self.invert
         smooth = 1 - (self.smoothing * .99)
         joystick = self.joystick
@@ -457,8 +453,8 @@ class ULGamepadLook():
         x *= neg_x
         y *= neg_y
 
-        self._x = x = interpolate(self._x, -x if invert[0] else x, smooth)
-        self._y = y = interpolate(self._y, -y if invert[1] else y, smooth)
+        self._x = x = interpolate(self._x, x if invert[0] else -x, smooth)
+        self._y = y = interpolate(self._y, y if invert[1] else -y, smooth)
         if self._x == self._y == 0:
             self.done = True
             return
@@ -466,6 +462,8 @@ class ULGamepadLook():
         x *= sensitivity
         y *= sensitivity
         if self.use_cap_x:
+            lowercapX = cap_x[0] * pi / 180
+            uppercapX = cap_x[1] * pi / 180
             objectRotation = game_object_x.localOrientation.to_euler()
 
             if objectRotation.z + x > uppercapX:
@@ -482,6 +480,8 @@ class ULGamepadLook():
 
         rot_axis = 1 - self.front
         if self.use_cap_y:
+            lowercapY = cap_y[0] * pi / 180
+            uppercapY = cap_y[1] * pi / 180
             objectRotation = game_object_y.localOrientation.to_euler()
 
             if objectRotation[rot_axis] + y > uppercapY:
@@ -502,3 +502,19 @@ class ULGamepadLook():
 
 class GamepadLook(ULGamepadLook):
     _deprecated = False
+
+
+def gamepad_active(idx) -> bool:
+    if logic.joysticks[idx]:
+        joystick = logic.joysticks[idx]
+    else:
+        return False
+    axis_active = False
+    for x in joystick.axisValues:
+        if x < -.1 or x > .1:
+            axis_active = True
+            break
+    return (
+        len(joystick.activeButtons) > 0 or
+        axis_active
+    )

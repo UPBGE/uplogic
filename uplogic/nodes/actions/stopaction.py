@@ -2,9 +2,6 @@ from uplogic.animation import ULActionSystem
 from uplogic.data import GlobalDB
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_invalid
-from uplogic.utils import is_waiting
-from uplogic.utils import not_met
 
 
 class ULStopAction(ULActionNode):
@@ -30,19 +27,10 @@ class ULStopAction(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition = self.get_input(self.condition)
-        if not_met(condition):
-            self._set_ready()
+        if not self.get_input(self.condition):
             return
         game_object = self.get_input(self.game_object)
         action_layer = self.get_input(self.action_layer)
-        if is_waiting(game_object, action_layer):
-            return
-        self._set_ready()
-        if is_invalid(game_object):
-            return
-        if is_invalid(action_layer):
-            return
 
         action = self.act_system.get_layer(game_object, action_layer)
         if action is not None:

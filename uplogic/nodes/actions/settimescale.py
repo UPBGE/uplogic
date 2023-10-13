@@ -1,9 +1,6 @@
 from bge import logic
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_waiting
-from uplogic.utils import is_invalid
-from uplogic.utils import not_met
 
 
 class ULSetTimeScale(ULActionNode):
@@ -20,14 +17,8 @@ class ULSetTimeScale(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition = self.get_input(self.condition)
-        if not_met(condition):
+        if not self.get_input(self.condition):
             return
         timescale = self.get_input(self.timescale)
-        if is_waiting(timescale):
-            return
-        self._set_ready()
-        if is_invalid(timescale):
-            return
         logic.setTimeScale(timescale)
         self.done = True

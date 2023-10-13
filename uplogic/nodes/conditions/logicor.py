@@ -1,6 +1,4 @@
-from uplogic.nodes import ULConditionNode
-from uplogic.utils.constants import STATUS_WAITING
-from uplogic.utils import is_waiting
+from uplogic.nodes import ULConditionNode, ULOutSocket
 
 
 class ULOr(ULConditionNode):
@@ -8,16 +6,14 @@ class ULOr(ULConditionNode):
         ULConditionNode.__init__(self)
         self.ca = False
         self.cb = False
+        self.OUT = ULOutSocket(self, self.get_out)
 
-    def evaluate(self):
-        ca = self.get_input(self.ca)
-        cb = self.get_input(self.cb)
-        self._set_ready()
-        if is_waiting(ca):
-            ca = False
-        if is_waiting(cb):
-            cb = False
-        self._set_value(ca or cb)
+    def get_out(self):
+        return (
+            self.get_input(self.ca)
+            or
+            self.get_input(self.cb)
+        )
 
 
 class ULOrList(ULConditionNode):
@@ -29,14 +25,15 @@ class ULOrList(ULConditionNode):
         self.cd = False
         self.ce = False
         self.cf = False
+        self.OUT = ULOutSocket(self, self.get_out)
 
-    def evaluate(self):
-        ca = self.get_input(self.ca)
-        cb = self.get_input(self.cb)
-        cc = self.get_input(self.cc)
-        cd = self.get_input(self.cd)
-        ce = self.get_input(self.ce)
-        cf = self.get_input(self.cf)
-        self._set_ready()
-        conds = [ca, cb, cc, cd, ce, cf]
-        self._set_value(True in conds)
+    def get_out(self):
+        conds = [
+            self.get_input(self.ca),
+            self.get_input(self.cb),
+            self.get_input(self.cc),
+            self.get_input(self.cd),
+            self.get_input(self.ce),
+            self.get_input(self.cf)
+        ]
+        return True in conds

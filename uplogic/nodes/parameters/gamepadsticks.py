@@ -1,7 +1,7 @@
 from bge import logic, types
 from uplogic.nodes import ULParameterNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_invalid
+from mathutils import Vector
 
 
 class ULGamepadSticks(ULParameterNode):
@@ -16,8 +16,12 @@ class ULGamepadSticks(ULParameterNode):
         self._y_axis_values = None
         self._sensitivity = 0.0
         self.raw_values = [0, 0]
+        self.VEC = ULOutSocket(self, self.get_vec)
         self.X = ULOutSocket(self, self.get_x_axis)
         self.Y = ULOutSocket(self, self.get_y_axis)
+
+    def get_vec(self):
+        return Vector((self.get_x_axis(), self.get_y_axis(), 0))
 
     def get_x_axis(self):
         x = self.raw_values[0]
@@ -26,13 +30,12 @@ class ULGamepadSticks(ULParameterNode):
         return x * self._sensitivity
 
     def get_y_axis(self):
-        y = self.raw_values[1]
+        y = -self.raw_values[1]
         if -self.threshold < y < self.threshold:
             y = 0
         return y * self._sensitivity
 
     def evaluate(self):
-        self._set_ready()
         index = self.get_input(self.index)
 
         if logic.joysticks[index]:
@@ -40,8 +43,6 @@ class ULGamepadSticks(ULParameterNode):
         else:
             self._x_axis_values = 0
             self._y_axis_values = 0
-            return
-        if is_invalid(joystick):
             return
         axis = self.get_input(self.axis)
         raw_values = joystick.axisValues

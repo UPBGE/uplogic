@@ -1,7 +1,6 @@
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_waiting
-from uplogic.utils import not_met
+from bge.types import KX_GameObject
 
 
 class ULSetLightShadow(ULActionNode):
@@ -19,15 +18,10 @@ class ULSetLightShadow(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition = self.get_input(self.condition)
-        if not_met(condition):
-            self._set_value(False)
-            return self._set_ready()
-        lamp = self.get_input(self.lamp)
-        use_shadow = self.get_input(self.use_shadow)
-        if is_waiting(lamp, use_shadow):
+        if not self.get_input(self.condition):
             return
-        self._set_ready()
-        light = lamp.blenderObject.data
+        light: KX_GameObject = self.get_input(self.lamp)
+        use_shadow = self.get_input(self.use_shadow)
+        light = light.blenderObject.data
         light.use_shadow = use_shadow
         self.done = True

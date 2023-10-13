@@ -10,6 +10,3 @@ class ULGetFullscreen(ULParameterNode):
 
     def get_fullscreen(self):
         return render.getFullScreen()
-
-    def evaluate(self):
-        self._set_ready()

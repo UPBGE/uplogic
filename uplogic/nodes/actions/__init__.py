@@ -154,3 +154,5 @@ from .localserver import ULLocalServer
 from .localclient import ULLocalClient
 from .sendnetworkmessage import ULSendNetworkMessage
 from .createuislider import ULCreateUISlider
+from .applytransform import ULApplyTransform
+from .setlogictreeproperty import ULSetLogicTreeProperty

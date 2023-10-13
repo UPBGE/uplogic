@@ -41,3 +41,5 @@ from .barrier import ULBarrier
 from .controllerstatus import ULControllerStatus  # noqa
 from .timedelay import ULTimeDelay  # noqa
 from .pulsify import ULPulsify  # noqa
+from .logicgate import ULLogicGate
+from .logicgatelist import ULLogicGateList

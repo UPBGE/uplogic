@@ -14,8 +14,9 @@ def key_event(key: str) -> bool:
     Not intended for manual use.
     '''
     if isinstance(key, int):
-        return key
-    key = KEYBOARD_EVENTS[
+        key = KEYBOARD_EVENTS[key]
+    else:
+        key = KEYBOARD_EVENTS[
         getattr(
             events, f'{key.upper()}KEY',
             (getattr(events, f'PAD{key.upper()}', None))
@@ -164,3 +165,29 @@ def key_pulse(key: str, time: float = .4) -> bool:
     if _keys_active[key] > time:
         return key_event(key).active
     return False
+
+
+def record_keyboard(all=False) -> tuple[bool, int, str]:
+    '''Listen to keyboard actions
+    :returns: Tuple of `(pressed, keycode, character)`'''
+    left_shift = KEYBOARD_EVENTS[events.LEFTSHIFTKEY].active
+    right_shift = KEYBOARD_EVENTS[events.RIGHTSHIFTKEY].active
+    active_events = logic.keyboard.activeInputs.copy()
+
+    for keycode in active_events:
+        if key_pulse(keycode):
+            event = active_events[keycode]
+            char = events.EventToCharacter(
+                event.type,
+                left_shift or right_shift
+            )
+            return (
+                True if char or all else False,
+                keycode,
+                char
+            )
+    return (False, None, None)
+
+
+def keyboard_active() -> bool:
+    return len(KEYBOARD_EVENTS) > 0

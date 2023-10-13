@@ -24,4 +24,3 @@ class ULCheckDistance(ULConditionNode):
 
     def evaluate(self):
         self._distance = (Vector(self.get_input(self.param_a)) - Vector(self.get_input(self.param_b))).length
-        self._set_ready()

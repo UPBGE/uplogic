@@ -2,19 +2,6 @@ import operator
 from mathutils import Vector
 from bge import logic
 
-class _Status(object):
-    def __init__(self, name):
-        self._name = name
-
-    def __repr__(self):
-        return self._name
-
-
-NO_VALUE = _Status("NO_VALUE")
-STATUS_WAITING = _Status("WAITING")
-STATUS_READY = _Status("READY")
-STATUS_INVALID = _Status("INVALID")
-
 
 # uplogic game properties
 VEHICLE = '.ulvehicleconst'
@@ -38,13 +25,17 @@ LOGIC_OPERATORS = [
 ]
 
 
+def MATMUL (a, b):
+    return a @ b
+
+
 OPERATORS = {
     "ADD": operator.add,
     "DIV": operator.truediv,
     "MUL": operator.mul,
     "SUB": operator.sub,
     'FDIV': operator.floordiv,
-    'MATMUL': operator.matmul,
+    'MATMUL': MATMUL,#operator.matmul,
     'MOD': operator.mod,
     'POW': operator.pow
 }
@@ -62,6 +53,12 @@ LO_AXIS_TO_VECTOR = {
     4: Vector((0, -1, 0)), 5: Vector((0, 0, -1)),
 }
 
+FRONT_AXIS_VECTOR_SIGNED = {
+    0: Vector((1, 0)), 1: Vector((1, 0)),
+    2: Vector((0, 1)), 3: Vector((-1, 0)),
+    4: Vector((-1, 0)), 5: Vector((0, -1)),
+}
+
 
 FRAMETIME_COMPARE = 1 / 60
 
@@ -69,3 +66,14 @@ FRAMETIME_COMPARE = 1 / 60
 def FPS_FACTOR() -> float:
     avg = logic.getAverageFrameRate()
     return (60 / avg) if 0 < avg < 10000 else 1
+
+
+RED = [1, 0, 0]
+GREEN = [0, 1, 0]
+BLUE = [0, 0, 1]
+YELLOW = [1, 1, 0]
+PURPLE = [1, 0, 1]
+TORQUISE = [0, 1, 1]
+WHITE = [1, 1, 1]
+BLACK = [0, 0, 0]
+GREY = [.5, .5, .5]

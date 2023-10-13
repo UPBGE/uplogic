@@ -1,8 +1,6 @@
 from bge import constraints
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_invalid
-from uplogic.utils import not_met
 
 
 class ULRemovePhysicsConstraint(ULActionNode):
@@ -19,15 +17,9 @@ class ULRemovePhysicsConstraint(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition = self.get_input(self.condition)
-        if not_met(condition):
+        if not self.get_input(self.condition):
             return
         obj = self.get_input(self.object)
-        if is_invalid(obj):
-            return
         name = self.get_input(self.name)
-        if is_invalid(name):
-            return
-        self._set_ready()
         constraints.removeConstraint(obj[name].getConstraintId())
         self.done = True

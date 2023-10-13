@@ -1,7 +1,6 @@
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
 from uplogic.ui import RelativeLayout, FloatLayout, BoxLayout
-from uplogic.utils import not_met
 from math import degrees
 
 
@@ -43,9 +42,7 @@ class ULCreateUILayout(ULActionNode):
 
     def evaluate(self):
         self._done = False
-        condition = self.get_input(self.condition)
-        self._set_ready()
-        if not_met(condition):
+        if not self.get_input(self.condition):
             return
         ipt = self.get_input
         parent = ipt(self.parent)

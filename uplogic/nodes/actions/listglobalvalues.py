@@ -1,8 +1,6 @@
 from uplogic.data import GlobalDB
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_waiting
-from uplogic.utils import not_met
 
 
 class ULListGlobalValues(ULActionNode):
@@ -24,14 +22,10 @@ class ULListGlobalValues(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition = self.get_input(self.condition)
-        if not_met(condition):
+        if not self.get_input(self.condition):
             return
         data_id = self.get_input(self.data_id)
         print_d = self.get_input(self.print_d)
-        if is_waiting(data_id, print_d):
-            return
-        self._set_ready()
         db = GlobalDB.retrieve(data_id)
         if print_d:
             print(f'[Logic Nodes] Global category "{data_id}":')

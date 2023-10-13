@@ -1,7 +1,5 @@
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_waiting
-from uplogic.utils import not_met
 
 
 class ULSetMousePosition(ULActionNode):
@@ -22,13 +20,9 @@ class ULSetMousePosition(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition = self.get_input(self.condition)
-        if not_met(condition):
+        if not self.get_input(self.condition):
             return
         screen_x = self.get_input(self.screen_x)
         screen_y = self.get_input(self.screen_y)
-        if is_waiting(screen_x, screen_y):
-            return
-        self._set_ready()
         self.network.set_mouse_position(screen_x, screen_y)
         self.done = True

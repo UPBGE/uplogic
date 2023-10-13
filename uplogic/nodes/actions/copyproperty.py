@@ -1,8 +1,5 @@
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_waiting
-from uplogic.utils import is_invalid
-from uplogic.utils import not_met
 
 
 class ULCopyProperty(ULActionNode):
@@ -12,7 +9,7 @@ class ULCopyProperty(ULActionNode):
         self.from_object = None
         self.to_object = None
         self.property_name = None
-        self.mode = 'GAME'
+        self.mode = 0
         self.done = False
         self.OUT = ULOutSocket(self, self._get_done)
 
@@ -21,20 +18,13 @@ class ULCopyProperty(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition = self.get_input(self.condition)
-        if not_met(condition):
+        if not self.get_input(self.condition):
             return
         from_object = self.get_input(self.from_object)
         to_object = self.get_input(self.to_object)
-        if is_invalid(from_object, to_object):
-            return
         property_name = self.get_input(self.property_name)
-        if is_waiting(property_name):
-            return
-        self._set_ready()
-        mode = self.mode == 'GAME'
-        from_object = from_object if mode else from_object.blenderObject
-        to_object = from_object if mode else to_object.blenderObject
+        from_object = from_object.blenderObject if self.mode else from_object
+        to_object = from_object.blenderObject if self.mode else to_object
         val = from_object.get(property_name)
         if val is not None:
             to_object[property_name] = val

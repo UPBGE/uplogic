@@ -36,6 +36,3 @@ class ULRebuildData(ULParameterNode):
                     setattr(obj, attr, dat[attr])
                 return obj
         return self.dattypes[self.read_as](dat)
-
-    def evaluate(self):
-        self._set_ready()

@@ -1,18 +1,11 @@
-from uplogic.nodes import ULParameterNode
-from uplogic.utils.constants import STATUS_READY
+from uplogic.nodes import ULOutSocket, ULParameterNode
 
 
 class ULGetOwner(ULParameterNode):
     def __init__(self):
         ULParameterNode.__init__(self)
+        self.owner = None
+        self.OUT = ULOutSocket(self, self.get_out)
 
-    def setup(self, network):
-        ULParameterNode.setup(self, network)
-        self._set_status(STATUS_READY)
-        self._set_value(network.get_owner())
-
-    def reset(self):
-        pass
-
-    def evaluate(self):
-        pass
+    def get_out(self):
+        self.owner

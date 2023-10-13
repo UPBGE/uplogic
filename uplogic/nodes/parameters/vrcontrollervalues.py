@@ -42,6 +42,3 @@ class ULGetVRControllerValues(ULParameterNode):
     
     def get_trigger(self):
         return self.controller.trigger
-
-    def evaluate(self):
-        self._set_ready()

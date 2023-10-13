@@ -1,8 +1,5 @@
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_invalid
-from uplogic.utils import is_waiting
-from uplogic.utils import not_met
 
 
 class ULRemoveParent(ULActionNode):
@@ -18,16 +15,8 @@ class ULRemoveParent(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition = self.get_input(self.condition)
-        if not_met(condition):
+        if not self.get_input(self.condition):
             return
         child_object = self.get_input(self.child_object)
-        if is_waiting(child_object):
-            return
-        self._set_ready()
-        if is_invalid(child_object):
-            return
-        if not child_object.parent:
-            return
         child_object.removeParent()
         self.done = True

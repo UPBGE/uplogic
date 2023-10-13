@@ -80,7 +80,7 @@ class ULAction():
         self._locked = False
         self._speed = speed
         self._frozen_speed = speed
-        self.finished = False
+        self.stopped = False
         '''Finish state of the animation.'''
         self.keep = keep
         '''Whether to keep or free animation data after playback has finished.'''
@@ -153,6 +153,14 @@ class ULAction():
     @is_playing.setter
     def is_playing(self):
         print('ULAction.is_playing is read-only!')
+
+    @property
+    def started(self):
+        return self.frame - self.start_frame < self.speed
+
+    @property
+    def finished(self):
+        return self.end_frame - self.frame < self.speed
 
     @property
     def frame(self) -> float:
@@ -291,14 +299,14 @@ class ULAction():
     def stop(self):
         '''Stop playback of this action.
         '''
-        self.finished = True
+        self.stopped = True
         self.on_finish()
         self.game_object.stopAction(self.layer)
 
     def restart(self):
         '''Restart this animation with its current parameters.
         '''
-        self.finished = False
+        self.stopped = False
         self.game_object.stopAction(self.layer)
         self.game_object.playAction(
             self.name,

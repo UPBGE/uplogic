@@ -1,8 +1,6 @@
 from uplogic.nodes import ULParameterNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils.constants import STATUS_WAITING
 from uplogic.utils import debug
-from uplogic.utils import is_waiting
 import bpy
 import json
 import os
@@ -18,25 +16,15 @@ class ULLoadVariable(ULParameterNode):
         self.VAR = ULOutSocket(self, self.get_var)
 
     def get_var(self):
-        socket = self.get_output('var')
-        if socket is None:
-            name = self.get_input(self.name)
-            if is_waiting(name):
-                return self.set_output('var', STATUS_WAITING)
-            cust_path = self.get_custom_path(self.path)
-
-            path = (
-                bpy.path.abspath('//Data/')
-                if self.path == ''
-                else bpy.path.abspath(cust_path)
-            )
-            os.makedirs(path, exist_ok=True)
-
-            return self.set_output(
-                'var',
-                self.read_from_json(path, name)
-            )
-        return socket
+        name = self.get_input(self.name)
+        cust_path = self.get_custom_path(self.path)
+        path = (
+            bpy.path.abspath('//Data/')
+            if self.path == ''
+            else bpy.path.abspath(cust_path)
+        )
+        os.makedirs(path, exist_ok=True)
+        return self.read_from_json(path, name)
 
     def read_from_json(self, path, name):
         if not path.endswith('.json'):
@@ -58,5 +46,3 @@ class ULLoadVariable(ULParameterNode):
             path = path + '/'
         return path
 
-    def evaluate(self):
-        self._set_ready()

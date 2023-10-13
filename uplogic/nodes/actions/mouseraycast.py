@@ -1,9 +1,8 @@
 from bge import logic
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_waiting
-from uplogic.utils import is_invalid
-from uplogic.utils import not_met
+from uplogic.utils import get_bitmask
+from uplogic.utils.raycasting import raycast_mouse, RayCastData
 
 
 class ULMouseRayCast(ULActionNode):
@@ -15,54 +14,35 @@ class ULMouseRayCast(ULActionNode):
         self.property = None
         self.xray = None
         self.camera = None
-        self._set_value(False)
+        self.mask = get_bitmask(all=True)
         self._out_object = None
         self._out_normal = None
         self._out_point = None
+        self._data = RayCastData((None, None, None, None, None, None))
+        self.RESULT = ULOutSocket(self, self.get_result)
         self.OUTOBJECT = ULOutSocket(self, self.get_out_object)
         self.OUTNORMAL = ULOutSocket(self, self.get_out_normal)
         self.OUTPOINT = ULOutSocket(self, self.get_out_point)
 
+    def get_result(self):
+        return self._data.obj is not None
+
     def get_out_object(self):
-        return self._out_object
+        return self._data.obj
 
     def get_out_normal(self):
-        return self._out_normal
+        return self._data.normal
 
     def get_out_point(self):
-        return self._out_point
+        return self._data.point
 
     def evaluate(self):
-        condition = self.get_input(self.condition)
-        if not_met(condition):
+        if not self.get_input(self.condition):
             return
-        distance = self.get_input(self.distance)
-        property_name = self.get_input(self.property)
-        xray = self.get_input(self.xray)
-        camera = self.get_input(self.camera)
-        if is_waiting(distance, property_name, xray, camera):
-            return
-        self._set_ready()
-        if not condition:
-            self._set_value(False)
-            self._out_normal = None
-            self._out_object = None
-            self._out_point = None
-            return
-        if is_invalid(camera):
-            return
-        mpos = logic.mouse.position
-        vec = 10 * camera.getScreenVect(*mpos)
-        ray_target = camera.worldPosition - vec
-        target, point, normal = self.network.ray_cast(
-            camera,
-            None,
-            ray_target,
-            property_name,
-            xray,
-            distance
+        self._data = raycast_mouse(
+            distance=self.get_input(self.distance),
+            prop=self.get_input(self.property),
+            xray=self.get_input(self.xray),
+            mask=self.get_input(self.mask)
+
         )
-        self._set_value(target is not None)
-        self._out_object = target
-        self._out_normal = normal
-        self._out_point = point

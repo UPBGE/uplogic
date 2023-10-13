@@ -10,6 +10,3 @@ class ULGetScene(ULParameterNode):
 
     def get_done(self):
         return logic.getCurrentScene()
-
-    def evaluate(self):
-        self._set_ready()

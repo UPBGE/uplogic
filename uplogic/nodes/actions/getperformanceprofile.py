@@ -1,7 +1,6 @@
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_waiting
-from uplogic.utils import not_met
+from bge.logic import getRealTime
 
 
 class ULGetPerformanceProfile(ULActionNode):
@@ -31,9 +30,7 @@ class ULGetPerformanceProfile(ULActionNode):
     def evaluate(self):
         self.done = False
         self.data = '----------------------------------Start Profile\n'
-        condition = self.get_input(self.condition)
-        if not_met(condition):
-            self._set_ready()
+        if not self.get_input(self.condition):
             return
         print_profile = self.get_input(
             self.print_profile
@@ -47,22 +44,13 @@ class ULGetPerformanceProfile(ULActionNode):
         check_cells_per_tick = self.get_input(
             self.check_cells_per_tick
         )
-        if is_waiting(
-            print_profile,
-            check_evaluated_cells,
-            check_average_cells_per_sec,
-            check_cells_per_tick
-        ):
-            self._set_ready()
-            return
-        self._set_ready()
         if check_evaluated_cells:
             self.data += 'Evaluated Nodes:\t{}\n'.format(
                 self.network.evaluated_cells
             )
         if check_average_cells_per_sec:
             self.data += 'Nodes per Sec (avg):\t{}\n'.format(
-                self.network.evaluated_cells / self.network.timeline
+                self.network.evaluated_cells / getRealTime()
             )
         if check_cells_per_tick:
             self.data += 'Nodes per Tick:\t{}\n'.format(

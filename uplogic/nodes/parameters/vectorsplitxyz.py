@@ -1,7 +1,6 @@
 from mathutils import Vector
 from uplogic.nodes import ULOutSocket
 from uplogic.nodes import ULParameterNode
-from uplogic.utils import is_invalid
 
 
 class ULVectorSplitXYZ(ULParameterNode):
@@ -14,12 +13,6 @@ class ULVectorSplitXYZ(ULParameterNode):
         self.OUTZ = ULOutSocket(self, self.get_out_z)
 
     def get_out_x(self):
-        vector = self.get_output('vector')
-        if vector is None:
-            vector = self.set_output(
-                'vector',
-                self.get_input(self.input_v)
-            )
         return self.output_v.x
 
     def get_out_y(self):
@@ -29,7 +22,5 @@ class ULVectorSplitXYZ(ULParameterNode):
         return self.output_v.z
 
     def evaluate(self):
-        self._set_ready()
         vec = self.get_input(self.input_v)
-        if not is_invalid(vec):
-            self.output_v = vec
+        self.output_v = vec

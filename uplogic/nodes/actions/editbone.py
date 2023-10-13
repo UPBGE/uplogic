@@ -4,9 +4,6 @@ from mathutils import Vector
 from mathutils import Quaternion
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_waiting
-from uplogic.utils import is_invalid
-from uplogic.utils import not_met
 
 
 class ULEditBone(ULActionNode):
@@ -55,8 +52,7 @@ class ULEditBone(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition = self.get_input(self.condition)
-        if not_met(condition):
+        if not self.get_input(self.condition):
             return
         armature = self.get_input(self.armature)
         bone_name = self.get_input(self.bone_name)
@@ -66,22 +62,6 @@ class ULEditBone(ULActionNode):
         translate = self.get_input(self.translate)
         rotate = self.get_input(self.rotate)
         scale = self.get_input(self.scale)
-        if is_waiting(
-            armature,
-            bone_name,
-            set_translation,
-            set_orientation,
-            set_scale,
-            translate,
-            rotate,
-            scale
-        ):
-            return
-        self._set_ready()
-        if is_invalid(armature):
-            return
-        if not bone_name:
-            return
         # TODO cache the bone index
         bone_channel = armature.channels[bone_name]
         if set_translation is not None:

@@ -65,7 +65,9 @@ class LoggerLayout(Canvas):
     def __init__(self, toggle_key='BACKSLASH', visible=False):
         self.toggle_key = toggle_key
         super().__init__()
-        if not getattr(bpy.context.scene, 'screen_console_open', False) and not visible:
+        if not bpy.context.preferences.addons['bge_netlogic'].preferences.screen_console_open and not visible:
+            self.show = False
+        if not getattr(bpy.context.scene, 'screen_console_open', True) and not visible:
             self.show = False
         self.messages: list[Label] = []
         self.layout = RelativeLayout(relative={'size': True, 'pos': True}, pos=[0, 0], size=(1, .4), bg_color=[0, 0, 0, .3])
@@ -193,6 +195,6 @@ def debug(msg):
             logger.add_message(f'{msg}', 'DEBUG')
             sys.__stdout__.write(f'{msg}\n')
 
-
-if getattr(bpy.context.scene, 'use_screen_console', False):
+nodeprefs = bpy.context.preferences.addons.get('bge_netlogic', None)
+if nodeprefs and getattr(nodeprefs.preferences, 'use_screen_console', False):
     enable()

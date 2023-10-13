@@ -1,8 +1,6 @@
 from mathutils import Vector
 from uplogic.nodes import ULOutSocket
 from uplogic.nodes import ULParameterNode
-from uplogic.utils.constants import STATUS_WAITING
-from uplogic.utils import is_invalid
 
 
 class ULVectorLength(ULParameterNode):
@@ -13,10 +11,4 @@ class ULVectorLength(ULParameterNode):
         self.OUTV = ULOutSocket(self, self.get_out_v)
 
     def get_out_v(self):
-        vec = self.get_input(self.input_v)
-        if is_invalid(vec):
-            return STATUS_WAITING
-        return vec.length
-
-    def evaluate(self):
-        self._set_ready()
+        return self.get_input(self.input_v).length

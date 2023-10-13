@@ -1,8 +1,5 @@
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_waiting
-from uplogic.utils import is_invalid
-from uplogic.utils import not_met
 
 
 class ULApplyForce(ULActionNode):
@@ -19,16 +16,10 @@ class ULApplyForce(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition = self.get_input(self.condition)
-        if not_met(condition):
+        if not self.get_input(self.condition):
             return
         game_object = self.get_input(self.game_object)
         force = self.get_input(self.force)
         local = self.local
-        if is_waiting(force):
-            return
-        if is_invalid(game_object):
-            return
-        self._set_ready()
         game_object.applyForce(force, local)
         self.done = True

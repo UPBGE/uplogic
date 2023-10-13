@@ -217,7 +217,7 @@ def get_local(obj, target) -> Vector:
     return obj.worldTransform.inverted() @ target
 
 
-def get_collision_bitmask(
+def get_bitmask(
     *slots: int, all=False
 ) -> int:
     """Get the collision bitmask value for the provided slot indices. Slots range from 0 to 15.
@@ -230,6 +230,11 @@ def get_collision_bitmask(
     for slot in range(16) if all else slots:
         mask += 1 << slot
     return mask
+
+def get_collision_bitmask(
+    *slots: int, all=False
+) -> int:
+    return get_bitmask(*slots, all)
 
 
 def project_vector3(v, xi, yi):
@@ -265,3 +270,55 @@ def rotate3d(origin, pivot, angle, axis=2):
             origin[2]
         ))
     return origin
+
+
+def rotate_by_axis(origin: Vector, pivot: Vector, angle: float, axis: Vector):
+
+    angle = math.radians(angle)
+
+    origin = origin.copy() - pivot
+
+    z_null = Vector((axis.x, axis.y))
+    if z_null.length:
+        thz = z_null.angle_signed(Vector((1, 0)))
+    else:
+        thz = 90
+
+    axis = Vector((
+            (axis[0] * math.cos(-thz)) - (axis[1] * math.sin(-thz)),
+            (axis[0] * math.sin(-thz)) + (axis[1] * math.cos(-thz)),
+            axis[2]
+    ))
+    target_point = Vector((
+            (origin[0] * math.cos(-thz)) - (origin[1] * math.sin(-thz)),
+            (origin[0] * math.sin(-thz)) + (origin[1] * math.cos(-thz)),
+            origin[2]
+    ))
+
+    thy = axis.angle(Vector((0, 0, 1)))
+
+    target_point = Vector((
+            (target_point[0] * math.cos(thy)) - (target_point[2] * math.sin(thy)),
+            target_point[1],
+            (target_point[0] * math.sin(thy)) + (target_point[2] * math.cos(thy))
+    ))
+
+    target_point = Vector((
+            (target_point[0] * math.cos(angle)) - (target_point[1] * math.sin(angle)),
+            (target_point[0] * math.sin(angle)) + (target_point[1] * math.cos(angle)),
+            target_point[2]
+    ))
+
+    target_point = Vector((
+            (target_point[0] * math.cos(-thy)) - (target_point[2] * math.sin(-thy)),
+            target_point[1],
+            (target_point[0] * math.sin(-thy)) + (target_point[2] * math.cos(-thy))
+    ))
+
+    target_point = Vector((
+            (target_point[0] * math.cos(thz)) - (target_point[1] * math.sin(thz)),
+            (target_point[0] * math.sin(thz)) + (target_point[1] * math.cos(thz)),
+            target_point[2]
+    ))
+
+    return pivot + target_point

@@ -1,7 +1,6 @@
 from mathutils import Vector
 from uplogic.nodes import ULOutSocket
 from uplogic.nodes import ULParameterNode
-from uplogic.utils.constants import STATUS_READY
 
 
 class ULMouseData(ULParameterNode):
@@ -35,9 +34,3 @@ class ULMouseData(ULParameterNode):
 
     def getmdxyz(self):
         return Vector(self.network.mouse.movement)
-
-    def evaluate(self):
-        self._set_ready()
-
-    def has_status(self, status):
-        return status is STATUS_READY

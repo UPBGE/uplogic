@@ -1,10 +1,6 @@
 from uplogic.events import send
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils.constants import STATUS_INVALID
-from uplogic.utils import is_invalid
-from uplogic.utils import is_waiting
-from uplogic.utils import not_met
 
 
 class ULDispatchEvent(ULActionNode):
@@ -23,19 +19,10 @@ class ULDispatchEvent(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition = self.get_input(self.condition)
-        if not_met(condition):
-            self._set_ready()
+        if not self.get_input(self.condition):
             return
         subject = self.get_input(self.subject)
         body = self.get_input(self.body)
-        if body is STATUS_INVALID:
-            body = None
         target = self.get_input(self.target)
-        if is_waiting(body, target):
-            return
-        if is_invalid(subject):
-            return
-        self._set_ready()
         send(subject, body, target)
         self.done = True

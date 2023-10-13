@@ -1,7 +1,6 @@
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_waiting
-from uplogic.utils import not_met
+from bge.types import KX_GameObject
 
 
 class ULSetLightColor(ULActionNode):
@@ -19,17 +18,12 @@ class ULSetLightColor(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition = self.get_input(self.condition)
-        if not_met(condition):
-            self._set_value(False)
-            return self._set_ready()
-        lamp = self.get_input(self.lamp)
-        color = self.get_input(self.color)
-        if is_waiting(lamp, color):
+        if not self.get_input(self.condition):
             return
+        light: KX_GameObject = self.get_input(self.lamp)
+        color = self.get_input(self.color)
         if len(color) > 3:
             color = color[:-1]
-        self._set_ready()
-        light = lamp.blenderObject.data
+        light = light.blenderObject.data
         light.color = color
         self.done = True

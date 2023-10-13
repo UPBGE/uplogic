@@ -1,5 +1,4 @@
-from uplogic.nodes import ULConditionNode
-from uplogic.utils import not_met
+from uplogic.nodes import ULConditionNode, ULOutSocket
 
 
 class ULOnNextTick(ULConditionNode):
@@ -8,16 +7,16 @@ class ULOnNextTick(ULConditionNode):
         ULConditionNode.__init__(self)
         self.input_condition = None
         self._activated = 0
+        self.OUT = ULOutSocket(self, self.get_out)
 
-    def evaluate(self):
-        input_condition = self.get_input(self.input_condition)
-        self._set_ready()
+    def get_out(self):
+        condition = self.get_input(self.input_condition)
         if self._activated == 1:
-            self._set_value(True)
-            if not_met(input_condition):
+            if not condition:
                 self._activated = 0
-        elif not not_met(input_condition):
-            self._set_value(False)
+            return True
+        elif condition:
             self._activated = 1
+            return False
         elif self._activated == 0:
-            self._set_value(False)
+            return False

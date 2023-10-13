@@ -284,7 +284,7 @@ class ULMouseLook():
         cap_x: tuple = (0, 0),
         use_cap_y: bool = False,
         cap_y: tuple = (-89, 89),
-        invert: tuple = (False, True),
+        invert: tuple = (False, False),
         smoothing: float = 0.0,
         local: bool = True,
         front: int = 1,
@@ -405,27 +405,25 @@ class ULMouseLook():
         game_object_y = self.head
         sensitivity = self.sensitivity * 10
         cap_x = self.cap_x
-        lowercapX = cap_x[0] * pi / 180
-        uppercapX = cap_x[1] * pi / 180
         cap_y = self.cap_y
-        lowercapY = cap_y[0] * pi / 180
-        uppercapY = cap_y[1] * pi / 180
         invert = self.invert
         smooth = 1 - (self.smoothing * .99)
 
         mouse_position = Vector(self.mouse.position)
         offset = (mouse_position - self.center) * -0.2
 
-        if invert[1] is False:
+        if invert[1] is True:
             offset.y = -offset.y
         if invert[0] is True:
             offset.x = -offset.x
-        offset *= sensitivity
+        offset *= sensitivity * .001
 
-        self._x = offset.x = interpolate(self._x, offset.x, smooth, 0)
-        self._y = offset.y = interpolate(self._y, offset.y, smooth, 0)
+        self._x = offset.x = interpolate(self._x, offset.x * render.getWindowWidth(), smooth, 0)
+        self._y = offset.y = interpolate(self._y, offset.y * render.getWindowHeight(), smooth, 0)
 
         if self.use_cap_x:
+            lowercapX = cap_x[0] * pi / 180
+            uppercapX = cap_x[1] * pi / 180
             objectRotation = game_object_x.localOrientation.to_euler()
 
             if objectRotation.z + offset.x > uppercapX:
@@ -443,6 +441,8 @@ class ULMouseLook():
 
         rot_axis = 1 - self.front
         if self.use_cap_y:
+            lowercapY = cap_y[0] * pi / 180
+            uppercapY = cap_y[1] * pi / 180
             objectRotation = game_object_y.localOrientation.to_euler()
 
             if objectRotation[rot_axis] + offset.y > uppercapY:

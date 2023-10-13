@@ -1,8 +1,6 @@
 from mathutils import Vector
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_invalid
-from uplogic.utils import not_met
 from uplogic.utils.objects import rotate_to
 from uplogic.utils.objects import move_to
 
@@ -56,12 +54,9 @@ class ULFollowPath(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition = self.get_input(self.condition)
-        path_continue = self.get_input(self.path_continue)
-        if not_met(condition):
-            if not path_continue:
+        if not self.get_input(self.condition):
+            if not self.get_input(self.path_continue):
                 self._motion_path = None
-            self._set_ready()
             return
         moving_object = self.get_input(self.moving_object)
         rotating_object = self.get_input(self.rotating_object)
@@ -75,27 +70,7 @@ class ULFollowPath(ULActionNode):
         front_axis = self.get_input(self.front_axis)
         rot_speed = self.get_input(self.rot_speed)
         loop = self.get_input(self.loop)
-        if is_invalid(
-            path_points,
-            move_dynamic,
-            linear_speed,
-            reach_threshold,
-            look_at,
-            rot_axis,
-            front_axis,
-            loop
-        ):
-            return
-        if is_invalid(rot_speed):
-            rot_speed = 0
-        if loop is None:
-            return
-        if is_invalid(moving_object):
-            return
-        if is_invalid(navmesh_object):
-            navmesh_object = None
-        self._set_ready()
-        self._set_value(False)
+
         if (self._motion_path is None) or (self._motion_path.loop != loop):
             self.generate_path(
                 moving_object.worldPosition,
@@ -108,9 +83,9 @@ class ULFollowPath(ULActionNode):
             tpf = self.network.time_per_frame
             if look_at:
                 rotate_to(
-                    rot_axis,
                     rotating_object,
                     next_point,
+                    rot_axis,
                     front_axis,
                     rot_speed
                 )
@@ -125,7 +100,6 @@ class ULFollowPath(ULActionNode):
             if reached:
                 has_more = self._motion_path.advance()
                 if not has_more:
-                    self._set_value(True)
                     self.done = True
 
     def generate_path(self, start_position, path_points, navmesh_object, loop):

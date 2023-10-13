@@ -1,9 +1,6 @@
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
 from uplogic.utils import debug
-from uplogic.utils import is_invalid
-from uplogic.utils import not_met
-
 
 class ULRemoveListIndex(ULActionNode):
     def __init__(self):
@@ -24,14 +21,10 @@ class ULRemoveListIndex(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition = self.get_input(self.condition)
-        if not_met(condition):
+        if not self.get_input(self.condition):
             return
         list_d = self.get_input(self.items)
         idx = self.get_input(self.idx)
-        if is_invalid(list_d, idx):
-            return
-        self._set_ready()
         if len(list_d) > idx:
             del list_d[idx]
         else:

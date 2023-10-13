@@ -1,16 +1,11 @@
 from uplogic.animation import ULActionSystem
 from uplogic.data import GlobalDB
 from uplogic.animation import Action
-from uplogic.animation import ACTION_STARTED
-from uplogic.animation import ACTION_FINISHED
 from uplogic.events import receive
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils.constants import STATUS_INVALID, STATUS_WAITING
-from uplogic.utils import is_invalid
-from uplogic.utils import is_waiting
-from uplogic.utils import not_met
 from uplogic.utils.math import clamp
+from bpy.types import Action as BPYAction
 
 
 class ULPlayAction(ULActionNode):
@@ -52,25 +47,23 @@ class ULPlayAction(ULActionNode):
             return ULActionSystem('default')
 
     def _get_started(self):
-        if self.action_evt:
-            return self.action_evt.content == ACTION_STARTED
-        return STATUS_WAITING
+        return self._action and self._action.started
     
     def on_finish(self):
         self._finished = True
 
     def _get_finished(self):
-        return self._finished
+        return self._action and self._action.finished
 
     def _get_running(self):
         if self._action:
             return self._action.is_playing
-        return STATUS_WAITING
+        return False
 
     def _get_frame(self):
         if self._action:
             return self._action.frame
-        return STATUS_WAITING
+        return False
     
     def reset(self):
         self._finished = False
@@ -88,10 +81,8 @@ class ULPlayAction(ULActionNode):
         action = self._action
         has_action = action is not None
         play_mode = self.get_input(self.play_mode)
-        # print(play_mode)
         self.action_evt = receive(self._action)
-        if not_met(condition):
-            self._set_ready()
+        if not condition:
             if has_action:
                 action.speed = speed
                 action.intensity = intensity
@@ -99,16 +90,13 @@ class ULPlayAction(ULActionNode):
                     self._action = None
                     self.in_use = False
                 elif play_mode > 2:
-                    # print('AAA')
                     self._action.remove()
                     self._action = None
                     self.in_use = False
             return
-        action_name = self.get_input(self.action_name)
-        if layer_action and layer_action.name == action_name:
-            # if layer_action.speed != speed:
+        bpy_action: BPYAction = self.get_input(self.action_name)
+        if layer_action and layer_action.name == bpy_action:
             layer_action.speed = speed
-            # if layer_action.intensity != intensity:
             layer_action.intensity = intensity
             return
         if self.in_use and has_action:
@@ -120,34 +108,14 @@ class ULPlayAction(ULActionNode):
         priority = self.get_input(self.priority)
         blendin = self.get_input(self.blendin)
         blend_mode = self.get_input(self.blend_mode)
-        self._set_ready()
-        if is_invalid(game_object):
-            return
-        if is_waiting(
-            action_name,
-            start_frame,
-            end_frame,
-            layer,
-            priority,
-            play_mode,
-            intensity,
-            speed,
-            blendin,
-            blend_mode
-        ):
-            return
         if play_mode > 2:
             play_mode -= 3
         if speed <= 0:
             speed = 0.01
-        if is_invalid(game_object):  # can't play
-            self._action = None
-            self.in_use = False
 
-        # print('STATATASTSA')
         self._action = Action(
             game_object,
-            action_name,
+            bpy_action.name,
             start_frame,
             end_frame,
             layer,

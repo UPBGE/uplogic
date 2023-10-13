@@ -1,7 +1,5 @@
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_waiting
-from uplogic.utils import not_met
 
 
 class ULSetDictKey(ULActionNode):
@@ -24,15 +22,11 @@ class ULSetDictKey(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition = self.get_input(self.condition)
-        if not_met(condition):
+        if not self.get_input(self.condition):
             return
         dictionary = self.get_input(self.dict)
         key = self.get_input(self.key)
         val = self.get_input(self.val)
-        if is_waiting(dictionary, key, val):
-            return
-        self._set_ready()
         dictionary[key] = val
         self.new_dict = dictionary
         self.done = True

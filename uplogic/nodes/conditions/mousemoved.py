@@ -1,5 +1,4 @@
-from bge import events
-from uplogic.nodes import ULConditionNode
+from uplogic.nodes import ULConditionNode, ULOutSocket
 from uplogic.input import mouse_moved
 
 
@@ -7,14 +6,9 @@ class ULMouseMoved(ULConditionNode):
     def __init__(self):
         ULConditionNode.__init__(self)
         self.pulse = False
+        self.OUT = ULOutSocket(self, self.get_out)
 
-    def evaluate(self):
-        self._set_ready()
+    def get_out(self):
         if self.pulse:
-            self._set_value(
-                mouse_moved()
-            )
-        else:
-            self._set_value(
-                mouse_moved(tap=True)
-            )
+            return mouse_moved()
+        return mouse_moved(tap=True)

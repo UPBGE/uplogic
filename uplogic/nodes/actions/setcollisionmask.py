@@ -1,8 +1,5 @@
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_waiting
-from uplogic.utils import is_invalid
-from uplogic.utils import not_met
 
 
 class ULSetCollisionMask(ULActionNode):
@@ -19,17 +16,10 @@ class ULSetCollisionMask(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition = self.get_input(self.condition)
-        if not_met(condition):
-            self._set_ready()
+        if not self.get_input(self.condition):
             return
         game_object = self.get_input(self.game_object)
         slots = self.get_input(self.slots)
-        if is_waiting(game_object, slots):
-            return
-        self._set_ready()
-        if is_invalid(game_object):
-            return
         game_object.collisionMask = slots
 
         self.done = True

@@ -1,7 +1,5 @@
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_invalid
-from uplogic.utils import not_met
 
 
 class ULSetListIndex(ULActionNode):
@@ -24,15 +22,11 @@ class ULSetListIndex(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition = self.get_input(self.condition)
-        if not_met(condition):
+        if not self.get_input(self.condition):
             return
         list_d: list = self.get_input(self.items)
         index: int = self.get_input(self.index)
         val = self.get_input(self.val)
-        if is_invalid(list_d, index, val):
-            return
-        self._set_ready()
         list_d[index] = val
         self.new_list = list_d
         self.done = True

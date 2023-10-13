@@ -1,7 +1,5 @@
 from uplogic.nodes import ULParameterNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils.constants import STATUS_WAITING
-from uplogic.utils import is_invalid
 
 
 class ULThreshold(ULParameterNode):
@@ -18,16 +16,8 @@ class ULThreshold(ULParameterNode):
         v = self.get_input(self.value)
         e = self.get_input(self.else_z)
         t = self.get_input(self.threshold)
-        if is_invalid(v, t):
-            return STATUS_WAITING
         value = self.calc_threshold(self.operator, v, t, e)
-        if (v is None) or (t is None):
-            return STATUS_WAITING
-        else:
-            return value
-
-    def evaluate(self):
-        self._set_ready()
+        return value
 
     def calc_threshold(self, op, v, t, e):
         if op == 'GREATER':

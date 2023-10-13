@@ -1,8 +1,6 @@
 from bge import logic
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_invalid
-from uplogic.utils import not_met
 import bpy
 
 
@@ -20,13 +18,9 @@ class ULSetEeveeBloom(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition = self.get_input(self.condition)
-        if not_met(condition):
+        if not self.get_input(self.condition):
             return
         value = self.get_input(self.value)
-        if is_invalid(value):
-            return
-        self._set_ready()
         scene = logic.getCurrentScene()
         bpy.data.scenes[scene.name].eevee.use_bloom = value
         self.done = True

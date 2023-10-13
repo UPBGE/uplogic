@@ -1,8 +1,5 @@
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_waiting
-from uplogic.utils import is_invalid
-from uplogic.utils import not_met
 
 
 class ULInstallSubNetwork(ULActionNode):
@@ -24,21 +21,11 @@ class ULInstallSubNetwork(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition = self.get_input(self.condition)
-        if not_met(condition):
+        if not self.get_input(self.condition):
             return
         target_object = self.get_input(self.target_object)
         tree_name = self.get_input(self.tree_name)
         initial_status = self.get_input(self.initial_status)
-        if is_waiting(
-            target_object,
-            tree_name,
-            initial_status
-        ):
-            return
-        self._set_ready()
-        if is_invalid(target_object):
-            return
         self._network.install_subnetwork(
             target_object,
             tree_name,

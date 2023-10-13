@@ -43,6 +43,7 @@ from .listduplicate import ULListDuplicate  # noqa
 from .listfromitems import ULListFromItems  # noqa
 from .listindex import ULListIndex  # noqa
 from .listindexrandom import ULListIndexRandom  # noqa
+from .listextend import ULListExtend
 from .materialgetattribute import ULGetMaterialAttribute  # noqa
 from .materialgetnode import ULGetMaterialNode  # noqa
 from .materialgetsocket import ULGetMaterialSocket  # noqa
@@ -96,3 +97,8 @@ from .getuiwidgetattr import ULGetUIWidgetAttr
 from .serializedata import ULSerializeData
 from .rebuilddata import ULRebuildData
 from .fpsfactor import ULFPSFactor
+from .instream import ULKeyLogger
+from .rotatebypoint import ULRotateByPoint
+from .getlogictreeproperty import ULGetLogicTreeProperty
+
+from .randomvalue import ULRandomValue

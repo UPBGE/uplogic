@@ -1,8 +1,5 @@
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_waiting
-from uplogic.utils import is_invalid
-from uplogic.utils import not_met
 
 
 class ULEndObject(ULActionNode):
@@ -19,15 +16,9 @@ class ULEndObject(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition = self.get_input(self.condition)
+        if not self.get_input(self.condition):
+            return
         game_object = self.get_input(self.game_object)
-        if not_met(condition):
-            return
-        if is_waiting(game_object):
-            return
-        self._set_ready()
-        if is_invalid(game_object):
-            return
         if game_object is self.network._owner:
             self.network._do_remove = True
         game_object.endObject()

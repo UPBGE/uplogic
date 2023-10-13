@@ -10,6 +10,3 @@ class ULGetVSync(ULParameterNode):
 
     def get_vsync(self):
         return render.getVsync()
-
-    def evaluate(self):
-        self._set_ready()

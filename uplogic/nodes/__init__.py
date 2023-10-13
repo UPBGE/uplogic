@@ -1,8 +1,4 @@
 from bge import logic
-from uplogic.utils.constants import STATUS_READY
-from uplogic.utils.constants import STATUS_WAITING
-from uplogic.utils import check_game_object
-
 
 def alpha_move(a, b, fac):
     if a < b:
@@ -45,18 +41,15 @@ def load_user_logic(module_name):
 
 class ULLogicBase(object):
     def get_value(self): pass
-    def has_status(self, status): pass
 
 
 class ULLogicContainer(ULLogicBase):
 
     def __init__(self):
         self._uid = None
-        self._status = STATUS_WAITING
         self._value = None
         self._children = []
         self.network = None
-        self.is_waiting = False
 
     def get_value(self):
         return self._value
@@ -75,36 +68,20 @@ class ULLogicContainer(ULLogicBase):
     def stop(self, network):
         pass
 
-    def _set_ready(self):
-        self._status = STATUS_READY
-
-    def _set_status(self, status):
-        """
-        Check the current status of the cell. Should return
-        True if status equals the current status of the cell.
-        :param status:
-        :return:
-        """
-        self._status = status
-
-    def has_status(self, status):
-        return status == self._status
-
     def reset(self):
         """
-        Resets the status of the cell to ULLogicContainer.STATUS_WAITING.
+        Resets the status of the cell.
         A cell may override this to reset other states
-        or to keep the value at STATUS_READY if evaluation is required
+        or to keep the value if evaluation is required
         to happen only once (or never at all)
         :return:
         """
-        self._set_status(STATUS_WAITING)
+        pass
 
     def evaluate(self):
         """
         A logic cell implements this method to do its job. The network
-        evaluates a cell until its status becomes
-         STATUS_READY. When that happens, the cell is
+        evaluates a cell. When that happens, the cell is
          removed from the update queue.
         :return:
         """
@@ -112,14 +89,10 @@ class ULLogicContainer(ULLogicBase):
             "{} doesn't implement evaluate".format(self.__class__.__name__)
         )
 
-    def _always_ready(self, status):
-        return status is STATUS_READY
-
     def _skip_evaluate(self):
         return
 
     def deactivate(self):
-        self.has_status = self._always_ready
         self.evaluate = self._skip_evaluate
 
 
@@ -132,10 +105,18 @@ class ULOutSocket(ULLogicBase):
 
     def __init__(self, node, value_getter):
         self.node = node
-        self.get_value = value_getter
+        # self.get_value
+        self._value_getter = value_getter
 
-    def has_status(self, status):
-        return self.node.has_status(status)
+    def _value_getter(self):
+        pass
+    
+    def get_value(self):
+        result = self.node.outputs.get(self, None)
+        if result is None:
+            result = self._value_getter()
+            self.node.outputs[self] = result
+        return result
 
 
 ###############################################################################
@@ -147,11 +128,13 @@ class ULLogicNode(ULLogicContainer):
 
     def __init__(self):
         super().__init__()
+        self.outputs = {}
         self.output_values = {}
 
     def reset(self):
         super().reset()
-        self.output_values = {}
+        self.outputs = {}
+        self.output_values = {}  # XXX: Remove
 
     def set_output(self, socket, value):
         self.output_values[socket] = value
@@ -160,19 +143,14 @@ class ULLogicNode(ULLogicContainer):
     def get_output(self, socket, default=None):
         return self.output_values.get(socket, default)
 
-    def get_input(self, param, scene=None, type=None):
-        if str(param).startswith('NLO:'):
-            if str(param) == 'NLO:U_O':
-                return self.network._owner
-            else:
-                return check_game_object(param.split(':')[-1], scene)
+    def get_input(self, param):
         if isinstance(param, ULLogicBase):
-            if param.has_status(STATUS_READY):
-                return param.get_value()
-            else:
-                return STATUS_WAITING
+            return param.get_value()
         else:
             return param
+
+    def evaluate(self):
+        pass
 
 
 class ULParameterNode(ULLogicNode):

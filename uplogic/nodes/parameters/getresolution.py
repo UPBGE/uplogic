@@ -22,6 +22,3 @@ class ULGetResolution(ULParameterNode):
 
     def get_res(self):
         return Vector((self.width, self.height))
-
-    def evaluate(self):
-        self._set_ready()

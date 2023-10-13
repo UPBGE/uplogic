@@ -1,7 +1,6 @@
 from uplogic.nodes import ULParameterNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils.constants import STATUS_WAITING
-from uplogic.utils import is_invalid
+from bpy.types import Material
 import bpy
 
 
@@ -13,15 +12,10 @@ class ULGetMaterialNode(ULParameterNode):
         self.OUT = ULOutSocket(self, self._get_val)
 
     def _get_val(self):
-        mat_name = self.get_input(self.mat_name)
+        material: Material = self.get_input(self.mat_name)
         node_name = self.get_input(self.node_name)
-        if is_invalid(mat_name, node_name):
-            return STATUS_WAITING
         return (
-            bpy.data.materials[mat_name]
+            material
             .node_tree
             .nodes[node_name]
         )
-
-    def evaluate(self):
-        self._set_ready()

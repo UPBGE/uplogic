@@ -11,10 +11,4 @@ class ULFPSFactor(ULParameterNode):
         self.TIMEFACTOR = ULOutSocket(self, self.get_out)
 
     def get_out(self):
-        socket = self.get_output('out')
-        if socket is None:
-            return self.set_output('out', FPS_FACTOR())
-        return socket
-
-    def evaluate(self):
-        self._set_ready()
+        return FPS_FACTOR()

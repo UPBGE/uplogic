@@ -1,8 +1,5 @@
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.utils import is_invalid
-from uplogic.utils import is_waiting
-from uplogic.utils import not_met
 
 
 class ULToggleProperty(ULActionNode):
@@ -11,7 +8,7 @@ class ULToggleProperty(ULActionNode):
         self.condition = None
         self.game_object = None
         self.property_name = None
-        self.mode = 'GAME'
+        self.mode = 0
         self.done = False
         self.OUT = ULOutSocket(self, self._get_done)
 
@@ -20,19 +17,11 @@ class ULToggleProperty(ULActionNode):
 
     def evaluate(self):
         self.done = False
-        condition = self.get_input(self.condition)
-        if not_met(condition):
-            self._set_ready()
+        if not self.get_input(self.condition):
             return
         game_object = self.get_input(self.game_object)
         property_name = self.get_input(self.property_name)
-        if is_waiting(property_name):
-            return
-        if is_invalid(game_object):
-            return
-        self._set_ready()
-        if condition:
-            obj = game_object if self.mode == 'GAME' else game_object.blenderObject
-            value = obj.get(property_name)
-            obj[property_name] = not value
+        obj = game_object.blenderObject if self.mode else game_object
+        value = obj.get(property_name)
+        obj[property_name] = not value
         self.done = True
