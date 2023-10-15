@@ -85,7 +85,7 @@ class ULCollision(ULConditionNode):
         self._normal = normal
 
     def reset(self):
-        ULLogicContainer.reset(self)
+        super().reset()
         self._collision_triggered = False
         self._objects = []
 

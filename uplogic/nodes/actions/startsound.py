@@ -35,7 +35,7 @@ class ULStartSound(ULActionNode):
         return self.done
 
     def reset(self):
-        ULActionNode.reset(self)
+        super().reset()
         if self._handle and self._handle.finished:
             self._handle = None
 

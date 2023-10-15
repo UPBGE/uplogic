@@ -225,6 +225,10 @@ def retrieve(key, category='uplogic.default_globals', default=None):
     return values.get(key, default)
 
 
+def get_category(name='uplogic.default_globals'):
+    return GlobalDB.retrieve(name)
+
+
 def initialize():
     if not GlobalDB.initialized:
         scene = logic.getCurrentScene()
