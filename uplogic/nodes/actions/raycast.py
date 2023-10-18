@@ -23,7 +23,7 @@ class ULRaycast(ULActionNode):
         self.mask: int = get_bitmask(all=True)
         self.visualize: bool = None
         self._data = RayCastData((None, None, None, None, None, None))
-        self.advanced = False
+        self.face_data = False
         self.RESULT = ULOutSocket(self, self.get_result)
         self.PICKED_OBJECT = ULOutSocket(self, self.get_picked_object)
         self.POINT = ULOutSocket(self, self.get_point)
@@ -82,5 +82,6 @@ class ULRaycast(ULActionNode):
             xray=xray,
             local=local,
             mask=self.get_input(self.mask),
-            visualize=visualize
+            visualize=visualize,
+            face_data=self.face_data
         )
