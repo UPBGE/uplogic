@@ -154,7 +154,7 @@ def get_direction(a, b, local=False) -> Vector:
     return d
 
 
-def map_range(value: float, in_min: float, in_max: float, out_min: float, out_max: float, clamp=(None, None)) -> float:
+def map_range(value: float, in_min: float, in_max: float, out_min: float, out_max: float, clamp: bool = False) -> float:
     """Map a value from one range to another.
     
     :param `value`: Value to be remapped.
@@ -165,11 +165,32 @@ def map_range(value: float, in_min: float, in_max: float, out_min: float, out_ma
     :param `clamp`: Clamp the modified value.
     """
     result = (value - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
-    if clamp[0] is not None and result < clamp[0]:
-        return clamp[0]
-    if clamp[1] is not None and result > clamp[1]:
-        return clamp[1]
+    if clamp and result < out_min:
+        return out_min
+    if clamp and result > out_max:
+        return out_max
     return result
+
+
+def map_range_vector(value: float, in_min: float, in_max: float, out_min: float, out_max: float, clamp: bool = False) -> float:
+    """Map a vector from one range to another.
+
+    :param `value`: Value to be remapped.
+    :param `in_min`: Lower end of the original range.
+    :param `in_max`: Upper end of the original range.
+    :param `out_min`: Lower end of the new range.
+    :param `out_max`: Upper end of the new range.
+    :param `clamp`: Clamp the modified value.
+    """
+    outvec = Vector(value)
+    for i in range(len(value)):
+        result = (value[i] - in_min[i]) * (out_max[i] - out_min[i]) / (in_max[i] - in_min[i]) + out_min[i]
+        if clamp and result < out_min[i]:
+            result = out_min[i]
+        if clamp and result > out_max[i]:
+            result = out_max[i]
+        outvec[i] = result
+    return outvec
 
 
 def world_to_screen(position: Vector = Vector((0, 0, 0)), inv_y: bool = True) -> Vector:

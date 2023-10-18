@@ -9,9 +9,6 @@ class ULObjectAttribute(ULParameterNode):
         self.game_object = None
         self.attribute_name = None
         self.OUT = ULOutSocket(self, self.get_done)
-        self.VAL = ULOutSocket(self, self.get_done)
-        self.VEC = ULOutSocket(self, self.get_done)
-        self.BOOL = ULOutSocket(self, self.get_done)
 
     def get_done(self):
         game_object = self.get_input(self.game_object)

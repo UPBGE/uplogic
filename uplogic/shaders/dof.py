@@ -91,6 +91,8 @@ float height = bgl_RenderedTextureHeight; //texture height
 in vec4 bgl_TexCoord;
 vec2 texcoord = bgl_TexCoord.xy;
 
+out vec4 fragColor
+
 vec2 texel = vec2(1.0/width,1.0/height);
 
 uniform float distance;  //external focal point value, but you may use autofocus option below
@@ -279,8 +281,8 @@ void main()
 
 	col /= s;   
 
-	gl_FragColor.rgb = col;
-	gl_FragColor.a = 1.0;
+	fragColor.rgb = col;
+	fragColor.a = 1.0;
 }
 """
 
