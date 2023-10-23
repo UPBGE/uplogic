@@ -70,10 +70,10 @@ class Slider(Widget):
         self._parent = val
         self.pos = self.pos
         self.size = self.size
-        self.build_shader()
+        self._build_shader()
 
-    def build_shader(self):
-        super().build_shader()
+    def _build_shader(self):
+        super()._build_shader()
         if self.parent:
             self.value = self.value
 

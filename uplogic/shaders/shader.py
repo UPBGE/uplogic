@@ -52,7 +52,7 @@ class ULFilter():
         self,
         program: str,
         idx: int = None,
-        bound_uniforms: dict = {}
+        uniforms: dict = {}
     ) -> None:
         if self._deprecated:
             debug('ULTrackTo class will be renamed to "TrackTo" in future releases!')
@@ -60,7 +60,7 @@ class ULFilter():
         self.idx = idx
         scene = logic.getCurrentScene()
         self.manager = scene.filterManager
-        self._uniforms = bound_uniforms
+        self._uniforms = uniforms
         self._filter = None
         FilterSystem.add_filter(self)
 
@@ -136,6 +136,14 @@ class ULFilter():
 
 class Filter2D(ULFilter):
     _deprecated = False
+
+
+class Attachment2D(ULFilter):
+
+    _deprecated = False
+
+    def __init__(self, program: str, idx: int = None, uniforms: dict = {}) -> None:
+        super().__init__(program, idx, uniforms)
 
 
 class FilterSystem:

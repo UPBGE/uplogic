@@ -42,7 +42,7 @@ class Cursor(Widget):
         if texture:
             self._texture = gpu.texture.from_image(texture)
 
-    def build_shader(self):
+    def _build_shader(self):
         self._shader = gpu.shader.from_builtin('IMAGE_COLOR')
         screen_res = [bge.render.getWindowWidth(), bge.render.getWindowHeight()]
         mpos = [MOUSE.position.x * screen_res[0] + self.offset[0], (1 - MOUSE.position.y) * screen_res[1] + self.offset[1]]
@@ -60,7 +60,7 @@ class Cursor(Widget):
         )
 
     def _draw_custom_cursor(self):
-        self.build_shader()
+        self._build_shader()
         scene = bge.logic.getCurrentScene()
         if scene.post_draw[-1] is not self._draw_custom_cursor:
             scene.post_draw.remove(self._draw_custom_cursor)

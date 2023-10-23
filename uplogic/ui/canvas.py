@@ -5,6 +5,12 @@ import bge
 
 
 class Canvas(Widget):
+    """The base class for UI layouts. This class has no visual representation
+    and spans the whole screen. It is intended to manage collections of widgets
+    more easily.
+
+    A canvas cannot be attached to another widget and has its own update cycle.
+    """
 
     def __init__(self):
         super().__init__((0, 0), (0, 0))
@@ -40,12 +46,13 @@ class Canvas(Widget):
 
     @property
     def parent(self):
-        return self._parent
+        return None
 
     @parent.setter
     def parent(self, val):
-        self._parent = val
-        self.pos = self.pos
+        self._parent = None
+        # self._parent = val
+        # self.pos = self.pos
 
     def draw(self):
         if not self.show:

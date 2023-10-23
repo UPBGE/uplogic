@@ -5,7 +5,19 @@ from mathutils import Vector
 
 
 class Widget():
-    '''TODO: Documentation
+    '''The widget Base class. a Widget has all the basic logic about
+    sizing and positioning, but has no visual representation.
+
+    This class is intended to be used as a base for inheriting from
+    for custom widgets.
+
+    :param `pos`: Initial position of this widget in either pixels or factor.
+    :param `size`: Initial size of this widget in either pixels or factor.
+    :param `bg_color`: Color to draw in the area of the widget.
+    :param `relative`: Whether to use pixels or factor for size or pos; example: {`'pos'`: `True`, `'size'`: `True`}.
+    :param `halign`: Horizontal alignment of the widget, can be (`left`, `center`, `right`).
+    :param `valign`: Vertical alignment of the widget, can be (`bottom`, `center`, `top`).
+    :param `angle`: Rotation in degrees of this widget around the pivot defined by the alignment.
     '''
     def __init__(self, pos=(0, 0), size=(0, 0), bg_color=(0, 0, 0, 0), relative={}, halign='left', valign='bottom', angle=0):
         self.halign = halign
@@ -15,23 +27,25 @@ class Widget():
         self._pos = [0, 0]
         self._children: list[Widget] = []
         self.relative = relative
-        self._rebuild = True 
+        self._rebuild = True
         self.size = size
         self.pos = pos
         self.bg_color = bg_color
         self._vertices = None # (Vector((0, 0)), Vector((0, 0)), Vector((0, 0)), Vector((0, 0)))
         self.angle = angle
-        self.build_shader()
+        self._build_shader()
         self._clipped = [0, 0]
         self.use_clipping = False
         self.z = 0
         self.start()
 
     def toggle(self, *args):
+        """Toggle the widget on/off."""
         self.show = not self.show
 
     @property
     def show(self):
+        """If `False`, this widget and all its children will not be rendered."""
         return self._show
 
     @show.setter
@@ -49,6 +63,7 @@ class Widget():
 
     @property
     def canvas(self):
+        """Find the canvas this widget is attached to."""
         pa = self
         while pa.parent is not None:
             pa = pa.parent
@@ -56,6 +71,7 @@ class Widget():
 
     @property
     def pivot(self):
+        """Rotation point for this widget."""
         if self.parent is None:
             return (0, 0)
         v = self._vertices
@@ -73,6 +89,7 @@ class Widget():
 
     @property
     def angle(self):
+        """The angle this widget is rotated by."""
         return self._angle
 
     @angle.setter
@@ -90,6 +107,7 @@ class Widget():
 
     @property
     def childrenRecursive(self):
+        """All children and children's children of this widget."""
         widgets = []
         for w in self.children:
             widgets.extend(w._recurse)
@@ -97,6 +115,7 @@ class Widget():
 
     @property
     def children(self):
+        """Immediate children of this widget."""
         return self._children
 
     @children.setter
@@ -105,6 +124,7 @@ class Widget():
 
     @property
     def bg_color(self):
+        """Background color of this widget. Colors the whole area of the widget in a rectangular shape."""
         return self._bg_color
 
     @bg_color.setter
@@ -114,6 +134,7 @@ class Widget():
 
     @property
     def parent(self):
+        """The widget whose position and size to use relatively."""
         return self._parent
 
     @parent.setter
@@ -125,10 +146,11 @@ class Widget():
         self._parent = val
         self.pos = self.pos
         self.size = self.size
-        self.build_shader()
+        self._build_shader()
 
     @property
     def pos_abs(self):
+        """The absolute position of this widget from the bottom left corner of the screen in pixels."""
         if self._vertices is None:
             return [0, 0]
         pos = self._vertices[0]
@@ -139,6 +161,7 @@ class Widget():
 
     @property
     def pos(self):
+        """Position of this widget relative to its parent in either pixels or factor."""
         return self._pos
 
     @pos.setter
@@ -153,6 +176,7 @@ class Widget():
 
     @property
     def x(self):
+        """Horizontal position of this widget relative to its parent in either pixels or factor."""
         return self._pos[0]
 
     @x.setter
@@ -167,6 +191,7 @@ class Widget():
 
     @property
     def y(self):
+        """Vertical position of this widget relative to its parent in either pixels or factor."""
         return self._pos[1]
 
     @y.setter
@@ -181,6 +206,7 @@ class Widget():
 
     @property
     def size(self):
+        """Size of this widget in either pixels or factor relative to its parent."""
         return self._size
 
     @size.setter
@@ -196,6 +222,7 @@ class Widget():
 
     @property
     def use_clipping(self):
+        """Whether to draw outside of the parent's bounds."""
         return self._use_clipping
 
     @use_clipping.setter
@@ -208,6 +235,7 @@ class Widget():
 
     @property
     def width(self):
+        """Horizontal size of this widget in either pixels or factor relative to its parent."""
         return self.size[0]
 
     @width.setter
@@ -218,6 +246,7 @@ class Widget():
 
     @property
     def height(self):
+        """Vertical size of this widget in either pixels or factor relative to its parent."""
         return self.size[1]
 
     @height.setter
@@ -228,6 +257,7 @@ class Widget():
 
     @property
     def opacity(self):
+        """Opacity for this widget, but not its children."""
         return self.bg_color[3]
 
     @opacity.setter
@@ -242,6 +272,7 @@ class Widget():
 
     @property
     def clipping(self):
+        """Clipping boundaries. If clipping is enabled, don't draw outside of these boundaries."""
         pdpos = self.parent._draw_pos
         pdsize = self.parent._draw_size
         return [
@@ -317,7 +348,7 @@ class Widget():
             return y1
         return x0
 
-    def build_shader(self):
+    def _build_shader(self):
         if self.parent is None:
             return
         pos = self._draw_pos
@@ -362,16 +393,17 @@ class Widget():
 
     def _setup_draw(self):
         if self._rebuild is True:
-            self.build_shader()
+            self._build_shader()
             self._rebuild = False
 
     def _rebuild_tree(self):
-        self.build_shader()
+        self._build_shader()
         for c in self.children:
             c._rebuild_tree()
 
     def draw(self):
-        """This is called each frame.
+        """This is called each frame if the widget is part of a canvas. It can be called manually,
+        but it will result in a higher logic load.
         """
         gpu.state.blend_set('ALPHA')
         self.canvas._to_evaluate.append(self)
@@ -388,25 +420,25 @@ class Widget():
         pass
 
     def add_widget(self, widget):
-        '''Add a `Widget`.
+        '''Add a `Widget` to this widget as child.
 
         :param `widget`: `Widget` to add.
         '''
         if widget not in self.children:
             self.children.append(widget)
-            self.canvas.set_z(-1)
+            self.canvas._set_z(-1)
             widget.parent = self
         self.children = sorted(self.children, key=lambda widget: widget.z, reverse=False)
 
-    def set_z(self, z):
+    def _set_z(self, z):
         z += 1
         self.z = z
         for c in self.children:
-            z = c.set_z(z)
+            z = c._set_z(z)
         return z
 
     def remove_widget(self, widget):
-        '''Remove a `Widget`.
+        '''Remove a `Widget` from this widget.
 
         :param `widget`: `Widget` which to remove.
         '''
@@ -415,6 +447,7 @@ class Widget():
             widget.parent = None
 
     def clear(self):
+        """Remove all widgets from this widget."""
         to_remove = self.children.copy()
         for child in to_remove:
             self.remove_widget(child)

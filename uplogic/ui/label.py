@@ -1,18 +1,24 @@
 from .widget import Widget
 import blf
-from bge import render
 from bpy.types import VectorFont
 from uplogic.utils.math import rotate2d
 import math
 
 
 class Label(Widget):
-    """Widget for displaying text"""
+    '''Widget for displaying text
+
+    :param `orientation`: Whether to arrange widgets horizontally or vertically; Can be (`'horizontal'`, `'vertical'`).
+    :param `pos`: Initial position of this widget in either pixels or factor.
+    :param `relative`: Whether to use pixels or factor for size or pos; example: {`'pos'`: `True`, `'size'`: `True`}.
+    :param `halign`: Horizontal alignment of the widget, can be (`left`, `center`, `right`).
+    :param `valign`: Vertical alignment of the widget, can be (`bottom`, `center`, `top`).
+    :param `angle`: Rotation in degrees of this widget around the pivot defined by the alignment.
+    '''
 
     def __init__(
         self,
         pos=[0, 0],
-        bg_color=[0, 0, 0, 0],
         relative={},
         text='',
         font='',
@@ -27,18 +33,6 @@ class Label(Widget):
         wrap=False,
         angle=0
     ):
-        """
-        :param parent: the widget's parent
-        :param name: the name of the widget
-        :param text: the text to display (this can be changed later via the text property)
-        :param font: the font to use
-        :param pt_size: the point size of the text to draw (defaults to 30 if None)
-        :param bg_color: the color to use when rendering the font
-        :param pos: a tuple containing the x and y position
-        :param sub_theme: name of a sub_theme defined in the theme file (similar to CSS classes)
-        :param options: various other options
-
-        """
         self._parent = None
         self._children = None
         self._font_color = font_color
@@ -47,12 +41,11 @@ class Label(Widget):
         self.shadow = shadow
         self.shadow_offset = shadow_offset
         self.shadow_color = shadow_color
-        self.bg_color = bg_color
         self.font_size = font_size
         self.font_color = font_color
         self.font = font
         self.wrap = wrap
-        Widget.__init__(self, pos, (0, 0), bg_color, relative, angle=angle)
+        Widget.__init__(self, pos, (0, 0), (0, 0, 0, 0), relative, angle=angle)
         self.text_halign = halign
         self.text_valign = valign
 
@@ -110,8 +103,6 @@ class Label(Widget):
 
     @property
     def _draw_size(self):
-        # if self.parent is None:
-        #     return [0, 0]
         return blf.dimensions(self.font, self.text)
 
     def draw(self):

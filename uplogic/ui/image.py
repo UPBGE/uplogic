@@ -23,7 +23,7 @@ class Image(Widget):
         if texture:
             self._texture = gpu.texture.from_image(texture)
 
-    def build_shader(self):
+    def _build_shader(self):
         pos = self._draw_pos
         size = self._draw_size
         x0 = Vector((pos[0], pos[1]))
@@ -72,7 +72,7 @@ class Sprite(Image):
     @idx.setter
     def idx(self, val):
         self._idx = val
-        self.build_shader()
+        self._build_shader()
 
     @property
     def rows(self):
@@ -96,7 +96,7 @@ class Sprite(Image):
         self._cols = val
         self._col_width = 1 / val
 
-    def build_shader(self):
+    def _build_shader(self):
         pos = self._draw_pos
         size = self._draw_size
         x0 = Vector((pos[0], pos[1]))
