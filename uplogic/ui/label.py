@@ -121,7 +121,7 @@ class Label(Widget):
             blf.disable(self.font, blf.CLIPPING)
         if self.wrap and self.parent:
             blf.enable(self.font, blf.WORD_WRAP)
-            blf.word_wrap(self.font, self.parent._draw_size[0])
+            blf.word_wrap(self.font, int(self.parent._draw_size[0]))
         if self.shadow:
             col = self.shadow_color
             blf.enable(self.font, blf.SHADOW)
@@ -164,7 +164,7 @@ class Label(Widget):
             blf.position(self.font, pos[0], pos[1], 0)
             blf.draw(self.font, self.text)
 
+        super().draw()
         blf.disable(self.font, blf.WORD_WRAP)
         blf.disable(self.font, blf.SHADOW)
         blf.disable(self.font, blf.ROTATION)
-        super().draw()
