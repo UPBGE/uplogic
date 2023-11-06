@@ -106,4 +106,7 @@ def on_collision(
     :param `material`: Only look for objects that have this material applied.
     :param `tap`: Only validate the first frame of the collision.
     """
+    if not isinstance(obj, GameObject):
+        print("'on_collision()' Argument 0 is required to be a 'KX_GameObject' type!")
+        return
     return Collision(obj, callback, prop, material, tap, post_call)

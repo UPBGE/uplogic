@@ -3,13 +3,14 @@ from uplogic.nodes import ULOutSocket
 from uplogic.utils import rotate2d
 from uplogic.utils import rotate3d
 from uplogic.utils import rotate_by_axis
+from mathutils import Vector
 from math import degrees
 
 
 class ULRotateByPoint(ULParameterNode):
     def __init__(self):
         ULParameterNode.__init__(self)
-        self.mode = 0
+        # self.mode = 0
         self.global_axis = 0
         self.origin = None
         self.pivot = None
@@ -21,6 +22,14 @@ class ULRotateByPoint(ULParameterNode):
             self._rotate3d,
             self._rotate_by_axis
         ]
+
+    @property
+    def mode(self):
+        return None
+
+    @mode.setter
+    def mode(self, val):
+        self.OUT._value_getter = self._operations[val]
 
     def _rotate2d(self):
         return rotate2d(
@@ -46,4 +55,4 @@ class ULRotateByPoint(ULParameterNode):
         )
 
     def get_point(self):
-        return self._operations[self.mode]()
+        return Vector((0, 0, 0))

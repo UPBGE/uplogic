@@ -1,5 +1,6 @@
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
+from uplogic.utils.math import clamp
 
 
 class ULModifyProperty(ULActionNode):
@@ -12,6 +13,9 @@ class ULModifyProperty(ULActionNode):
         self.property_value = None
         self.operator = None
         self.mode = 0
+        self.clamp = False
+        self.min_val = 0.0
+        self.max_val = 1.0
         self.done = False
         self.OUT = ULOutSocket(self, self._get_done)
 
@@ -27,7 +31,12 @@ class ULModifyProperty(ULActionNode):
         property_value = self.get_input(self.property_value)
         obj = game_object.blenderObject if self.mode else game_object
         value = obj.get(property_name, 0)
-        obj[property_name] = (
-            self.operator(value, property_value)
-        )
+        result = self.operator(value, property_value)
+        if self.clamp:
+            result = clamp(
+                result,
+                self.get_input(self.min_val),
+                self.get_input(self.max_val)
+            )
+        obj[property_name] = result
         self.done = True
