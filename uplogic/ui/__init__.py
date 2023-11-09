@@ -12,3 +12,5 @@ from .canvas import Canvas
 from .slider import Slider
 from .slider import FrameSlider
 from .slider import ProgressSlider
+from .path import Path
+from .path import WorldPath

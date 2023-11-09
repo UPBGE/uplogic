@@ -9,6 +9,7 @@ from uplogic.audio import ULAudioSystem
 from uplogic.audio import get_audio_system
 from uplogic.events import schedule_callback
 from uplogic.utils.math import interpolate
+from uplogic.utils import DELTA_TIME
 import bpy
 import aud
 
@@ -227,7 +228,7 @@ class ULSound2D(ULSound):
 
     @lowpass.setter
     def lowpass(self, val):
-        if self._lowpass == val:
+        if abs(self._lowpass - val) < 10:
             return
         self._lowpass = val
         sound = self.soundfile
@@ -235,10 +236,10 @@ class ULSound2D(ULSound):
             sound = sound.lowpass(val, .5)
         sound = self.aud_system.device.play(sound)
         sound.loop_count = self.sound.loop_count
-        sound.position = self.sound.position
+        sound.position = self.sound.position + DELTA_TIME()
         sound.volume = self.sound.volume
         sound.pitch = self.sound.pitch
-        schedule_callback(self.sound.stop, .1)
+        schedule_callback(self.sound.stop, .5)
         self.sound = sound
 
     def update(self):

@@ -71,6 +71,7 @@ from .constants import WHITE
 from .constants import BLACK
 from .constants import GREY
 from .constants import FPS_FACTOR
+from .constants import DELTA_TIME
 from bge import logic
 from bge.types import KX_GameObject as GameObject
 from mathutils import Matrix

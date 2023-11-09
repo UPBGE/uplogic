@@ -16,7 +16,8 @@ from .setactuatorvalue import ULSetActuatorValue  # noqa
 from .setoverlaycollection import ULSetOverlayCollection  # noqa
 from .setpyinstanceattr import ULSetPyInstanceAttr  # noqa
 from .setsensorvalue import ULSetSensorValue  # noqa
-from .startsound import ULStartSound  # noqa
+from .startsound2d import ULStartSound  # noqa
+from .startsound import StartSoundNode  # noqa
 from .startsound3d import ULStartSound3D  # noqa
 from .startspeaker import ULStartSpeaker  # noqa
 from .dispatchevent import ULDispatchEvent  # noqa

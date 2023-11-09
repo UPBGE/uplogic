@@ -68,12 +68,17 @@ def FPS_FACTOR() -> float:
     return (60 / avg) if 0 < avg < 10000 else 1
 
 
-RED = [1, 0, 0]
-GREEN = [0, 1, 0]
-BLUE = [0, 0, 1]
-YELLOW = [1, 1, 0]
-PURPLE = [1, 0, 1]
-TORQUISE = [0, 1, 1]
-WHITE = [1, 1, 1]
-BLACK = [0, 0, 0]
-GREY = [.5, .5, .5]
+def DELTA_TIME() -> float:
+    avg = logic.getAverageFrameRate()
+    return (1 / avg) if 0 < avg < 10000 else 0.0
+
+
+RED = [1, 0, 0, 1]
+GREEN = [0, 1, 0, 1]
+BLUE = [0, 0, 1, 1]
+YELLOW = [1, 1, 0, 1]
+PURPLE = [1, 0, 1, 1]
+TORQUISE = [0, 1, 1, 1]
+WHITE = [1, 1, 1, 1]
+BLACK = [0, 0, 0, 1]
+GREY = [.5, .5, .5, 1]
