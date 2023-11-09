@@ -31,6 +31,16 @@ ACTION_STARTED = 'ACTION_STARTED'
 ACTION_FINISHED = 'ACTION_FINISHED'
 
 
+class ActionCallback:
+
+    def __init__(self, action, callback, frame, *args):
+        self.action = action
+        self.frame = frame
+        self.callback = callback
+        self.consumed = False
+        self.args = args
+
+
 class ULAction():
     '''
     [DEPRECATED] Use `uplogic.animation.action` instead.
@@ -47,7 +57,7 @@ class ULAction():
     :param `priority`: The priority with which to play the action (only relevant
     for actions on the same layer).
     :param `blendin`: Use this many frames to "blend into" the animation.
-    :param `play_mode`: Mode of playback of [`'play'`, `'loop'`, `'pingpong'`].
+    :param `play_mode`: Playback mode of [`'play'`, `'loop'`, `'pingpong'`].
     :param `speed`: Playback speed.
     :param `intensity`: "Intensity" of the action; Use this to blend
     animations on different layers together.
@@ -113,6 +123,7 @@ class ULAction():
         layer = self.layer
         layer_action_name = game_object.getActionName(layer)
         same_action = layer_action_name == action_name
+        self._callbacks: list[ActionCallback] = []
         self.on_start()
         if (not same_action and self.is_playing):
             game_object.stopAction(layer)
@@ -142,6 +153,9 @@ class ULAction():
         '''Handler for animation playback finish.
         '''
         schedule(self, 0, ACTION_FINISHED)
+
+    def frame_trigger(self, frame, callback, *args):
+        self._callbacks.append(ActionCallback(self, callback, frame, *args))
 
     @property
     def is_playing(self) -> bool:
@@ -265,6 +279,13 @@ class ULAction():
         end_frame = self.end_frame
         playing_action = game_object.getActionName(layer)
         playing_frame = game_object.getActionFrame(layer)
+        for action_callback in self._callbacks:
+            if playing_frame > action_callback.frame:
+                if not action_callback.consumed:
+                    action_callback.callback(*action_callback.args)
+                    action_callback.consumed = True
+            else:
+                action_callback.consumed = False
         if end_frame < start_frame:
             start_frame, end_frame = end_frame, start_frame
         if (
@@ -324,8 +345,8 @@ class ULAction():
     def randomize_frame(self, min: float = -1, max: float = -1):
         '''Randomize the frame of this animation.
 
-        :param `min`: Min range of randomization (Optional).
-        :param `max`: Max range of randomization (Optional).
+        :param `min`: Min range of randomization.
+        :param `max`: Max range of randomization.
         '''
         if min == -1:
             min = self.start_frame
@@ -337,8 +358,8 @@ class ULAction():
     def randomize_speed(self, min: float = .9, max: float = 1.1):
         '''Randomize the speed of this animation.
 
-        :param `min`: Min range of randomization (Optional, default 0.9).
-        :param `max`: Max range of randomization (Optional, default 1.1).
+        :param `min`: Min range of randomization.
+        :param `max`: Max range of randomization.
         '''
         delta = max - min
         self.speed = min + (delta * random())
@@ -361,7 +382,7 @@ class Action(ULAction):
     :param `priority`: The priority with which to play the action (only relevant
     for actions on the same layer).
     :param `blendin`: Use this many frames to "blend into" the animation.
-    :param `play_mode`: Mode of playback of [`'play'`, `'loop'`, `'pingpong'`].
+    :param `play_mode`: Playback mode of [`'play'`, `'loop'`, `'pingpong'`].
     :param `speed`: Playback speed.
     :param `intensity`: "Intensity" of the action; Use this to blend
     animations on different layers together.

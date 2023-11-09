@@ -138,6 +138,7 @@ class SpawnedInstance(Spawn):
     #         scene.pre_draw.append(self._update)
     #     self._visualize = False
     #     self.start()
+
     def _reset_physics(self):
         super()._reset_physics()
         for c in self._object.components:

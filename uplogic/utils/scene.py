@@ -8,8 +8,9 @@ def set_scene(scene: str or bpy.types.Scene) -> None:
 
 
 class FileLoader():
+    '''Load the content of the currently'''
 
-    def __init__(self, start=True):
+    def __init__(self, start=False):
         self.status = 0.0
         self.item = ''
         self.data = 'textures'

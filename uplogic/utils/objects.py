@@ -443,23 +443,23 @@ class ULCurve(GameObject):
         return self.game_object.name
 
     @name.setter
-    def name(self, val):
-        print('Curve.name is read-only!')
+    def name(self, val: str):
+        print('Curve.name is Read-Only!')
 
     @property
     def points(self):
-        """Points of the curve. These points use global coordinates."""
+        """Points of the curve in global space."""
         splines = self.game_object.blenderObject.data.splines
         return splines[0].points if len(splines) > 0 else []
 
     @points.setter
-    def points(self, val):
+    def points(self, val: list):
         if val != self.points:
             set_curve_points(self.game_object, val)
 
     @property
     def bevel_depth(self):
-        """Thickness of the curve geometry."""
+        """Thickness of the curve geometry as diameter."""
         return self.game_object.blenderObject.data.bevel_depth
 
     @bevel_depth.setter
@@ -468,6 +468,7 @@ class ULCurve(GameObject):
 
     @property
     def length(self):
+        '''Length of the curve.'''
         depsgraph = bpy.context.evaluated_depsgraph_get()
         return sum(s.calc_length() for s in self.blenderObject.evaluated_get(depsgraph).data.splines)
 
@@ -477,6 +478,7 @@ class ULCurve(GameObject):
 
     @property
     def path_duration(self):
+        '''The number of frames that are needed to traverse the path, defining the maximum value for the "Evaluation Time" setting'''
         return self.blenderObject.data.path_duration
 
     @path_duration.setter
