@@ -66,7 +66,7 @@ class LoggerLayout(Canvas):
         self.toggle_key = toggle_key
         super().__init__()
         prefs = bpy.context.preferences.addons.get('bge_netlogic', None)
-        if prefs is None or prefs.preferences is None not (prefs.preferences.screen_console_open or visible):
+        if prefs is None or prefs.preferences is None and not (prefs.preferences.screen_console_open or visible):
             self.show = False
         if not getattr(bpy.context.scene, 'screen_console_open', True) and not visible:
             self.show = False
