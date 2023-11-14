@@ -63,6 +63,16 @@ from collections import deque
 from .utils import load_user_module
 from .input import key_tap
 from .logging import enable
+from . import animation
+from . import audio
+from . import events
+from . import input
+from . import logging
+from . import network
+from . import physics
+from . import shaders
+from . import ui
+from . import utils
 import bge
 import bpy
 import signal

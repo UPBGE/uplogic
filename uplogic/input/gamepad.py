@@ -25,8 +25,8 @@ XBOX = {
     'DPADDOWN': 12,
     'DPADLEFT': 13,
     'DPADRIGHT': 14,
-    'RT': 5,
-    'LT': 4
+    'RT': 15,
+    'LT': 16
 }
 """Buttons in [`A`, `B`, `X`, `Y`, `SELECT`, `BACK`, `START`, `MENU`, `LS`,
 `L3`, `RS`, `R3`, `LB`, `RB`, `DPADUP`, `DPADDOWN`, `DPADLEFT`, `DPADRIGHT`,
@@ -51,16 +51,16 @@ SONY = {
     'DPADDOWN': 12,
     'DPADLEFT': 13,
     'DPADRIGHT': 14,
-    'R2': 5,
-    'L2': 4
+    'R2': 15,
+    'L2': 16
 }
 """Buttons in [`X`, `CROSS`, `CIRCLE`, `SQUARE`, `TRIANGLE`, `SELECT`, `SHARE`,
 `START`, `MENU`, `L3`, `R3`, `L1`, `R1`, `DPADUP`, `DPADDOWN`, `DPADLEFT`,
 `DPADRIGHT`, `R2`, `L2`]"""
 
 
-LS = 'LS'
-RS = 'RS'
+LS = 15
+RS = 16
 
 STICKS = {
     LS: [0, 1],
@@ -108,6 +108,8 @@ def gamepad_axis(
     '''Retrieve axis value.\n
     Not intended for manual use.
     '''
+    if axis > 5:
+        axis -= 11  # for indices 15, 16
     global _active_axis
     if logic.joysticks[idx] is None:
         return 0.0
@@ -123,10 +125,12 @@ def gamepad_axis(
     if tap:
         if _active_axis.get(axis, 0) == 0:
             val = gamepad.axisValues[axis]
+            val = val if abs(val) >= threshold else 0
             _active_axis[axis] = val
             return val if abs(val) >= threshold else 0
         else:
-            _active_axis[axis] = gamepad.axisValues[axis]
+            val = gamepad.axisValues[axis]
+            _active_axis[axis] = val if abs(val) >= threshold else 0
             return 0.0
     val = gamepad.axisValues[axis]
     _active_axis[axis] = val
@@ -147,7 +151,7 @@ def gamepad_trigger(
 
     :returns: Intensity of the selected trigger.
     """
-    return gamepad_axis(4 if trigger == 'LT' else 5, idx, threshold=threshold)
+    return gamepad_axis(15 if trigger == 'LT' else 16, idx, threshold=threshold)
 
 
 def gamepad_stick(
@@ -187,7 +191,7 @@ def gamepad_tap(
     :returns: float or boolean
     '''
     btn_idx = layout.get(button, button)
-    if button in ['R2', 'L2', 'RT', 'LT']:
+    if button in [15, 16, 'R2', 'L2', 'RT', 'LT']:
         return gamepad_axis(btn_idx, idx, True)
     else:
         return gamepad_button(btn_idx, idx, True)
@@ -208,7 +212,7 @@ def gamepad_down(
     :returns: float or boolean
     '''
     btn_idx = layout.get(button, button)
-    if button in ['R2', 'L2', 'RT', 'LT']:
+    if button in [15, 16, 'R2', 'L2', 'RT', 'LT']:
         return gamepad_axis(btn_idx, idx)
     else:
         return gamepad_button(btn_idx, idx)
@@ -229,7 +233,7 @@ def gamepad_up(
     :returns: float or boolean
     '''
     btn_idx = layout.get(button, button)
-    if button in ['R2', 'L2', 'RT', 'LT']:
+    if button in [15, 16, 'R2', 'L2', 'RT', 'LT']:
         return gamepad_axis(btn_idx, idx, True, True)
     else:
         return gamepad_button(btn_idx, idx, True, True)

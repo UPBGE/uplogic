@@ -174,3 +174,7 @@ class FilterSystem:
     def remove_filter(cls, filter):
         if isinstance(filter, int) and cls.filters.get(filter, None):
             cls.filters.get(filter).shutdown()
+
+
+class Shader:
+    pass

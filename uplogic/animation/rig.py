@@ -45,6 +45,10 @@ class RigBone():
         self.armature.blenderObject.update_tag()
 
 
+class RigBones(dict):
+    pass
+
+
 class Rig(GameObject):
 
     def __init__(
@@ -52,7 +56,7 @@ class Rig(GameObject):
         armature
     ) -> None:
         self.game_object: BL_ArmatureObject = armature
-        self.bones: dict[str, RigBone] = {}
+        self.bones: RigBones[str, RigBone] = RigBones()
         for bone in self.game_object.channels:
             self.bones[bone.name] = RigBone(bone, armature)
 

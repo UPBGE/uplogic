@@ -10,6 +10,7 @@ from mathutils import Vector
 class Image(Widget):
 
     def __init__(self, pos=[0, 0], size=(100, 100), relative={}, texture=None, halign='left', valign='bottom', angle=0):
+        self._texture = None
         super().__init__(pos, size, relative=relative, halign=halign, valign=valign, angle=angle)
         self.texture = texture
 
@@ -51,6 +52,9 @@ class Image(Widget):
     
     def draw(self):
         super()._setup_draw()
+        if self.texture is None:
+            super().draw()
+            return
         self._shader.bind()
         self._shader.uniform_sampler("image", self.texture)
         self._batch.draw(self._shader)

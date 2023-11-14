@@ -43,7 +43,7 @@ class ActionCallback:
 
 class ULAction():
     '''
-    [DEPRECATED] Use `uplogic.animation.action` instead.
+    [DEPRECATED] Use `uplogic.animation.Action` instead.
 
     Wrapper class for animated actions that provides additional parameters
     and quick access properties.
@@ -54,7 +54,7 @@ class ULAction():
     :param `end_frame`: The last frame of the action.
     :param `layer`: The layer on which to play the action. Leave at -1 for
     auto-selection.
-    :param `priority`: The priority with which to play the action (only relevant
+    :param `priority`: [Disabled] | The priority with which to play the action (only relevant
     for actions on the same layer).
     :param `blendin`: Use this many frames to "blend into" the animation.
     :param `play_mode`: Playback mode of [`'play'`, `'loop'`, `'pingpong'`].
@@ -89,7 +89,7 @@ class ULAction():
         self._fps_factor = bpy.context.scene.render.fps / 60
         self._locked = False
         self._speed = speed
-        self._frozen_speed = speed
+        self._frozen_speed = -1
         self.stopped = False
         '''Finish state of the animation.'''
         self.keep = keep
@@ -107,6 +107,8 @@ class ULAction():
         self.priority = priority
         '''Priority of this animation; This is only relevant if multiple
         animations are playing on the same layer.'''
+        if priority != 0:
+            print("'uplogic.animation.Action' attribute 'priority' is disabled.")
         self.blendin = blendin
         '''The amount of blending frames when starting the animation.'''
         self.layer = layer
@@ -124,7 +126,6 @@ class ULAction():
         layer_action_name = game_object.getActionName(layer)
         same_action = layer_action_name == action_name
         self._callbacks: list[ActionCallback] = []
-        self.on_start()
         if (not same_action and self.is_playing):
             game_object.stopAction(layer)
         if not (self.is_playing or same_action):
@@ -135,14 +136,15 @@ class ULAction():
                 play_mode=play_mode,
                 speed=speed,
                 layer=layer,
-                priority=priority,
+                # priority=priority,
                 blendin=blendin,
                 layer_weight=1-intensity,
                 blend_mode=blend_mode
             )
-        self.intensity = intensity
-        self.speed = speed
-        self._act_system.add(self)
+            self.intensity = intensity
+            self.speed = speed
+            self.on_start()
+            self._act_system.add(self)
 
     def on_start(self):
         '''Handler for animation playback start.
@@ -255,7 +257,7 @@ class ULAction():
             start_frame,
             end_frame,
             layer=layer,
-            priority=priority,
+            # priority=priority,
             blendin=blendin,
             play_mode=play_mode,
             speed=self.speed,
@@ -309,13 +311,23 @@ class ULAction():
     def pause(self):
         '''Pause this action.
         '''
-        self._frozen_speed = self.speed
-        self.speed = 0
+        if self._frozen_speed < 0:
+            self._frozen_speed = self.speed
+            self.speed = 0
 
     def unpause(self):
-        '''Unpause this action.
+        '''Resume this action from pause.
         '''
-        self.speed = self._frozen_speed
+        if self._frozen_speed >= 0:
+            self.speed = self._frozen_speed
+            self._frozen_speed = -1
+
+    def resume(self):
+        '''Resume this action from pause.
+        '''
+        if self._frozen_speed >= 0:
+            self.speed = self._frozen_speed
+            self._frozen_speed = -1
 
     def stop(self):
         '''Stop playback of this action.
@@ -334,7 +346,7 @@ class ULAction():
             self.start_frame,
             self.end_frame,
             layer=self.layer,
-            priority=self.priority,
+            # priority=self.priority,
             blendin=self.blendin,
             play_mode=self.play_mode,
             speed=self.speed,

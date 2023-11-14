@@ -60,7 +60,7 @@ class ULMouseLook(ULActionNode):
                     cap_x=cap_x,
                     use_cap_y=use_cap_y,
                     cap_y=cap_y,
-                    invert=list(self.get_input(self.inverted).values()),  # XXX: Socket type InvertXY to Dict!
+                    invert=self.get_input(self.inverted),
                     smoothing=self.get_input(self.smooth),
                     local=head is not obj,
                     front=self.get_input(self.axis)

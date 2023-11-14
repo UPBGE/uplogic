@@ -32,8 +32,9 @@ class ULRunPython(ULActionNode):
             return
         text = self.get_input(self.module_name)
         mfun = self.get_input(self.module_func)
-        mname = text.name.split('.')[0]
+        mname = text.name
         if self.mode:
+            mname = mname.split('.')[0]
             if mname and (self._old_mod_name != mname):
                 exec("import {}".format(mname))
                 self._old_mod_name = mname

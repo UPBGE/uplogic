@@ -57,7 +57,7 @@ class ULGamepadLook(ULActionNode):
                     cap_x=cap_x,
                     use_cap_y=use_cap_y,
                     cap_y=cap_y,
-                    invert=list(self.get_input(self.inverted).values()),
+                    invert=self.get_input(self.inverted),
                     smoothing=0.0,
                     local=head is not obj,
                     front=self.get_input(self.axis),
@@ -69,80 +69,3 @@ class ULGamepadLook(ULActionNode):
         if self.gamepadlook is not None:
             self.gamepadlook.active = condition
         self.done = True
-        # axis: int = self.get_input(self.axis)
-        # if not self.get_input(self.condition):
-        #     return
-        # main_obj: GameObject = self.get_input(self.main_obj)
-        # head_obj: GameObject = self.get_input(self.head_obj)
-        # inverted: bool = self.get_input(self.inverted)
-        # index: int = self.get_input(self.index)
-        # sensitivity: float = self.get_input(self.sensitivity)
-        # exponent: float = self.get_input(self.exponent)
-        # threshold: float = self.get_input(self.threshold)
-        # use_cap_x: Vector = self.get_input(self.use_cap_x)
-        # use_cap_y: Vector = self.get_input(self.use_cap_y)
-        # if logic.joysticks[index]:
-        #     joystick = logic.joysticks[index]
-        # else:
-        #     return
-        # raw_values = joystick.axisValues
-        # if axis == 0:
-        #     x, y = raw_values[0], raw_values[1]
-        # elif axis == 1:
-        #     x, y = raw_values[2], raw_values[3]
-        # neg_x = -1 if x < 0 else 1
-        # neg_y = 1 if y < 0 else -1
-
-        # if -threshold < x < threshold:
-        #     x = 0
-        # else:
-        #     x = abs(x) ** exponent
-
-        # if -threshold < y < threshold:
-        #     y = 0
-        # else:
-        #     y = abs(y) ** exponent
-        # if x == y == 0:
-        #     self.done = True
-        #     return
-
-        # x *= neg_x
-        # y *= neg_y
-
-        # x = -x if inverted['x'] else x
-        # y = -y if inverted['y'] else y
-        # x *= sensitivity
-        # if use_cap_x:
-        #     cap_x: Vector = self.get_input(self.cap_x)
-        #     uppercapX: float = cap_x.x
-        #     lowercapX: float = -cap_x.y
-        #     objectRotation = main_obj.localOrientation.to_euler()
-        #     if objectRotation.z + x > uppercapX:
-        #         x = 0
-        #         objectRotation.z = uppercapX
-        #         main_obj.localOrientation = objectRotation.to_matrix()
-
-        #     if objectRotation.z + x < lowercapX:
-        #         x = 0
-        #         objectRotation.z = lowercapX
-        #         main_obj.localOrientation = objectRotation.to_matrix()
-
-        # y *= sensitivity
-        # if use_cap_y:
-        #     cap_y: Vector = self.get_input(self.cap_y)
-        #     uppercapY: float = cap_y.y
-        #     lowercapY: float = cap_y.x
-        #     objectRotation = head_obj.localOrientation.to_euler()
-        #     if objectRotation.x + y > uppercapY:
-        #         y = 0
-        #         objectRotation.x = uppercapY
-        #         head_obj.localOrientation = objectRotation.to_matrix()
-
-        #     if objectRotation.x + y < lowercapY:
-        #         y = 0
-        #         objectRotation.x = lowercapY
-        #         head_obj.localOrientation = objectRotation.to_matrix()
-
-        # main_obj.applyRotation(Vector((0, 0, x)), True)
-        # head_obj.applyRotation(Vector((y, 0, 0)), True)
-        # self.done = True

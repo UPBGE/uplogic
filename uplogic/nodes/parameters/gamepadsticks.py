@@ -21,7 +21,14 @@ class ULGamepadSticks(ULParameterNode):
         self.Y = ULOutSocket(self, self.get_y_axis)
 
     def get_vec(self):
-        return Vector((self.get_x_axis(), self.get_y_axis(), 0))
+        inverted = self.get_input(self.inverted)
+        x = self.get_x_axis()
+        y = self.get_y_axis()
+        return Vector((
+            -x if inverted[0] else x,
+            -y if inverted[1] else y,
+            0
+        ))
 
     def get_x_axis(self):
         x = self.raw_values[0]
@@ -50,7 +57,5 @@ class ULGamepadSticks(ULParameterNode):
             self.raw_values = [raw_values[0], raw_values[1]]
         elif axis == 1:
             self.raw_values = [raw_values[2], raw_values[3]]
-        inverted = self.get_input(self.inverted)
-        sensitivity = self.get_input(self.sensitivity)
-        self._sensitivity = -sensitivity if inverted else sensitivity
+        self._sensitivity = self.get_input(self.sensitivity)
         self.threshold = self.get_input(self.threshold)
