@@ -68,8 +68,6 @@ def interpolate(a: float, b: float, fac: float, threshold: float = 0.001) -> flo
 
     :returns: calculated value as float
     """
-    if isinstance(a, Vector) or isinstance(b, Vector):
-        print('[UPLOGIC] Warning: utils.interpolate() will not work for Vector anymore; Use mathutils.Vector.lerp(vec2, fac) instead!')
     if -threshold < a-b < threshold:
         return b
     return (fac * b) + ((1-fac) * a)
@@ -84,8 +82,6 @@ def lerp(a: float, b: float, fac: float, threshold: float = 0.001) -> float:
 
     :returns: calculated value as float
     """
-    if isinstance(a, Vector) or isinstance(b, Vector):
-        print('[UPLOGIC] Warning: utils.lerp() will not work for Vector anymore; Use mathutils.Vector.lerp(vec2, fac) instead!')
     if -threshold < a-b < threshold:
         return b
     return (fac * b) + ((1-fac) * a)

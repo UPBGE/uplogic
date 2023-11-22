@@ -19,6 +19,7 @@ class StartSoundNode(ULActionNode):
         self.device = None
         self.loop_count = None
         self.pitch = 1.0
+        self.speed = 1.0
         self.volume = 1.0
         self.lowpass = 1.0
         self.attenuation = 1.0
