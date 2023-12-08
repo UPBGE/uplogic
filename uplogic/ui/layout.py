@@ -260,16 +260,23 @@ class GridLayout(BoxLayout):
     def arrange(self):
         dsize = self._draw_size
         idx = 0
+        _widget_sizes = []
+        _offset_y = 0
         if self.orientation == 'horizontal':
             row = 0
             offset = 0
             for widget in self.children:
-                offset_y = self._draw_size[1] / (self.rows) * row
+                offset_y = _offset_y + (self.spacing if row else 0)
                 widget.relative['pos'] = False
-                widget.pos = [offset, dsize[1] - widget._draw_size[1] - offset_y]
-                offset += widget._draw_size[0] + self.spacing
+                wsize = widget._draw_size
+                widget.pos = [offset, dsize[1] - wsize[1] - offset_y]
+                _widget_sizes.append(widget._draw_pos[1])
+                offset += wsize[0] + self.spacing
                 idx += 1
                 if idx >= self.cols:
+                    _offset_y = min(_widget_sizes)
+                    print(_widget_sizes)
+                    _widget_sizes = []
                     idx = 0
                     row += 1
                     offset = 0
@@ -277,13 +284,13 @@ class GridLayout(BoxLayout):
             col = 0
             offset = dsize[1]
             for widget in self.children:
-                offset_x = self._draw_size[0] / (self.cols - 1) * col
+                offset_x = (self._draw_size[0] / (self.cols) + self.spacing) * col
                 offset -= widget._draw_size[0]
                 widget.relative['pos'] = False
                 widget.pos = [offset_x, offset]
                 offset -= self.spacing
                 idx += 1
-                if idx >= self.cols:
+                if idx >= self.rows:
                     idx = 0
                     col += 1
                     offset = dsize[1]

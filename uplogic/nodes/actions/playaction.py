@@ -1,4 +1,4 @@
-from uplogic.animation import ULActionSystem
+from uplogic.animation import ActionSystem
 from uplogic.data import GlobalDB
 from uplogic.animation import Action
 from uplogic.events import receive
@@ -44,7 +44,7 @@ class ULPlayAction(ULActionNode):
         if act_systems.check('default'):
             return act_systems.get('default')
         else:
-            return ULActionSystem('default')
+            return ActionSystem('default')
 
     def _get_started(self):
         return self._action and self._action.started

@@ -288,7 +288,8 @@ class ULMouseLook():
         smoothing: float = 0.0,
         local: bool = True,
         front: int = 1,
-        active: bool = True
+        center_mouse: bool = True,
+        active: bool = True,
     ) -> None:
         if self._deprecated:
             print('Warning: ULMouseLook class will be renamed to "MouseLook" in future releases!')
@@ -300,6 +301,8 @@ class ULMouseLook():
             if head else
             obj.localOrientation.copy()
         ]
+        self.center_mouse = center_mouse
+        self._old_mouse_pos = logic.mouse.position
         self.sensitivity = sensitivity
         self.use_cap_x = use_cap_x
         self.cap_x = cap_x
@@ -385,19 +388,22 @@ class ULMouseLook():
         """Get data for this component.
         
         Not intended for manual use."""
-        self.x = render.getWindowWidth()//2
-        self.y = render.getWindowHeight()//2
-        self.screen_center = (
-            self.x / render.getWindowWidth(),
-            self.y / render.getWindowHeight()
-        )
-        self.center = Vector(self.screen_center)
         self.mouse = logic.mouse
+        if self.center_mouse:
+            self.x = render.getWindowWidth()//2
+            self.y = render.getWindowHeight()//2
+            self.screen_center = (
+                self.x / render.getWindowWidth(),
+                self.y / render.getWindowHeight()
+            )
+        else:
+            self.screen_center = self._old_mouse_pos
+        self.center = Vector(self.screen_center)
 
     def update(self):
         """This is executed each frame if component is active."""
         self.get_data()
-        if not self.initialized:
+        if not self.initialized and self.center_mouse:
             self.mouse.position = self.screen_center
             self.initialized = True
             return
@@ -459,8 +465,9 @@ class ULMouseLook():
         rot[1-self.front] = offset.y
         if not self.axis_lock[1]:
             game_object_y.applyRotation((*rot, ), True)
-        if (Vector(self.mouse.position) - Vector(self.screen_center)).length > .00001:
+        if self.center_mouse and (Vector(self.mouse.position) - Vector(self.screen_center)).length > .00001:
             self.mouse.position = self.screen_center
+        self._old_mouse_pos = self.mouse.position
         self.done = True
 
 

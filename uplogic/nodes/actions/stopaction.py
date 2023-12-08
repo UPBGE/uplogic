@@ -1,4 +1,4 @@
-from uplogic.animation import ULActionSystem
+from uplogic.animation import ActionSystem
 from uplogic.data import GlobalDB
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
@@ -20,7 +20,7 @@ class ULStopAction(ULActionNode):
         if act_systems.check('default'):
             return act_systems.get('default')
         else:
-            return ULActionSystem('default')
+            return ActionSystem('default')
 
     def get_done(self):
         return self.done

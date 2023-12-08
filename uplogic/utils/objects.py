@@ -7,8 +7,12 @@ from .constants import FRONT_AXIS_VECTOR_SIGNED
 from .math import project_vector3
 from .math import clamp
 from .math import get_local
-from mathutils import Vector, Matrix
+from .math import rotate2d
+from .math import rotate3d
+from .math import rotate_by_axis
+from mathutils import Vector, Matrix, Euler
 from math import degrees
+from math import radians
 
 
 def xrot_to(
@@ -488,3 +492,15 @@ class ULCurve(GameObject):
 
 class Curve(ULCurve):
     _deprecated = False
+
+
+class Mesh():
+
+    def __init__(self, mesh: bpy.types.Mesh):
+        self.blenderMesh: bpy.types.Mesh = mesh
+
+    def applyRotation(self, rotation, local=False):
+        rot = Euler(rotation)
+        self.blenderMesh.transform(
+            rot.to_matrix().to_4x4()
+        )

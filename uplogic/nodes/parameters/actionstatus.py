@@ -1,4 +1,4 @@
-from uplogic.animation import ULActionSystem
+from uplogic.animation import ActionSystem
 from uplogic.data import GlobalDB
 from uplogic.nodes import ULOutSocket
 from uplogic.nodes import ULParameterNode
@@ -26,7 +26,7 @@ class ULActionStatus(ULParameterNode):
         if act_systems.check('default'):
             return act_systems.get('default')
         else:
-            return ULActionSystem('default')
+            return ActionSystem('default')
 
     def get_action_name(self):
         return self.action.name if self.action else None

@@ -7,7 +7,16 @@ import gpu
 
 
 class Path(Widget):
-    '''Widget for displaying a path.'''
+    '''Widget for displaying a path.
+
+    :param `pos`: Initial position of this widget in either pixels or factor.
+    :param `size`: Initial size of this widget in either pixels or factor.
+    :param `bg_color`: Color to draw in the area of the widget.
+    :param `relative`: Whether to use pixels or factor for size or pos; example: {`'pos'`: `True`, `'size'`: `True`}.
+    :param `halign`: Horizontal alignment of the widget, can be (`left`, `center`, `right`).
+    :param `valign`: Vertical alignment of the widget, can be (`bottom`, `center`, `top`).
+    :param `angle`: Rotation in degrees of this widget around the pivot defined by the alignment.
+    '''
 
     def __init__(
         self,

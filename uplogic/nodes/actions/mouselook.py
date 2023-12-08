@@ -23,6 +23,7 @@ class ULMouseLook(ULActionNode):
         self.cap_y = None
         self.smooth = None
         self.initialized = False
+        self.center_mouse = True
         self.use_local_head = False
         self._x = 0
         self._y = 0
@@ -63,6 +64,7 @@ class ULMouseLook(ULActionNode):
                     invert=self.get_input(self.inverted),
                     smoothing=self.get_input(self.smooth),
                     local=head is not obj,
+                    center_mouse=self.center_mouse,
                     front=self.get_input(self.axis)
                 )
         if self.mouselook is not None:

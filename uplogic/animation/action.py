@@ -5,7 +5,7 @@ from bge import logic
 from bge.types import KX_GameObject as GameObject
 from random import randint
 from random import random
-from uplogic.animation import ULActionSystem
+from uplogic.animation import ActionSystem
 from uplogic.animation.actionsystem import get_action_system
 from uplogic.events import schedule
 import bpy
@@ -118,8 +118,8 @@ class ULAction():
         self.blend_mode = blend_mode = BLEND_MODES.get(blend_mode, blend_mode)
         '''Blending Mode of the animation.'''
         if layer == -1:
-            ULActionSystem.find_free_layer(self)
-        # elif ULActionSystem.check_layer(self):
+            ActionSystem.find_free_layer(self)
+        # elif ActionSystem.check_layer(self):
             # self.finished = True
             # return
         layer = self.layer
@@ -233,7 +233,6 @@ class ULAction():
         start_frame = self.start_frame
         end_frame = self.end_frame
         play_mode = self.play_mode
-        priority = self.priority
         blendin = self.blendin
         intensity = self.intensity
         speed = self.speed * self._fps_factor * logic.getTimeScale()
@@ -282,7 +281,12 @@ class ULAction():
         playing_action = game_object.getActionName(layer)
         playing_frame = game_object.getActionFrame(layer)
         for action_callback in self._callbacks:
-            if playing_frame > action_callback.frame:
+            cond = (
+                playing_frame > action_callback.frame
+                if end_frame > start_frame else
+                playing_frame < action_callback.frame
+            )
+            if cond:
                 if not action_callback.consumed:
                     action_callback.callback(*action_callback.args)
                     action_callback.consumed = True

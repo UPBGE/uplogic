@@ -3,7 +3,7 @@ from bge.types import KX_GameObject
 from uplogic.data import GlobalDB
 
 
-class ULActionSystem():
+class ActionSystem():
     '''System for managing actions started using `Action`. This class is
     usually addressed indirectly through `Action` and is not intended for
     manual use.
@@ -84,7 +84,7 @@ class ULActionSystem():
         :param `action`: `Action` to add.
         '''
         self.actions.append(action)
-        ULActionSystem.lock_layer(action)
+        ActionSystem.lock_layer(action)
 
     def remove(self, action):
         '''Remove a `Action` from this system.
@@ -94,7 +94,7 @@ class ULActionSystem():
         action.stop()
         if action in self.actions:
             self.actions.remove(action)
-        ULActionSystem.free_layer(action)
+        ActionSystem.free_layer(action)
 
     def shutdown(self):
         '''Shutdown and remove this action system. This will stop all actions
@@ -105,16 +105,16 @@ class ULActionSystem():
         GlobalDB.retrieve('uplogic.animation').remove(self)
 
 
-def get_action_system(system_name: str = 'default') -> ULActionSystem:
-    """Get or create a `ULActionSystem` with the given name. Using more than one
+def get_action_system(system_name: str = 'default') -> ActionSystem:
+    """Get or create a `ActionSystem` with the given name. Using more than one
     action system is highly discouraged.
 
     :param `system_name`: Look for this name.
 
-    :returns: `ULActionSystem`, new system is created if none is found.
+    :returns: `ActionSystem`, new system is created if none is found.
     """
     act_systems = GlobalDB.retrieve('uplogic.animation')
     if act_systems.check(system_name):
         return act_systems.get(system_name)
     else:
-        return ULActionSystem(system_name)
+        return ActionSystem(system_name)

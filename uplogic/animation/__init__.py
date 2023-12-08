@@ -2,7 +2,7 @@
 controlling animations.
 '''
 
-from .actionsystem import ULActionSystem  # noqa
+from .actionsystem import ActionSystem  # noqa
 from .action import ACTION_FINISHED  # noqa
 from .action import ACTION_STARTED  # noqa
 from .action import ULAction, Action  # noqa

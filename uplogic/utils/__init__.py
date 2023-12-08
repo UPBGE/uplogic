@@ -15,6 +15,7 @@ from .nodetrees import set_material_socket  # noqa
 from .nodetrees import set_world_socket  # noqa
 from .objects import get_curve_length
 from .objects import ULCurve, Curve  # noqa
+from .objects import Mesh  # noqa
 from .objects import controller_brick_status  # noqa
 from .objects import controller_brick  # noqa
 from .objects import create_curve  # noqa
@@ -29,6 +30,7 @@ from .pooling import SpawnPool  # noqa
 from .pooling import Spawn  # noqa
 from .pooling import SimpleBullet  # noqa
 from .pooling import PhysicsBullet  # noqa
+from .visuals import draw_arrow  # noqa
 from .visuals import draw_box  # noqa
 from .visuals import draw_cube  # noqa
 from .visuals import draw_line  # noqa

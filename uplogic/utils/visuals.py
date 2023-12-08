@@ -1,5 +1,6 @@
-from bge import render
+from bge import render, logic
 from mathutils import Vector
+from .math import world_to_screen, screen_to_world, rotate2d
 
 
 # def draw_screen_line(origin: Vector, target: Vector, color: list = [1, 1, 1, 1]):
@@ -15,6 +16,51 @@ def draw_line(origin: Vector, target: Vector, color: list = [1, 1, 1, 1]):
         target,
         color
     )
+
+
+def draw_arrow(origin: Vector, target: Vector, color: list = [1, 1, 1, 1]):
+    cam = logic.getCurrentScene().active_camera
+    target = Vector(target)
+    origin = Vector(origin)
+
+    cam_dir = target - cam.worldPosition
+
+    direction = target - origin
+    normal = direction.cross(cam_dir).normalized() * direction.length
+
+    # render.drawLine(
+    #     target,
+    #     target + normal,
+    #     (1, 0, 0)
+    # )
+
+    render.drawLine(
+        target,
+        target - direction * .2 + normal * .1,
+        color
+    )
+
+    render.drawLine(
+        target,
+        target - direction * .2 - normal * .1,
+        color
+    )
+
+    render.drawLine(
+        origin,
+        target,
+        color
+    )
+    # render.drawLine(
+    #     target,
+    #     screen_to_world(uptarget.x, uptarget.y, dist),
+    #     color
+    # )
+    # render.drawLine(
+    #     target,
+    #     screen_to_world(downtarget.x, downtarget.y, dist),
+    #     color
+    # )
 
 
 def draw_points(points: list, color: list = [1, 1, 1, 1]):

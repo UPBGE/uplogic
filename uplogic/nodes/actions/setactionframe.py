@@ -1,4 +1,4 @@
-from uplogic.animation import ULActionSystem
+from uplogic.animation import ActionSystem
 from uplogic.animation.action import Action
 from uplogic.data import GlobalDB
 from uplogic.nodes import ULActionNode
@@ -27,7 +27,7 @@ class ULSetActionFrame(ULActionNode):
         if act_systems.check('default'):
             return act_systems.get('default')
         else:
-            return ULActionSystem('default')
+            return ActionSystem('default')
 
     def get_done(self):
         return self.done
