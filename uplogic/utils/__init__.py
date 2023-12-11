@@ -29,10 +29,10 @@ from .pooling import SpawnPool  # noqa
 from .pooling import Spawn  # noqa
 from .pooling import SimpleBullet  # noqa
 from .pooling import PhysicsBullet  # noqa
-from .visuals import draw_box  # noqa
-from .visuals import draw_cube  # noqa
-from .visuals import draw_line  # noqa
-from .visuals import draw_points  # noqa
+from .visualize import draw_box  # noqa
+from .visualize import draw_cube  # noqa
+from .visualize import draw_line  # noqa
+from .visualize import draw_path  # noqa
 from .scene import FileLoader  # noqa
 from .scene import SceneLoader  # noqa
 from .math import clamp

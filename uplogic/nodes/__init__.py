@@ -119,6 +119,10 @@ class ULOutSocket(ULLogicBase):
         return result
 
 
+class Output(ULOutSocket):
+    pass
+
+
 ###############################################################################
 # Basic Cells
 ###############################################################################
@@ -162,4 +166,7 @@ class ULActionNode(ULLogicNode):
 
 
 class ULConditionNode(ULLogicNode):
+    pass
+
+class LogicNodeCustom(ULLogicNode):
     pass

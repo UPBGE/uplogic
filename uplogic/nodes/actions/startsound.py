@@ -11,6 +11,7 @@ class StartSoundNode(ULActionNode):
         self.sound = None
         self.start_time = 0.0
         self.end_time = 1.0
+        # self.position = Vector((0, 0, 0))
         self.occlusion = False
         self.reverb = False
         self.transition = .1
