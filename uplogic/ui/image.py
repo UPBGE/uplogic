@@ -20,7 +20,7 @@ class Image(Widget):
 
     @texture.setter
     def texture(self, val):
-        texture = bpy.data.images.get(val)
+        texture = bpy.data.images.get(val, None)
         if texture:
             self._texture = gpu.texture.from_image(texture)
 

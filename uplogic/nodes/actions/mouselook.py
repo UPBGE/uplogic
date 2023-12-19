@@ -34,6 +34,10 @@ class ULMouseLook(ULActionNode):
     def get_done(self):
         return self.done
 
+    def reset(self):
+        if self.mouselook:
+            self.mouselook.get_data()
+
     def evaluate(self):
         self.done = False
         condition = self.get_input(self.condition)
@@ -44,7 +48,7 @@ class ULMouseLook(ULActionNode):
                 if (
                     self.mouselook.obj is not obj
                     or
-                    self.mouselook.head is not head
+                    head is not None and self.mouselook.head is not head
                 ):
                     self.mouselook.disable()
                     self.mouselook = None

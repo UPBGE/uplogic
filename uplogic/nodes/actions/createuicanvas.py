@@ -8,6 +8,7 @@ class ULCreateUICanvas(ULActionNode):
         ULActionNode.__init__(self)
         self.condition = None
         self._canvas = None
+        self.on_init = False
         self._done = False
         self.OUT = ULOutSocket(self, self._get_done)
         self.CANVAS = ULOutSocket(self, self._get_canvas)
@@ -20,8 +21,7 @@ class ULCreateUICanvas(ULActionNode):
 
     def evaluate(self):
         self._done = False
-        if not self.get_input(self.condition):
-            return
-        self._canvas = Canvas()
-        self._done = True
-        
+        if self.get_input(self.condition) or self.on_init:
+            self._canvas = Canvas()
+            self.on_init = False
+            self._done = True

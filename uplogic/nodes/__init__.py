@@ -118,8 +118,9 @@ class ULOutSocket(ULLogicBase):
             self.node.outputs[self] = result
         return result
 
-class OutputSocket(ULOutSocket):
-    ...
+
+class Output(ULOutSocket):
+    pass
 
 
 ###############################################################################
@@ -167,5 +168,5 @@ class ULActionNode(ULLogicNode):
 class ULConditionNode(ULLogicNode):
     pass
 
-class CustomLogicNode(ULLogicNode):
-    ...
+class LogicNodeCustom(ULLogicNode):
+    pass

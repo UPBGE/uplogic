@@ -115,7 +115,7 @@ class LoggerLayout(Canvas):
             self.layout.remove_widget(self.layout.children[0])
         now = datetime.now()
         current_time = f'[{now.strftime("%H:%M:%S")}]' if time else "\t\t\t\t\t\t".replace('\t', '    ')
-        self.layout.add_widget(Label(text=f'>{current_time}  {msg}', pos=[5, 10], font_color=self.colors[type]))
+        self.layout.add_widget(Label(text=f'>{current_time}  {msg}', pos=[5, 10], font_color=self.colors[type], shadow=True))
         dim = self.layout.children[0].dimensions[1]
         lheight = self.layout._draw_size[1]
         amount = lheight / dim
@@ -124,6 +124,7 @@ class LoggerLayout(Canvas):
             if child.pos[1] > lheight - dim:
                 self.layout.remove_widget(child)
             child.opacity = 1 - (i * (1/amount))
+            child.shadow_color[3] = child.font_color[3]
         self._prev_msg = msg
 
 
@@ -198,4 +199,5 @@ def debug(msg):
 
 nodeprefs = bpy.context.preferences.addons.get('bge_netlogic', None)
 if nodeprefs and getattr(nodeprefs.preferences, 'use_screen_console', False):
-    enable()
+    print(nodeprefs.preferences.screen_console_key)
+    enable(toggle_key=nodeprefs.preferences.screen_console_key)

@@ -10,6 +10,7 @@ class ULRebuildData(ULParameterNode):
         ULParameterNode.__init__(self)
         self.data = None
         self.read_as = 'builtin'
+        self.ret = None
         self.dattypes = {
             'Vec2': Vector,
             'Vec3': Vector,
@@ -20,13 +21,20 @@ class ULRebuildData(ULParameterNode):
         self.OUT = ULOutSocket(self, self.get_data)
 
     def get_data(self):
+        return self.ret
+
+    def evaluate(self):
         dat = self.get_input(self.data)
+        if dat is None:
+            return
         if self.read_as == 'builtin':
-            return dat
+            self.ret = dat
+            return
         if self.read_as == 'GameObj':
             bobj = bpy.data.objects.get(dat['data_id'])
             if bobj is None:
-                return None
+                self.ret = None
+                return
             obj = logic.getCurrentScene().getGameObjectFromObject(bobj)
             for attr in dat:
                 if attr == 'properties':
@@ -34,5 +42,6 @@ class ULRebuildData(ULParameterNode):
                         obj[prop] = dat[attr][prop]
                 elif attr not in ['name', 'data_id']:
                     setattr(obj, attr, dat[attr])
-                return obj
-        return self.dattypes[self.read_as](dat)
+            self.ret = obj
+            return
+        self.ret = self.dattypes[self.read_as](dat)

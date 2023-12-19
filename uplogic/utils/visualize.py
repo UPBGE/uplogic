@@ -1,12 +1,11 @@
-# from bge import render, logic
 from bge.render import drawLine
+from bge import logic
 from mathutils import Vector
 from bge.types import KX_GameObject
-from bpy.types import Mesh, MeshEdge
+from bpy.types import Mesh
 
 
 def draw_line(origin: Vector, target: Vector, color: list = [1, 1, 1, 1]):
-    print('Moved from "uplogic.utils.visuals" to "uplogic.utils.visualize"!')
     drawLine(
         origin,
         target,
@@ -14,20 +13,47 @@ def draw_line(origin: Vector, target: Vector, color: list = [1, 1, 1, 1]):
     )
 
 
+def draw_arrow(origin: Vector, target: Vector, color: list = [1, 1, 1, 1]):
+    cam = logic.getCurrentScene().active_camera
+    target = Vector(target)
+    origin = Vector(origin)
+
+    cam_dir = target - cam.worldPosition
+
+    direction = target - origin
+    normal = direction.cross(cam_dir).normalized() * direction.length
+
+    drawLine(
+        target,
+        target - direction * .2 + normal * .1,
+        color
+    )
+
+    drawLine(
+        target,
+        target - direction * .2 - normal * .1,
+        color
+    )
+
+    drawLine(
+        origin,
+        target,
+        color
+    )
+    
+
+
 def draw_path(points: list, color: list = [1, 1, 1, 1]):
-    print('Moved from "uplogic.utils.visuals" to "uplogic.utils.visualize"!')
     for i, p in enumerate(points):
         if i < len(points) - 1:
             drawLine(p, points[i+1], color)
 
 
 def draw_cube(origin: Vector, width: float = 1, color: list = [1, 1, 1, 1], centered: bool = False):
-    print('Moved from "uplogic.utils.visuals" to "uplogic.utils.visualize"!')
     draw_box(origin, width, width, width, color, centered)
 
 
 def draw_box(origin: Vector, width: float, length: float, height: float, color: list = [1, 1, 1, 1], centered: bool = False):
-    print('Moved from "uplogic.utils.visuals" to "uplogic.utils.visualize"!')
     if centered:
         origin = origin.copy() - Vector((width * .5, length * .5, height * .5))
 
@@ -75,7 +101,6 @@ def draw_box(origin: Vector, width: float, length: float, height: float, color: 
 
 
 def draw_mesh(game_object: KX_GameObject, color: tuple = (1, 1, 1, 1)):
-    print('Moved from "uplogic.utils.visuals" to "uplogic.utils.visualize"!')
     mesh: Mesh = game_object.blenderObject.data
     for edge in mesh.edges:
         v1 = mesh.vertices[edge.vertices[0]]

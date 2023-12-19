@@ -32,6 +32,7 @@ class Button(Widget, HoverBehavior):
         self._released = False
         self._in_focus = False
         self._down = False
+        self._hover = False
         if on_press is not None:
             self.on_press = on_press
 
@@ -50,7 +51,8 @@ class Button(Widget, HoverBehavior):
         super().draw()
 
     def _evaluate(self):
-        if self.hover:
+        self._hover = self.hover
+        if self._hover:
             self._in_focus = True
             self.on_hover(self)
             self.canvas._hover_consumed = True
@@ -221,10 +223,15 @@ class ImageButton(Button, HoverBehavior):
         valign='bottom',
         on_press=None,
         texture=None,
+        hover_texture=None,
+        click_texture=None,
         angle=0
     ):
         super().__init__(pos, size, bg_color, relative, halign=halign, valign=valign, angle=angle, on_press=on_press, hover_color=hover_color, border_color=border_color)
         self.image = Image(relative={'size': True}, size=(1, 1), texture=texture)
+        self._texture_name = texture
+        self.hover_texture = hover_texture if hover_texture else texture
+        self.click_texture = click_texture if click_texture else texture
         self.add_widget(self.image)
 
     @property
@@ -233,7 +240,15 @@ class ImageButton(Button, HoverBehavior):
 
     @texture.setter
     def texture(self, val):
-        self.image.texture = val
+        self._texture_name = val
+
+    def _evaluate(self):
+        super()._evaluate()
+        self.image.texture = (
+            self.click_texture if self._clicked else (
+                self.hover_texture if self._hover else self._texture_name
+            )
+        )
 
 
 class SpriteButton(Button, HoverBehavior):
@@ -249,6 +264,8 @@ class SpriteButton(Button, HoverBehavior):
         halign='left',
         valign='bottom',
         texture=None,
+        hover_texture=None,
+        click_texture=None,
         idx=0,
         rows=1,
         cols=1,
@@ -257,6 +274,9 @@ class SpriteButton(Button, HoverBehavior):
     ):
         super().__init__(pos, size, bg_color, relative, halign=halign, valign=valign, angle=angle, on_press=on_press, hover_color=hover_color, border_color=border_color)
         self.image = Sprite(relative={'size': True}, size=(1, 1), texture=texture, rows=rows, cols=cols, idx=idx)
+        self._texture_name = texture
+        self.hover_texture = hover_texture if hover_texture else texture
+        self.click_texture = click_texture if click_texture else texture
         self.add_widget(self.image)
 
     @property
@@ -265,7 +285,7 @@ class SpriteButton(Button, HoverBehavior):
 
     @texture.setter
     def texture(self, val):
-        self.image.texture = val
+        self._texture_name = val
 
     @property
     def idx(self):
@@ -274,3 +294,11 @@ class SpriteButton(Button, HoverBehavior):
     @idx.setter
     def idx(self, val):
         self.image.idx = val
+
+    def _evaluate(self):
+        super()._evaluate()
+        self.image.texture = (
+            self.click_texture if self._clicked else (
+                self.hover_texture if self._hover else self._texture_name
+            )
+        )

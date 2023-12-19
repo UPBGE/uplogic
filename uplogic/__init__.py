@@ -77,6 +77,14 @@ import bge
 import bpy
 import signal
 import time
+import os, sys
+
+
+# pyfmodex module support
+pypath = sys.executable
+dllpath = os.path.join(pypath, os.path.pardir, os.path.pardir, 'DLLs')
+os.environ["PYFMODEX_STUDIO_DLL_PATH"] = os.path.join(dllpath, "fmodstudioL")
+os.environ["PYFMODEX_DLL_PATH"] = os.path.join(dllpath, "fmodL")
 
 
 class MainLoop:

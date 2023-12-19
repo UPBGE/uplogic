@@ -66,7 +66,9 @@ class ULSetUIWidgetAttr(ULActionNode):
             return
         widget = self.get_input(self.widget)
         value = self.get_input(getattr(self, attrs.get(self.widget_attr, 0)))
-        if self.widget_attr in ['font', 'texture']:
+        if self.widget_attr == 'texture':
+            value = value.name
+        if self.widget_attr == 'font':
             value = value.filepath.replace('\\', '/') if value else 0
         setattr(widget, self.widget_attr, value)
         self._done = True

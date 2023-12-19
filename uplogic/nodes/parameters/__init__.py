@@ -100,5 +100,6 @@ from .fpsfactor import ULFPSFactor
 from .instream import ULKeyLogger
 from .rotatebypoint import ULRotateByPoint
 from .getlogictreeproperty import ULGetLogicTreeProperty
+from .resizevector import ResizeVectorNode
 
 from .randomvalue import ULRandomValue
