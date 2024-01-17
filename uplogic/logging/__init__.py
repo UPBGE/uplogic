@@ -199,5 +199,5 @@ def debug(msg):
 
 nodeprefs = bpy.context.preferences.addons.get('bge_netlogic', None)
 if nodeprefs and getattr(nodeprefs.preferences, 'use_screen_console', False):
-    print(nodeprefs.preferences.screen_console_key)
+    # print(nodeprefs.preferences.screen_console_key)
     enable(toggle_key=nodeprefs.preferences.screen_console_key)

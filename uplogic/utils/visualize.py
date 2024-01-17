@@ -40,7 +40,6 @@ def draw_arrow(origin: Vector, target: Vector, color: list = [1, 1, 1, 1]):
         target,
         color
     )
-    
 
 
 def draw_path(points: list, color: list = [1, 1, 1, 1]):

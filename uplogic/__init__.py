@@ -61,6 +61,7 @@ mainloop on purpose, use the following code:
 from collections import deque
 
 from .utils import load_user_module
+from .utils import make_valid_name
 from .input import key_tap
 from .logging import enable
 from . import animation
@@ -215,15 +216,15 @@ def start(max_fps=60, tick_idle=.001):
     eventloop.start()
 
 
-class ULLoop:
+class CustomLoop:
 
-    quit_key = 'esc'
 
     def __init__(self, max_fps=-1, tick_idle=.00001) -> None:
+        self.quit_key = 'esc'
         self.scene = bge.logic.getCurrentScene()
         logic_tree = bpy.data.scenes[self.scene.name].get('custom_mainloop_tree')
         if logic_tree:
-            module = load_user_module(f'nl_{logic_tree.name.lower()}')
+            module = load_user_module(make_valid_name(f'nl_{logic_tree.name.lower()}'))
             logic_tree = module.get_tree(self.scene)
             MainLoop.on_update(logic_tree.network.evaluate)
         MainLoop.on_start(self.start)
@@ -248,3 +249,7 @@ class ULLoop:
 
     def stop(self):
         pass
+
+
+class ULLoop(CustomLoop):
+    pass

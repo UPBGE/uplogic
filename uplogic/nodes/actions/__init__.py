@@ -158,3 +158,4 @@ from .createuislider import ULCreateUISlider
 from .applytransform import ULApplyTransform
 from .setlogictreeproperty import ULSetLogicTreeProperty
 from .draw import DrawNode
+from .setconstraintattribute import SetConstraintAttributeNode

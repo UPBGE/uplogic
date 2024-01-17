@@ -272,7 +272,8 @@ def create_curve(
 
 def set_curve_points(
     curve: KX_GameObject,
-    points: list
+    points: list,
+    type: str = 'POLY'
 ) -> None:
     """Set the curve points of a `KX_GameObject` containing a `bpy.types.Curve` object.
 
@@ -282,7 +283,7 @@ def set_curve_points(
     bcurve = curve.blenderObject.data
     for spline in bcurve.splines:
         bcurve.splines.remove(spline)
-    spline = bcurve.splines.new('POLY')
+    spline = bcurve.splines.new(type)
     pos = curve.worldPosition
 
     spline.points.add(len(points)-1)
@@ -429,16 +430,18 @@ class ULCurve(GameObject):
         bevel_depth: float = 0.0,
         dimensions: int = 3,
         material: str or Material =None,
-        collection: str = None
+        collection: str = None,
+        type: str = 'POLY'
     ) -> None:
         if self._deprecated:
             print('[UPLOGIC] ULCurve class will be renamed to "Curve" in future releases!')
+        self.type = type
         self.game_object = create_curve(
-            name,
-            bevel_depth,
-            dimensions,
-            material,
-            collection
+            name=name,
+            bevel_depth=bevel_depth,
+            dimensions=dimensions,
+            material=material,
+            collection=collection
         )
 
     @property
@@ -459,7 +462,7 @@ class ULCurve(GameObject):
     @points.setter
     def points(self, val: list):
         if val != self.points:
-            set_curve_points(self.game_object, val)
+            set_curve_points(self.game_object, val, type=self.type)
 
     @property
     def bevel_depth(self):
@@ -504,3 +507,14 @@ class Mesh():
         self.blenderMesh.transform(
             rot.to_matrix().to_4x4()
         )
+
+
+def add_object(name: str | KX_GameObject, position=Vector((0, 0, 0)), rotation=Matrix(), scale=Vector((1, 1, 1))):
+    orig_ob = bpy.data.objects.get(name, None)
+    if orig_ob is None:
+        return
+    game_scene = logic.getCurrentScene()
+    scene = bpy.data.scenes[game_scene.name]
+    ob = orig_ob.copy()
+    scene.collection.objects.link(ob)
+    return game_scene.convertBlenderObject(ob)

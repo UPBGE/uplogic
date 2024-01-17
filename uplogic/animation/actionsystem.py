@@ -77,6 +77,8 @@ class ActionSystem():
         """
         for action in self.actions:
             action.update()
+            # if action.layer_weight >= 1.0:
+            #     pass
 
     def add(self, action):
         '''Add a `Action` to this system.
@@ -84,6 +86,7 @@ class ActionSystem():
         :param `action`: `Action` to add.
         '''
         self.actions.append(action)
+        self.actions.sort(key=lambda action: action.layer, reverse=True)
         ActionSystem.lock_layer(action)
 
     def remove(self, action):
