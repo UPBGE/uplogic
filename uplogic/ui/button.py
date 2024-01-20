@@ -19,6 +19,7 @@ class Button(Widget, HoverBehavior):
         border_width=1.0,
         border_color=(0, 0, 0, 0),
         hover_color=(0, 0, 0, .5),
+        click_color=(0, 0, 0, 0),
         halign='left',
         valign='bottom',
         on_press=None,
@@ -28,6 +29,7 @@ class Button(Widget, HoverBehavior):
         self.hover_color = hover_color
         self.border_width = border_width
         self.border_color = border_color
+        self.click_color = click_color
         self._clicked = False
         self._released = False
         self._in_focus = False
@@ -40,10 +42,10 @@ class Button(Widget, HoverBehavior):
         super()._setup_draw()
 
         self._released = False
-        self._clicked = False
         gpu.state.line_width_set(self.border_width)
         gpu.state.point_size_set(self.border_width)
-        self._shader.uniform_float("color", self.hover_color if self._in_focus else self.bg_color)
+        self._shader.uniform_float("color", self.click_color if self._clicked else (self.hover_color if self._in_focus else self.bg_color))
+        self._clicked = False
         self._batch.draw(self._shader)
         self._shader.uniform_float("color", self.border_color)
         self._batch_line.draw(self._shader)
@@ -104,6 +106,7 @@ class LabelButton(Button, HoverBehavior):
         border_width=1.0,
         border_color=(0, 0, 0, 0),
         hover_color=(0, 0, 0, .5),
+        click_color=(0, 0, 0, 0),
         text='',
         text_pos=[.5, .5],
         font='',
@@ -136,6 +139,7 @@ class LabelButton(Button, HoverBehavior):
             border_width=border_width,
             border_color=border_color,
             hover_color=hover_color,
+            click_color=click_color,
             halign=halign,
             valign=valign,
             angle=angle,
@@ -218,6 +222,7 @@ class ImageButton(Button, HoverBehavior):
         bg_color=(0, 0, 0, 0),
         border_color=(0, 0, 0, 0),
         hover_color=(0, 0, 0, .0),
+        click_color=(0, 0, 0, 0),
         relative={},
         halign='left',
         valign='bottom',
@@ -227,7 +232,7 @@ class ImageButton(Button, HoverBehavior):
         click_texture=None,
         angle=0
     ):
-        super().__init__(pos, size, bg_color, relative, halign=halign, valign=valign, angle=angle, on_press=on_press, hover_color=hover_color, border_color=border_color)
+        super().__init__(pos, size, bg_color, relative, halign=halign, valign=valign, angle=angle, on_press=on_press, hover_color=hover_color, border_color=border_color, click_color=click_color)
         self.image = Image(relative={'size': True}, size=(1, 1), texture=texture)
         self._texture_name = texture
         self.hover_texture = hover_texture if hover_texture else texture

@@ -273,6 +273,7 @@ def create_curve(
 def set_curve_points(
     curve: KX_GameObject,
     points: list,
+    loop: bool = False,
     type: str = 'POLY'
 ) -> None:
     """Set the curve points of a `KX_GameObject` containing a `bpy.types.Curve` object.
@@ -284,6 +285,7 @@ def set_curve_points(
     for spline in bcurve.splines:
         bcurve.splines.remove(spline)
     spline = bcurve.splines.new(type)
+    spline.use_cyclic_u = loop
     pos = curve.worldPosition
 
     spline.points.add(len(points)-1)
@@ -431,11 +433,13 @@ class ULCurve(GameObject):
         dimensions: int = 3,
         material: str or Material =None,
         collection: str = None,
+        loop: bool = False,
         type: str = 'POLY'
     ) -> None:
         if self._deprecated:
             print('[UPLOGIC] ULCurve class will be renamed to "Curve" in future releases!')
         self.type = type
+        self._loop = loop
         self.game_object = create_curve(
             name=name,
             bevel_depth=bevel_depth,
@@ -454,6 +458,16 @@ class ULCurve(GameObject):
         print('Curve.name is Read-Only!')
 
     @property
+    def loop(self):
+        """Name of the game object (Read-Only)."""
+        return self._loop
+
+    @loop.setter
+    def loop(self, val: bool):
+        self._loop = val
+        self.points = self.points
+
+    @property
     def points(self):
         """Points of the curve in global space."""
         splines = self.game_object.blenderObject.data.splines
@@ -462,7 +476,7 @@ class ULCurve(GameObject):
     @points.setter
     def points(self, val: list):
         if val != self.points:
-            set_curve_points(self.game_object, val, type=self.type)
+            set_curve_points(self.game_object, val, loop=self.loop, type=self.type)
 
     @property
     def bevel_depth(self):
@@ -509,7 +523,7 @@ class Mesh():
         )
 
 
-def add_object(name: str | KX_GameObject, position=Vector((0, 0, 0)), rotation=Matrix(), scale=Vector((1, 1, 1))):
+def add_object(name: str | KX_GameObject, position=Vector((0, 0, 0)), rotation=Vector((0, 0, 0)), scale=Vector((1, 1, 1))):
     orig_ob = bpy.data.objects.get(name, None)
     if orig_ob is None:
         return
@@ -517,4 +531,23 @@ def add_object(name: str | KX_GameObject, position=Vector((0, 0, 0)), rotation=M
     scene = bpy.data.scenes[game_scene.name]
     ob = orig_ob.copy()
     scene.collection.objects.link(ob)
-    return game_scene.convertBlenderObject(ob)
+    gobj = game_scene.convertBlenderObject(ob)
+    gobj.worldPosition = position
+    gobj.worldOrientation = rotation
+    gobj.worldScale = scale
+    return gobj
+
+
+def add_object_from_mesh(name: str | KX_GameObject, position=Vector((0, 0, 0)), rotation=Vector((0, 0, 0)), scale=Vector((1, 1, 1))):
+    orig_ob = bpy.data.objects.get(name, None)
+    if orig_ob is None:
+        return
+    game_scene = logic.getCurrentScene()
+    scene = bpy.data.scenes[game_scene.name]
+    ob = bpy.data.objects.new(name, orig_ob.data)
+    scene.collection.objects.link(ob)
+    gobj = game_scene.convertBlenderObject(ob)
+    gobj.worldPosition = position
+    gobj.worldOrientation = rotation
+    gobj.worldScale = scale
+    return gobj

@@ -6,7 +6,7 @@ from uplogic.input.mouse import MOUSE
 from uplogic.utils.math import clamp, map_range
 
 
-class Slider(Widget):
+class Slider(RelativeLayout):
 
     def __init__(
         self,
@@ -26,6 +26,8 @@ class Slider(Widget):
         allow_bar_click=True,
         angle=0
     ):
+        self.bar = None
+        self.knob = None
         super().__init__(pos, size, (0, 0, 0, 0), relative, halign=halign, valign=valign, angle=angle)
         self._value = 0
         self.border_width = 1
@@ -74,6 +76,9 @@ class Slider(Widget):
 
     def _build_shader(self):
         super()._build_shader()
+        if self.bar and self.knob:
+            self.bar._build_shader()
+            self.knob._build_shader()
         if self.parent:
             self.value = self.value
 
@@ -144,6 +149,8 @@ class FrameSlider(Slider):
         allow_bar_click=True,
         angle=0
     ):
+        self.bar = None
+        self.knob = None
         Widget.__init__(self, pos, size, (0, 0, 0, 0), relative, halign=halign, valign=valign, angle=angle)
         self._value = 0
         self._horiz = orientation != 'vertical'
@@ -179,6 +186,8 @@ class FrameSlider(Slider):
 class ProgressSlider(FrameSlider):
 
     def __init__(self, pos=[0, 0], size=[100, 10], relative={}, halign='left', valign='bottom', orientation='horizontal', border_width=1, border_color=(0.8, 0.8, 0.8, 1), bg_color=(0, 0, 0, 0), bar_color=(1, 1, 1, 1), bar_hover_color=(0.1, 0.1, 0.1, 0.3), steps=-1, allow_bar_click=True, angle=0):
+        self.bar = None
+        self.knob = None
         super().__init__(pos, size, relative, halign, valign, orientation, border_width, border_color, bg_color, bar_color, bar_hover_color, steps, allow_bar_click, angle)
         self.knob.relative = {'size': True}
         self.knob.halign = 'left'

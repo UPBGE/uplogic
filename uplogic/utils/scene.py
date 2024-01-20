@@ -7,6 +7,10 @@ def set_scene(scene: str or bpy.types.Scene) -> None:
     logic.getCurrentScene().replace(scene)
 
 
+def get_custom_loop():
+    return logic.getCurrentScene()['uplogic.mainloop']
+
+
 class FileLoader():
     '''Load the content of the currently'''
 

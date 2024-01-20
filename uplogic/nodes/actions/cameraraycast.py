@@ -23,7 +23,7 @@ class ULCameraRayCast(ULActionNode):
         self.PICKED_NORMAL = ULOutSocket(self, self.get_picked_normal)
 
     def get_result(self):
-        return self._data.obj is not None
+        return self._data.obj
 
     def get_picked_object(self):
         return self._data.obj
@@ -36,6 +36,7 @@ class ULCameraRayCast(ULActionNode):
 
     def evaluate(self):
         if not self.get_input(self.condition):
+            self._data = RayCastCameraData((None, None, None))
             return
         self._data = raycast_camera(
             distance=self.get_input(self.distance),

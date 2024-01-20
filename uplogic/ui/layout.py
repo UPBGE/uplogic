@@ -189,12 +189,16 @@ class BoxLayout(Layout):
         if self.orientation == 'horizontal':
             offset = 0
             for widget in self.children:
+                widget.halign = 'left'
+                widget.valign = 'bottom'
                 widget.relative['pos'] = False
                 widget.pos = [offset, dsize[1] - widget._draw_size[1]]
                 offset += widget._draw_size[0] + self.spacing
         if self.orientation == 'vertical':
             offset = dsize[1]
             for widget in self.children:
+                widget.halign = 'left'
+                widget.valign = 'bottom'
                 offset -= widget._draw_size[1]
                 widget.relative['pos'] = False
                 widget.pos = [0, offset]

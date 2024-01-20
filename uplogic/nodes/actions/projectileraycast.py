@@ -55,6 +55,7 @@ class ULProjectileRayCast(ULActionNode):
 
     def evaluate(self):
         if not self.get_input(self.condition):
+            self._data = RayCastProjectileData((None, None, None, None))
             return
         origin = self.get_input(self.origin)
         power: float = self.get_input(self.power)
@@ -71,7 +72,7 @@ class ULProjectileRayCast(ULActionNode):
         owner = self.network._owner
 
         self._data = raycast_projectile(
-            caster=owner,
+            caster=logic.getCurrentScene().active_camera,
             origin=Vector(origin),
             aim=Vector(destination),
             local=self.get_input(self.local),

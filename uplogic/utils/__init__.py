@@ -26,6 +26,7 @@ from .raycasting import raycast_face  # noqa
 from .raycasting import raycast_projectile  # noqa
 from .raycasting import raycast_mouse  # noqa
 from .scene import set_scene  # noqa
+from .scene import get_custom_loop  # noqa
 from .pooling import SpawnPool  # noqa
 from .pooling import Spawn  # noqa
 from .pooling import SimpleBullet  # noqa

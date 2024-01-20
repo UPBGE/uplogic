@@ -15,7 +15,6 @@ class ULMouseRayCast(ULActionNode):
         self.xray = None
         self.camera = None
         self.mask = get_bitmask(all=True)
-        self._done = False
         self._out_object = None
         self._out_normal = None
         self._out_point = None
@@ -26,7 +25,7 @@ class ULMouseRayCast(ULActionNode):
         self.OUTPOINT = ULOutSocket(self, self.get_out_point)
 
     def get_result(self):
-        return self._done
+        return self._data.obj
 
     def get_out_object(self):
         return self._data.obj
@@ -38,8 +37,8 @@ class ULMouseRayCast(ULActionNode):
         return self._data.point
 
     def evaluate(self):
-        self._done = False
         if not self.get_input(self.condition):
+            self._data = RayCastData((None, None, None, None, None, None))
             return
         self._data = raycast_mouse(
             distance=self.get_input(self.distance),
@@ -48,4 +47,3 @@ class ULMouseRayCast(ULActionNode):
             mask=self.get_input(self.mask)
 
         )
-        self._done = True

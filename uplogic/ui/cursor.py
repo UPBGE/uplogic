@@ -4,6 +4,7 @@ import gpu
 import bge, bpy
 from gpu_extras.batch import batch_for_shader
 from bge import logic
+from math import ceil
 
 
 CURSOR = None
@@ -21,8 +22,14 @@ def remove_custom_cursor():
 
 class Cursor(Widget):
 
-    def __init__(self, texture=None, size=(20,20), offset=(0, 0)):
+    def __init__(self, texture=None, size=(20,20), offset=(0, 0), rows=1, cols=1, idx=0):
         self.offset = offset
+        self.rows = rows
+        self.cols = cols
+        self._idx = idx
+        # self._idx = 0
+        # self._rows = 1
+        # self._cols = 1
         remove_custom_cursor()
         super().__init__(MOUSE.position, size)
         self._texture = None
@@ -33,6 +40,37 @@ class Cursor(Widget):
         bge.logic.getCurrentScene().post_draw.append(self._draw_custom_cursor)
 
     @property
+    def idx(self):
+        return self._idx
+
+    @idx.setter
+    def idx(self, val):
+        self._idx = val
+        self._build_shader()
+
+    @property
+    def rows(self):
+        return self._rows
+
+    @rows.setter
+    def rows(self, val):
+        if val < 1:
+            return
+        self._rows = val
+        self._row_height = 1 / val
+
+    @property
+    def cols(self):
+        return self._cols
+
+    @cols.setter
+    def cols(self, val):
+        if val < 1:
+            return
+        self._cols = val
+        self._col_width = 1 / val
+
+    @property
     def texture(self):
         return self._texture
 
@@ -40,12 +78,24 @@ class Cursor(Widget):
     def texture(self, val):
         texture = bpy.data.images.get(val)
         if texture:
+            texture.use_fake_user = True
             self._texture = gpu.texture.from_image(texture)
 
     def _build_shader(self):
         self._shader = gpu.shader.from_builtin('IMAGE_COLOR')
         screen_res = [bge.render.getWindowWidth(), bge.render.getWindowHeight()]
         mpos = [MOUSE.position.x * screen_res[0] + self.offset[0], (1 - MOUSE.position.y) * screen_res[1] + self.offset[1]]
+        idx = self.idx
+        col = idx % self.cols
+        col_end = col + 1
+        row = ceil((idx + 1) / self.cols) - 1
+        row_end = row + 1
+        texcoord = (
+            (col * self._col_width, 1 - row_end * self._row_height),
+            (col_end * self._col_width, 1 - row_end * self._row_height),
+            (col_end * self._col_width, 1 - row * self._row_height),
+            (col * self._col_width, 1 - row * self._row_height)
+        )
         self._batch = batch_for_shader(
             self._shader, 'TRI_FAN',
             {
@@ -55,7 +105,7 @@ class Cursor(Widget):
                     (mpos[0] + self.size[0], mpos[1]),
                     mpos
                 ),
-                "texCoord": ((0, 0), (1, 0), (1, 1), (0, 1)),
+                "texCoord": texcoord,
             },
         )
 
