@@ -13,7 +13,7 @@ class ULLoadVariable(ULParameterNode):
         self.default_value = None
         self.file_name = None
         self.path = ''
-        self.VAR = ULOutSocket(self, self.get_var)
+        self.VAR = self.add_output(self.get_var)
 
     def get_var(self):
         name = self.get_input(self.name)

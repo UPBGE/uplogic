@@ -21,7 +21,7 @@ class ULVehicleSetAttributes(ULActionNode):
         self.suspension_damping = False
         self.set_tyre_friction = False
         self.tyre_friction = False
-        self.OUT = ULOutSocket(self, self.get_done)
+        self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
         return self.done

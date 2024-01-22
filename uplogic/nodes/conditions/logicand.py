@@ -6,7 +6,7 @@ class ULAnd(ULConditionNode):
         ULConditionNode.__init__(self)
         self.ca = None
         self.cb = None
-        self.OUT = ULOutSocket(self, self.get_out)
+        self.OUT = self.add_output(self.get_out)
 
     def get_out(self):
         ca = self.get_input(self.ca)
@@ -23,7 +23,7 @@ class ULAndList(ULConditionNode):
         self.cd = True
         self.ce = True
         self.cf = True
-        self.OUT = ULOutSocket(self, self.get_out)
+        self.OUT = self.add_output(self.get_out)
 
     def get_out(self):
         results = [

@@ -9,7 +9,7 @@ class ULListIndexRandom(ULParameterNode):
         self.condition = None
         self._item = None
         self.items = None
-        self.OUT = ULOutSocket(self, self.get_val)
+        self.OUT = self.add_output(self.get_val)
 
     def get_val(self):
         list_d = self.get_input(self.items)

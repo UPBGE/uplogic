@@ -13,7 +13,7 @@ class ULReplaceMesh(ULActionNode):
         self.use_display = None
         self.use_physics = None
         self.done = None
-        self.OUT = ULOutSocket(self, self.get_done)
+        self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
         return self.done

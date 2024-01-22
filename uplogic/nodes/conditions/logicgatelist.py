@@ -8,7 +8,7 @@ class ULLogicGateList(ULConditionNode):
         ULConditionNode.__init__(self)
         self.items = None
         self.list: list = None
-        self.OUT = ULOutSocket(self, self.get_and_list)
+        self.OUT = self.add_output(self.get_and_list)
 
         self.getters = [
             self.get_and_list,

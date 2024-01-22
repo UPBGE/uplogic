@@ -9,7 +9,7 @@ class ULWorldPosition(ULParameterNode):
         self.screen_x = None
         self.screen_y = None
         self.world_z = None
-        self.OUT = ULOutSocket(self, self.get_pos)
+        self.OUT = self.add_output(self.get_pos)
 
     def get_pos(self):
         camera = self.get_input(self.camera)

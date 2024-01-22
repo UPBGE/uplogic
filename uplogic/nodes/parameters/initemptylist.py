@@ -10,7 +10,7 @@ class ULInitEmptyList(ULParameterNode):
         self.condition = None
         self.length = None
         self.items = None
-        self.LIST = ULOutSocket(self, self.get_list)
+        self.LIST = self.add_output(self.get_list)
 
     def get_list(self):
         length = self.get_input(self.length)

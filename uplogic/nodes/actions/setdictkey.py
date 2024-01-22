@@ -11,8 +11,8 @@ class ULSetDictKey(ULActionNode):
         self.val = None
         self.new_dict = None
         self.done = None
-        self.OUT = ULOutSocket(self, self.get_done)
-        self.DICT = ULOutSocket(self, self.get_dict)
+        self.OUT = self.add_output(self.get_done)
+        self.DICT = self.add_output(self.get_dict)
 
     def get_done(self):
         return self.done

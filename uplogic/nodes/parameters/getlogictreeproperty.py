@@ -7,7 +7,7 @@ class ULGetLogicTreeProperty(ULParameterNode):
     def __init__(self):
         ULParameterNode.__init__(self)
         self.property_name = None
-        self.OUT = ULOutSocket(self, self.get_property)
+        self.OUT = self.add_output(self.get_property)
 
     def get_property(self):
         property_name = self.get_input(self.property_name)

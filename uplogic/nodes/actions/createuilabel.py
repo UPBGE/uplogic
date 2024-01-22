@@ -26,8 +26,8 @@ class ULCreateUILabel(ULActionNode):
         self.halign_type = 'left'
         self.valign_type = 'bottom'
         self._done = False
-        self.OUT = ULOutSocket(self, self._get_done)
-        self.WIDGET = ULOutSocket(self, self._get_widget)
+        self.OUT = self.add_output(self._get_done)
+        self.WIDGET = self.add_output(self._get_widget)
 
     def _get_done(self):
         return self._done

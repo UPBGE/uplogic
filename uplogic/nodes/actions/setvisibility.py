@@ -15,7 +15,7 @@ class ULSetVisibility(ULActionNode):
         self.visible: bool = None
         self.recursive: bool = None
         self.done: bool = None
-        self.OUT = ULOutSocket(self, self.get_done)
+        self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
         return self.done
@@ -39,7 +39,7 @@ class ULSetCollectionVisibility(ULActionNode):
         self.visible: bool = None
         self.done: bool = None
         self.recursive: bool = None
-        self.OUT = ULOutSocket(self, self.get_done)
+        self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
         return self.done

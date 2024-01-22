@@ -10,7 +10,7 @@ class ULGetSensorValue(ULParameterNode):
         self.game_obj = None
         self.sens_name = None
         self.field = None
-        self.OUT = ULOutSocket(self, self.get_sensor)
+        self.OUT = self.add_output(self.get_sensor)
 
     def get_sensor(self):
         game_obj: GameObject = self.get_input(self.game_obj)

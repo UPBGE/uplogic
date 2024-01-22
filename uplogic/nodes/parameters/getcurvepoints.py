@@ -7,7 +7,7 @@ class ULGetCurvePoints(ULParameterNode):
     def __init__(self):
         ULParameterNode.__init__(self)
         self.curve = None
-        self.OUT = ULOutSocket(self, self.get_points)
+        self.OUT = self.add_output(self.get_points)
 
     def get_points(self):
         obj = self.get_input(self.curve)

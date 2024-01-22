@@ -7,7 +7,7 @@ class ULGetGravity(ULParameterNode):
     def __init__(self):
         ULParameterNode.__init__(self)
         self.collection = None
-        self.OUT = ULOutSocket(self, self.get_gravity)
+        self.OUT = self.add_output(self.get_gravity)
 
     def get_gravity(self):
         return logic.getCurrentScene().gravity

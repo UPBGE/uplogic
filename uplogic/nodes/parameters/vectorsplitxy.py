@@ -8,8 +8,8 @@ class ULVectorSplitXY(ULParameterNode):
         ULParameterNode.__init__(self)
         self.input_v = None
         self.output_v = Vector((0, 0))
-        self.OUTX = ULOutSocket(self, self.get_out_x)
-        self.OUTY = ULOutSocket(self, self.get_out_y)
+        self.OUTX = self.add_output(self.get_out_x)
+        self.OUTY = self.add_output(self.get_out_y)
 
     def get_out_x(self):
         return self.output_v.x

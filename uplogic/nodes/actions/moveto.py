@@ -13,7 +13,7 @@ class ULMoveTo(ULActionNode):
         self.dynamic = None
         self.distance = None
         self.done = False
-        self.OUT = ULOutSocket(self, self.get_done)
+        self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
         return self.done

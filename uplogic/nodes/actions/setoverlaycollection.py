@@ -11,7 +11,7 @@ class ULSetOverlayCollection(ULActionNode):
         self.camera = None
         self.collection = None
         self.done = False
-        self.OUT = ULOutSocket(self, self.get_out)
+        self.OUT = self.add_output(self.get_out)
 
     def get_out(self):
         return self.done

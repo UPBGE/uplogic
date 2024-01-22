@@ -12,7 +12,7 @@ class ULGamepadVibration(ULActionNode):
         self.right = None
         self.time = None
         self.done = None
-        self.DONE = ULOutSocket(self, self.get_done)
+        self.DONE = self.add_output(self.get_done)
 
     def get_done(self):
         return self.done

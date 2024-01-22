@@ -15,8 +15,8 @@ class ULGetPerformanceProfile(ULActionNode):
         self.check_cells_per_tick = False
         self.done = None
         self.data = ''
-        self.OUT = ULOutSocket(self, self.get_done)
-        self.DATA = ULOutSocket(self, self.get_data)
+        self.OUT = self.add_output(self.get_done)
+        self.DATA = self.add_output(self.get_data)
 
     def get_done(self):
         return self.done

@@ -9,7 +9,7 @@ class ULMouseReleased(ULConditionNode):
         self.pulse = False
         self.mouse_button_code = None
         self.network = None
-        self.OUT = ULOutSocket(self, self.get_changed)
+        self.OUT = self.add_output(self.get_changed)
 
     def get_changed(self):
         mouse_button = self.get_input(self.mouse_button_code)

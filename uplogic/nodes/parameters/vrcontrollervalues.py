@@ -9,12 +9,12 @@ class ULGetVRControllerValues(ULParameterNode):
         self._index = None
         self.index = None
         self.controller = None
-        self.POS = ULOutSocket(self, self.get_pos)
-        self.ORI = ULOutSocket(self, self.get_ori)
-        self.APOS = ULOutSocket(self, self.get_apos)
-        self.AORI = ULOutSocket(self, self.get_aori)
-        self.STICK = ULOutSocket(self, self.get_stick)
-        self.TRIGGER = ULOutSocket(self, self.get_trigger)
+        self.POS = self.add_output(self.get_pos)
+        self.ORI = self.add_output(self.get_ori)
+        self.APOS = self.add_output(self.get_apos)
+        self.AORI = self.add_output(self.get_aori)
+        self.STICK = self.add_output(self.get_stick)
+        self.TRIGGER = self.add_output(self.get_trigger)
     
     @property
     def index(self):

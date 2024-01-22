@@ -9,7 +9,7 @@ class ULGetActuatorValue(ULParameterNode):
         self.game_obj = None
         self.act_name = None
         self.field = None
-        self.OUT = ULOutSocket(self, self.get_actuator)
+        self.OUT = self.add_output(self.get_actuator)
 
     def get_actuator(self):
         game_obj = self.get_input(self.game_obj)

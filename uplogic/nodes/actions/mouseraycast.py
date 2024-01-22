@@ -19,10 +19,10 @@ class ULMouseRayCast(ULActionNode):
         self._out_normal = None
         self._out_point = None
         self._data = RayCastData((None, None, None, None, None, None))
-        self.RESULT = ULOutSocket(self, self.get_result)
-        self.OUTOBJECT = ULOutSocket(self, self.get_out_object)
-        self.OUTNORMAL = ULOutSocket(self, self.get_out_normal)
-        self.OUTPOINT = ULOutSocket(self, self.get_out_point)
+        self.RESULT = self.add_output(self.get_result)
+        self.OUTOBJECT = self.add_output(self.get_out_object)
+        self.OUTNORMAL = self.add_output(self.get_out_normal)
+        self.OUTPOINT = self.add_output(self.get_out_point)
 
     def get_result(self):
         return self._data.obj

@@ -9,7 +9,7 @@ class ULSetLogicTreeProperty(ULActionNode):
         self.prop_name = None
         self.value = None
         self._done = False
-        self.OUT = ULOutSocket(self, self.get_property)
+        self.OUT = self.add_output(self.get_property)
 
     def get_property(self):
         return self._done

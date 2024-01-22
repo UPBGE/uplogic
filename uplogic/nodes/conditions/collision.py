@@ -22,11 +22,11 @@ class ULCollision(ULConditionNode):
         self._consumed = False
         self._game_object = None
         self._objects = []
-        self.COLLISION = ULOutSocket(self, self.get_collision)
-        self.TARGET = ULOutSocket(self, self.get_target)
-        self.POINT = ULOutSocket(self, self.get_point)
-        self.NORMAL = ULOutSocket(self, self.get_normal)
-        self.OBJECTS = ULOutSocket(self, self.get_objects)
+        self.COLLISION = self.add_output(self.get_collision)
+        self.TARGET = self.add_output(self.get_target)
+        self.POINT = self.add_output(self.get_point)
+        self.NORMAL = self.add_output(self.get_normal)
+        self.OBJECTS = self.add_output(self.get_objects)
         
     def get_collision(self):
         return self._collision

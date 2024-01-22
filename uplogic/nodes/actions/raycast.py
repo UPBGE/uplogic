@@ -24,13 +24,13 @@ class ULRaycast(ULActionNode):
         self.visualize: bool = None
         self._data = RayCastData((None, None, None, None, None, None))
         self.face_data = False
-        self.RESULT = ULOutSocket(self, self.get_result)
-        self.PICKED_OBJECT = ULOutSocket(self, self.get_picked_object)
-        self.POINT = ULOutSocket(self, self.get_point)
-        self.NORMAL = ULOutSocket(self, self.get_normal)
-        self.DIRECTION = ULOutSocket(self, self.get_direction)
-        self.MATERIAL = ULOutSocket(self, self.get_material)
-        self.UV = ULOutSocket(self, self.get_uv)
+        self.RESULT = self.add_output(self.get_result)
+        self.PICKED_OBJECT = self.add_output(self.get_picked_object)
+        self.POINT = self.add_output(self.get_point)
+        self.NORMAL = self.add_output(self.get_normal)
+        self.DIRECTION = self.add_output(self.get_direction)
+        self.MATERIAL = self.add_output(self.get_material)
+        self.UV = self.add_output(self.get_uv)
         self.network = None
 
     def setup(self, network):

@@ -10,7 +10,7 @@ class ULVectorAngle(ULParameterNode):
         self.op = None
         self.vector: Vector = None
         self.vector_2: Vector = None
-        self.OUT = ULOutSocket(self, self.get_done)
+        self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
         vector: Vector = self.get_input(self.vector)

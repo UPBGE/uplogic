@@ -16,7 +16,7 @@ class ULRotateByPoint(ULParameterNode):
         self.pivot = None
         self.angle = None
         self.arbitrary_axis = None
-        self.OUT = ULOutSocket(self, self.get_point)
+        self.OUT = self.add_output(self.get_point)
         self._operations = [
             self._rotate2d,
             self._rotate3d,

@@ -24,11 +24,11 @@ class ULProjectileRayCast(ULActionNode):
         self.visualize: bool = None
         self.network = None
         self._data = RayCastProjectileData((None, None, None, None))
-        self.RESULT = ULOutSocket(self, self.get_result)
-        self.PICKED_OBJECT = ULOutSocket(self, self.get_picked_object)
-        self.POINT = ULOutSocket(self, self.get_point)
-        self.NORMAL = ULOutSocket(self, self.get_normal)
-        self.PARABOLA = ULOutSocket(self, self.get_parabola)
+        self.RESULT = self.add_output(self.get_result)
+        self.PICKED_OBJECT = self.add_output(self.get_picked_object)
+        self.POINT = self.add_output(self.get_point)
+        self.NORMAL = self.add_output(self.get_normal)
+        self.PARABOLA = self.add_output(self.get_parabola)
 
     def setup(self, network):
         self.network = network

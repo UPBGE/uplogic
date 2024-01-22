@@ -6,13 +6,13 @@ from uplogic.nodes import ULParameterNode
 class ULMouseData(ULParameterNode):
     def __init__(self):
         ULParameterNode.__init__(self)
-        self.MX = ULOutSocket(self, self.getmx)
-        self.MY = ULOutSocket(self, self.getmy)
-        self.MDX = ULOutSocket(self, self.getmdx)
-        self.MDY = ULOutSocket(self, self.getmdy)
-        self.MDWHEEL = ULOutSocket(self, self.getmdwheel)
-        self.MXY0 = ULOutSocket(self, self.getmxyz)
-        self.MDXY0 = ULOutSocket(self, self.getmdxyz)
+        self.MX = self.add_output(self.getmx)
+        self.MY = self.add_output(self.getmy)
+        self.MDX = self.add_output(self.getmdx)
+        self.MDY = self.add_output(self.getmdy)
+        self.MDWHEEL = self.add_output(self.getmdwheel)
+        self.MXY0 = self.add_output(self.getmxyz)
+        self.MDXY0 = self.add_output(self.getmdxyz)
 
     def getmx(self):
         return self.network.mouse.position[0]

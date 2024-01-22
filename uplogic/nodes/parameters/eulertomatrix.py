@@ -10,7 +10,7 @@ class ULEulerToMatrix(ULParameterNode):
         ULParameterNode.__init__(self)
         self.input_e = None
         self.matrix = Matrix()
-        self.OUT = ULOutSocket(self, self.get_matrix)
+        self.OUT = self.add_output(self.get_matrix)
 
     def get_matrix(self):
         vec = self.get_input(self.input_e)

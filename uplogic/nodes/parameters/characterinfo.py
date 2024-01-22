@@ -15,11 +15,11 @@ class ULCharacterInfo(ULParameterNode):
         self.walk_dir = None
         self.on_ground = None
         self.local = False
-        self.MAX_JUMPS = ULOutSocket(self, self.get_max_jumps)
-        self.CUR_JUMP = ULOutSocket(self, self.get_current_jump)
-        self.GRAVITY = ULOutSocket(self, self.get_gravity)
-        self.WALKDIR = ULOutSocket(self, self.get_walk_dir)
-        self.ON_GROUND = ULOutSocket(self, self.get_on_ground)
+        self.MAX_JUMPS = self.add_output(self.get_max_jumps)
+        self.CUR_JUMP = self.add_output(self.get_current_jump)
+        self.GRAVITY = self.add_output(self.get_gravity)
+        self.WALKDIR = self.add_output(self.get_walk_dir)
+        self.ON_GROUND = self.add_output(self.get_on_ground)
 
     def get_max_jumps(self):
         return self.physics.maxJumps

@@ -9,7 +9,7 @@ class ULMatrixToXYZ(ULParameterNode):
         self.input_m = None
         self.output = None
         self.euler_order = 'XYZ'
-        self.OUT = ULOutSocket(self, self.get_out)
+        self.OUT = self.add_output(self.get_out)
 
     def get_out(self):
         matrix = self.get_input(self.input_m)

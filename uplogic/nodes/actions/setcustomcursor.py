@@ -13,8 +13,8 @@ class ULSetCustomCursor(ULActionNode):
         self.size: list = None
         self.done: bool = None
         self._cursor = None
-        self.OUT = ULOutSocket(self, self.get_done)
-        self.CURSOR = ULOutSocket(self, self.get_cursor)
+        self.OUT = self.add_output(self.get_done)
+        self.CURSOR = self.add_output(self.get_cursor)
 
     def get_done(self):
         return self.done

@@ -11,7 +11,7 @@ class ULTranslate(ULActionNode):
         self.speed = None
         self._t = None
         self._old_values = None
-        self.OUT = ULOutSocket(self, self.get_done)
+        self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
         return self.done

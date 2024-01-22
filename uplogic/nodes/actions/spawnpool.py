@@ -26,13 +26,13 @@ class ULSpawnPool(ULActionNode):
         self._pool = None
 
         self.done = None
-        self.OUT = ULOutSocket(self, self.get_done)
-        self.SPAWNED = ULOutSocket(self, self.get_spawned)
-        self.ONHIT = ULOutSocket(self, self.get_hit)
-        self.HITOBJECT = ULOutSocket(self, self.get_hit_obj)
-        self.HITPOINT = ULOutSocket(self, self.get_hit_point)
-        self.HITNORMAL = ULOutSocket(self, self.get_hit_normal)
-        self.HITDIR = ULOutSocket(self, self.get_hit_direction)
+        self.OUT = self.add_output(self.get_done)
+        self.SPAWNED = self.add_output(self.get_spawned)
+        self.ONHIT = self.add_output(self.get_hit)
+        self.HITOBJECT = self.add_output(self.get_hit_obj)
+        self.HITPOINT = self.add_output(self.get_hit_point)
+        self.HITNORMAL = self.add_output(self.get_hit_normal)
+        self.HITDIR = self.add_output(self.get_hit_direction)
 
         class NodeSimple(Spawn):
             pass

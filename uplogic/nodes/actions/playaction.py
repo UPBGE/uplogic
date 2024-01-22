@@ -34,10 +34,10 @@ class ULPlayAction(ULActionNode):
         self._action = None
         self.action_evt = None
         self.act_system = self.get_act_system()
-        self.STARTED = ULOutSocket(self, self._get_started)
-        self.FINISHED = ULOutSocket(self, self._get_finished)
-        self.RUNNING = ULOutSocket(self, self._get_running)
-        self.FRAME = ULOutSocket(self, self._get_frame)
+        self.STARTED = self.add_output(self._get_started)
+        self.FINISHED = self.add_output(self._get_finished)
+        self.RUNNING = self.add_output(self._get_running)
+        self.FRAME = self.add_output(self._get_frame)
         
     def get_act_system(self):
         act_systems = GlobalDB.retrieve('uplogic.animation')

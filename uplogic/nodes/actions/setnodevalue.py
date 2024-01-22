@@ -14,7 +14,7 @@ class ULSetNodeValue(ULActionNode):
         self.attribute = None
         self.value = None
         self.done = False
-        self.OUT = ULOutSocket(self, self._get_done)
+        self.OUT = self.add_output(self._get_done)
 
     def _get_done(self):
         return self.done

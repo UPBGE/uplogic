@@ -9,7 +9,7 @@ class ULMousePressedOn(ULConditionNode):
         ULConditionNode.__init__(self)
         self.game_object = None
         self.mouse_button = None
-        self.OUT = ULOutSocket(self, self.get_changed)
+        self.OUT = self.add_output(self.get_changed)
 
     def get_changed(self):
         mouse_button = self.get_input(self.mouse_button)

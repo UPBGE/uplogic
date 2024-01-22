@@ -10,7 +10,7 @@ class ULMath(ULParameterNode):
         self.operand_a = None
         self.operand_b = None
         self.operator = None
-        self.OUT = ULOutSocket(self, self.get_done)
+        self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
         a = self.get_input(self.operand_a)

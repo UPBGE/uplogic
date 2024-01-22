@@ -22,7 +22,7 @@ class ResizeVectorNode(ULParameterNode):
 
     @to_size.setter
     def to_size(self, val):
-        self.OUT = ULOutSocket(self, self.funcs[val])
+        self.OUT = self.add_output(self.funcs[val])
         self._to_size = val
 
     def get_2D_vec(self):

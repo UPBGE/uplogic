@@ -10,7 +10,7 @@ class ULSetCollisionGroup(ULActionNode):
         self.slots = None
         self.mode = 0
         self.done = None
-        self.OUT = ULOutSocket(self, self.get_done)
+        self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
         return self.done

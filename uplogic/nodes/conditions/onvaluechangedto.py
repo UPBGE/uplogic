@@ -9,7 +9,7 @@ class ULValueChangedTo(ULConditionNode):
         self.trigger_value = None
         self.changed = None
         self.old = None
-        self.OUT = ULOutSocket(self, self.get_changed)
+        self.OUT = self.add_output(self.get_changed)
 
     def get_changed(self):
         monitored_value = self.get_input(self.monitored_value)

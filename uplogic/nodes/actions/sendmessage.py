@@ -13,7 +13,7 @@ class ULSendMessage(ULActionNode):
         self.subject = None
         self.body = None
         self.done = False
-        self.OUT = ULOutSocket(self, self.get_out)
+        self.OUT = self.add_output(self.get_out)
 
     def get_out(self):
         return self.done

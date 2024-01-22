@@ -11,8 +11,8 @@ class ULMakeUniqueLight(ULActionNode):
         self.light = None
         self.done = None
         self._light = None
-        self.OUT = ULOutSocket(self, self.get_done)
-        self.LIGHT = ULOutSocket(self, self.get_light)
+        self.OUT = self.add_output(self.get_done)
+        self.LIGHT = self.add_output(self.get_light)
 
     def get_done(self):
         return self.done

@@ -13,8 +13,8 @@ class ULVectorAngleCheck(ULConditionNode):
         self.vector_2: Vector = None
         self.value = None
         self._angle = 0
-        self.OUT = ULOutSocket(self, self.get_done)
-        self.ANGLE = ULOutSocket(self, self.get_angle)
+        self.OUT = self.add_output(self.get_done)
+        self.ANGLE = self.add_output(self.get_angle)
 
     def get_angle(self):
         return self._angle

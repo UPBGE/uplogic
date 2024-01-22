@@ -17,7 +17,7 @@ class ULModifyProperty(ULActionNode):
         self.min_val = 0.0
         self.max_val = 1.0
         self.done = False
-        self.OUT = ULOutSocket(self, self._get_done)
+        self.OUT = self.add_output(self._get_done)
 
     def _get_done(self):
         return self.done

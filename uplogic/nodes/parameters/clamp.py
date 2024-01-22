@@ -11,7 +11,7 @@ class ULClamp(ULParameterNode):
         self.range = None
         self.min_value = None
         self.max_value = None
-        self.OUT = ULOutSocket(self, self.get_done)
+        self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
         value = self.get_input(self.value)

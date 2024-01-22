@@ -14,9 +14,9 @@ class ULActionStatus(ULParameterNode):
         self.action = None
         self._playing = False
         self.act_system = self.get_act_system()
-        self.OUT = ULOutSocket(self, self.get_out)
-        self.ACTION_NAME = ULOutSocket(self, self.get_action_name)
-        self.ACTION_FRAME = ULOutSocket(self, self.get_action_frame)
+        self.OUT = self.add_output(self.get_out)
+        self.ACTION_NAME = self.add_output(self.get_action_name)
+        self.ACTION_FRAME = self.add_output(self.get_action_frame)
 
     def get_out(self):
         return bool(self.action and self.action.is_playing)

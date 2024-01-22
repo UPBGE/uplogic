@@ -20,12 +20,12 @@ class ULLocalServer(ULActionNode):
         self._received = False
         self._message = None
 
-        self.STARTED = ULOutSocket(self, self.get_started)
-        self.RUNNING = ULOutSocket(self, self.get_running)
-        self.STOPPED = ULOutSocket(self, self.get_stopped)
-        self.SERVER = ULOutSocket(self, self.get_server)
-        self.RECEIVED = ULOutSocket(self, self.get_received)
-        self.MSG = ULOutSocket(self, self.get_message)
+        self.STARTED = self.add_output(self.get_started)
+        self.RUNNING = self.add_output(self.get_running)
+        self.STOPPED = self.add_output(self.get_stopped)
+        self.SERVER = self.add_output(self.get_server)
+        self.RECEIVED = self.add_output(self.get_received)
+        self.MSG = self.add_output(self.get_message)
 
     def get_started(self):
         return self._started

@@ -11,8 +11,8 @@ class ULGamepadTrigger(ULParameterNode):
         self.sensitivity = None
         self.threshold = None
         self._values = None
-        self.LEFT = ULOutSocket(self, self.get_left)
-        self.RIGHT = ULOutSocket(self, self.get_right)
+        self.LEFT = self.add_output(self.get_left)
+        self.RIGHT = self.add_output(self.get_right)
 
     @property
     def values(self) -> Vector:

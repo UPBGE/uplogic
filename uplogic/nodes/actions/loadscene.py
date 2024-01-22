@@ -16,11 +16,11 @@ class ULLoadScene(ULActionNode):
         self.datatype = ''
         self.item = ''
         self.loader = None
-        self.OUT = ULOutSocket(self, self.get_done)
-        self.UPDATED = ULOutSocket(self, self.get_updated)
-        self.STATUS = ULOutSocket(self, self.get_status)
-        self.DATATYPE = ULOutSocket(self, self.get_datatype)
-        self.ITEM = ULOutSocket(self, self.get_item)
+        self.OUT = self.add_output(self.get_done)
+        self.UPDATED = self.add_output(self.get_updated)
+        self.STATUS = self.add_output(self.get_status)
+        self.DATATYPE = self.add_output(self.get_datatype)
+        self.ITEM = self.add_output(self.get_item)
 
     def get_status(self):
         return self.status

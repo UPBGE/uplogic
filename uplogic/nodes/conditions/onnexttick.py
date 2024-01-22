@@ -7,7 +7,7 @@ class ULOnNextTick(ULConditionNode):
         ULConditionNode.__init__(self)
         self.input_condition = None
         self._activated = 0
-        self.OUT = ULOutSocket(self, self.get_out)
+        self.OUT = self.add_output(self.get_out)
 
     def get_out(self):
         condition = self.get_input(self.input_condition)

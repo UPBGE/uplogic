@@ -17,9 +17,9 @@ class ULCreateVehicle(ULActionNode):
         self.done = None
         self.vehicle = None
         self.wheels = None
-        self.OUT = ULOutSocket(self, self.get_done)
-        self.VEHICLE = ULOutSocket(self, self.get_vehicle)
-        self.WHEELS = ULOutSocket(self, self.get_wheels)
+        self.OUT = self.add_output(self.get_done)
+        self.VEHICLE = self.add_output(self.get_vehicle)
+        self.WHEELS = self.add_output(self.get_wheels)
 
     def get_done(self):
         return self.done

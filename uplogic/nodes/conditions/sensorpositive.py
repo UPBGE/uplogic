@@ -8,7 +8,7 @@ class ULSensorPositive(ULConditionNode):
         ULConditionNode.__init__(self)
         self.obj_name = None
         self.sens_name = None
-        self.OUT = ULOutSocket(self, self.get_sensor)
+        self.OUT = self.add_output(self.get_sensor)
 
     def get_sensor(self):
         game_obj = self.get_input(self.obj_name)

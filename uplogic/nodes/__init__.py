@@ -103,19 +103,18 @@ class ULLogicContainer(ULLogicBase):
 
 class ULOutSocket(ULLogicBase):
 
-    def __init__(self, node, value_getter):
-        self.node = node
-        # self.get_value
+    def __init__(self, value_getter):
+        self._result = None
         self._value_getter = value_getter
 
     def _value_getter(self):
         pass
     
     def get_value(self):
-        result = self.node.outputs.get(self, None)
+        result = self._result
         if result is None:
             result = self._value_getter()
-            self.node.outputs[self] = result
+            self._result = result
         return result
 
 
@@ -131,21 +130,18 @@ class Output(ULOutSocket):
 class ULLogicNode(ULLogicContainer):
 
     def __init__(self):
+        self.outputs = []
         super().__init__()
-        self.outputs = {}
-        self.output_values = {}
 
     def reset(self):
         super().reset()
-        self.outputs = {}
-        self.output_values = {}  # XXX: Remove
+        for o in self.outputs:
+            o._result = None
 
-    def set_output(self, socket, value):
-        self.output_values[socket] = value
-        return value
-
-    def get_output(self, socket, default=None):
-        return self.output_values.get(socket, default)
+    def add_output(self, getter):
+        o = Output(getter)
+        self.outputs.append(o)
+        return o
 
     def get_input(self, param):
         if isinstance(param, ULLogicBase):

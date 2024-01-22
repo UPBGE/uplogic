@@ -6,8 +6,8 @@ class ULMouseScrolled(ULConditionNode):
     def __init__(self):
         ULConditionNode.__init__(self)
         self.wheel_direction = 0
-        self.OUT = ULOutSocket(self, self.get_wheel)
-        self.DIFF = ULOutSocket(self, self.get_diff)
+        self.OUT = self.add_output(self.get_wheel)
+        self.DIFF = self.add_output(self.get_diff)
 
     def get_wheel(self):
         wd = self.wheel_direction

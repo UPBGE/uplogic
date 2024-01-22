@@ -20,7 +20,7 @@ class ULApplyTransform(ULActionNode):
             self.apply_torque,
             self.apply_impulse,
         ]
-        self.OUT = ULOutSocket(self, self.get_done)
+        self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
         return self.done

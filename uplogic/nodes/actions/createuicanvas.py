@@ -10,8 +10,8 @@ class ULCreateUICanvas(ULActionNode):
         self._canvas = None
         self.on_init = False
         self._done = False
-        self.OUT = ULOutSocket(self, self._get_done)
-        self.CANVAS = ULOutSocket(self, self._get_canvas)
+        self.OUT = self.add_output(self._get_done)
+        self.CANVAS = self.add_output(self._get_canvas)
 
     def _get_done(self):
         return self._done

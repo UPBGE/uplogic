@@ -10,7 +10,7 @@ class ULPulsify(ULConditionNode):
         self.result = False
         self._old_time = getRealTime()
         self._time = 0.0
-        self.OUT = ULOutSocket(self, self.get_out)
+        self.OUT = self.add_output(self.get_out)
 
     def get_out(self):
         return self.result

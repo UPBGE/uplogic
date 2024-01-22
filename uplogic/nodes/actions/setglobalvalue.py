@@ -12,7 +12,7 @@ class ULSetGlobalValue(ULActionNode):
         self.value = None
         self.persistent = None
         self.done = None
-        self.OUT = ULOutSocket(self, self.get_done)
+        self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
         return self.done

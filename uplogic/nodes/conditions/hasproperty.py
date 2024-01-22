@@ -8,7 +8,7 @@ class ULHasProperty(ULConditionNode):
         self.game_object = None
         self.property_name = None
         self.mode = 0
-        self.OUT = ULOutSocket(self, self.get_stat)
+        self.OUT = self.add_output(self.get_stat)
 
     def get_stat(self):
         game_object = self.get_input(self.game_object)

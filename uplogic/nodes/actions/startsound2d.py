@@ -17,9 +17,9 @@ class ULStartSound(ULActionNode):
         self.device = None
         self.on_finish = False
         self._handle = None
-        self.DONE = ULOutSocket(self, self.get_done)
-        self.ON_FINISH = ULOutSocket(self, self.get_on_finish)
-        self.HANDLE = ULOutSocket(self, self.get_handle)
+        self.DONE = self.add_output(self.get_done)
+        self.ON_FINISH = self.add_output(self.get_on_finish)
+        self.HANDLE = self.add_output(self.get_handle)
 
     def get_handle(self):
         return self._handle

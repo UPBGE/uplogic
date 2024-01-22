@@ -14,8 +14,8 @@ class ULListVariables(ULActionNode):
         self.path = ''
         self.done = None
         self.items = None
-        self.OUT = ULOutSocket(self, self.get_done)
-        self.LIST = ULOutSocket(self, self.get_list)
+        self.OUT = self.add_output(self.get_done)
+        self.LIST = self.add_output(self.get_list)
 
     def get_done(self):
         return self.done

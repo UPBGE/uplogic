@@ -19,9 +19,9 @@ class ULStartSpeaker(ULActionNode):
         self._clear_sound = 1
         self._sustained = 1
         self._handle = None
-        self.DONE = ULOutSocket(self, self.get_done)
-        self.ON_FINISH = ULOutSocket(self, self.get_on_finish)
-        self.HANDLE = ULOutSocket(self, self.get_handle)
+        self.DONE = self.add_output(self.get_done)
+        self.ON_FINISH = self.add_output(self.get_on_finish)
+        self.HANDLE = self.add_output(self.get_handle)
 
     def get_handle(self):
         return self._handle

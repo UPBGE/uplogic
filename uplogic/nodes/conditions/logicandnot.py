@@ -6,7 +6,7 @@ class ULAndNot(ULConditionNode):
         ULConditionNode.__init__(self)
         self.condition_a = None
         self.condition_b = None
-        self.OUT = ULOutSocket(self, self.get_out)
+        self.OUT = self.add_output(self.get_out)
 
     def get_out(self):
         ca = self.get_input(self.condition_a)

@@ -8,7 +8,7 @@ class ULGetLightEnergy(ULParameterNode):
         ULParameterNode.__init__(self)
         self.lamp = None
         self.energy = 0
-        self.ENERGY = ULOutSocket(self, self.get_energy)
+        self.ENERGY = self.add_output(self.get_energy)
 
     def get_energy(self):
         lamp = self.get_input(self.lamp)

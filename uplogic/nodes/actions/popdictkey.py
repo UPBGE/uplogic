@@ -11,9 +11,9 @@ class ULPopDictKey(ULActionNode):
         self.key = None
         self.new_dict = None
         self.done = None
-        self.OUT = ULOutSocket(self, self.get_done)
-        self.DICT = ULOutSocket(self, self.get_dict)
-        self.VALUE = ULOutSocket(self, self.get_value)
+        self.OUT = self.add_output(self.get_done)
+        self.DICT = self.add_output(self.get_dict)
+        self.VALUE = self.add_output(self.get_value)
 
     def get_done(self):
         return self.done

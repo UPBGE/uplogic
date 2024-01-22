@@ -17,10 +17,10 @@ class ULCameraRayCast(ULActionNode):
         self.mask = get_bitmask(all=True)
         self.distance = None
         self._data = RayCastCameraData((None, None, None))
-        self.RESULT = ULOutSocket(self, self.get_result)
-        self.PICKED_OBJECT = ULOutSocket(self, self.get_picked_object)
-        self.PICKED_POINT = ULOutSocket(self, self.get_picked_point)
-        self.PICKED_NORMAL = ULOutSocket(self, self.get_picked_normal)
+        self.RESULT = self.add_output(self.get_result)
+        self.PICKED_OBJECT = self.add_output(self.get_picked_object)
+        self.PICKED_POINT = self.add_output(self.get_picked_point)
+        self.PICKED_NORMAL = self.add_output(self.get_picked_normal)
 
     def get_result(self):
         return self._data.obj

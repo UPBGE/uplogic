@@ -11,8 +11,8 @@ class ULSetListIndex(ULActionNode):
         self.val = None
         self.new_list: list = None
         self.done: bool = None
-        self.OUT = ULOutSocket(self, self.get_done)
-        self.LIST = ULOutSocket(self, self.get_list)
+        self.OUT = self.add_output(self.get_done)
+        self.LIST = self.add_output(self.get_list)
 
     def get_done(self):
         return self.done

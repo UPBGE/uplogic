@@ -55,7 +55,7 @@ class ULSetUIWidgetAttr(ULActionNode):
         self.widget_attr = 'show'
         self.show = None
         self._done = False
-        self.OUT = ULOutSocket(self, self._get_done)
+        self.OUT = self.add_output(self._get_done)
 
     def _get_done(self):
         return self._done

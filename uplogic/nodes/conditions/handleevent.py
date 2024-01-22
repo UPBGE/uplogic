@@ -9,9 +9,9 @@ class ULHandleEvent(ULConditionNode):
         ULConditionNode.__init__(self)
         self.subject = None
         self.event = None
-        self.OUT = ULOutSocket(self, self.get_received)
-        self.BODY = ULOutSocket(self, self.get_body)
-        self.TARGET = ULOutSocket(self, self.get_target)
+        self.OUT = self.add_output(self.get_received)
+        self.BODY = self.add_output(self.get_body)
+        self.TARGET = self.add_output(self.get_target)
 
     def get_received(self):
         return isinstance(self.event, ULEvent)

@@ -18,7 +18,7 @@ class ULRebuildData(ULParameterNode):
             'Mat3': Matrix,
             'Mat4': Matrix
         }
-        self.OUT = ULOutSocket(self, self.get_data)
+        self.OUT = self.add_output(self.get_data)
 
     def get_data(self):
         return self.ret

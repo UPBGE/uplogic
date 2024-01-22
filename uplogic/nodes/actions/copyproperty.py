@@ -11,7 +11,7 @@ class ULCopyProperty(ULActionNode):
         self.property_name = None
         self.mode = 0
         self.done = False
-        self.OUT = ULOutSocket(self, self._get_done)
+        self.OUT = self.add_output(self._get_done)
 
     def _get_done(self):
         return self.done

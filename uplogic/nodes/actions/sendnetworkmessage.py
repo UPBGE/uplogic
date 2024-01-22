@@ -8,7 +8,7 @@ class ULSendNetworkMessage(ULActionNode):
         self.data = None
         self.subject = None
         self._done = False
-        self.OUT = ULOutSocket(self, self.get_done)
+        self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
         return self._done

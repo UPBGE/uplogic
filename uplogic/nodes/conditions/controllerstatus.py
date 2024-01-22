@@ -9,8 +9,8 @@ class ULControllerStatus(ULConditionNode):
         ULConditionNode.__init__(self)
         self.obj_name = None
         self.cont_name = None
-        self.OUT = ULOutSocket(self, self.get_controller)
-        self.SENSORS = ULOutSocket(self, self.get_sensors)
+        self.OUT = self.add_output(self.get_controller)
+        self.SENSORS = self.add_output(self.get_sensors)
 
     def get_controller(self):
         game_obj = self.game_obj

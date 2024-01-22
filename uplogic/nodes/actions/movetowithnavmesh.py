@@ -44,9 +44,9 @@ class ULMoveToWithNavmesh(ULActionNode):
         self._motion_path = None
         self.done: bool = False
         self.finished: bool = False
-        self.OUT = ULOutSocket(self, self.get_done)
-        self.FINISHED = ULOutSocket(self, self.get_finished)
-        self.POINT = ULOutSocket(self, self.get_point)
+        self.OUT = self.add_output(self.get_done)
+        self.FINISHED = self.add_output(self.get_finished)
+        self.POINT = self.add_output(self.get_point)
 
     def get_done(self):
         return self.done

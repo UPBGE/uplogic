@@ -25,7 +25,7 @@ class ULGamepadLook(ULActionNode):
         self.threshold: float = None
         self.gamepadlook: GamepadLook = None
         self.done: bool = None
-        self.DONE = ULOutSocket(self, self.get_done)
+        self.DONE = self.add_output(self.get_done)
 
     def get_done(self):
         return self.done

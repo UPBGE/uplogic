@@ -7,9 +7,9 @@ class ULKeyLogger(ULParameterNode):
     def __init__(self):
         ULParameterNode.__init__(self)
         self.only_characters = None
-        self.PRESSED = ULOutSocket(self, self.get_pressed)
-        self.CHARACTER = ULOutSocket(self, self.get_character)
-        self.KEYCODE = ULOutSocket(self, self.get_keycode)
+        self.PRESSED = self.add_output(self.get_pressed)
+        self.CHARACTER = self.add_output(self.get_character)
+        self.KEYCODE = self.add_output(self.get_keycode)
 
     def get_pressed(self):
         return self.scan()[0]

@@ -9,7 +9,7 @@ class ULToggleFilter(ULActionNode):
         self.condition = None
         self.pass_idx = None
         self.done = False
-        self.OUT = ULOutSocket(self, self._get_done)
+        self.OUT = self.add_output(self._get_done)
 
     def _get_done(self):
         return self.done

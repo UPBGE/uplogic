@@ -8,7 +8,7 @@ class ULRandomVect(ULActionNode):
     def __init__(self):
         ULActionNode.__init__(self)
         self.xyz = None
-        self.OUT_A = ULOutSocket(self, self._get_output)
+        self.OUT_A = self.add_output(self._get_output)
 
     def _get_output(self):
         xyz = self.get_input(self.xyz)

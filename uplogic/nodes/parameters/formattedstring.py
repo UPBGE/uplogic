@@ -10,7 +10,7 @@ class ULFormattedString(ULParameterNode):
         self.value_b = None
         self.value_c = None
         self.value_d = None
-        self.OUT = ULOutSocket(self, self.get_out)
+        self.OUT = self.add_output(self.get_out)
 
     def get_out(self):
         format_string = self.get_input(self.format_string)

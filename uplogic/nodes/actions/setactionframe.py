@@ -20,7 +20,7 @@ class ULSetActionFrame(ULActionNode):
         self.freeze = None
         self.done = None
         self.act_system = self.get_act_system()
-        self.OUT = ULOutSocket(self, self.get_done)
+        self.OUT = self.add_output(self.get_done)
 
     def get_act_system(self):
         act_systems = GlobalDB.retrieve('uplogic.animation')

@@ -13,11 +13,11 @@ class ULMouseOver(ULConditionNode):
         self._mouse_over_status = False
         self._point = None
         self._normal = None
-        self.MOUSE_ENTERED = ULOutSocket(self, self._get_mouse_entered)
-        self.MOUSE_EXITED = ULOutSocket(self, self._get_mouse_exited)
-        self.MOUSE_OVER = ULOutSocket(self, self._get_mouse_over)
-        self.POINT = ULOutSocket(self, self._get_point)
-        self.NORMAL = ULOutSocket(self, self._get_normal)
+        self.MOUSE_ENTERED = self.add_output(self._get_mouse_entered)
+        self.MOUSE_EXITED = self.add_output(self._get_mouse_exited)
+        self.MOUSE_OVER = self.add_output(self._get_mouse_over)
+        self.POINT = self.add_output(self._get_point)
+        self.NORMAL = self.add_output(self._get_normal)
         self._last_target = None
 
     def _get_mouse_entered(self):

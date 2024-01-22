@@ -13,7 +13,7 @@ class ULSetMaterial(ULActionNode):
         self.slot = None
         self.mat_name = None
         self.done = False
-        self.OUT = ULOutSocket(self, self._get_done)
+        self.OUT = self.add_output(self._get_done)
 
     def _get_done(self):
         return self.done

@@ -33,11 +33,11 @@ class ULCreateUIButton(ULActionNode):
         self.valign_type = 'bottom'
         self.text_halign_type = 'left'
         self.text_valign_type = 'bottom'
-        self.OUT = ULOutSocket(self, self._get_done)
-        self.WIDGET = ULOutSocket(self, self._get_widget)
-        self.CLICK = ULOutSocket(self, self._get_click)
-        self.HOVER = ULOutSocket(self, self._get_hover)
-        self.RELEASE = ULOutSocket(self, self._get_release)
+        self.OUT = self.add_output(self._get_done)
+        self.WIDGET = self.add_output(self._get_widget)
+        self.CLICK = self.add_output(self._get_click)
+        self.HOVER = self.add_output(self._get_hover)
+        self.RELEASE = self.add_output(self._get_release)
 
     def _get_done(self):
         return self._done

@@ -7,7 +7,7 @@ class ULGetProperty(ULParameterNode):
         self.game_object = None
         self.property_name = None
         self.mode = 0
-        self.OUT = ULOutSocket(self, self.get_property)
+        self.OUT = self.add_output(self.get_property)
 
     def get_property(self):
         game_object = self.get_input(self.game_object)

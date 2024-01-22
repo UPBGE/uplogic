@@ -33,10 +33,10 @@ class ULCreateUISlider(ULActionNode):
         self.orientation_type = 'horizontal'
         self.slider_type = '0'
         self._done = False
-        self.OUT = ULOutSocket(self, self._get_done)
-        self.WIDGET = ULOutSocket(self, self._get_widget)
-        self.VALUE = ULOutSocket(self, self._get_value)
-        self.KNOB_POSITION = ULOutSocket(self, self._get_knob_pos)
+        self.OUT = self.add_output(self._get_done)
+        self.WIDGET = self.add_output(self._get_widget)
+        self.VALUE = self.add_output(self._get_value)
+        self.KNOB_POSITION = self.add_output(self._get_knob_pos)
 
     def _get_done(self):
         return self._done

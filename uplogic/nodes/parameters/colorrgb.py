@@ -7,7 +7,7 @@ class ULColorRGB(ULParameterNode):
         ULParameterNode.__init__(self)
         self.color = None
         self.output_vector = None
-        self.OUTV = ULOutSocket(self, self.get_out_v)
+        self.OUTV = self.add_output(self.get_out_v)
 
     def get_out_v(self):
         c = self.get_input(self.color)

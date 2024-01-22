@@ -9,7 +9,7 @@ class ULStoreValue(ULParameterNode):
         self.initialize = True
         self.condition = None
         self._stored_value = None
-        self.OUT = ULOutSocket(self, self.get_done)
+        self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
         return self._stored_value

@@ -9,7 +9,7 @@ class ULGetNodeSocket(ULParameterNode):
         self.tree_name = None
         self.node_name = None
         self.input_slot = None
-        self.OUT = ULOutSocket(self, self._get_val)
+        self.OUT = self.add_output(self._get_val)
 
     def _get_val(self):
         tree: NodeTree = self.get_input(self.tree_name)

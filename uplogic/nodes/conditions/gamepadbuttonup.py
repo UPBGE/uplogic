@@ -11,7 +11,7 @@ class ULGamepadButtonUp(ULConditionNode):
         self.index = None
         self._last_value = False
         self._up_value = None
-        self.BUTTON = ULOutSocket(self, self.get_button)
+        self.BUTTON = self.add_output(self.get_button)
         self.initialized = False
 
     def get_button(self):

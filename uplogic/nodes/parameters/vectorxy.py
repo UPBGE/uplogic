@@ -8,7 +8,7 @@ class ULVectorXY(ULParameterNode):
         ULParameterNode.__init__(self)
         self.input_x = None
         self.input_y = None
-        self.OUTV = ULOutSocket(self, self.get_out_v)
+        self.OUTV = self.add_output(self.get_out_v)
 
     def get_out_v(self):
         return Vector((

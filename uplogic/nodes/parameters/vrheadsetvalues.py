@@ -7,8 +7,8 @@ class ULGetVRHeadsetValues(ULParameterNode):
     def __init__(self):
         ULParameterNode.__init__(self)
         self.controller = VRHeadset()
-        self.POS = ULOutSocket(self, self.get_pos)
-        self.ORI = ULOutSocket(self, self.get_ori)
+        self.POS = self.add_output(self.get_pos)
+        self.ORI = self.add_output(self.get_ori)
 
     def get_pos(self):
         return self.controller.position

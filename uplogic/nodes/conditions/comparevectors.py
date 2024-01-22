@@ -11,7 +11,7 @@ class ULCompareVectors(ULConditionNode):
         self.threshold = None
         self.param_a = None
         self.param_b = None
-        self.OUT = ULOutSocket(self, self.get_result)
+        self.OUT = self.add_output(self.get_result)
 
     def get_result(self):
         a = self.get_input(self.param_a)

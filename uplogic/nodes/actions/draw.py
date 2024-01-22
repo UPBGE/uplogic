@@ -18,7 +18,7 @@ class DrawNode(ULActionNode):
         self.object = None
         self.use_volume_origin = False
         self.done = False
-        self.OUT = ULOutSocket(self, self.get_out)
+        self.OUT = self.add_output(self.get_out)
         self.mode = 0
         self.modes = [
             self.draw_line,

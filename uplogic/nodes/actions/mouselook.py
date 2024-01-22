@@ -28,7 +28,7 @@ class ULMouseLook(ULActionNode):
         self._x = 0
         self._y = 0
         self.done = None
-        self.OUT = ULOutSocket(self, self.get_done)
+        self.OUT = self.add_output(self.get_done)
         self.mouselook = None
 
     def get_done(self):

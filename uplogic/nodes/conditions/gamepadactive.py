@@ -7,7 +7,7 @@ class ULGamepadActive(ULConditionNode):
         ULConditionNode.__init__(self)
         self.index = None
         self.out = False
-        self.OUT = ULOutSocket(self, self.get_done)
+        self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
         index = self.get_input(self.index)

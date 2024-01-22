@@ -16,7 +16,7 @@ class ULSerializeData(ULParameterNode):
             'Mat4': Mat4,
             'GameObj': GameObj,
         }
-        self.OUT = ULOutSocket(self, self.get_data)
+        self.OUT = self.add_output(self.get_data)
 
     def get_data(self):
         dat = self.get_input(self.data)

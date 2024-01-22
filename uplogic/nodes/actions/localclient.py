@@ -22,12 +22,12 @@ class ULLocalClient(ULActionNode):
         self._received = False
         self._message = None
 
-        self.CONNECT = ULOutSocket(self, self.get_connect)
-        self.CONNECTED = ULOutSocket(self, self.get_connected)
-        self.DISCONNECT = ULOutSocket(self, self.get_disconnect)
-        self.CLIENT = ULOutSocket(self, self.get_client)
-        self.RECEIVED = ULOutSocket(self, self.get_received)
-        self.MSG = ULOutSocket(self, self.get_message)
+        self.CONNECT = self.add_output(self.get_connect)
+        self.CONNECTED = self.add_output(self.get_connected)
+        self.DISCONNECT = self.add_output(self.get_disconnect)
+        self.CLIENT = self.add_output(self.get_client)
+        self.RECEIVED = self.add_output(self.get_received)
+        self.MSG = self.add_output(self.get_message)
 
     def get_connect(self):
         return self._connect

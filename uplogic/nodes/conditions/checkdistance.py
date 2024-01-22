@@ -12,8 +12,8 @@ class ULCheckDistance(ULConditionNode):
         self.param_b = None
         self.dist = None
         self._distance = 0
-        self.OUT = ULOutSocket(self, self.get_result)
-        self.DIST = ULOutSocket(self, self.get_distance)
+        self.OUT = self.add_output(self.get_result)
+        self.DIST = self.add_output(self.get_distance)
 
     def get_result(self):
         dist = self.get_input(self.dist)

@@ -13,7 +13,7 @@ class ULDrawCube(ULActionNode):
         self.width = None
         self.use_volume_origin = False
         self.done = False
-        self.OUT = ULOutSocket(self, self.get_out)
+        self.OUT = self.add_output(self.get_out)
 
     def get_out(self):
         return self.done

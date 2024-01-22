@@ -17,9 +17,9 @@ class ULBoneStatus(ULParameterNode):
         self._pos = Vector((0, 0, 0))
         self._rot = Euler((0, 0, 0), "XYZ")
         self._sca = Vector((0, 0, 0))
-        self.XYZ_POS = ULOutSocket(self, self._get_pos)
-        self.XYZ_ROT = ULOutSocket(self, self._get_rot)
-        self.XYZ_SCA = ULOutSocket(self, self._get_sca)
+        self.XYZ_POS = self.add_output(self._get_pos)
+        self.XYZ_ROT = self.add_output(self._get_rot)
+        self.XYZ_SCA = self.add_output(self._get_sca)
 
     def _get_pos(self):
         return self._pos

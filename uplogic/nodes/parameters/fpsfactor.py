@@ -8,7 +8,7 @@ class ULFPSFactor(ULParameterNode):
 
     def __init__(self):
         ULParameterNode.__init__(self)
-        self.TIMEFACTOR = ULOutSocket(self, self.get_out)
+        self.TIMEFACTOR = self.add_output(self.get_out)
 
     def get_out(self):
         return FPS_FACTOR()

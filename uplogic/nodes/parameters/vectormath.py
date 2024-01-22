@@ -13,8 +13,8 @@ class ULVectorMath(ULParameterNode):
         self.scale = None
         self.vector_3 = None
         self.ior = None
-        self.OUT = ULOutSocket(self, self.get_done)
-        self.VOUT = ULOutSocket(self, self.get_done)
+        self.OUT = self.add_output(self.get_done)
+        self.VOUT = self.add_output(self.get_done)
         self.calculations = {
             'scale': self.get_scale,
             'length': self.get_length,

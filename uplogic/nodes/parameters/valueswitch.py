@@ -10,7 +10,7 @@ class ULValueSwitch(ULParameterNode):
         self.val_a = None
         self.val_b = None
         self.out_value = False
-        self.VAL = ULOutSocket(self, self._get_out_value)
+        self.VAL = self.add_output(self._get_out_value)
 
     def _get_out_value(self):
         condition = self.get_input(self.condition)
@@ -35,7 +35,7 @@ class ULValueSwitchList(ULParameterNode):
         self.cf = True
         self.val_f = None
         self.out_value = False
-        self.VAL = ULOutSocket(self, self._get_out_value)
+        self.VAL = self.add_output(self._get_out_value)
 
     def _get_out_value(self):
         if self.get_input(self.ca) is True:
@@ -72,7 +72,7 @@ class ULValueSwitchListCompare(ULParameterNode):
         self.val_e = None
         self.pf = None
         self.val_f = None
-        self.RESULT = ULOutSocket(self, self.get_result)
+        self.RESULT = self.add_output(self.get_result)
 
     def is_none_if_not_eq_or_neq_operator(self, a, b):
         if self.operator > 1:  # eq and neq are valid for None

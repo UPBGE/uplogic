@@ -12,7 +12,7 @@ class ULWithinRange(ULParameterNode):
         self.min_value = None
         self.max_value = None
         self.operator = None
-        self.OUT = ULOutSocket(self, self.get_done)
+        self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
         v = self.get_input(self.value)

@@ -7,7 +7,7 @@ class ULGetPyInstanceAttr(ULParameterNode):
         ULParameterNode.__init__(self)
         self.instance = None
         self.attr = None
-        self.OUT = ULOutSocket(self, self.get_done)
+        self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
         instance = self.get_input(self.instance)

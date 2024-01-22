@@ -12,7 +12,7 @@ class ULKeyPressed(ULConditionNode):
         self.input_type = 1 if self.pulse else 0
         self.key_code = 0
         self.network = None
-        self.OUT = ULOutSocket(self, self.get_pressed)
+        self.OUT = self.add_output(self.get_pressed)
 
     def get_pressed(self):
         keycode = self.get_input(self.key_code)

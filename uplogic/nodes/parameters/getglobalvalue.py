@@ -9,7 +9,7 @@ class ULGetGlobalValue(ULParameterNode):
         self.data_id = None
         self.key = None
         self.default = None
-        self.OUT = ULOutSocket(self, self.get_out)
+        self.OUT = self.add_output(self.get_out)
 
     def get_out(self):
         data_id = self.get_input(self.data_id)

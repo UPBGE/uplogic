@@ -13,7 +13,7 @@ class ULLimitRange(ULParameterNode):
         self.max_value = None
         self.operator = None
         self.last_val = 0
-        self.OUT = ULOutSocket(self, self.get_done)
+        self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
         v = self.get_input(self.value)

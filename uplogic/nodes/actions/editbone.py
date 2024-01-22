@@ -21,7 +21,7 @@ class ULEditBone(ULActionNode):
         self._eulers = Euler((0, 0, 0), "XYZ")
         self._vector = Vector((0, 0, 0))
         self.done = None
-        self.OUT = ULOutSocket(self, self.get_done)
+        self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
         return self.done

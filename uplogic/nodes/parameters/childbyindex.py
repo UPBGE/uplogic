@@ -8,7 +8,7 @@ class ULChildByIndex(ULParameterNode):
         ULParameterNode.__init__(self)
         self.from_parent: GameObject = None
         self.index: int = None
-        self.CHILD = ULOutSocket(self, self.get_child)
+        self.CHILD = self.add_output(self.get_child)
 
     def get_child(self):
         parent: GameObject = self.get_input(self.from_parent)

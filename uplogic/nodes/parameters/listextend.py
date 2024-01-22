@@ -7,8 +7,8 @@ class ULListExtend(ULParameterNode):
         ULParameterNode.__init__(self)
         self.list_1: list = None
         self.list_2: list = None
-        self.OUT = ULOutSocket(self, self.get_done)
-        self.LIST = ULOutSocket(self, self.get_list)
+        self.OUT = self.add_output(self.get_done)
+        self.LIST = self.add_output(self.get_list)
 
     def get_done(self):
         return False

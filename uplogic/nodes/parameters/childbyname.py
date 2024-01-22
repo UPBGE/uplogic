@@ -8,7 +8,7 @@ class ULChildByName(ULParameterNode):
         ULParameterNode.__init__(self)
         self.from_parent = None
         self.child = None
-        self.CHILD = ULOutSocket(self, self.get_child)
+        self.CHILD = self.add_output(self.get_child)
 
     def get_child(self):
         parent: KX_GameObject = self.get_input(self.from_parent)

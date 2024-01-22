@@ -15,7 +15,7 @@ class ULMapRange(ULParameterNode):
         self.clamp = False
         self.mode = 0
         self.operations = [map_range, map_range_vector]
-        self.OUT = ULOutSocket(self, self.get_done)
+        self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
         return self.operations[self.mode](

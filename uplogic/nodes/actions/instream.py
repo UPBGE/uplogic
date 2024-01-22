@@ -15,9 +15,9 @@ class ULKeyLogger(ULActionNode):
         self._key_logged = None
         self._key_code = None
         self._character = None
-        self.KEY_LOGGED = ULOutSocket(self, self.get_key_logged)
-        self.KEY_CODE = ULOutSocket(self, self.get_key_code)
-        self.CHARACTER = ULOutSocket(self, self.get_character)
+        self.KEY_LOGGED = self.add_output(self.get_key_logged)
+        self.KEY_CODE = self.add_output(self.get_key_code)
+        self.CHARACTER = self.add_output(self.get_character)
 
     def get_key_logged(self):
         return self._key_logged

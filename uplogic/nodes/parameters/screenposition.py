@@ -9,7 +9,7 @@ class ULScreenPosition(ULParameterNode):
         self.game_object = None
         self.camera = None
         self.pos = None
-        self.OUT = ULOutSocket(self, self.get_pos)
+        self.OUT = self.add_output(self.get_pos)
 
     def get_pos(self):
         game_object = self.get_input(self.game_object)

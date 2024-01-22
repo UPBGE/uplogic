@@ -10,7 +10,7 @@ class ULThreshold(ULParameterNode):
         self.else_z = None
         self.threshold = None
         self.operator = None
-        self.OUT = ULOutSocket(self, self.get_done)
+        self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
         v = self.get_input(self.value)

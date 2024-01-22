@@ -10,7 +10,7 @@ class ULEuler(ULParameterNode):
         self.input_y = None
         self.input_z = None
         self.order = 'XYZ'
-        self.OUTV = ULOutSocket(self, self.get_out_v)
+        self.OUTV = self.add_output(self.get_out_v)
 
     def get_out_v(self):
         e = Euler(order=self.order)

@@ -11,7 +11,7 @@ class ULPrintValue(ULActionNode):
         self.value = None
         self.done = None
         self.msg_type = 'INFO'
-        self.OUT = ULOutSocket(self, self.get_done)
+        self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
         return self.done

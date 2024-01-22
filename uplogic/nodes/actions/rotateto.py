@@ -13,7 +13,7 @@ class ULActionRotateTo(ULActionNode):
         self._done = False
         self.rot_axis = 2
         self.front_axis = 0
-        self.OUT = ULOutSocket(self, self._get_done)
+        self.OUT = self.add_output(self._get_done)
 
     def _get_done(self):
         return self._done

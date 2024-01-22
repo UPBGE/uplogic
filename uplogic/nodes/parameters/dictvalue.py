@@ -8,7 +8,7 @@ class ULDictValue(ULParameterNode):
         self.dict = None
         self.key = None
         self.default_value = None
-        self.OUT = ULOutSocket(self, self.get_val)
+        self.OUT = self.add_output(self.get_val)
 
     def get_val(self):
         dictionary = self.get_input(self.dict)

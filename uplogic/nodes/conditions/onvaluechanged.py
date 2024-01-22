@@ -9,12 +9,11 @@ class ULOnValueChanged(ULConditionNode):
         self.new = None
         self.current_value = None
         self.initialize = False
-        self.OUT = ULOutSocket(self, self.get_changed)
-        self.OLD = ULOutSocket(
-            self,
+        self.OUT = self.add_output(self.get_changed)
+        self.OLD = self.add_output(
             self.get_previous_value
         )
-        self.NEW = ULOutSocket(self, self.get_current_value)
+        self.NEW = self.add_output(self.get_current_value)
 
     def get_changed(self):
         curr = self.get_input(self.current_value)

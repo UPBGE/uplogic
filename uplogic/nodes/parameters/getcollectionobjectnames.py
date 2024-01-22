@@ -8,7 +8,7 @@ class ULGetCollectionObjectNames(ULParameterNode):
         ULParameterNode.__init__(self)
         self.condition = None
         self.collection = None
-        self.OUT = ULOutSocket(self, self.get_objects)
+        self.OUT = self.add_output(self.get_objects)
 
     def get_objects(self):
         collection: Collection = self.get_input(self.collection)

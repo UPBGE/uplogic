@@ -11,7 +11,7 @@ class ULGetMaterialAttribute(ULParameterNode):
         self.node_name = None
         self.internal = None
         self.attribute = None
-        self.OUT = ULOutSocket(self, self._get_val)
+        self.OUT = self.add_output(self._get_val)
 
     def _get_val(self):
         material: Material = self.get_input(self.mat_name)

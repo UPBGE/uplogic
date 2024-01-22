@@ -7,7 +7,7 @@ class ULListIndex(ULParameterNode):
         ULParameterNode.__init__(self)
         self.items = None
         self.index = None
-        self.OUT = ULOutSocket(self, self.get_val)
+        self.OUT = self.add_output(self.get_val)
 
     def get_val(self):
         list_d = self.get_input(self.items)

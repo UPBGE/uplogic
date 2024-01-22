@@ -13,8 +13,8 @@ class ULAddObject(ULActionNode):
         self.full_copy = False
         self.done = False
         self.obj = False
-        self.OBJ = ULOutSocket(self, self._get_obj)
-        self.OUT = ULOutSocket(self, self._get_done)
+        self.OBJ = self.add_output(self._get_obj)
+        self.OUT = self.add_output(self._get_done)
 
     def _get_done(self):
         return self.done

@@ -10,7 +10,7 @@ class ULCompare(ULConditionNode):
         self.param_a = None
         self.param_b = None
         self.threshold = 0.0
-        self.RESULT = ULOutSocket(self, self.get_result)
+        self.RESULT = self.add_output(self.get_result)
 
     def get_result(self):
         a = self.get_input(self.param_a)

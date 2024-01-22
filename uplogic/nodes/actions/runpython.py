@@ -12,8 +12,8 @@ class ULRunPython(ULActionNode):
         self.mode = 1
         self.arg = None
         self.val = None
-        self.OUT = ULOutSocket(self, self.get_done)
-        self.VAL = ULOutSocket(self, self.get_val)
+        self.OUT = self.add_output(self.get_done)
+        self.VAL = self.add_output(self.get_val)
         self._old_mod_name = None
         self._code_as_str = ''
         self._old_mod_fun = None

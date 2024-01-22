@@ -15,10 +15,10 @@ class ULPaySequence(ULActionNode):
         self.frames = None
         self.sequence = None
         self.fps = None
-        self.ON_START = ULOutSocket(self, self._get_on_start)
-        self.RUNNING = ULOutSocket(self, self._get_running)
-        self.ON_FINISH = ULOutSocket(self, self._get_on_finish)
-        self.FRAME = ULOutSocket(self, self._get_frame)
+        self.ON_START = self.add_output(self._get_on_start)
+        self.RUNNING = self.add_output(self._get_running)
+        self.ON_FINISH = self.add_output(self._get_on_finish)
+        self.FRAME = self.add_output(self._get_frame)
 
     def _get_on_start(self):
         return self.on_start

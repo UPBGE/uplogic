@@ -10,9 +10,9 @@ class ULEvaluateProperty(ULConditionNode):
         self.operator = None
         self.mode = 0
         self.compare_value = None
-        self.OUT = ULOutSocket(self, self.get_out)
+        self.OUT = self.add_output(self.get_out)
         self.val = 0
-        self.VAL = ULOutSocket(self, self.get_val)
+        self.VAL = self.add_output(self.get_val)
 
     def get_out(self):
         compare_value = self.get_input(self.compare_value)

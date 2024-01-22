@@ -10,7 +10,7 @@ class ULSetCharacterMaxJumps(ULActionNode):
         self.game_object = None
         self.max_jumps = None
         self.done = None
-        self.OUT = ULOutSocket(self, self.get_done)
+        self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
         return self.done

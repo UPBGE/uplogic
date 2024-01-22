@@ -11,7 +11,7 @@ class ULRandomInt(ULParameterNode):
         ULParameterNode.__init__(self)
         self.max_value = None
         self.min_value = None
-        self.OUT_A = ULOutSocket(self, self._get_output)
+        self.OUT_A = self.add_output(self._get_output)
 
     def _get_output(self):
         min_value = self.get_input(self.min_value)

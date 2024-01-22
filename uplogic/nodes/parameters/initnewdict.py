@@ -7,7 +7,7 @@ class ULInitNewDict(ULParameterNode):
         ULParameterNode.__init__(self)
         self.key = None
         self.val = None
-        self.DICT = ULOutSocket(self, self.get_dict)
+        self.DICT = self.add_output(self.get_dict)
 
     def get_dict(self):
         key = self.get_input(self.key)

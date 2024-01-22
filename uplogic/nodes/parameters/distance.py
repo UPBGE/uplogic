@@ -8,7 +8,7 @@ class ULDistance(ULParameterNode):
         ULParameterNode.__init__(self)
         self.parama = None
         self.paramb = None
-        self.OUT = ULOutSocket(self, self.get_out)
+        self.OUT = self.add_output(self.get_out)
 
     def get_out(self):
         parama = self.get_input(self.parama)

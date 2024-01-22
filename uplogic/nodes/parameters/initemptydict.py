@@ -8,7 +8,7 @@ class ULInitEmptyDict(ULParameterNode):
         self.condition = None
         self.dict = None
         self.done = None
-        self.DICT = ULOutSocket(self, self.get_dict)
+        self.DICT = self.add_output(self.get_dict)
 
     def get_dict(self):
         return {}

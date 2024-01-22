@@ -18,7 +18,7 @@ class ULRandomValue(ULParameterNode):
         self.max_vector = None
         self.probability = None
         self.seed = None
-        self.OUT = ULOutSocket(self, self.get_float)
+        self.OUT = self.add_output(self.get_float)
 
         self.getters = [
             self.get_float,

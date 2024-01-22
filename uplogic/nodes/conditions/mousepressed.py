@@ -11,7 +11,7 @@ class ULMousePressed(ULConditionNode):
         self.pulse = False
         self.input_type = 1 if self.pulse else 0
         self.mouse_button_code = None
-        self.OUT = ULOutSocket(self, self.get_pressed)
+        self.OUT = self.add_output(self.get_pressed)
 
     def get_pressed(self):
         mouse_button = self.get_input(self.mouse_button_code)

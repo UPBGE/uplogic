@@ -11,7 +11,7 @@ class ULBarrier(ULConditionNode):
         self.consumed = False
         self.trigger = 0
         self.result = False
-        self.OUT = ULOutSocket(self, self.get_done)
+        self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
         return self.result

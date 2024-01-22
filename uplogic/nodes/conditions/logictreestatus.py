@@ -10,8 +10,8 @@ class ULLogicTreeStatus(ULConditionNode):
         self._running = False
         self._stopped = False
         self.tree = None
-        self.IFRUNNING = ULOutSocket(self, self.get_running)
-        self.IFSTOPPED = ULOutSocket(self, self.get_stopped)
+        self.IFRUNNING = self.add_output(self.get_running)
+        self.IFSTOPPED = self.add_output(self.get_stopped)
 
     def get_running(self):
         tree = self.tree

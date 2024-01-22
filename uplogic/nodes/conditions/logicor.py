@@ -6,7 +6,7 @@ class ULOr(ULConditionNode):
         ULConditionNode.__init__(self)
         self.ca = False
         self.cb = False
-        self.OUT = ULOutSocket(self, self.get_out)
+        self.OUT = self.add_output(self.get_out)
 
     def get_out(self):
         return (
@@ -25,7 +25,7 @@ class ULOrList(ULConditionNode):
         self.cd = False
         self.ce = False
         self.cf = False
-        self.OUT = ULOutSocket(self, self.get_out)
+        self.OUT = self.add_output(self.get_out)
 
     def get_out(self):
         conds = [

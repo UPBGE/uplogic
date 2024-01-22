@@ -10,7 +10,7 @@ class ULInterpolate(ULParameterNode):
         self.a = None
         self.b = None
         self.fac = None
-        self.OUT = ULOutSocket(self, self.get_done)
+        self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
         a = self.get_input(self.a)

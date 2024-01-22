@@ -10,9 +10,9 @@ class ULGetResolution(ULParameterNode):
         self.width = None
         self.height = None
         self.res = None
-        self.WIDTH = ULOutSocket(self, self.get_width)
-        self.HEIGHT = ULOutSocket(self, self.get_height)
-        self.RES = ULOutSocket(self, self.get_res)
+        self.WIDTH = self.add_output(self.get_width)
+        self.HEIGHT = self.add_output(self.get_height)
+        self.RES = self.add_output(self.get_res)
 
     def get_width(self):
         return render.getWindowWidth()

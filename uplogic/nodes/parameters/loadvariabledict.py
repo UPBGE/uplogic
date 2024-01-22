@@ -11,7 +11,7 @@ class ULLoadVariableDict(ULParameterNode):
         ULParameterNode.__init__(self)
         self.file_name = None
         self.path = ''
-        self.VAR = ULOutSocket(self, self.get_var)
+        self.VAR = self.add_output(self.get_var)
 
     def get_var(self):
         cust_path = self.get_custom_path(self.path)
