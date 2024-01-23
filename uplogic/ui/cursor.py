@@ -91,17 +91,17 @@ class Cursor(Widget):
         row = ceil((idx + 1) / self.cols) - 1
         row_end = row + 1
         texcoord = (
-            (col * self._col_width, 1 - row_end * self._row_height),
             (col_end * self._col_width, 1 - row_end * self._row_height),
+            (col * self._col_width, 1 - row_end * self._row_height),
             (col_end * self._col_width, 1 - row * self._row_height),
             (col * self._col_width, 1 - row * self._row_height)
         )
         self._batch = batch_for_shader(
-            self._shader, 'TRI_FAN',
+            self._shader, 'TRI_STRIP',
             {
                 "pos": (
-                    (mpos[0], mpos[1] - self.size[1]),
                     (mpos[0] + self.size[0], mpos[1] - self.size[1]),
+                    (mpos[0], mpos[1] - self.size[1]),
                     (mpos[0] + self.size[0], mpos[1]),
                     mpos
                 ),

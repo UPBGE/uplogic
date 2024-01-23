@@ -381,14 +381,15 @@ class Widget():
             Vector(x0),
             Vector(x1),
             Vector(y1),
-            Vector(y0)
+            Vector(y0),
+            Vector(x0)
         )
         indices = (
             (0, 1, 2), (2, 3, 0)
         )
         self._shader = gpu.shader.from_builtin('UNIFORM_COLOR')
         self._batch = batch_for_shader(self._shader, 'TRIS', {"pos": vertices}, indices=indices)
-        self._batch_line = batch_for_shader(self._shader, 'LINE_LOOP', {"pos": vertices})
+        self._batch_line = batch_for_shader(self._shader, 'LINE_STRIP', {"pos": vertices})
         self._batch_points = batch_for_shader(self._shader, 'POINTS', {"pos": vertices})
 
     def _setup_draw(self):
