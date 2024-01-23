@@ -210,7 +210,7 @@ def screen_to_world(x:float = None, y: float = None, distance: float = 10) -> Ve
     mouse = logic.mouse
     x = x if x is not None else mouse.position[0]
     y = y if y is not None else mouse.position[1]
-    direction = camera.getScreenVect(x, 1-y)
+    direction = camera.getScreenVect(x, y)
     origin = camera.worldPosition
     aim = direction * -distance
     return origin + (aim)

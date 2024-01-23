@@ -256,7 +256,7 @@ class ULAction():
             start_frame,
             end_frame,
             layer=layer,
-            # priority=priority,
+            priority=0,
             blendin=blendin,
             play_mode=play_mode,
             speed=self.speed,

@@ -45,7 +45,7 @@ class ActionSystem():
         """
         layers = cls.layers.get(action.game_object, {})
         action.layer = 0
-        while action.layer in layers.keys():
+        while str(action.layer) in layers.keys():
             action.layer += 1
 
     @classmethod
