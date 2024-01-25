@@ -1,6 +1,7 @@
 from uplogic.events import receive, ULEvent
 from uplogic.utils.errors import TypeMismatchError
 from bge.types import KX_PythonComponent, KX_GameObject
+from uplogic import CustomLoop
 from bge import logic
 
 
@@ -244,8 +245,8 @@ def scene_props(*prop_names):
     :param `prop_names`: Names of properties as a list.
     """
     def deco(cls: KX_PythonComponent or KX_GameObject) -> KX_PythonComponent or KX_GameObject:
-        if not (issubclass(cls, KX_PythonComponent) or issubclass(cls, KX_GameObject)):
-            raise TypeMismatchError('Decorator only viable for KX_PythonComponent or KX_GameObject subclasses!')
+        if not (issubclass(cls, KX_PythonComponent) or issubclass(cls, KX_GameObject) or issubclass(cls, CustomLoop)):
+            raise TypeMismatchError('Decorator only viable for KX_PythonComponent, KX_GameObject or CustomLoop subclasses!')
         if not (isinstance(prop_names, list) or isinstance(prop_names, tuple)):
             raise TypeMismatchError('Expected property names as a list or tuple!')
         for scene_prop in prop_names:
@@ -264,7 +265,7 @@ def scene_props(*prop_names):
 
             if issubclass(cls, KX_PythonComponent):
                 prop = property(getPropComponent, setPropComponent)
-            elif issubclass(cls, KX_GameObject):
+            elif issubclass(cls, KX_GameObject) or issubclass(cls, CustomLoop):
                 prop = property(getPropObject, setPropObject)
             else:
                 return

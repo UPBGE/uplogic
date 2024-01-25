@@ -181,6 +181,9 @@ class ULVehicle():
         brakes = self.brakes
         wheelcount = self.brake_wheels
         value *= self.body.mass
+
+        for wheel in range(wheelcount):
+            self.constraint.applyBraking(0, wheel)
         if brakes == FWD:
             for wheel in range(wheelcount):
                 self.constraint.applyBraking(value, wheel)
@@ -223,9 +226,9 @@ class ULVehicle():
 
     @suspension.setter
     def suspension(self, value):
-        self._suspension = value
         for wheel in range(self.constraint.getNumWheels()):
             self.constraint.setSuspensionCompression(value, wheel)
+        self._suspension = value
 
     @property
     def stiffness(self):
@@ -243,8 +246,7 @@ class ULVehicle():
 
     @speed.setter
     def speed(self, value):
-        print('ULVecicle.speed is read-only!')
-
+        print('Vehicle.speed is read-only!')
 
     @property
     def damping(self):
@@ -297,7 +299,7 @@ class ULVehicle():
 
     def brake(self, power: float = .1, brakes: str = '', wheelcount: int = None):
         if brakes != self.brakes and brakes:
-            self.drive = brakes
+            self.brakes = brakes
         if wheelcount and wheelcount != self.brake_wheels:
             self.brake_wheels = wheelcount
         self.braking = power
