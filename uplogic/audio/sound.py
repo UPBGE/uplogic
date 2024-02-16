@@ -666,7 +666,7 @@ class ULSpeaker2D(ULSound2D):
         if self._deprecated:
             print('Warning: ULSpeaker2D class will be renamed to "Speaker2D" in future releases!')
         speaker_data = speaker.blenderObject.data
-        ULSound2D()
+        # ULSound2D()
         super().__init__(
             speaker_data.sound.filepath,
             speaker_data.volume,

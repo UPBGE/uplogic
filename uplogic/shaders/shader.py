@@ -155,7 +155,7 @@ class FilterSystem:
         # return logic.getCurrentScene().filterManager.getFilter(idx)
 
     @classmethod
-    def add_filter(cls, filter):
+    def add_filter(cls, filter: Filter2D):
         if filter.idx and cls.filters.get(filter.idx, None) is None:
             filter.startup()
             filter.activate()

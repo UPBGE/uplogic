@@ -1,5 +1,4 @@
 from uplogic.nodes import ULParameterNode
-from uplogic.nodes import ULOutSocket
 from uplogic.input import record_keyboard
 
 

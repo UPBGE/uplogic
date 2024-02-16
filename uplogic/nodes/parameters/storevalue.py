@@ -21,4 +21,5 @@ class ULStoreValue(ULParameterNode):
             condition = True
         if not condition:
             return
+        print('RECALC')
         self._stored_value = self.get_input(self.value)

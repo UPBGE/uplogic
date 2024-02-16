@@ -9,8 +9,11 @@ from mathutils import Vector
 
 class Image(Widget):
 
-    def __init__(self, pos=[0, 0], size=(100, 100), relative={}, texture=None, halign='left', valign='bottom', angle=0):
+    def __init__(self, pos=[0, 0], size=(100, 100), relative={}, texture=None, halign='left', valign='bottom', use_aspect_ratio: bool = True, angle=0):
         self._texture = None
+        self._image = None
+        self.use_aspect_ratio = use_aspect_ratio
+        self._opacity = 1
         super().__init__(pos, size, relative=relative, halign=halign, valign=valign, angle=angle)
         self.texture = texture
 
@@ -18,11 +21,38 @@ class Image(Widget):
     def texture(self):
         return self._texture
 
+    @property
+    def aspect_ratio(self):
+        if self._image is None:
+            return 1
+        return self._image.size[1] / self._image.size[0]
+
+    @property
+    def _draw_size(self):
+        size = self.size.copy()
+        use_aspect_ratio = self.use_aspect_ratio
+        if self.parent is None:
+            return size
+        if use_aspect_ratio and self._image:
+            size[1] = size[0] * self.aspect_ratio
+        if self.relative.get('size'):
+            pdsize = self.parent._draw_size
+            size = [
+                size[0] * pdsize[0],
+                size[1] * (pdsize[0] if use_aspect_ratio else pdsize[1])
+            ]
+        return size
+
     @texture.setter
     def texture(self, val):
+        if val is None:
+            return
         texture = bpy.data.images.get(val, None)
-        if texture:
-            self._texture = gpu.texture.from_image(texture)
+        if not texture:
+            texture = bpy.data.images.load(val)
+        self._image = texture
+        self.size = self.size
+        self._texture = gpu.texture.from_image(texture)
 
     def _build_shader(self):
         pos = self._draw_pos
@@ -41,7 +71,34 @@ class Image(Widget):
         vertices = self._vertices = (
             x1, x0, y1, y0
         )
-        self._shader = gpu.shader.from_builtin('IMAGE_COLOR')
+
+        tex_vert_shader = """
+        in vec2 texCoord;
+        in vec2 pos;
+        out vec2 uv;
+
+        uniform mat4 ModelViewProjectionMatrix;
+
+        void main() {
+            uv = texCoord;
+            gl_Position = ModelViewProjectionMatrix * vec4(pos.xy, 0.0, 1.0);
+        }
+        """
+
+        tex_frag_shader = """
+        in vec2 uv;
+        out vec4 fragColor;
+
+        uniform sampler2D image;
+        uniform float alpha = 1.0;
+
+        void main() {
+            vec4 color = mix(vec4(0.0), texture(image, uv), alpha);
+            fragColor = pow(color, vec4(.5));
+        }
+        """
+        self._shader = gpu.types.GPUShader(tex_vert_shader, tex_frag_shader)
+        self._shader.uniform_float("alpha", self.opacity)
         self._batch = batch_for_shader(
             self._shader, 'TRI_STRIP',
             {
@@ -56,6 +113,7 @@ class Image(Widget):
         )
     
     def draw(self):
+        gpu.state.blend_set("ALPHA")
         super()._setup_draw()
         if self.texture is None:
             super().draw()
@@ -68,11 +126,11 @@ class Image(Widget):
 
 class Sprite(Image):
 
-    def __init__(self, pos=[0, 0], size=(100, 100), relative={}, texture=None, idx=0, rows=1, cols=1, halign='left', valign='bottom'):
+    def __init__(self, pos=[0, 0], size=(100, 100), relative={}, texture=None, idx=0, rows=1, cols=1, halign='left', valign='bottom', use_aspect_ratio=True):
         self._idx = idx
         self.rows = rows
         self.cols = cols
-        super().__init__(pos, size, relative, texture, halign=halign, valign=valign)
+        super().__init__(pos, size, relative, texture, halign=halign, valign=valign, use_aspect_ratio=use_aspect_ratio)
 
     @property
     def idx(self):
@@ -82,6 +140,12 @@ class Sprite(Image):
     def idx(self, val):
         self._idx = val
         self._build_shader()
+
+    @property
+    def aspect_ratio(self):
+        if self._image is None:
+            return 1
+        return (self._image.size[1] / self.rows) / (self._image.size[0] / self.cols)
 
     @property
     def rows(self):
@@ -126,7 +190,35 @@ class Sprite(Image):
             y1,
             y0
         )
-        self._shader = gpu.shader.from_builtin('IMAGE_COLOR')
+
+        tex_vert_shader = """
+        in vec2 texCoord;
+        in vec2 pos;
+        out vec2 uv;
+
+        uniform mat4 ModelViewProjectionMatrix;
+
+        void main() {
+            uv = texCoord;
+            gl_Position = ModelViewProjectionMatrix * vec4(pos.xy, 0.0, 1.0);
+        }
+        """
+
+        tex_frag_shader = """
+        in vec2 uv;
+        out vec4 fragColor;
+
+        uniform sampler2D image;
+        uniform float alpha = 1.0;
+
+        void main() {
+            vec4 color = mix(vec4(0.0), texture(image, uv), alpha);
+            fragColor = pow(color, vec4(.5));
+        }
+        """
+        self._shader = gpu.types.GPUShader(tex_vert_shader, tex_frag_shader)
+        self._shader.uniform_float("alpha", self.opacity)
+
         idx = self.idx
         col = idx % self.cols
         col_end = col + 1

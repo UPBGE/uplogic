@@ -30,6 +30,7 @@ class FileWrapper(dict):
         self.clear()
         for key, value in data.items():
             self[key] = value
+            setattr(self, key, value)
 
     def read(self):
         ending = self.filepath.split('.')[-1]

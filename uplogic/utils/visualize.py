@@ -48,6 +48,13 @@ def draw_path(points: list, color: list = [1, 1, 1, 1]):
             drawLine(p, points[i+1], color)
 
 
+def draw_arrow_path(points: list, color: list = [1, 1, 1, 1]):
+    for i, p in enumerate(points):
+        if i < len(points) - 1:
+            draw_arrow(p, points[i+1], color)
+
+
+
 def draw_cube(origin: Vector, width: float = 1, color: list = [1, 1, 1, 1], centered: bool = False):
     draw_box(origin, width, width, width, color, centered)
 

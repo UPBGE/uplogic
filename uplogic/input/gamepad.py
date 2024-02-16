@@ -157,7 +157,8 @@ def gamepad_trigger(
 def gamepad_stick(
     stick: str = LS,
     idx: int = 0,
-    threshold: float = .1
+    threshold: float = .1,
+    invert: tuple = (False, True)
 ) -> Vector:
     '''Retrieve stick values.
 
@@ -171,8 +172,8 @@ def gamepad_stick(
     xaxis = STICKS[stick][0]
     yaxis = STICKS[stick][1]
     return Vector((
-        gamepad_axis(xaxis, idx, threshold=threshold),
-        -gamepad_axis(yaxis, idx, threshold=threshold)
+        gamepad_axis(xaxis, idx, threshold=threshold) * (-1 if invert[0] else 1),
+        gamepad_axis(yaxis, idx, threshold=threshold) * (-1 if invert[1] else 1)
     ))
 
 
@@ -190,7 +191,7 @@ def gamepad_tap(
 
     :returns: float or boolean
     '''
-    btn_idx = layout.get(button, button)
+    btn_idx = layout.get(button.upper(), button.upper())
     if button in [15, 16, 'R2', 'L2', 'RT', 'LT']:
         return gamepad_axis(btn_idx, idx, True)
     else:

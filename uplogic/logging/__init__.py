@@ -63,11 +63,12 @@ class LoggerLayout(Canvas):
     toggle_key = 'BACKSLASH'
 
     def __init__(self, toggle_key='BACKSLASH', visible=False):
+        scene = logic.getCurrentScene()
         self.toggle_key = toggle_key
         super().__init__()
-        prefs = bpy.context.preferences.addons.get('bge_netlogic', None)
-        if prefs is None or prefs.preferences is None or not (prefs.preferences.screen_console_open or visible):
-            self.show = False
+        # prefs = bpy.context.preferences.addons.get('bge_netlogic', None)
+        # if not (scene.screen_console_open or visible):
+        #     self.show = False
         if not getattr(bpy.context.scene, 'screen_console_open', True) and not visible:
             self.show = False
         self.messages: list[Label] = []
@@ -77,7 +78,6 @@ class LoggerLayout(Canvas):
         self.fade_event = None
         self._toggle_key = False
         self._prev_msg = None
-        scene = logic.getCurrentScene()
         if disable not in scene.onRemove:
             scene.onRemove.append(disable)
         if self.toggle not in scene.pre_draw:
@@ -87,7 +87,7 @@ class LoggerLayout(Canvas):
         if key_down(self.toggle_key):
             if not self._toggle_key:
                 self.show = not self.show
-                self.opacity = .1
+                self.opacity = 1
             self._toggle_key = True
         else:
             self._toggle_key = False
@@ -198,6 +198,6 @@ def debug(msg):
             sys.__stdout__.write(f'{msg}\n')
 
 nodeprefs = bpy.context.preferences.addons.get('bge_netlogic', None)
-if nodeprefs and getattr(nodeprefs.preferences, 'use_screen_console', False):
+if nodeprefs and getattr(bpy.context.scene, 'use_screen_console', False):
     # print(nodeprefs.preferences.screen_console_key)
-    enable(toggle_key=nodeprefs.preferences.screen_console_key)
+    enable(toggle_key='BACKSLASH')

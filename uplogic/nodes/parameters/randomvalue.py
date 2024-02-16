@@ -59,7 +59,7 @@ class ULRandomValue(ULParameterNode):
             uniform(vec1.y, vec2.y),
             uniform(vec1.z, vec2.z)
         ))
-        return vec
+        return vec.copy()
 
     def get_bool(self):
         return random() <= self.get_input(self.probability)

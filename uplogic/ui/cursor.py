@@ -22,7 +22,7 @@ def remove_custom_cursor():
 
 class Cursor(Widget):
 
-    def __init__(self, texture=None, size=(20,20), offset=(0, 0), rows=1, cols=1, idx=0):
+    def __init__(self, texture=None, size=(30,30), offset=(0, 0), rows=1, cols=1, idx=0):
         self.offset = offset
         self.rows = rows
         self.cols = cols
@@ -77,9 +77,10 @@ class Cursor(Widget):
     @texture.setter
     def texture(self, val):
         texture = bpy.data.images.get(val)
-        if texture:
-            texture.use_fake_user = True
-            self._texture = gpu.texture.from_image(texture)
+        if not texture:
+            texture = bpy.data.images.load(val)
+        texture.use_fake_user = True
+        self._texture = gpu.texture.from_image(texture)
 
     def _build_shader(self):
         self._shader = gpu.shader.from_builtin('IMAGE_COLOR')

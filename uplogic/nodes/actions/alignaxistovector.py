@@ -20,15 +20,13 @@ class ULAlignAxisToVector(ULActionNode):
         if not self.get_input(self.condition):
             return
         game_object = self.get_input(self.game_object)
-        v = self.get_input(self.vector)
+        v = self.get_input(self.vector).copy()
         axis = self.get_input(self.axis)
         factor = self.get_input(self.factor)
         if not self.local:
             v -= game_object.worldPosition
         if axis > 2:
-            matvec = v.copy()
-            matvec.negate()
-            v = matvec
+            v.negate()
             axis -= 3
         game_object.alignAxisToVect(v, axis, factor)
         self.done = True

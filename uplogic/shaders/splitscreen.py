@@ -7,11 +7,6 @@ from uplogic.ui import Canvas, Path
 class SplitScreen:
     def __init__(self, camera2: KX_Camera = None, camera3: KX_Camera=None, camera4: KX_Camera=None) -> None:
         self.cameras: list[KX_Camera] = []
-        # self._canvas = Canvas()
-        # self._path_y = Path(relative={'points': True}, points=[(.5, 0), (.5, 1)], line_color=(0, 0, 0, .0), line_width=2)
-        # self._path_x = Path(relative={'points': True}, points=[(0, .5), (1, .5)], line_color=(0, 0, 0, .0), line_width=2)
-        # self._canvas.add_widget(self._path_y)
-        # self._canvas.add_widget(self._path_x)
         cam = self._camera = logic.getCurrentScene().active_camera
         self.add_camera(cam)
         if camera2 is not None:

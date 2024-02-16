@@ -1,5 +1,5 @@
 from bge import logic
-from uplogic.nodes import ULConditionNode, ULOutSocket
+from uplogic.nodes import ULConditionNode
 
 
 class ULGamepadActive(ULConditionNode):
@@ -13,6 +13,8 @@ class ULGamepadActive(ULConditionNode):
         index = self.get_input(self.index)
         if logic.joysticks[index]:
             joystick = logic.joysticks[index]
+        else:
+            return False
         axis_active = False
         for x in joystick.axisValues:
             if x < -.1 or x > .1:

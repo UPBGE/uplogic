@@ -3,6 +3,7 @@ from mathutils import Vector
 from uplogic.utils.math import rotate2d, world_to_screen
 from gpu_extras.batch import batch_for_shader
 from bge.render import getWindowWidth, getWindowHeight
+from bge.types import KX_GameObject
 import gpu
 
 
@@ -12,7 +13,7 @@ class Path(Widget):
     :param `pos`: Initial position of this widget in either pixels or factor.
     :param `size`: Initial size of this widget in either pixels or factor.
     :param `bg_color`: Color to draw in the area of the widget.
-    :param `relative`: Whether to use pixels or factor for size or pos; example: {`'pos'`: `True`, `'size'`: `True`}.
+    :param `relative`: Whether to use pixels or factor for size or pos; example: `{'pos': True, 'size': True}`.
     :param `halign`: Horizontal alignment of the widget, can be (`left`, `center`, `right`).
     :param `valign`: Vertical alignment of the widget, can be (`bottom`, `center`, `top`).
     :param `angle`: Rotation in degrees of this widget around the pivot defined by the alignment.
@@ -38,7 +39,7 @@ class Path(Widget):
 
     @line_color.setter
     def line_color(self, val):
-        self._line_color = val
+        self._line_color = list(val)
         self._build_shader()
 
     @property
@@ -80,7 +81,9 @@ class Path(Widget):
     def draw(self):
         super()._setup_draw()
         gpu.state.line_width_set(self.line_width)
-        self._shader.uniform_float("color", self.line_color)
+        col = self.line_color.copy()
+        col[3] *= self.opacity
+        self._shader.uniform_float("color", col)
         self._batch_line.draw(self._shader)
         super().draw()
 
@@ -112,3 +115,41 @@ class WorldPath(Path):
         vertices = self._vertices = points
         self._shader = gpu.shader.from_builtin('UNIFORM_COLOR')
         self._batch_line = batch_for_shader(self._shader, 'LINE_STRIP', {"pos": vertices})
+
+
+class ObjectPath(Path):
+    def __init__(
+        self,
+        object=None,
+        line_width=1,
+        line_color=(1.0, 1.0, 1.0, 1.0)
+    ):
+        Widget.__init__(self, (0, 0), (0, 0), (0, 0, 0, 0))
+        self.object: KX_GameObject = object
+        self.line_color = line_color
+        self.line_width = line_width
+
+    def _build_shader(self):
+        if self.parent is None:
+            return
+        points = []
+        mesh = self.object.blenderObject.data
+        for edge in mesh.edges:
+            v1 = mesh.vertices[edge.vertices[0]]
+            v2 = mesh.vertices[edge.vertices[1]]
+            v1 = world_to_screen(self.object.worldTransform @ Vector(v1.co))
+            v2 = world_to_screen(self.object.worldTransform @ Vector(v2.co))
+            # # point = world_to_screen(point)
+            v1 *= Vector((
+                getWindowWidth(),
+                getWindowHeight()
+            ))
+            v2 *= Vector((
+                getWindowWidth(),
+                getWindowHeight()
+            ))
+            points.append(v1)
+            points.append(v2)
+        vertices = self._vertices = points
+        self._shader = gpu.shader.from_builtin('UNIFORM_COLOR')
+        self._batch_line = batch_for_shader(self._shader, 'LINES', {"pos": vertices})

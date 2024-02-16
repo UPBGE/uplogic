@@ -20,7 +20,7 @@ void main( )
     vec4 vcol = vec4(color.x, color.y, color.z, 1);
     vec4 px = texture(bgl_RenderedTexture, bgl_TexCoord.xy);
 
-    fragColor = mix(vcol, px, vig); 
+    fragColor = mix(vcol, px, vig);
 }
 """
 

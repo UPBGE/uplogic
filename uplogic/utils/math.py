@@ -161,6 +161,8 @@ def map_range(value: float, in_min: float, in_max: float, out_min: float, out_ma
     :param `clamp`: Clamp the modified value.
     """
     result = (value - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
+    if out_min > out_max:
+        out_min, out_max = out_max, out_min
     if clamp and result < out_min:
         return out_min
     if clamp and result > out_max:

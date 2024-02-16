@@ -12,6 +12,8 @@ class ULDictValue(ULParameterNode):
 
     def get_val(self):
         dictionary = self.get_input(self.dict)
+        if dictionary is None:
+            return None
         key = self.get_input(self.key)
         return dictionary.get(
             key,

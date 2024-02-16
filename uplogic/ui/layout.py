@@ -9,7 +9,7 @@ class Layout(Widget):
     :param `pos`: Initial position of this widget in either pixels or factor.
     :param `size`: Initial size of this widget in either pixels or factor.
     :param `bg_color`: Color to draw in the area of the widget.
-    :param `relative`: Whether to use pixels or factor for size or pos; example: {`'pos'`: `True`, `'size'`: `True`}.
+    :param `relative`: Whether to use pixels or factor for size or pos; example: `{'pos': True, 'size': True}`.
     :param `border_width`: Width (in pixels) of the border drawn around the area of the widget.
     :param `border_color`: Color to use for drawing the border.
     :param `halign`: Horizontal alignment of the widget, can be (`left`, `center`, `right`).
@@ -34,15 +34,6 @@ class Layout(Widget):
         super().__init__(pos, size, bg_color, relative, halign=halign, valign=valign, angle=angle)
 
     @property
-    def opacity(self):
-        return self.bg_color[3]
-
-    @opacity.setter
-    def opacity(self, val):
-        self.bg_color[3] = val
-        self.border_color[3] = val
-
-    @property
     def border_color(self):
         return self._border_color
 
@@ -62,9 +53,13 @@ class Layout(Widget):
         super()._setup_draw()
         gpu.state.line_width_set(self.border_width)
         gpu.state.point_size_set(self.border_width)
-        self._shader.uniform_float("color", self.bg_color)
+        col = self.bg_color.copy()
+        col[3] *= self.opacity
+        bcol = self.border_color.copy()
+        bcol[3] *= self.opacity
+        self._shader.uniform_float("color", col)
         self._batch.draw(self._shader)
-        self._shader.uniform_float("color", self.border_color)
+        self._shader.uniform_float("color", bcol)
         self._batch_line.draw(self._shader)
         self._batch_points.draw(self._shader)
         super().draw()
@@ -76,7 +71,7 @@ class RelativeLayout(Layout):
     :param `pos`: Initial position of this widget in either pixels or factor.
     :param `size`: Initial size of this widget in either pixels or factor.
     :param `bg_color`: Color to draw in the area of the widget.
-    :param `relative`: Whether to use pixels or factor for size or pos; example: {`'pos'`: `True`, `'size'`: `True`}.
+    :param `relative`: Whether to use pixels or factor for size or pos; example: `{'pos': True, 'size': True}`.
     :param `border_width`: Width (in pixels) of the border drawn around the area of the widget.
     :param `border_color`: Color to use for drawing the border.
     :param `halign`: Horizontal alignment of the widget, can be (`left`, `center`, `right`).
@@ -99,7 +94,7 @@ class FloatLayout(Layout):
     :param `pos`: Initial position of this widget in either pixels or factor.
     :param `size`: Initial size of this widget in either pixels or factor.
     :param `bg_color`: Color to draw in the area of the widget.
-    :param `relative`: Whether to use pixels or factor for size or pos; example: {`'pos'`: `True`, `'size'`: `True`}.
+    :param `relative`: Whether to use pixels or factor for size or pos; example: `{'pos': True, 'size': True}`.
     :param `border_width`: Width (in pixels) of the border drawn around the area of the widget.
     :param `border_color`: Color to use for drawing the border.
     :param `halign`: Horizontal alignment of the widget, can be (`left`, `center`, `right`).
@@ -112,39 +107,8 @@ class FloatLayout(Layout):
         return [0, 0]
 
 
-class BoxLayout(Layout):
-    '''The BoxLayout allows you to automatically arrange widgets in a row or column.
-
-    :param `orientation`: Whether to arrange widgets horizontally or vertically; Can be (`'horizontal'`, `'vertical'`).
-    :param `pos`: Initial position of this widget in either pixels or factor.
-    :param `size`: Initial size of this widget in either pixels or factor.
-    :param `bg_color`: Color to draw in the area of the widget.
-    :param `relative`: Whether to use pixels or factor for size or pos; example: {`'pos'`: `True`, `'size'`: `True`}.
-    :param `border_width`: Width (in pixels) of the border drawn around the area of the widget.
-    :param `border_color`: Color to use for drawing the border.
-    :param `spacing`: Pixels in between child widgets.
-    :param `halign`: Horizontal alignment of the widget, can be (`left`, `center`, `right`).
-    :param `valign`: Vertical alignment of the widget, can be (`bottom`, `center`, `top`).
-    :param `angle`: Rotation in degrees of this widget around the pivot defined by the alignment.
-    '''
-    def __init__(
-            self,
-            orientation: str = 'horizontal',
-            pos: list = [0, 0],
-            size: list = [100, 100],
-            bg_color: list = (0, 0, 0, 0),
-            relative: dict = {},
-            border_width: int = 1,
-            border_color: list = (0, 0, 0, 0),
-            spacing: int = 0,
-            halign: str = 'left',
-            valign: str = 'bottom',
-            angle=0
-        ):
-        self.orientation = orientation
-        self.spacing = spacing
-        super().__init__(pos, size, bg_color, relative, border_width, border_color, halign=halign, valign=valign, angle=angle)
-        self.use_clipping = False
+class ArrangedLayout(Layout):
+    """Metaclass"""
 
     @property
     def parent(self):
@@ -159,6 +123,8 @@ class BoxLayout(Layout):
         self._parent = val
         self.pos = self.pos
         self.size = self.size
+        for c in self.children:
+            c.parent = c.parent
         self.arrange()
 
     @property
@@ -184,24 +150,72 @@ class BoxLayout(Layout):
         self.arrange()
 
     def arrange(self):
+        raise NotImplementedError
+
+
+class BoxLayout(ArrangedLayout):
+    '''The BoxLayout allows you to automatically arrange widgets in a row or column.
+
+    :param `orientation`: Whether to arrange widgets horizontally or vertically; Can be (`'horizontal'`, `'vertical'`).
+    :param `pos`: Initial position of this widget in either pixels or factor.
+    :param `size`: Initial size of this widget in either pixels or factor.
+    :param `bg_color`: Color to draw in the area of the widget.
+    :param `relative`: Whether to use pixels or factor for size or pos; example: `{'pos': True, 'size': True}`.
+    :param `border_width`: Width (in pixels) of the border drawn around the area of the widget.
+    :param `border_color`: Color to use for drawing the border.
+    :param `spacing`: Pixels in between child widgets.
+    :param `halign`: Horizontal alignment of the widget, can be (`left`, `center`, `right`).
+    :param `valign`: Vertical alignment of the widget, can be (`bottom`, `center`, `top`).
+    :param `angle`: Rotation in degrees of this widget around the pivot defined by the alignment.
+    '''
+    def __init__(
+            self,
+            orientation: str = 'horizontal',
+            pos: list = [0, 0],
+            size: list = [100, 100],
+            bg_color: list = (0, 0, 0, 0),
+            relative: dict = {},
+            border_width: int = 1,
+            border_color: list = (0, 0, 0, 0),
+            spacing: int = 0,
+            halign: str = 'left',
+            valign: str = 'bottom',
+            angle=0
+        ):
+        self.orientation = orientation
+        self.spacing = spacing
+        self.children_align = ['left', 'bottom']
+        super().__init__(pos, size, bg_color, relative, border_width, border_color, halign=halign, valign=valign, angle=angle)
+        self.use_clipping = False
+
+    def arrange(self):
         '''Arrange the widgets according to the specified orientation.'''
         dsize = self._draw_size
+        arrange_factor = {
+            'left': 0,
+            'center': .5,
+            'right': 1,
+            'top': 0,
+            'bottom': 1
+        }
+        xalign = self.children_align[0]
+        yalign = self.children_align[1]
         if self.orientation == 'horizontal':
             offset = 0
             for widget in self.children:
-                widget.halign = 'left'
-                widget.valign = 'bottom'
+                widget.halign = xalign
+                widget.valign = yalign
                 widget.relative['pos'] = False
-                widget.pos = [offset, dsize[1] - widget._draw_size[1]]
+                widget.pos = [offset, dsize[1] - (widget._draw_size[1] * arrange_factor[yalign])]
                 offset += widget._draw_size[0] + self.spacing
         if self.orientation == 'vertical':
             offset = dsize[1]
             for widget in self.children:
-                widget.halign = 'left'
-                widget.valign = 'bottom'
+                widget.halign = xalign
+                widget.valign = yalign
                 offset -= widget._draw_size[1]
                 widget.relative['pos'] = False
-                widget.pos = [0, offset]
+                widget.pos = [arrange_factor[xalign] * dsize[0], offset]
                 offset -= self.spacing
 
 
@@ -212,7 +226,7 @@ class GridLayout(BoxLayout):
     :param `pos`: Initial position of this widget in either pixels or factor.
     :param `size`: Initial size of this widget in either pixels or factor.
     :param `bg_color`: Color to draw in the area of the widget.
-    :param `relative`: Whether to use pixels or factor for size or pos; example: {`'pos'`: `True`, `'size'`: `True`}.
+    :param `relative`: Whether to use pixels or factor for size or pos; example: `{'pos': True, 'size': True}`.
     :param `border_width`: Width (in pixels) of the border drawn around the area of the widget.
     :param `border_color`: Color to use for drawing the border.
     :param `spacing`: Pixels in between child widgets.
@@ -298,3 +312,54 @@ class GridLayout(BoxLayout):
                     idx = 0
                     col += 1
                     offset = dsize[1]
+
+
+class PolarLayout(BoxLayout):
+
+    def __init__(
+            self,
+            pos: list = [0, 0],
+            size: list = [100, 100],
+            bg_color: list = (0, 0, 0, 0),
+            relative: dict = {},
+            border_width: int = 1,
+            border_color: list = (0, 0, 0, 0),
+            halign: str = 'center',
+            valign: str = 'center',
+            starting_angle: str = 0,
+            distance: int = 100,
+            angle: float =0
+        ):
+        self._starting_angle = starting_angle
+        self._distance = distance
+        super().__init__(
+            pos,
+            size,
+            bg_color,
+            relative,
+            border_width,
+            border_color,
+            halign,
+            valign,
+            angle
+        )
+        self.starting_angle = starting_angle
+        self.distance = distance
+
+    @property
+    def starting_angle(self):
+        return self._starting_angle
+
+    @starting_angle.setter
+    def starting_angle(self, val):
+        self._starting_angle = val
+        self.arrange()
+
+    @property
+    def distance(self):
+        return self._distance
+
+    @distance.setter
+    def distance(self, val):
+        self._distance = val
+        self.arrange()

@@ -14,7 +14,7 @@ class Widget():
     :param `pos`: Initial position of this widget in either pixels or factor.
     :param `size`: Initial size of this widget in either pixels or factor.
     :param `bg_color`: Color to draw in the area of the widget.
-    :param `relative`: Whether to use pixels or factor for size or pos; example: {`'pos'`: `True`, `'size'`: `True`}.
+    :param `relative`: Whether to use pixels or factor for size or pos; example: `{'pos': True, 'size': True}`.
     :param `halign`: Horizontal alignment of the widget, can be (`left`, `center`, `right`).
     :param `valign`: Vertical alignment of the widget, can be (`bottom`, `center`, `top`).
     :param `angle`: Rotation in degrees of this widget around the pivot defined by the alignment.
@@ -36,12 +36,41 @@ class Widget():
         self._build_shader()
         self._clipped = [0, 0]
         self.use_clipping = False
+        self.copy_height = False
+        self.copy_width = False
+        self.opacity = 1
         self.z = 0
+        self._active = True
         self.start()
 
     def toggle(self, *args):
         """Toggle the widget on/off."""
         self.show = not self.show
+
+    def set_visible(self, flag=True):
+        self.show = flag
+
+    def set_invisible(self):
+        self.show = False
+
+    def make_floating(self, pos=True, size=True, halign='center', valign='center'):
+        self.relative['pos'] = pos
+        self.relative['size'] = size
+        self.halign = halign
+        self.valign = valign
+
+    @property
+    def active(self):
+        parent = self
+        while parent is not None:
+            if not parent._active:
+                return False
+            parent = parent.parent
+        return True
+
+    @active.setter
+    def active(self, val):
+        self._active = val
 
     @property
     def show(self):
@@ -146,6 +175,8 @@ class Widget():
         self._parent = val
         self.pos = self.pos
         self.size = self.size
+        for c in self.children:
+            c.parent = c.parent
         self._build_shader()
 
     @property
@@ -258,11 +289,15 @@ class Widget():
     @property
     def opacity(self):
         """Opacity for this widget, but not its children."""
-        return self.bg_color[3]
+        op = self._opacity
+        if self.parent:
+            op *= self.parent.opacity
+        self._rebuild = True
+        return op
 
     @opacity.setter
     def opacity(self, val):
-        self.bg_color[3] = val
+        self._opacity = val
         if self.parent and self.show:
             self._rebuild = True
 
@@ -286,7 +321,8 @@ class Widget():
     def _draw_pos(self):
         if self.parent is None:
             return [0, 0]
-        inherit_pos = self.parent.pos_abs if self.parent else [0, 0]
+        # inherit_pos = self.parent.pos_abs if self.parent else [0, 0]
+        inherit_pos = self.parent._draw_pos if self.parent else [0, 0]
         pdsize = self.parent._draw_size
         pos = [
             self.pos[0] * pdsize[0],
@@ -309,14 +345,19 @@ class Widget():
 
     @property
     def _draw_size(self):
+        size = self.size
         if self.parent is None:
             return self.size
         if self.relative.get('size'):
-            return [
-                self.size[0] * self.parent._draw_size[0],
-                self.size[1] * self.parent._draw_size[1]
-            ]
-        return self.size
+            pdsize = self.parent._draw_size
+            x_size = self.size[0] * pdsize[0]
+            y_size = self.size[1] * pdsize[1]
+            size = [x_size, y_size]
+        if self.copy_width:
+            size[1] = size[0]
+        elif self.copy_height:
+            size[0] = size[1]
+        return size
 
     def start(self):
         """Put your custom startup logic here.
@@ -412,7 +453,7 @@ class Widget():
             if widget.show:
                 widget.draw()
 
-    def _evaluate(self):
+    def evaluate(self):
         pass
 
     def update(self):
@@ -426,9 +467,9 @@ class Widget():
         :param `widget`: `Widget` to add.
         '''
         if widget not in self.children:
+            widget.parent = self
             self.children.append(widget)
             self.canvas._set_z(-1)
-            widget.parent = self
         self.children = sorted(self.children, key=lambda widget: widget.z, reverse=False)
 
     def _set_z(self, z):
@@ -446,6 +487,10 @@ class Widget():
         if widget in self.children:
             self.children.remove(widget)
             widget.parent = None
+
+    def remove(self):
+        if self.parent:
+            self.parent.remove_widget(self)
 
     def clear(self):
         """Remove all widgets from this widget."""

@@ -78,7 +78,7 @@ class ULTrackTo():
         factor: float = 1
     ) -> None:
         if self._deprecated:
-            debug('ULTrackTo class will be renamed to "TrackTo" in future releases!')
+            print('ULTrackTo class will be renamed to "TrackTo" in future releases!')
         self._axis = None
         self._target = None
         self.game_object = game_object
@@ -98,7 +98,7 @@ class ULTrackTo():
         elif isinstance(val, Vector):
             self._target = val
         else:
-            debug('Could not set TrackTo target!')
+            print('Could not set TrackTo target!')
 
     @property
     def axis(self):
@@ -165,7 +165,7 @@ class ULSpring():
         visualize: bool = False
     ) -> None:
         if self._deprecated:
-            debug('ULSpring class will be renamed to "Spring" in future releases!')
+            print('ULSpring class will be renamed to "Spring" in future releases!')
         self.force = 0
         if isinstance(origin, tuple) or isinstance(origin, list):
             origin = Vector((origin))

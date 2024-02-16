@@ -25,7 +25,15 @@ class FileLoader():
         self.finished = False
         if start:
             self.start()
-    
+
+    @property
+    def progress(self):
+        return self.status
+
+    @property
+    def value(self):
+        return self.status
+
     def start(self):
         self.create_object()
         logic.getCurrentScene().pre_draw.append(self.load_next)
@@ -50,6 +58,7 @@ class FileLoader():
             self.tex_image.image = self.images.pop()
             self.status += 1 / self.datasize
             self.item = self.tex_image.image.name
+            self.on_progress(self.status)
             return
         if self.materials:
             mat = self.materials.pop()
@@ -57,12 +66,14 @@ class FileLoader():
             self.status += 1 / self.datasize
             self.data = 'shaders'
             self.item = mat.name
+            self.on_progress(self.status)
             return
         if self.meshes:
             self.bobj.data = self.meshes.pop()
             self.status += 1 / self.datasize
             self.data = 'objects'
             self.item = self.bobj.data.name
+            self.on_progress(self.status)
             return
         logic.getCurrentScene().pre_draw.remove(self.load_next)
         self.object.endObject()
@@ -73,6 +84,9 @@ class FileLoader():
         self.on_finish()
 
     def on_finish(self):
+        pass
+
+    def on_progress(self, progress):
         pass
 
 

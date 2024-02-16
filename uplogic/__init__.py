@@ -214,7 +214,7 @@ class CustomLoop:
 
     def __init__(self, max_fps=-1, tick_idle=.00001) -> None:
         self.scene = bge.logic.getCurrentScene()
-        self.scene['uplogic.mainloop'] = self
+        bge.logic.globalDict['loop'] = self
         self.quit_key = 'esc'
         logic_tree = bpy.data.scenes[self.scene.name].get('custom_mainloop_tree')
         if logic_tree:
@@ -228,7 +228,10 @@ class CustomLoop:
 
         if max_fps == -1:
             max_fps = bpy.data.scenes[self.scene.name].game_settings.fps
-        start(max_fps, tick_idle)
+        if bpy.data.scenes[self.scene.name].game_settings.use_frame_rate:
+            start(max_fps, tick_idle)
+        else:
+            start(10000, tick_idle)
 
     def start(self):
         pass
@@ -242,6 +245,9 @@ class CustomLoop:
 
     def stop(self):
         pass
+
+    def shutdown(self):
+        get_mainloop().stop()
 
 
 class ULLoop(CustomLoop):

@@ -30,6 +30,7 @@ class Button(Widget, HoverBehavior):
         self.border_width = border_width
         self.border_color = border_color
         self.click_color = click_color
+        self.override_color = None
         self._clicked = False
         self._released = False
         self._in_focus = False
@@ -38,21 +39,58 @@ class Button(Widget, HoverBehavior):
         if on_press is not None:
             self.on_press = on_press
 
+    @property
+    def border_color(self):
+        return self._border_color
+
+    @border_color.setter
+    def border_color(self, val):
+        self._border_color = list(val)
+
+    @property
+    def click_color(self):
+        return self._click_color
+
+    @click_color.setter
+    def click_color(self, val):
+        self._click_color = list(val)
+
+    @property
+    def hover_color(self):
+        return self._hover_color
+
+    @hover_color.setter
+    def hover_color(self, val):
+        self._hover_color = list(val)
+
+    @property
+    def current_color(self):
+        return self.click_color if self._clicked else (self.hover_color if self._in_focus else self.bg_color).copy()
+
     def draw(self):
         super()._setup_draw()
-
         self._released = False
         gpu.state.line_width_set(self.border_width)
         gpu.state.point_size_set(self.border_width)
-        self._shader.uniform_float("color", self.click_color if self._clicked else (self.hover_color if self._in_focus else self.bg_color))
+        col = self.override_color if self.override_color is not None else self.current_color
+        col[3] *= self.opacity
+        bcol = self.border_color.copy()
+        bcol[3] *= self.opacity
+        self._shader.uniform_float("color", col)
         self._clicked = False
         self._batch.draw(self._shader)
-        self._shader.uniform_float("color", self.border_color)
+        self._shader.uniform_float("color", bcol)
         self._batch_line.draw(self._shader)
         self._batch_points.draw(self._shader)
         super().draw()
 
-    def _evaluate(self):
+    def evaluate(self):
+        is_hover = self.hover
+        was_hover = self._hover
+        if is_hover and not was_hover:
+            self.on_enter(self)
+        elif was_hover and not is_hover:
+            self.on_exit(self)
         self._hover = self.hover
         if self._hover:
             self._in_focus = True
@@ -73,26 +111,29 @@ class Button(Widget, HoverBehavior):
             self.canvas._click_consumed = False
         elif self._down:
             self.on_hold(self)
+        self.override_color = None
         
+
+    def on_enter(self, widget):
+        pass
+
+    def on_exit(self, widget):
+        pass
 
     def on_click(self, widget):
         pass
-        # debug(f'{self} clicked.')
 
     def on_press(self, widget):
         pass
 
     def on_hold(self, widget):
         pass
-        # debug(f'{self} is being held.')
 
     def on_release(self, widget):
         pass
-        # debug(f'{self} is released.')
 
     def on_hover(self, widget):
         pass
-        # debug(f'{self} is hovered over.')
 
 
 class LabelButton(Button, HoverBehavior):
@@ -120,8 +161,9 @@ class LabelButton(Button, HoverBehavior):
         on_press=None,
         angle=0
     ):
+        text_rel = relative.get('font_size', False)
         self.label = Label(
-            relative={'pos': True},
+            relative={'pos': True, 'font_size': text_rel},
             pos=text_pos,
             font=font,
             halign=halign_text,
@@ -235,6 +277,7 @@ class ImageButton(Button, HoverBehavior):
         super().__init__(pos, size, bg_color, relative, halign=halign, valign=valign, angle=angle, on_press=on_press, hover_color=hover_color, border_color=border_color, click_color=click_color)
         self.image = Image(relative={'size': True}, size=(1, 1), texture=texture)
         self._texture_name = texture
+        self.idle_texture = texture
         self.hover_texture = hover_texture if hover_texture else texture
         self.click_texture = click_texture if click_texture else texture
         self.add_widget(self.image)
@@ -246,14 +289,19 @@ class ImageButton(Button, HoverBehavior):
     @texture.setter
     def texture(self, val):
         self._texture_name = val
+        self.image.texture = val
 
-    def _evaluate(self):
-        super()._evaluate()
-        self.image.texture = (
-            self.click_texture if self._clicked else (
-                self.hover_texture if self._hover else self._texture_name
-            )
+    @property
+    def current_texture(self):
+        return self.click_texture if self._clicked else (
+            self.hover_texture if self._hover else self.idle_texture
         )
+
+    def evaluate(self):
+        super().evaluate()
+        tex = self.current_texture
+        if self._texture_name != tex:
+            self.texture = tex
 
 
 class SpriteButton(Button, HoverBehavior):
@@ -280,6 +328,8 @@ class SpriteButton(Button, HoverBehavior):
         super().__init__(pos, size, bg_color, relative, halign=halign, valign=valign, angle=angle, on_press=on_press, hover_color=hover_color, border_color=border_color)
         self.image = Sprite(relative={'size': True}, size=(1, 1), texture=texture, rows=rows, cols=cols, idx=idx)
         self._texture_name = texture
+
+        self.idle_texture = texture
         self.hover_texture = hover_texture if hover_texture else texture
         self.click_texture = click_texture if click_texture else texture
         self.add_widget(self.image)
@@ -291,6 +341,13 @@ class SpriteButton(Button, HoverBehavior):
     @texture.setter
     def texture(self, val):
         self._texture_name = val
+        self.image.texture = val
+
+    @property
+    def current_texture(self):
+        return self.click_texture if self._clicked else (
+            self.hover_texture if self._hover else self.idle_texture
+        )
 
     @property
     def idx(self):
@@ -300,10 +357,8 @@ class SpriteButton(Button, HoverBehavior):
     def idx(self, val):
         self.image.idx = val
 
-    def _evaluate(self):
-        super()._evaluate()
-        self.image.texture = (
-            self.click_texture if self._clicked else (
-                self.hover_texture if self._hover else self._texture_name
-            )
-        )
+    def evaluate(self):
+        super().evaluate()
+        tex = self.current_texture
+        if self._texture_name != tex:
+            self.texture = tex

@@ -1,4 +1,5 @@
 from .shader import Filter2D
+from .buffer import Buffer
 from .fxaa import FXAA
 from .brightness import Brightness
 from .vignette import Vignette

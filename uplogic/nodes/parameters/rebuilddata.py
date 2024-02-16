@@ -31,7 +31,9 @@ class ULRebuildData(ULParameterNode):
             self.ret = dat
             return
         if self.read_as == 'GameObj':
-            bobj = bpy.data.objects.get(dat['data_id'])
+            bobj = bpy.data.objects.get(dat['name'])
+            # obj = logic.getCurrentScene().objects.get(dat['data_id'])
+            # print(dat['data_id'])
             if bobj is None:
                 self.ret = None
                 return

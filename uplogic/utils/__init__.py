@@ -35,7 +35,9 @@ from .visualize import draw_box  # noqa
 from .visualize import draw_cube  # noqa
 from .visualize import draw_line  # noqa
 from .visualize import draw_path  # noqa
+from .visualize import draw_mesh  # noqa
 from .visualize import draw_arrow  # noqa
+from .visualize import draw_arrow_path  # noqa
 from .scene import FileLoader  # noqa
 from .scene import SceneLoader  # noqa
 from .math import clamp

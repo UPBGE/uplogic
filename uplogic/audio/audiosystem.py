@@ -187,6 +187,9 @@ class ULAudioSystem(object):
         self.scene.pre_draw.remove(self.update)
         GlobalDB.retrieve('uplogic.audio').remove(self.name)
 
+    def stop_all(self):
+        self.device.stopAll()
+
 
 def get_audio_system(system_name: str = 'default', mode: str = '3D') -> ULAudioSystem:
     '''Get or create a `ULAudioSystem` with the given name.

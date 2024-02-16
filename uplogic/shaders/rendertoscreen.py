@@ -15,7 +15,6 @@ class RenderToScreen:
 
         context = bpy.context
         context.space_data.overlay.show_overlays = False
-        print(bpy.app.handlers.game_post)
         bpy.app.handlers.game_post.append(self.stop)
         bge.logic.getCurrentScene().post_draw.append(self.draw)
         self.scene = bpy.data.scenes.get(camera.scene.name, None)

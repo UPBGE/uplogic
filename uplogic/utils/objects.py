@@ -299,8 +299,8 @@ def set_curve_points(
 
 class GameObject:
 
-    def __init__(self) -> None:
-        self.game_object: KX_GameObject
+    def __init__(self, game_object: KX_GameObject) -> None:
+        self.game_object: KX_GameObject = game_object
 
     @property
     def blenderObject(self) -> Object:
@@ -316,6 +316,22 @@ class GameObject:
 
     def set_parent(self, parent):
         self.game_object.setParent(parent)
+
+    @property
+    def children(self):
+        return self.game_object.children
+
+    @property
+    def children_recursive(self):
+        return self.game_object.childrenRecursive
+
+    @property
+    def mass(self):
+        return getattr(self.game_object, 'mass', 0)
+
+    @mass.setter
+    def mass(self, val):
+        self.game_object.mass = val
 
     @property
     def worldPosition(self) -> Vector:
