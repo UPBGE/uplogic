@@ -1,4 +1,4 @@
-from ..utils.visualize import draw_arrow
+from ..utils.visualize import draw_line
 from .navigation import NavContainer
 from bge.types import KX_GameObject
 from bge.types import KX_NavMeshObject
@@ -22,7 +22,7 @@ class Agent(NavContainer):
     def __init__(
             self,
             game_object: KX_GameObject,
-            speed: float= 1.0,
+            speed: float= .1,
             threshold: float = -1,
             bevel=0.0,
             dynamic=False,
@@ -31,11 +31,15 @@ class Agent(NavContainer):
         ):
         super().__init__(game_object)
         self.speed = speed
+        self.navmesh = None
         self.threshold = threshold
         self.height = height
         self.obstacle_mask = obstacle_mask
         self.bevel = bevel
         self.dynamic = dynamic
+
+    def set_navmesh(self, navmesh: KX_GameObject):
+        self.navmesh = navmesh
 
     @property
     def position(self):
@@ -48,7 +52,7 @@ class Agent(NavContainer):
         if self._path.points:
             if self.obstacle_mask:
                 pathpoints = self._path.points
-                dat = raycast(self.game_object, self.position, pathpoints[0], distance=5, mask=self.obstacle_mask)
+                dat = raycast(self.game_object, self.game_object.worldPosition.xy.to_3d(), pathpoints[0], distance=5, mask=self.obstacle_mask)
                 if dat.obj and dat.obj.blenderObject.game.use_obstacle_create:
                     rad = dat.obj.blenderObject.game.obstacle_radius * 1.5
                     while (pathpoints[0] - dat.obj.worldPosition).length < rad:
@@ -76,21 +80,24 @@ class Agent(NavContainer):
 
             return self._path.points[0]
 
-    def find_path(self, target: Vector, navmesh: KX_NavMeshObject):
-        return super().find_path(self.game_object.worldPosition, target, navmesh)
+    def find_path(self, target: Vector, navmesh: KX_NavMeshObject = None):
+        return super().find_path(self.game_object.worldPosition, target, navmesh if navmesh else self.navmesh)
 
     def visualize(self, color=Vector((0, 1, 0))):
         if self._path.points:
             compare = self.game_object.worldPosition.copy()
             compare.z = self.next_point.z
-            draw_arrow(compare, self.next_point, color)
+            draw_line(compare, self.next_point, color)
             return super().visualize(color)
 
     def pop(self, idx=0):
-        return self._path.points.pop(idx)
+        points = self._path.points
+        if not points:
+            return None
+        return points.pop(idx)
 
     def clean(self):
-       while self.distance < .3:
+       while self.next_point and self.distance < .3:
            self.pop()
 
     @property
@@ -100,12 +107,18 @@ class Agent(NavContainer):
     @property
     def distance(self):
         compare = self.game_object.worldPosition.copy()
+        np = self.next_point
+        if np is None:
+            return 0
         compare.z = self.next_point.z
         return super().distance(compare)
 
     @property
     def direction(self):
         compare = self.game_object.worldPosition.copy()
+        np = self.next_point
+        if np is None:
+            return Vector((0, 0, 0))
         compare.z = self.next_point.z
         return super().direction(compare)
 
@@ -128,7 +141,6 @@ class Agent(NavContainer):
         self._threshold = val
 
     def move(self):
-        print(self.threshold)
         while self._path.points and self.distance < self.threshold:
             self.pop()
         if not self._path.points:

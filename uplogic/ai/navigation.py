@@ -1,9 +1,7 @@
 from mathutils import Vector
 from ..utils.objects import GameObject
 from bge.types import KX_NavMeshObject, KX_GameObject
-from ..utils.visualize import draw_arrow_path, draw_arrow, draw_path
-from ..utils.math import rotate_by_axis
-from math import degrees
+from ..utils.visualize import draw_path
 
 
 class NavPath:
