@@ -24,7 +24,8 @@ class TweenValueNode(ULParameterNode):
         self.value_type = 0  # 0 -> float, 1 -> Vector
         
         self._result = 0.0
-        self._factor = 0
+        self._factor = 0.
+        self._eval = 0.
 
         self._direction = 1
 
@@ -44,7 +45,7 @@ class TweenValueNode(ULParameterNode):
         if self.on_demand:
             self.forward = True
             self.back = False
-        self._result = self.get_input(self.from_vec).lerp(self.get_input(self.to_vec), self._factor)
+        self._result = self.get_input(self.from_vec).lerp(self.get_input(self.to_vec), self._eval)
         return self._result
 
     def get_float(self):
@@ -52,7 +53,7 @@ class TweenValueNode(ULParameterNode):
         if self.on_demand:
             self.forward = True
             self.back = False
-        self._result = interpolate(self.get_input(self.from_float), self.get_input(self.to_float), self._factor)
+        self._result = interpolate(self.get_input(self.from_float), self.get_input(self.to_float), self._eval)
         return self._result
 
     def evaluate(self):
@@ -68,9 +69,10 @@ class TweenValueNode(ULParameterNode):
             self._direction = 1
             if duration > 0:
                 self._time = clamp(self._time + self.network.time_per_frame, 0, duration)
-                self._factor = clamp(mapping.evaluate(
+                self._factor = self._time / duration
+                self._eval = clamp(mapping.evaluate(
                     mapping.curves[0],
-                    self._time / duration
+                    self._factor
                 ))
             else:
                 self._factor = 1
@@ -78,9 +80,10 @@ class TweenValueNode(ULParameterNode):
             self._direction = 0
             if duration > 0:
                 self._time = clamp(self._time - self.network.time_per_frame, 0, duration)
-                self._factor = clamp(mapping.evaluate(
+                self._factor = self._time / duration
+                self._eval = clamp(mapping.evaluate(
                     mapping.curves[0],
-                    self._time / duration
+                    self._factor
                 ))
             else:
                 self._factor = 0
