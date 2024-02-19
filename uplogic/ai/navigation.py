@@ -54,7 +54,7 @@ class NavContainer(GameObject):
                 end_circle = p + next_direction * bevel
 
 
-                # KEEP for debugging!
+                # XXX KEEP for debugging!
                 # up = direction.cross(next_direction).normalized()
                 # normal1 = direction.cross(up).normalized()
                 # normal2 = next_direction.cross(up).normalized()

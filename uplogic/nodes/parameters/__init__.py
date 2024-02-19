@@ -101,5 +101,7 @@ from .instream import ULKeyLogger
 from .rotatebypoint import ULRotateByPoint
 from .getlogictreeproperty import ULGetLogicTreeProperty
 from .resizevector import ResizeVectorNode
+from .curveinterpolation import CurveInterpolationNode
+from .tweenvalue import TweenValueNode
 
 from .randomvalue import ULRandomValue

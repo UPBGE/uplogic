@@ -143,6 +143,11 @@ class ULLogicNode(ULLogicContainer):
         self.outputs.append(o)
         return o
 
+    # def add_input(self, name):
+    #     def ipt_get(self):
+    #         return self.get_input(getattr(self, name))
+    #     setattr(self, name, )
+
     def get_input(self, param):
         if isinstance(param, ULLogicBase):
             return param.get_value()

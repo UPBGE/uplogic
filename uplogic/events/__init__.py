@@ -7,27 +7,27 @@ from uplogic.physics import on_collision  # noqa
 
 
 def on_pre_draw(callback):
-    ULEventManager.update_on.append(callback)
+    EventManager.update_on.append(callback)
 
 
 def on_post_draw(callback):
-    ULEventManager.update_on.append(callback)
+    EventManager.update_on.append(callback)
 
 
 def get_event_manager():
-    update = ULEventManager.update_on
+    update = EventManager.update_on
     if update is None:
         update = logic.getCurrentScene().post_draw
-    if ULEventManager.update not in update:
-        update.append(ULEventManager.update)
-    return ULEventManager
+    if EventManager.update not in update:
+        update.append(EventManager.update)
+    return EventManager
 
 
 def set_update_loop(loop):
-    ULEventManager.set_update_on(loop)
+    EventManager.set_update_on(loop)
 
 
-class ULEventManager():
+class EventManager():
     '''Manager for `ULEvent` objects, not inteded for manual use.
     '''
     events = {}
@@ -128,15 +128,15 @@ class ULEvent():
         self.id = id
         self.content = content
         self.messenger = messenger
-        ULEventManager.schedule(self.register)
+        EventManager.schedule(self.register)
 
     def register(self):
-        ULEventManager.register(self)
-        ULEventManager.cancel(self.register)
+        EventManager.register(self)
+        EventManager.cancel(self.register)
 
     def remove(self):
-        ULEventManager.events.pop(self.id, None)
-        ULEventManager.cancel(self.remove)
+        EventManager.events.pop(self.id, None)
+        EventManager.cancel(self.remove)
 
 
 def send(id: int, content=None, messenger=None) -> None:
@@ -146,7 +146,7 @@ def send(id: int, content=None, messenger=None) -> None:
     :param `content`: This can be used to store data in an event.
     :param `messenger`: Can be used to store an object.
     '''
-    ULEventManager.send(id, content, messenger)
+    EventManager.send(id, content, messenger)
 
 
 def receive(id) -> ULEvent:
@@ -156,7 +156,7 @@ def receive(id) -> ULEvent:
 
     :returns: `ULEvent` with `id`, `content` and `messenger` as attributes.
     '''
-    return ULEventManager.receive(id)
+    return EventManager.receive(id)
 
 
 def consume(id: int):
@@ -166,7 +166,7 @@ def consume(id: int):
 
     :returns: `ULEvent` with `id`, `content` and `messenger` as attributes.
     '''
-    return ULEventManager.consume(id, None)
+    return EventManager.consume(id, None)
 
 
 def bind(id: int, callback) -> None:
@@ -180,7 +180,7 @@ def bind(id: int, callback) -> None:
         def __init__(self, id, cb) -> None:
             self.id = id
             self.callback = cb
-            ULEventManager.bind(self._check_evt)
+            EventManager.bind(self._check_evt)
 
         def _check_evt(self):
             evt = receive(self.id)
@@ -188,10 +188,10 @@ def bind(id: int, callback) -> None:
                 self.callback(evt)
 
         def unbind(self):
-            ULEventManager.unbind(self._check_evt)
+            EventManager.unbind(self._check_evt)
 
         def release(self):
-            ULEventManager.unbind(self._check_evt)
+            EventManager.unbind(self._check_evt)
 
     return BoundCallback(id, callback)
 
@@ -212,20 +212,20 @@ class ScheduledEvent():
         self.content = content
         self.messenger = messenger
         self._consumed = False
-        ULEventManager.schedule(self._send_scheduled)
+        EventManager.schedule(self._send_scheduled)
 
     def _send_scheduled(self):
         if time.time() >= self.delay:
             self.consume()
 
     def cancel(self):
-        ULEventManager.cancel(self._send_scheduled)
+        EventManager.cancel(self._send_scheduled)
 
     def consume(self):
         if self._consumed:
             return
         self._consumed = True
-        ULEventManager.cancel(self._send_scheduled)
+        EventManager.cancel(self._send_scheduled)
         ULEvent(self.id, self.content, self.messenger)
 
 
@@ -259,7 +259,7 @@ class ScheduledCallback():
         self.callback = cb
         self.arg = arg
         self._consumed = False
-        ULEventManager.schedule(self._call_scheduled)
+        EventManager.schedule(self._call_scheduled)
 
     def _call_scheduled(self):
         if time.time() >= self.delay:
@@ -269,14 +269,14 @@ class ScheduledCallback():
         if self._consumed:
             return
         self._consumed = True
-        ULEventManager.cancel(self._call_scheduled)
+        EventManager.cancel(self._call_scheduled)
         if self.arg is not None:
             self.callback(self.arg)
         else:
             self.callback()
 
     def cancel(self):
-        ULEventManager.cancel(self._call_scheduled)
+        EventManager.cancel(self._call_scheduled)
 
 
 def schedule_callback(cb, delay=0.0, arg=None) -> ScheduledCallback:

@@ -213,7 +213,7 @@ def instance_props(*prop_names) -> KX_PythonComponent:
     return deco
 
 
-def instance_props(*prop_names) -> KX_PythonComponent:
+def instance_property(*prop_names) -> KX_PythonComponent:
     """Decorator for `KX_PythonComponent` or `KX_GameObject` classes and subclasses.
 
     Automatically adds property handlers for this class to use the `game_object.GroupObject[prop]`

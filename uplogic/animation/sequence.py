@@ -171,7 +171,6 @@ class ULSequence():
                         while leftover > span:
                             leftover -= span
                         self.frame = start_frame + leftover
-                        print('Restart')
                     else:
                         self.frame = end_frame
                 else:

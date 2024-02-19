@@ -7,9 +7,9 @@ import math
 def clamp(value: float or Vector, min: float = 0, max: float = 1) -> float:
     """Clamp a value in between two other values.
 
-    :param value: input value
-    :param min: minimum value
-    :param max: maximum value
+    :param `value`: input value
+    :param `min`: minimum value
+    :param `max`: maximum value
 
     :returns: clamped value as float
     """
@@ -22,12 +22,12 @@ def clamp(value: float or Vector, min: float = 0, max: float = 1) -> float:
     return value
 
 
-def cycle(value: float or Vector, min: float = 0, max: float = 1) -> float:
+def cycle(value: float, min: float = 0, max: float = 1) -> float:
     """Clamp a value in between two other values.
 
-    :param value: input value
-    :param min: minimum value
-    :param max: maximum value
+    :param `value`: input value
+    :param `min`: minimum value
+    :param `max`: maximum value
 
     :returns: clamped value as float
     """
@@ -43,9 +43,9 @@ def cycle(value: float or Vector, min: float = 0, max: float = 1) -> float:
 def vec_clamp(vec: Vector, min: float = 0, max: float = 1) -> Vector:
     """Clamp length of a vector.
 
-    :param value: `Vector`
-    :param min: minimum length
-    :param max: maximum length
+    :param `value`: `Vector`
+    :param `min`: minimum length
+    :param `max`: maximum length
 
     :returns: clamped vector as float
     """
@@ -62,9 +62,9 @@ def vec_clamp(vec: Vector, min: float = 0, max: float = 1) -> Vector:
 def interpolate(a: float, b: float, fac: float, threshold: float = 0.001) -> float:
     """Interpolate between 2 values using a factor.
 
-    :param a: starting value
-    :param b: target value
-    :param fac: interpolation factor
+    :param `a`: starting value
+    :param `b`: target value
+    :param `fac`: interpolation factor
 
     :returns: calculated value as float
     """
@@ -76,9 +76,9 @@ def interpolate(a: float, b: float, fac: float, threshold: float = 0.001) -> flo
 def lerp(a: float, b: float, fac: float, threshold: float = 0.001) -> float:
     """Interpolate between 2 values using a factor.
 
-    :param a: starting value
-    :param b: target value
-    :param fac: interpolation factor
+    :param `a`: starting value
+    :param `b`: target value
+    :param `fac`: interpolation factor
 
     :returns: calculated value as float
     """

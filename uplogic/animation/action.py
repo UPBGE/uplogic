@@ -198,6 +198,8 @@ class ULAction():
     @intensity.setter
     def intensity(self, value: float):
         value = float(value)
+        if not value:
+            self.game_object.stopAction(self.layer)
         if not self.is_playing:
             return
         if not self.is_playing or value == self._intensity:
@@ -334,6 +336,9 @@ class ULAction():
             self._frozen_speed = -1
 
     def stop(self):
+        self._act_system.remove(self)
+
+    def _stop(self):
         '''Stop playback of this action.
         '''
         self.stopped = True

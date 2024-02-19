@@ -94,7 +94,7 @@ class ActionSystem():
 
         :param `action`: `Action` which to remove.
         '''
-        action.stop()
+        action._stop()
         if action in self.actions:
             self.actions.remove(action)
         ActionSystem.free_layer(action)
