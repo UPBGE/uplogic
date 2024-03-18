@@ -19,7 +19,7 @@ class Canvas(Widget):
         self._click_consumed = False
         self._old_width = bge.render.getWindowWidth()
         self._old_height = bge.render.getWindowHeight()
-        self.image = Buffer()
+        # self.image = Buffer()
         self.use_clipping = False
         self._to_evaluate: list[Widget] = []
         bge.logic.getCurrentScene().post_draw.append(self.draw)
