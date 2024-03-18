@@ -473,7 +473,8 @@ class ULSound3D(ULSound):
                 )
                 occluded = self.occluded = False
                 penetration = 1
-                while occluder:
+                occ_count = 0
+                while occluder and occ_count < 5:
                     if occluder is speaker:
                         break
                     sound_occluder = occluder.blenderObject.get(
@@ -495,6 +496,7 @@ class ULSound3D(ULSound):
                         point,
                         xray=False
                     )
+                    occ_count += 1
                 cs = self._clear_sound
                 if occluded and cs > 0:
                     self._clear_sound -= transition

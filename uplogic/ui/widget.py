@@ -54,10 +54,18 @@ class Widget():
         self.show = False
 
     def make_floating(self, pos=True, size=True, halign='center', valign='center'):
+        """Quickly set the attributes of this widget to use relative data.
+
+        :param `pos`: Use relative position.
+        :param `size`: Use relative size.
+        :param `halign`: The horizontal alignment.
+        :param `valign`: The vertical alignment.
+        """
         self.relative['pos'] = pos
         self.relative['size'] = size
         self.halign = halign
         self.valign = valign
+        return self
 
     @property
     def active(self):
@@ -471,6 +479,7 @@ class Widget():
             self.children.append(widget)
             self.canvas._set_z(-1)
         self.children = sorted(self.children, key=lambda widget: widget.z, reverse=False)
+        return widget
 
     def _set_z(self, z):
         z += 1

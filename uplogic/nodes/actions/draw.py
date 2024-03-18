@@ -1,6 +1,6 @@
 from mathutils import Vector
 from uplogic.nodes import ULActionNode
-from uplogic.utils.visualize import draw_line, draw_path, draw_box, draw_cube, draw_mesh, draw_arrow
+from uplogic.utils.visualize import draw_line, draw_path, draw_box, draw_cube, draw_mesh, draw_arrow, draw_axis
 from uplogic.nodes import ULOutSocket
 
 
@@ -26,7 +26,8 @@ class DrawNode(ULActionNode):
             self.draw_path,
             self.draw_cube,
             self.draw_box,
-            self.draw_mesh
+            self.draw_mesh,
+            self.draw_axis
         ]
 
     def get_out(self):
@@ -74,6 +75,12 @@ class DrawNode(ULActionNode):
         draw_mesh(
             self.get_input(self.object),
             self.get_input(self.color)
+        )
+
+    def draw_axis(self):
+        draw_axis(
+            self.get_input(self.object),
+            self.get_input(self.length)
         )
 
     def evaluate(self):

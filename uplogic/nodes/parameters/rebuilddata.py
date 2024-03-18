@@ -8,6 +8,7 @@ from bge import logic
 class ULRebuildData(ULParameterNode):
     def __init__(self):
         ULParameterNode.__init__(self)
+        self.condition = True
         self.data = None
         self.read_as = 'builtin'
         self.ret = None
@@ -24,6 +25,8 @@ class ULRebuildData(ULParameterNode):
         return self.ret
 
     def evaluate(self):
+        if not self.get_input(self.condition):
+            return
         dat = self.get_input(self.data)
         if dat is None:
             return
@@ -32,8 +35,6 @@ class ULRebuildData(ULParameterNode):
             return
         if self.read_as == 'GameObj':
             bobj = bpy.data.objects.get(dat['name'])
-            # obj = logic.getCurrentScene().objects.get(dat['data_id'])
-            # print(dat['data_id'])
             if bobj is None:
                 self.ret = None
                 return

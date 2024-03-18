@@ -15,4 +15,5 @@ from .slider import ProgressSlider
 from .path import Path
 from .path import WorldPath
 from .behaviors import MouseListener
+from .textinput import TextInput
 # from .render import RenderedTexture

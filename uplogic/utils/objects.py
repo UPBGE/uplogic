@@ -22,7 +22,7 @@ def xrot_to(
     factor=1
 ):
     local = get_local(rotating_object, target_pos)
-    front = Vector((1, 0)) if front_axis_code == 1 else Vector((0, 1))
+    front = Vector((1, 0)) if front_axis_code in [1, 4] else Vector((0, 1))
     if front_axis_code > 2:
         front.negate()
     angle = Vector((local.y, local.z))
@@ -39,7 +39,7 @@ def yrot_to(
     factor=1
 ):
     local = get_local(rotating_object, target_pos)
-    front = Vector((1, 0)) if front_axis_code == 0 else Vector((0, 1))
+    front = Vector((1, 0)) if front_axis_code in [0, 3] else Vector((0, 1))
     if front_axis_code > 2:
         front.negate()
     angle = Vector((local.x, local.z))
@@ -56,8 +56,9 @@ def zrot_to(
     factor=1
 ):
     local = get_local(rotating_object, target_pos)
-    front = Vector((1, 0)) if front_axis_code == 0 else Vector((0, 1))
+    front = Vector((1, 0)) if front_axis_code in [0, 3] else Vector((0, 1))
     if front_axis_code > 2:
+        print(front)
         front.negate()
     angle = Vector((local.x, local.y))
     if angle.length < .001:
@@ -79,6 +80,7 @@ def rotate_to(
         front -= 3
     if rotation_axis == front:
         return
+    print(front_axis)
     if rotation_axis == 0:
         xrot_to(
             object,

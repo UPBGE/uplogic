@@ -39,7 +39,7 @@ class ULLogicTree(ULLogicContainer):
         self.capslock_pressed = False
         self.evaluated_cells = 0
         scene = self.scene = logic.getCurrentScene()
-        mainloop = scene.get('uplogic.mainloop')
+        mainloop = logic.globalDict.get('loop')
         if mainloop:
             mainloop.logic_tree = self
 

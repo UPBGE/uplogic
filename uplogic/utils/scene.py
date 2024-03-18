@@ -8,7 +8,7 @@ def set_scene(scene: str or bpy.types.Scene) -> None:
 
 
 def get_custom_loop():
-    return logic.getCurrentScene()['uplogic.mainloop']
+    return logic.globalDict.get('loop', None)
 
 
 class FileLoader():
@@ -144,6 +144,7 @@ class SceneLoader():
             self.tex_image.image = self.images.pop()
             self.status += 1 / self.datasize
             self.item = self.tex_image.image.name
+            self.on_progress(self.status)
             return
         if self.materials:
             mat = self.materials.pop()
@@ -151,12 +152,14 @@ class SceneLoader():
             self.status += 1 / self.datasize
             self.data = 'shaders'
             self.item = mat.name
+            self.on_progress(self.status)
             return
         if self.meshes:
             self.bobj.data = self.meshes.pop()
             self.status += 1 / self.datasize
             self.data = 'objects'
             self.item = self.bobj.data.name
+            self.on_progress(self.status)
             return
         logic.getCurrentScene().pre_draw.remove(self.load_next)
         self.object.endObject()
@@ -165,6 +168,9 @@ class SceneLoader():
         bpy.data.meshes.remove(self.bmesh)
         self.finished = True
         self.on_finish()
+
+    def on_progress(self, progress):
+        pass
 
     def on_finish(self):
         pass

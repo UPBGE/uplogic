@@ -8,11 +8,19 @@ import math
 class Label(Widget):
     '''Widget for displaying text
 
-    :param `orientation`: Whether to arrange widgets horizontally or vertically; Can be (`'horizontal'`, `'vertical'`).
     :param `pos`: Initial position of this widget in either pixels or factor.
     :param `relative`: Whether to use pixels or factor for size or pos; example: `{'pos': True, 'size': True}`.
+    :param `text`: Initial text for this label.
+    :param `font`: Font name.
+    :param `font_color`: Color in RGBA.
+    :param `font_size`: Font size in pt or factor.
+    :param `line_height`: Total line height relative to character size (1 is same as character height).
+    :param `shadow`: Draw a shadow behind the text.
+    :param `shadow_offset`: Relative position of the shadow in px.
+    :param `shadow_color`: Shadow color in RGBA.
     :param `halign`: Horizontal alignment of the widget, can be (`left`, `center`, `right`).
     :param `valign`: Vertical alignment of the widget, can be (`bottom`, `center`, `top`).
+    :param `wrap`: Split lines that are too long for the containing widget.
     :param `angle`: Rotation in degrees of this widget around the pivot defined by the alignment.
     '''
 
@@ -45,6 +53,7 @@ class Label(Widget):
         self.font_color = font_color
         self.font = font
         self.wrap = wrap
+        self.lines = []
         Widget.__init__(self, pos, (0, 0), (0, 0, 0, 0), relative, angle=angle)
         self.text_halign = halign
         self.text_valign = valign
@@ -116,13 +125,14 @@ class Label(Widget):
     @property
     def dimensions(self):
         dim = blf.dimensions(self.font, self.text)
-        return (dim[0], blf.dimensions(self.font, 'Aj')[1])
+        lines = len(self.lines) or 1
+        return (dim[0], blf.dimensions(self.font, 'Aj')[1] * lines)
 
     @property
     def _draw_size(self):
-        parsize = self.parent._draw_size
         relative = self.relative.get('font_size', False)
-        blf.size(self.font, parsize[1] * self.font_size if relative else self.font_size)
+        fontsize = self.parent._draw_size[1] * self.font_size if relative else self.font_size
+        blf.size(self.font, fontsize)
         return self.dimensions
 
     def make_floating(self, pos=True, size=True, halign='center', valign='center'):
@@ -130,6 +140,7 @@ class Label(Widget):
         self.relative['size'] = size
         self.text_halign = halign
         self.text_valign = valign
+        return self
 
     def draw(self):
         super()._setup_draw()
@@ -143,6 +154,7 @@ class Label(Widget):
         smallsize = blf.dimensions(font, 'a')[1]
         lowsize = blf.dimensions(font, 'g')[1]
         diff = lowsize - smallsize
+
         if self.angle or self.parent._draw_angle:
             blf.enable(font, blf.ROTATION)
             blf.rotation(font, math.radians(self._draw_angle))
@@ -172,12 +184,12 @@ class Label(Widget):
                 elif self.text_halign == 'right':
                     pos[0] -= dimensions[0]
                 if self.text_valign == 'top':
-                    if underground:
-                        pos[1] += (diff)
+                    # if underground:
+                    # pos[1] += (diff)
                     pos[1] -= lheight
                 elif self.text_valign == 'center':
-                    if underground:
-                        pos[1] += (diff * .5)
+                    # if underground:
+                        # pos[1] += (diff * .5)
                     pos[1] += (.5 * lheight * (len(lines) - 1)) - (.5 * lheight)
                 elif self.text_valign == 'bottom':
                     pos[1] += (lheight * (len(lines) -2))
@@ -188,26 +200,27 @@ class Label(Widget):
         else:
             dimensions = blf.dimensions(font, self.text)
             pos = self._draw_pos.copy()
-            underground = dimensions[1] > charsize[1]
+            # underground = dimensions[1] > charsize[1]
 
             if self.text_halign == 'center':
                 pos[0] -= (dimensions[0] * .5)
             elif self.text_halign == 'right':
                 pos[0] -= dimensions[0]
             if self.text_valign == 'top':
-                if underground:
-                    pos[1] += (diff)
-                pos[1] -= dimensions[1]
+                # if underground:
+                    # pos[1] += diff
+                pos[1] -= charsize[1] * self.line_height
             elif self.text_valign == 'center':
-                if underground:
-                    pos[1] += (diff * .5)
-                pos[1] -= (.5 * dimensions[1])
+                # if underground:
+                    # pos[1] += (diff * .5)
+                pos[1] -= (.5 * charsize[1])
             if self.parent and self.parent._draw_angle:
                 pos = rotate2d(pos, self.pivot, self.parent.angle)
             blf.position(font, pos[0], pos[1], 0)
             blf.draw(font, self.text)
 
         super().draw()
+        self.lines = lines
         blf.disable(font, blf.WORD_WRAP)
         blf.disable(font, blf.SHADOW)
         blf.disable(font, blf.ROTATION)

@@ -43,7 +43,7 @@ class ULFlotsam(ULBuoy):
         flotsam = self.game_object
         lindamp = .1
         wpos = flotsam.worldPosition
-        obj, point, normal, direction = raycast(
+        ray = raycast(
             flotsam,
             wpos,
             up,
@@ -53,16 +53,16 @@ class ULFlotsam(ULBuoy):
             local=True,
             visualize=True
         )
-        if obj:
+        if ray.obj:
             lindamp = .8
-            lift = (up * (wpos - point).length * self.buoyancy)
+            lift = (up * (wpos - ray.point).length * self.buoyancy)
             flotsam.applyImpulse(
                 wpos,
                 vec_clamp(lift, max=self.buoyancy),
                 False
             )
             if self.align:
-                self.game_object.alignAxisToVect(normal, 2, .2)
+                self.game_object.alignAxisToVect(ray.normal, 2, .2)
         flotsam.linearDamping = lindamp
         flotsam.angularDamping = lindamp * .8
 
@@ -105,7 +105,7 @@ class ULShip(ULBuoy):
         ang_dampen_factor = 0
         for buoy in self.buoys:
             wpos = buoy.worldPosition
-            obj, point, normal, direction = raycast(
+            ray = raycast(
                 buoy,
                 wpos,
                 up,
@@ -114,11 +114,11 @@ class ULShip(ULBuoy):
                 xray=True,
                 local=True
             )
-            if obj:
+            if ray.obj:
                 div = 1 / lifts
                 lin_dampen_factor += (max_lin_damp * div)
                 ang_dampen_factor += (max_ang_damp * div)
-                lift = (up * (wpos - point).length * self.buoyancy) * div
+                lift = (up * (wpos - ray.point).length * self.buoyancy) * div
                 ship.applyImpulse(
                     wpos,
                     vec_clamp(lift, max=self.buoyancy * 2 * div),

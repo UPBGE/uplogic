@@ -2,11 +2,14 @@ from collections.abc import Iterable
 from bge import logic
 from bge import render
 from io import StringIO
-from uplogic.ui import Canvas
-from uplogic.ui import RelativeLayout
-from uplogic.ui import Label
+from uplogic.ui.canvas import Canvas
+from uplogic.ui.layout import RelativeLayout
+from uplogic.ui.label import Label
+from uplogic.ui.textinput import TextInput
 from uplogic.data import GlobalDB
 from uplogic.utils.math import lerp
+from uplogic.utils.raycasting import raycast_mouse
+from uplogic.utils.math import world_to_screen
 from uplogic.input import key_down
 from uplogic.events import schedule_callback
 import bpy
@@ -71,10 +74,14 @@ class LoggerLayout(Canvas):
         #     self.show = False
         if not getattr(bpy.context.scene, 'screen_console_open', True) and not visible:
             self.show = False
+        self.input = TextInput(text='a', shadow=True, valign='center')
+        self.input.on_enter = self.on_enter
+        self.input.edit = True
         self.messages: list[Label] = []
         self.layout = RelativeLayout(relative={'size': True, 'pos': True}, pos=[0, 0], size=(1, .4), bg_color=[0, 0, 0, .3])
         self.layout.use_clipping = True
         self.add_widget(self.layout)
+        self.layout.add_widget(self.input)
         self.fade_event = None
         self._toggle_key = False
         self._prev_msg = None
@@ -82,6 +89,21 @@ class LoggerLayout(Canvas):
             scene.onRemove.append(disable)
         if self.toggle not in scene.pre_draw:
             scene.pre_draw.append(self.toggle)
+        self.nameplate = Label(text='Hello', shadow=True, relative={'pos': True}, halign='center')
+        self.nameplate.update = self.update_nameplate
+        self.canvas.add_widget(self.nameplate)
+
+    def on_enter(self):
+        self.add_message(self.input.text)
+        self.input.text = ''
+
+    def update_nameplate(self):
+        ray = raycast_mouse()
+        if ray.obj:
+            self.nameplate.pos = world_to_screen(ray.point)
+            self.nameplate.text = ray.obj.blenderObject.name
+        else:
+            self.nameplate.text = ''
 
     def toggle(self):
         if key_down(self.toggle_key):
@@ -91,6 +113,7 @@ class LoggerLayout(Canvas):
             self._toggle_key = True
         else:
             self._toggle_key = False
+        logic.mouse.visible = self.show
 
     def stop(self):
         self.clear()
@@ -119,12 +142,17 @@ class LoggerLayout(Canvas):
         dim = self.layout.children[0].dimensions[1]
         lheight = self.layout._draw_size[1]
         amount = lheight / dim
+        y = 40
         for i, child in enumerate(self.layout._children_reversed):
-            child.pos[1] += 15
+            # sys.__stdout__.write(str(child.relative))
+            child.pos[1] = y
+            y+=15
             if child.pos[1] > lheight - dim:
                 self.layout.remove_widget(child)
             child.opacity = 1 - (i * (1/amount))
             child.shadow_color[3] = child.font_color[3]
+        self.input.pos[1] = 20
+        self.input.pos[0] = 5
         self._prev_msg = msg
 
 

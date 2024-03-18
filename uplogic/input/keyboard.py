@@ -1,5 +1,6 @@
 from bge import logic
 from bge import events
+from bge.types import SCA_InputEvent
 
 
 KEYBOARD_EVENTS = logic.keyboard.inputs
@@ -9,7 +10,7 @@ KEYBOARD_EVENTS = logic.keyboard.inputs
 _keys_active = {}
 
 
-def key_event(key: str) -> bool:
+def key_event(key: str) -> SCA_InputEvent:
     '''Retrieve key event.\n
     Not intended for manual use.
     '''
@@ -157,36 +158,61 @@ def key_pulse(key: str, time: float = .4) -> bool:
 
     :returns: boolean
     '''
-    if key_event(key).activated:
+    evt = key_event(key)
+    if evt.activated:
         _keys_active[key] = 0
         return True
     k = _keys_active.get(key, 0)
     _keys_active[key] = k + (1 / (logic.getAverageFrameRate() or 0.01))
     if _keys_active[key] > time:
-        return key_event(key).active
+        return evt.active
     return False
 
 
-def record_keyboard(all=False) -> tuple[bool, int, str]:
-    '''Listen to keyboard actions
-    :returns: Tuple of `(pressed, keycode, character)`'''
+class RecordedCharacter(tuple):
+
+    @property
+    def pressed(self):
+        return self[0]
+
+    @property
+    def keycode(self):
+        return self[1]
+
+    @property
+    def character(self):
+        return self[2]
+
+
+def record_keyboard(down=True, all=False) -> RecordedCharacter[bool, int, str]:
+    '''Listen to keyboard events.
+
+    :param `down`: Record if key is down.
+    :param `all`: Record non-character keys.
+
+    :returns: List of tuples of `(pressed, keycode, character)`'''
     left_shift = KEYBOARD_EVENTS[events.LEFTSHIFTKEY].active
     right_shift = KEYBOARD_EVENTS[events.RIGHTSHIFTKEY].active
     active_events = logic.keyboard.activeInputs.copy()
 
+    func = key_down if down else key_pulse
+
+    evts = []
+
     for keycode in active_events:
-        if key_pulse(keycode):
+        if func(keycode):
+            # print(keycode)
             event = active_events[keycode]
             char = events.EventToCharacter(
                 event.type,
                 left_shift or right_shift
             )
-            return (
+            evts.append(RecordedCharacter((
                 True if char or all else False,
                 keycode,
                 char
-            )
-    return (False, None, None)
+            )))
+    return evts
 
 
 def keyboard_active() -> bool:

@@ -4,7 +4,7 @@ from bge.types import KX_GameObject as GameObject
 import math
 
 
-def clamp(value: float or Vector, min: float = 0, max: float = 1) -> float:
+def clamp(value: float or Vector, lower: float = 0, upper: float = 1) -> float:
     """Clamp a value in between two other values.
 
     :param `value`: input value
@@ -15,11 +15,11 @@ def clamp(value: float or Vector, min: float = 0, max: float = 1) -> float:
     """
     if isinstance(value, Vector):
         return vec_clamp(value, min, max)
-    if value < min:
-        return min
-    if value > max:
-        return max
-    return value
+    # if value < min:
+    #     return min
+    # if value > max:
+    #     return max
+    return max(lower, min(value, upper))
 
 
 def cycle(value: float, min: float = 0, max: float = 1) -> float:

@@ -116,3 +116,16 @@ def draw_mesh(game_object: KX_GameObject, color: tuple = (1, 1, 1, 1)):
             game_object.worldTransform @ Vector(v2.co),
             color
         )
+
+
+def draw_axis(game_object: KX_GameObject, length=1.0):
+    xaxis = game_object.getAxisVect((1, 0, 0)) * length
+    yaxis = game_object.getAxisVect((0, 1, 0)) * length
+    zaxis = game_object.getAxisVect((0, 0, 1)) * length
+    wpos = game_object.worldPosition.copy()
+    drawLine(wpos, wpos + xaxis, (1, 0, 0))  # +X
+    drawLine(wpos, wpos + yaxis, (0, 1, 0))  # +Y
+    drawLine(wpos, wpos + zaxis, (0, 0, 1))  # +Z
+    drawLine(wpos, wpos - xaxis, (.5, 0, 0))  # -X
+    drawLine(wpos, wpos - yaxis, (0, .5, 0))  # -Y
+    drawLine(wpos, wpos - zaxis, (0, 0, .5))  # -Z

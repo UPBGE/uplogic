@@ -8,7 +8,8 @@ from uplogic.utils import unload_nodes
 
 
 class GlobalDB(object):
-    '''TODO: Documentation
+    '''Global Databank. Offers methods for storing and retrieving values akin to `bge.logic.globalDict`.
+    Values stored in this databank are available as long as the python interpreter runs and can be made permanent.
     '''
     index: int
     initialized: bool = False
@@ -213,10 +214,10 @@ class GlobalDB(object):
         print(self.content)
 
 
-def store(key, value, category='uplogic.default_globals'):
+def store(key, value, category='uplogic.default_globals', persist=False):
     initialize()
     values = GlobalDB.retrieve(category)
-    values.put(key, value)
+    values.put(key, value, persist)
 
 
 def retrieve(key, category='uplogic.default_globals', default=None):

@@ -38,6 +38,7 @@ from .visualize import draw_path  # noqa
 from .visualize import draw_mesh  # noqa
 from .visualize import draw_arrow  # noqa
 from .visualize import draw_arrow_path  # noqa
+from .visualize import draw_axis  # noqa
 from .scene import FileLoader  # noqa
 from .scene import SceneLoader  # noqa
 from .math import clamp
