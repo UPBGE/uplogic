@@ -17,7 +17,7 @@ void main()
 
 class Buffer(Filter2D):
 
-    def __init__(self, gamma=1, idx: int = None) -> None:
+    def __init__(self, gamma=.5, idx: int = 99) -> None:
         self.settings = {'gamma': float(gamma)}
         super().__init__(glsl, idx, {'gamma': self.settings})
         self._filter.addOffScreen(0)

@@ -16,4 +16,5 @@ from .path import Path
 from .path import WorldPath
 from .behaviors import MouseListener
 from .textinput import TextInput
+from .compass import Compass
 # from .render import RenderedTexture

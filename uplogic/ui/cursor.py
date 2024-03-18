@@ -22,18 +22,41 @@ def remove_custom_cursor():
 
 class Cursor(Widget):
 
+    vertex_code = """
+    in vec2 texCoord;
+    in vec2 pos;
+    out vec2 uv;
+
+    uniform mat4 ModelViewProjectionMatrix;
+
+    void main() {
+        uv = texCoord;
+        gl_Position = ModelViewProjectionMatrix * vec4(pos.xy, 0.0, 1.0);
+    }
+    """
+
+    fragment_code = """
+    in vec2 uv;
+    out vec4 fragColor;
+
+    uniform sampler2D image;
+    uniform float alpha = 1.0;
+
+    void main() {
+        vec4 color = mix(vec4(0.0), texture(image, uv), alpha);
+        fragColor = pow(color, vec4(.5));
+    }
+    """
+
     def __init__(self, texture=None, size=(30,30), offset=(0, 0), rows=1, cols=1, idx=0):
         self.offset = offset
         self.rows = rows
         self.cols = cols
         self._idx = idx
-        # self._idx = 0
-        # self._rows = 1
-        # self._cols = 1
         remove_custom_cursor()
         super().__init__(MOUSE.position, size)
         self._texture = None
-        self._shader = None
+        self.shader = None
         self.texture = texture
         self.pos = MOUSE.position
         self._last_visible = logic.mouse.visible
@@ -83,7 +106,7 @@ class Cursor(Widget):
         self._texture = gpu.texture.from_image(texture)
 
     def _build_shader(self):
-        self._shader = gpu.shader.from_builtin('IMAGE_COLOR')
+        self.shader = gpu.types.GPUShader(self.vertex_code, self.fragment_code)
         screen_res = [bge.render.getWindowWidth(), bge.render.getWindowHeight()]
         mpos = [MOUSE.position.x * screen_res[0] + self.offset[0], (1 - MOUSE.position.y) * screen_res[1] + self.offset[1]]
         idx = self.idx
@@ -98,7 +121,7 @@ class Cursor(Widget):
             (col * self._col_width, 1 - row * self._row_height)
         )
         self._batch = batch_for_shader(
-            self._shader, 'TRI_STRIP',
+            self.shader, 'TRI_STRIP',
             {
                 "pos": (
                     (mpos[0] + self.size[0], mpos[1] - self.size[1]),
@@ -119,6 +142,6 @@ class Cursor(Widget):
         gpu.state.blend_set('ALPHA')
         if self.show:
             self.pos = MOUSE.position
-            self._shader.bind()
-            self._shader.uniform_sampler("image", self.texture)
-            self._batch.draw(self._shader)
+            self.shader.bind()
+            self.shader.uniform_sampler("image", self.texture)
+            self._batch.draw(self.shader)

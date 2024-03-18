@@ -1,4 +1,5 @@
 from .widget import Widget
+from uplogic.shaders.buffer import Buffer
 from bge import render
 import gpu
 import bge
@@ -18,6 +19,7 @@ class Canvas(Widget):
         self._click_consumed = False
         self._old_width = bge.render.getWindowWidth()
         self._old_height = bge.render.getWindowHeight()
+        self.image = Buffer()
         self.use_clipping = False
         self._to_evaluate: list[Widget] = []
         bge.logic.getCurrentScene().post_draw.append(self.draw)
@@ -63,6 +65,9 @@ class Canvas(Widget):
     @parent.setter
     def parent(self, val):
         self._parent = None
+
+    def set_uniforms(self):
+        pass
 
     def draw(self):
         width = bge.render.getWindowWidth()

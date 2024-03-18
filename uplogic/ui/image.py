@@ -9,6 +9,32 @@ from mathutils import Vector
 
 class Image(Widget):
 
+    vertex_code = """
+    in vec2 texCoord;
+    in vec2 pos;
+    out vec2 uv;
+
+    uniform mat4 ModelViewProjectionMatrix;
+
+    void main() {
+        uv = texCoord;
+        gl_Position = ModelViewProjectionMatrix * vec4(pos.xy, 0.0, 1.0);
+    }
+    """
+
+    fragment_code = """
+    in vec2 uv;
+    out vec4 fragColor;
+
+    uniform sampler2D image;
+    uniform float alpha = 1.0;
+
+    void main() {
+        vec4 color = mix(vec4(0.0), texture(image, uv), alpha);
+        fragColor = pow(color, vec4(.5));
+    }
+    """
+
     def __init__(self, pos=[0, 0], size=(100, 100), relative={}, texture=None, halign='left', valign='bottom', use_aspect_ratio: bool = True, angle=0):
         self._texture = None
         self._image = None
@@ -72,35 +98,10 @@ class Image(Widget):
             x1, x0, y1, y0
         )
 
-        tex_vert_shader = """
-        in vec2 texCoord;
-        in vec2 pos;
-        out vec2 uv;
-
-        uniform mat4 ModelViewProjectionMatrix;
-
-        void main() {
-            uv = texCoord;
-            gl_Position = ModelViewProjectionMatrix * vec4(pos.xy, 0.0, 1.0);
-        }
-        """
-
-        tex_frag_shader = """
-        in vec2 uv;
-        out vec4 fragColor;
-
-        uniform sampler2D image;
-        uniform float alpha = 1.0;
-
-        void main() {
-            vec4 color = mix(vec4(0.0), texture(image, uv), alpha);
-            fragColor = pow(color, vec4(.5));
-        }
-        """
-        self._shader = gpu.types.GPUShader(tex_vert_shader, tex_frag_shader)
-        self._shader.uniform_float("alpha", self.opacity)
+        self.shader = gpu.types.GPUShader(self.vertex_code, self.fragment_code)
+        self.shader.uniform_float("alpha", self.opacity)
         self._batch = batch_for_shader(
-            self._shader, 'TRI_STRIP',
+            self.shader, 'TRI_STRIP',
             {
                 "pos": vertices,
                 "texCoord": (
@@ -118,13 +119,39 @@ class Image(Widget):
         if self.texture is None:
             super().draw()
             return
-        self._shader.bind()
-        self._shader.uniform_sampler("image", self.texture)
-        self._batch.draw(self._shader)
+        self.shader.bind()
+        self.shader.uniform_sampler("image", self.texture)
+        self._batch.draw(self.shader)
         super().draw()
 
 
 class Sprite(Image):
+
+    vertex_code = """
+    in vec2 texCoord;
+    in vec2 pos;
+    out vec2 uv;
+
+    uniform mat4 ModelViewProjectionMatrix;
+
+    void main() {
+        uv = texCoord;
+        gl_Position = ModelViewProjectionMatrix * vec4(pos.xy, 0.0, 1.0);
+    }
+    """
+
+    fragment_code = """
+    in vec2 uv;
+    out vec4 fragColor;
+
+    uniform sampler2D image;
+    uniform float alpha = 1.0;
+
+    void main() {
+        vec4 color = mix(vec4(0.0), texture(image, uv), alpha);
+        fragColor = pow(color, vec4(.5));
+    }
+    """
 
     def __init__(self, pos=[0, 0], size=(100, 100), relative={}, texture=None, idx=0, rows=1, cols=1, halign='left', valign='bottom', use_aspect_ratio=True):
         self._idx = idx
@@ -191,33 +218,8 @@ class Sprite(Image):
             y0
         )
 
-        tex_vert_shader = """
-        in vec2 texCoord;
-        in vec2 pos;
-        out vec2 uv;
-
-        uniform mat4 ModelViewProjectionMatrix;
-
-        void main() {
-            uv = texCoord;
-            gl_Position = ModelViewProjectionMatrix * vec4(pos.xy, 0.0, 1.0);
-        }
-        """
-
-        tex_frag_shader = """
-        in vec2 uv;
-        out vec4 fragColor;
-
-        uniform sampler2D image;
-        uniform float alpha = 1.0;
-
-        void main() {
-            vec4 color = mix(vec4(0.0), texture(image, uv), alpha);
-            fragColor = pow(color, vec4(.5));
-        }
-        """
-        self._shader = gpu.types.GPUShader(tex_vert_shader, tex_frag_shader)
-        self._shader.uniform_float("alpha", self.opacity)
+        self.shader = gpu.types.GPUShader(self.vertex_code, self.fragment_code)
+        self.shader.uniform_float("alpha", self.opacity)
 
         idx = self.idx
         col = idx % self.cols
@@ -231,7 +233,7 @@ class Sprite(Image):
             (col * self._col_width, 1 - row * self._row_height)
         )
         self._batch = batch_for_shader(
-            self._shader, 'TRI_STRIP',
+            self.shader, 'TRI_STRIP',
             {
                 "pos": vertices,
                 "texCoord": texcoord

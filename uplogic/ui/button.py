@@ -6,6 +6,8 @@ from .image import Sprite
 import gpu
 from uplogic.input.mouse import MOUSE_EVENTS, LMB, RMB
 from uplogic.utils import debug
+from bge import render
+from mathutils import Vector
 
 
 class Button(Widget, HoverBehavior):
@@ -48,6 +50,14 @@ class Button(Widget, HoverBehavior):
         self._border_color = list(val)
 
     @property
+    def border_width(self):
+        return self._border_width
+
+    @border_width.setter
+    def border_width(self, val):
+        self._border_width = int(val)
+
+    @property
     def click_color(self):
         return self._click_color
 
@@ -67,21 +77,25 @@ class Button(Widget, HoverBehavior):
     def current_color(self):
         return self.click_color if self._clicked else (self.hover_color if self._in_focus else self.bg_color).copy()
 
-    def draw(self):
-        super()._setup_draw()
-        self._released = False
-        gpu.state.line_width_set(self.border_width)
-        gpu.state.point_size_set(self.border_width)
+    def set_uniforms(self):
         col = self.override_color if self.override_color is not None else self.current_color
         col[3] *= self.opacity
         bcol = self.border_color.copy()
         bcol[3] *= self.opacity
-        self._shader.uniform_float("color", col)
+        self.shader.uniform_float("color", col)
+        self.shader.uniform_float("border_color", bcol)
+        self.shader.uniform_float("pos", self._draw_pos)
+        self.shader.uniform_float("size", self._draw_size)
+        self.shader.uniform_int("border_width", self.border_width)
+        self.shader.uniform_float("screen", Vector((
+            render.getWindowWidth(), render.getWindowHeight()
+        )))
+
+    def draw(self):
+        super()._setup_draw()
+        self._released = False
         self._clicked = False
-        self._batch.draw(self._shader)
-        self._shader.uniform_float("color", bcol)
-        self._batch_line.draw(self._shader)
-        self._batch_points.draw(self._shader)
+        self._batch.draw(self.shader)
         super().draw()
 
     def evaluate(self):

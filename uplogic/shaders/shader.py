@@ -24,7 +24,9 @@ def set_filter_state(pass_idx, state=True):
 
 
 class ULFilter():
-    '''Wrapper for KX_2DFilter.
+    '''[DEPRECATED] Use `shader.Filter2D` instead.
+
+    Wrapper for KX_2DFilter.
 
     :param `program`: GLSL code as `str`.
     :param `idx`: Pass Index for this filter.
@@ -135,6 +137,13 @@ class ULFilter():
 
 
 class Filter2D(ULFilter):
+    '''Wrapper for KX_2DFilter.
+
+    :param `program`: GLSL code as `str`.
+    :param `idx`: Pass Index for this filter.
+    :param `uniforms`: A `dict` of [`str`: `dict`] binding dictionary values to
+    the filter in the form "key of dictionary".
+    '''
     _deprecated = False
 
 

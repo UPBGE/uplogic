@@ -1,6 +1,7 @@
 from .widget import Widget
 import gpu
 from bge import render
+from mathutils import Vector
 
 
 class Layout(Widget):
@@ -16,6 +17,48 @@ class Layout(Widget):
     :param `valign`: Vertical alignment of the widget, can be (`bottom`, `center`, `top`).
     :param `angle`: Rotation in degrees of this widget around the pivot defined by the alignment.
     '''
+
+    fragment_code = """
+    uniform vec4 color;
+    uniform vec4 border_color;
+    uniform vec2 size;
+    uniform vec2 pos;
+    uniform vec2 screen;
+    uniform int border_width;
+
+    // Pixel Position from 0-1 in x, y
+    in vec2 pxpos;
+
+    out vec4 fragColor;
+
+    void main()
+    {
+        vec2 screen_pos = pxpos * screen;
+
+        float x = screen_pos[0];
+        float y = screen_pos[1];
+
+        if (
+            pos[0] <= x &&
+            x <= pos[0] + size[0] &&
+            pos[1] <= y &&
+            y <= pos[1] + size[1]
+        ){
+            fragColor = color;  // Pixel inside widget
+        } else if (
+            pos[0] - border_width <= x &&
+            x <= pos[0] + size[0] + border_width &&
+            pos[1] - border_width <= y &&
+            y <= pos[1] + size[1] + border_width
+        ){
+            fragColor = border_color; // Pixel at widget border
+        } else {
+            fragColor = vec4(0, 0, 0, 0); //XXX: Use drawbuffer instead?
+        }
+
+        gl_FragDepth = 1.0;
+    }
+    """
 
     def __init__(
         self,
@@ -49,19 +92,23 @@ class Layout(Widget):
     def border_width(self, val):
         self._border_width = int(val)
 
-    def draw(self):
-        super()._setup_draw()
-        gpu.state.line_width_set(self.border_width)
-        gpu.state.point_size_set(self.border_width)
+    def set_uniforms(self):
         col = self.bg_color.copy()
         col[3] *= self.opacity
         bcol = self.border_color.copy()
         bcol[3] *= self.opacity
-        self._shader.uniform_float("color", col)
-        self._batch.draw(self._shader)
-        self._shader.uniform_float("color", bcol)
-        self._batch_line.draw(self._shader)
-        self._batch_points.draw(self._shader)
+        self.shader.uniform_float("color", col)
+        self.shader.uniform_float("border_color", bcol)
+        self.shader.uniform_float("pos", self._draw_pos)
+        self.shader.uniform_float("size", self._draw_size)
+        self.shader.uniform_int("border_width", self.border_width)
+        self.shader.uniform_float("screen", Vector((
+            render.getWindowWidth(), render.getWindowHeight()
+        )))
+
+    def draw(self):
+        super()._setup_draw()
+        self._batch.draw(self.shader)
         super().draw()
 
 
@@ -293,7 +340,7 @@ class GridLayout(BoxLayout):
                 idx += 1
                 if idx >= self.cols:
                     _offset_y = min(_widget_sizes)
-                    print(_widget_sizes)
+                    # print(_widget_sizes)
                     _widget_sizes = []
                     idx = 0
                     row += 1
