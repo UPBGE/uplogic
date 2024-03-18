@@ -2,6 +2,7 @@ import gpu
 from gpu_extras.batch import batch_for_shader
 from uplogic.utils.math import rotate2d
 from mathutils import Vector
+from bge import render
 
 
 class Widget():
@@ -19,6 +20,55 @@ class Widget():
     :param `valign`: Vertical alignment of the widget, can be (`bottom`, `center`, `top`).
     :param `angle`: Rotation in degrees of this widget around the pivot defined by the alignment.
     '''
+
+    vertex_code = """
+    uniform mat4 ModelViewProjectionMatrix;
+    in vec2 pos;
+    out vec2 pxpos;
+
+    void main()
+    {
+        vec4 vertex_pos = ModelViewProjectionMatrix * vec4(pos, 0.0, 1.0);
+
+        pxpos = (vec2(vertex_pos[0], vertex_pos[1]) + vec2(1, 1)) * .5;
+
+        gl_Position = vertex_pos;
+    }
+    """
+
+    fragment_code = """
+    uniform vec4 color;
+    uniform vec2 size;
+    uniform vec2 pos;
+    uniform vec2 screen;
+
+    // Pixel Position from 0-1 in x, y
+    in vec2 pxpos;
+
+    out vec4 fragColor;
+
+    void main()
+    {
+        vec2 screen_pos = pxpos * screen;
+
+        float x = screen_pos[0];
+        float y = screen_pos[1];
+
+        if (
+            pos[0] <= x &&
+            x <= pos[0] + size[0] &&
+            pos[1] <= y &&
+            y <= pos[1] + size[1]
+        ){
+            fragColor = color;  // Pixel inside widget
+        } else {
+            fragColor = vec4(0, 0, 0, 0); //XXX: Use drawbuffer instead?
+        }
+
+        gl_FragDepth = 1.0;
+    }
+    """
+
     def __init__(self, pos=(0, 0), size=(0, 0), bg_color=(0, 0, 0, 0), relative={}, halign='left', valign='bottom', angle=0):
         self.halign = halign
         self.valign = valign
@@ -31,7 +81,7 @@ class Widget():
         self.size = size
         self.pos = pos
         self.bg_color = bg_color
-        self._vertices = None # (Vector((0, 0)), Vector((0, 0)), Vector((0, 0)), Vector((0, 0)))
+        self._vertices = None
         self.angle = angle
         self._build_shader()
         self._clipped = [0, 0]
@@ -54,6 +104,8 @@ class Widget():
         self.show = False
 
     def make_floating(self, pos=True, size=True, halign='center', valign='center'):
+        """Quickly set attributes to make the widget floating freely within the parent widget.
+        Sets the alignment to centered and the `pos` and `size` attributes to relative."""
         self.relative['pos'] = pos
         self.relative['size'] = size
         self.halign = halign
@@ -321,7 +373,6 @@ class Widget():
     def _draw_pos(self):
         if self.parent is None:
             return [0, 0]
-        # inherit_pos = self.parent.pos_abs if self.parent else [0, 0]
         inherit_pos = self.parent._draw_pos if self.parent else [0, 0]
         pdsize = self.parent._draw_size
         pos = [
@@ -428,23 +479,47 @@ class Widget():
         indices = (
             (0, 1, 2), (2, 3, 0)
         )
-        self._shader = gpu.shader.from_builtin('UNIFORM_COLOR')
-        self._batch = batch_for_shader(self._shader, 'TRIS', {"pos": vertices}, indices=indices)
-        self._batch_line = batch_for_shader(self._shader, 'LINE_STRIP', {"pos": vertices})
-        self._batch_points = batch_for_shader(self._shader, 'POINTS', {"pos": vertices})
+        vertex_points = (
+            Vector((0, 0)),
+            Vector((render.getWindowWidth(), 0)),
+            Vector((render.getWindowWidth(), render.getWindowHeight())),
+            Vector((0, render.getWindowHeight())),
+            Vector((0, 0))
+        )
+        self.shader = gpu.types.GPUShader(self.vertex_code, self.fragment_code)
+        self._batch = batch_for_shader(self.shader, 'TRIS', {"pos": vertex_points}, indices=indices)
 
     def _setup_draw(self):
         if self._rebuild is True:
             self._build_shader()
             self._rebuild = False
+        self.set_uniforms()
 
     def _rebuild_tree(self):
         self._build_shader()
         for c in self.children:
             c._rebuild_tree()
 
+    def set_uniforms(self):
+        """Assign values for uniforms used by this widget's shader code.
+        
+        Default:
+        - `color`: widget color in RGBA (0-1)
+        - `pos`: widget position in pixels
+        - `size`: widget size in pixels
+        - `screen`: screen size in pixels
+        """
+        col = self.bg_color.copy()
+        col[3] *= self.opacity
+        self.shader.uniform_float("color", col)
+        self.shader.uniform_float("pos", self._draw_pos)
+        self.shader.uniform_float("size", self._draw_size)
+        self.shader.uniform_float("screen", Vector((
+            render.getWindowWidth(), render.getWindowHeight()
+        )))
+
     def draw(self):
-        """This is called each frame if the widget is part of a canvas. It can be called manually,
+        """This function is called each frame if the widget is part of a canvas. It can be called manually,
         but it will result in a higher logic load.
         """
         gpu.state.blend_set('ALPHA')
@@ -482,7 +557,7 @@ class Widget():
     def remove_widget(self, widget):
         '''Remove a `Widget` from this widget.
 
-        :param `widget`: `Widget` which to remove.
+        :param `widget`: `Widget` to remove.
         '''
         if widget in self.children:
             self.children.remove(widget)

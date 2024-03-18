@@ -461,6 +461,7 @@ class ULMouseLook():
                 game_object_y.localOrientation = objectRotation
                 offset.y = 0
 
+        print(offset)
         rot = [0, 0, 0]
         rot[1-self.front] = offset.y
         if not self.axis_lock[1]:

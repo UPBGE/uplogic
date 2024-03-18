@@ -75,16 +75,16 @@ class Path(Widget):
                 point = rotate2d(point, pos, self._draw_angle)
             points.append(point)
         vertices = self._vertices = points
-        self._shader = gpu.shader.from_builtin('UNIFORM_COLOR')
-        self._batch_line = batch_for_shader(self._shader, 'LINE_STRIP', {"pos": vertices})
+        self.shader = gpu.types.GPUShader(self.vertex_code, self.fragment_code)
+        self._batch_line = batch_for_shader(self.shader, 'LINE_STRIP', {"pos": vertices})
 
     def draw(self):
         super()._setup_draw()
         gpu.state.line_width_set(self.line_width)
         col = self.line_color.copy()
         col[3] *= self.opacity
-        self._shader.uniform_float("color", col)
-        self._batch_line.draw(self._shader)
+        self.shader.uniform_float("color", col)
+        self._batch_line.draw(self.shader)
         super().draw()
 
 
@@ -113,8 +113,8 @@ class WorldPath(Path):
             ))
             points.append(point)
         vertices = self._vertices = points
-        self._shader = gpu.shader.from_builtin('UNIFORM_COLOR')
-        self._batch_line = batch_for_shader(self._shader, 'LINE_STRIP', {"pos": vertices})
+        self.shader = gpu.types.GPUShader(self.vertex_code, self.fragment_code)
+        self._batch_line = batch_for_shader(self.shader, 'LINE_STRIP', {"pos": vertices})
 
 
 class ObjectPath(Path):
@@ -151,5 +151,5 @@ class ObjectPath(Path):
             points.append(v1)
             points.append(v2)
         vertices = self._vertices = points
-        self._shader = gpu.shader.from_builtin('UNIFORM_COLOR')
-        self._batch_line = batch_for_shader(self._shader, 'LINES', {"pos": vertices})
+        self.shader = gpu.types.GPUShader(self.vertex_code, self.fragment_code)
+        self._batch_line = batch_for_shader(self.shader, 'LINES', {"pos": vertices})

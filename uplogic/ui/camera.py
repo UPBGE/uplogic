@@ -1,10 +1,5 @@
 from bge.types import KX_Camera
-from gpu.types import GPUOffScreen
 from uplogic.ui.widget import Widget
-from gpu_extras.presets import draw_texture_2d
-import bge
-import bpy
-import gpu
 
 
 class Camera(Widget):

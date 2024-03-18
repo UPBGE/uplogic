@@ -64,6 +64,9 @@ class Canvas(Widget):
     def parent(self, val):
         self._parent = None
 
+    def set_uniforms(self):
+        pass
+
     def draw(self):
         width = bge.render.getWindowWidth()
         height = bge.render.getWindowHeight()

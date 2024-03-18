@@ -1,10 +1,7 @@
 from .widget import Widget
 import gpu
-import bge, bpy
 from gpu_extras.batch import batch_for_shader
-from gpu_extras.presets import draw_texture_2d
 from mathutils import Vector
-from bge import render
 from uplogic.shaders import Buffer
 
 
@@ -53,9 +50,9 @@ class RenderedTexture(Widget):
             fragColor = image;
         }
         """
-        self._shader = gpu.types.GPUShader(tex_vert_shader, tex_frag_shader)
+        self.shader = gpu.types.GPUShader(tex_vert_shader, tex_frag_shader)
         self._batch = batch_for_shader(
-            self._shader, 'TRI_STRIP',
+            self.shader, 'TRI_STRIP',
             {
                 "pos": vertices,
                 "texCoord": (
@@ -69,7 +66,7 @@ class RenderedTexture(Widget):
 
 
     def draw(self):
-        self._shader.uniform_sampler("renderedTexture", self.buffer.texture)
+        self.shader.uniform_sampler("renderedTexture", self.buffer.texture)
         super()._setup_draw()
-        self._batch.draw(self._shader)
+        self._batch.draw(self.shader)
         super().draw()
