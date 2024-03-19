@@ -4,7 +4,7 @@ import pickle
 import socket
 import threading
 from uplogic.utils.constants import DISCONNECT_MSG
-from uplogic.logging import error, success, debug
+from uplogic.console import error, success, debug
 import time
 
 

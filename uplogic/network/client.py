@@ -3,7 +3,7 @@ import pickle
 import threading
 import bge
 from uplogic.utils.constants import DISCONNECT_MSG
-from uplogic.logging import error, success
+from uplogic.console import error, success
 from uplogic.serialize import *
 
 class Client:

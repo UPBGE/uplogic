@@ -154,7 +154,7 @@ def key_pulse(key: str, time: float = .4) -> bool:
     `'BACKSPACE'`, `'COMMA'`, `'DEL'`, `'END'`, `'EQUAL'`, `'ESC'`, `'HOME'`, `'INSERT'`, `'LEFTBRACKET'`, `'RIGHTBRACKET'`,
     `'LINEFEED'`, `'MINUS'`, `'PAGEDOWN'`, `'PAGEUP'`, `'PAUSE'`, `'PERIOD'`, `'QUOTE'`, `'RET'`, `'ENTER'`, `'SEMICOLON'`,
     `'SLASH'`, `'SPACE'`, `'TAB'`]
-    :param time: timeout for key down
+    :param `time`: timeout for key down
 
     :returns: boolean
     '''

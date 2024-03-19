@@ -110,6 +110,10 @@ class TextInput(Label):
     def text(self, val):
         self._text = str(val)
 
+    def write(self, text):
+        self.text += text
+        self.index = len(self.text)
+
     @property
     def _current_char_pos(self):
         self.index = self.index
