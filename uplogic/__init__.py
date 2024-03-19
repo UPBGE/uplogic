@@ -63,12 +63,12 @@ from collections import deque
 from .utils import load_user_module
 from .utils import make_valid_name
 from .input import key_tap
-from .console import enable
+# from .console import enable
 from . import animation
 from . import audio
 from . import events
 from . import input
-from . import console
+# from . import console
 from . import network
 from . import physics
 from . import shaders
