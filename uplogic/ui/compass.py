@@ -166,7 +166,7 @@ class Compass(Widget):
         degrs = -round(degrees(angle_x))
         self.angle_x_label.text = f'{degrs if degrs >= 0 else 360 + degrs}°'
 
-        self.angle_x_label.pos = world_to_screen(cam.worldPosition + forward + Vector((0, 0, self.bar_height * .08)))
+        self.angle_x_label.pos = world_to_screen(cam.worldPosition + forward, inv_y=False) - Vector((0, .25))
 
         # self.shader.uniform_sampler('image', self.canvas.image.texture)
         self.shader.uniform_float('camera_x', angle_x)

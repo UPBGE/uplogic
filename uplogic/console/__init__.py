@@ -150,7 +150,6 @@ class ConsoleLayout(Canvas):
         amount = lheight / dim
         y = 40
         for i, child in enumerate(self.layout._children_reversed):
-            # sys.__stdout__.write(str(child.relative))
             child.pos[1] = y
             y+=15
             if child.pos[1] > lheight - dim:
