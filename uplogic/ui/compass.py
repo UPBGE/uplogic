@@ -159,6 +159,8 @@ class Compass(Widget):
         view_dir = cam.getAxisVect((0, 0, -1))
         forward = view_dir.copy()
         forward.z = 0
+        if not forward.xy.length > 0:
+            return
         angle_x = -Vector((0, 1)).angle_signed(forward.xy.normalized())
         angle_y = view_dir.angle(Vector((0, 0, -1)))
         degrs = -round(degrees(angle_x))
