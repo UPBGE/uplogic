@@ -69,8 +69,9 @@ class ULMouseLook(ULActionNode):
                     smoothing=self.get_input(self.smooth),
                     local=head is not obj,
                     center_mouse=self.center_mouse,
-                    front=self.get_input(self.axis)
+                    front=self.get_input(self.axis),
+                    active=False
                 )
-        if self.mouselook is not None:
-            self.mouselook.active = condition
+        if self.mouselook is not None and condition:
+            self.mouselook.update()
         self.done = True

@@ -19,6 +19,28 @@ class Widget():
     :param `valign`: Vertical alignment of the widget, can be (`bottom`, `center`, `top`).
     :param `angle`: Rotation in degrees of this widget around the pivot defined by the alignment.
     '''
+
+    vertex_shader = '''
+    uniform mat4 ModelViewProjectionMatrix;
+    in vec3 pos;
+
+    void main()
+    {
+        gl_Position = ModelViewProjectionMatrix * vec4(pos.xy, 0.0, 1.0f);
+    }
+    '''
+
+    fragment_shader = '''
+    uniform vec4 color;
+    out vec4 fragColor;
+    #define gl_FragColor fragColor
+
+    void main()
+    {
+        fragColor = color;
+    }
+    '''
+
     def __init__(self, pos=(0, 0), size=(0, 0), bg_color=(0, 0, 0, 0), relative={}, halign='left', valign='bottom', angle=0):
         self.halign = halign
         self.valign = valign
@@ -31,7 +53,7 @@ class Widget():
         self.size = size
         self.pos = pos
         self.bg_color = bg_color
-        self._vertices = None # (Vector((0, 0)), Vector((0, 0)), Vector((0, 0)), Vector((0, 0)))
+        self._vertices = None  # (Vector((0, 0)), Vector((0, 0)), Vector((0, 0)), Vector((0, 0)))
         self.angle = angle
         self._build_shader()
         self._clipped = [0, 0]
@@ -436,7 +458,8 @@ class Widget():
         indices = (
             (0, 1, 2), (2, 3, 0)
         )
-        self._shader = gpu.shader.from_builtin('UNIFORM_COLOR')
+        # self._shader = gpu.shader.from_builtin('UNIFORM_COLOR')
+        self._shader = gpu.types.GPUShader(self.vertex_shader, self.fragment_shader)
         self._batch = batch_for_shader(self._shader, 'TRIS', {"pos": vertices}, indices=indices)
         self._batch_line = batch_for_shader(self._shader, 'LINE_STRIP', {"pos": vertices})
         self._batch_points = batch_for_shader(self._shader, 'POINTS', {"pos": vertices})

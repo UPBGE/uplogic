@@ -103,5 +103,6 @@ from .getlogictreeproperty import ULGetLogicTreeProperty
 from .resizevector import ResizeVectorNode
 from .curveinterpolation import CurveInterpolationNode
 from .tweenvalue import TweenValueNode
+from .getcollisiongroup import GetCollisionGroupNode
 
 from .randomvalue import ULRandomValue

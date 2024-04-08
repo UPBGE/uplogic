@@ -41,7 +41,7 @@ setup(
         'uplogic.decorators',
         'uplogic.events',
         'uplogic.input',
-        'uplogic.logging',
+        'uplogic.console',
         'uplogic.network',
         'uplogic.nodes',
         'uplogic.nodes.actions',

@@ -9,6 +9,7 @@ from uplogic.shaders import ChromaticAberration
 from uplogic.shaders import Grayscale
 from uplogic.shaders import Levels
 from uplogic.shaders import Mist
+from uplogic.shaders import Blur
 
 
 class ULAddFilter(ULActionNode):
@@ -36,63 +37,69 @@ class ULAddFilter(ULActionNode):
         ftype = self.filter_type
         if not condition or self.filter:
             if self.filter:
-                if ftype == 'VIGNETTE':
+                if ftype in [3, 'VIGNETTE']:
                     self.filter.settings['power'] = self.get_input(self.power)
                     self.filter.settings['color'] = self.get_input(self.color)
-                elif ftype == 'BRIGHTNESS':
+                elif ftype in [4, 'BRIGHTNESS']:
                     self.filter.settings['brightness'] = self.get_input(self.brightness)
-                elif ftype == 'CHROMAB':
+                elif ftype in [5, 'CHROMAB']:
                     self.filter.settings['power'] = self.get_input(self.power)
-                elif ftype == 'GRAYSCALE':
+                elif ftype in [6, 'GRAYSCALE']:
                     self.filter.settings['power'] = self.get_input(self.power)
-                elif ftype == 'LEVELS':
+                elif ftype in [7, 'LEVELS']:
                     self.filter.settings['color'] = self.get_input(self.color)
-                elif ftype == 'MIST':
+                elif ftype in [8, 'MIST']:
                     self.filter.settings['power'] = self.get_input(self.power)
                     self.filter.settings['color'] = self.get_input(self.color)
                     self.filter.settings['start'] = self.get_input(self.start)
                     self.filter.settings['density'] = self.get_input(self.density)
-                elif ftype in ['HBAO', 'SSAO']:
+                elif ftype in [1, 2, 'HBAO', 'SSAO']:
                     self.filter.settings['power'] = self.get_input(self.power)
             return
 
-        if ftype == 'FXAA':
+        if ftype in [0, 'FXAA']:
             self.filter = FXAA(self.get_input(self.pass_idx))
-        elif ftype == 'HBAO':
+        elif ftype in [1, 'HBAO']:
             self.filter = HBAO(self.get_input(self.power), self.get_input(self.pass_idx))
-        elif ftype == 'SSAO':
+        elif ftype in [2, 'SSAO']:
             self.filter = SSAO(self.get_input(self.power), self.get_input(self.pass_idx))
-        elif ftype == 'VIGNETTE':
+        elif ftype in [3, 'VIGNETTE']:
             self.filter = Vignette(
                 self.get_input(self.power),
                 self.get_input(self.color),
                 self.get_input(self.pass_idx)
             )
-        elif ftype == 'BRIGHTNESS':
+        elif ftype in [4, 'BRIGHTNESS']:
             self.filter = Brightness(
                 self.get_input(self.brightness),
                 self.get_input(self.pass_idx)
             )
-        elif ftype == 'CHROMAB':
+        elif ftype in [5, 'CHROMAB']:
             self.filter = ChromaticAberration(
                 self.get_input(self.power),
                 self.get_input(self.pass_idx)
             )
-        elif ftype == 'GRAYSCALE':
+        elif ftype in [6, 'GRAYSCALE']:
             self.filter = Grayscale(
                 self.get_input(self.power),
                 self.get_input(self.pass_idx)
             )
-        elif ftype == 'LEVELS':
+        elif ftype in [7, 'LEVELS']:
             self.filter = Levels(
                 self.get_input(self.color),
                 self.get_input(self.pass_idx)
             )
-        elif ftype == 'MIST':
+        elif ftype in [8, 'MIST']:
             self.filter = Mist(
                 self.get_input(self.start),
                 self.get_input(self.density),
                 self.get_input(self.color),
+                self.get_input(self.power),
+                self.get_input(self.pass_idx)
+            )
+        elif ftype == 9:
+            self.filter = Blur(
+                16,
                 self.get_input(self.power),
                 self.get_input(self.pass_idx)
             )

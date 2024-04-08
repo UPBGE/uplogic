@@ -25,7 +25,7 @@ def set_depth(depth):
 def enable(toggle_key='BACKSLASH', visible=False):
     get_logger(True, toggle_key=toggle_key, visible=visible)
     sys.stdout = Logger()
-    log('On-Screen Logging active; Check System Console for Errors.')
+    log('On-Screen Console active; Check System Console for Errors.')
 
 
 def disable():

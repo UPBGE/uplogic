@@ -60,6 +60,7 @@ from .math import world_to_screen
 from .math import rotate2d
 from .math import rotate3d
 from .math import rotate_by_axis
+from .math import rotate_by_euler
 from .objects import xrot_to
 from .objects import yrot_to
 from .objects import zrot_to

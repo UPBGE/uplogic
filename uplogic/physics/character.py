@@ -2,7 +2,6 @@ from bge import logic
 from bge.constraints import getCharacter
 from bge.types import KX_GameObject as GameObject
 from uplogic.utils.constants import FRAMETIME_COMPARE
-# from uplogic.logging import warning
 from mathutils import Vector
 import bpy
 

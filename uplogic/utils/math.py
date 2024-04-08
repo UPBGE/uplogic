@@ -1,4 +1,6 @@
 from mathutils import Vector
+from mathutils import Euler
+from mathutils import Matrix
 from bge import logic
 from bge.types import KX_GameObject as GameObject
 import math
@@ -341,3 +343,13 @@ def rotate_by_axis(origin: Vector, pivot: Vector, angle: float, axis: Vector):
     ))
 
     return pivot + target_point
+
+
+def rotate_by_euler(origin: Vector, pivot: Vector, angles: Euler):
+
+    origin = origin.copy() - pivot
+    angles = Euler(angles)
+
+    transmat = angles.to_matrix()
+
+    return pivot + origin @ transmat

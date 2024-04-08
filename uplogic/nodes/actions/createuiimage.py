@@ -20,6 +20,7 @@ class ULCreateUIImage(ULActionNode):
         self.boxlayout_type = 'vertical'
         self.halign_type = 'left'
         self.valign_type = 'bottom'
+        self.aspect_ratio = True
         self._done = False
         self.OUT = self.add_output(self._get_done)
         self.WIDGET = self.add_output(self._get_widget)
@@ -50,6 +51,7 @@ class ULCreateUIImage(ULActionNode):
             relative={'pos': rel_pos, 'size': rel_size},
             halign=self.halign_type,
             valign=self.valign_type,
+            use_aspect_ratio=self.aspect_ratio,
             angle=angle
         )
         if parent:

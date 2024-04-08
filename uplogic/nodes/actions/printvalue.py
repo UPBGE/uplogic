@@ -1,6 +1,6 @@
 from uplogic.nodes import ULActionNode
 from uplogic.nodes import ULOutSocket
-from uplogic.logging import log
+from uplogic.console import log
 
 
 class ULPrintValue(ULActionNode):
