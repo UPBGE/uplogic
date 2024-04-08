@@ -1,6 +1,5 @@
 from mathutils import Vector
 from uplogic.nodes import ULActionNode
-from uplogic.nodes import ULOutSocket
 from uplogic.utils.objects import rotate_to
 from uplogic.utils.objects import move_to
 

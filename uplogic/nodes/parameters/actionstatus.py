@@ -1,6 +1,5 @@
 from uplogic.animation import ActionSystem
 from uplogic.data import GlobalDB
-from uplogic.nodes import ULOutSocket
 from uplogic.nodes import ULParameterNode
 
 

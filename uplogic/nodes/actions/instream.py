@@ -1,5 +1,4 @@
 from uplogic.nodes import ULActionNode
-from uplogic.nodes import ULOutSocket
 from bge import events
 from bge.logic import keyboard
 

@@ -1,5 +1,4 @@
 from uplogic.nodes import ULActionNode
-from uplogic.nodes import ULOutSocket
 from uplogic.utils.pooling import SpawnPool, Spawn, SimpleBullet, PhysicsBullet, SpawnedInstance
 from uplogic.events import send, receive
 from uplogic.utils import get_bitmask

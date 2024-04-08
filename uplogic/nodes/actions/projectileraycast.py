@@ -2,7 +2,6 @@ from bge import logic
 from bge import render
 from mathutils import Vector
 from uplogic.nodes import ULActionNode
-from uplogic.nodes import ULOutSocket
 from uplogic.utils import get_bitmask
 from uplogic.utils.raycasting import raycast_projectile, RayCastProjectileData
 

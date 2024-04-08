@@ -2,7 +2,6 @@ from bge import render
 from bge import logic
 from mathutils import Vector
 from uplogic.nodes import ULActionNode
-from uplogic.nodes import ULOutSocket
 from uplogic.input import MouseLook
 from math import degrees
 

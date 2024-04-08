@@ -1,6 +1,5 @@
 from uplogic.animation.sequence import Sequence
 from uplogic.nodes import ULActionNode
-from uplogic.nodes import ULOutSocket
 from bpy.types import Material
 
 

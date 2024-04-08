@@ -1,7 +1,6 @@
 from bge import logic
 from uplogic.audio import Sound3D
 from uplogic.nodes import ULActionNode
-from uplogic.nodes import ULOutSocket
 
 
 class ULStartSpeaker(ULActionNode):

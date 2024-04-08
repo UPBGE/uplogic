@@ -1,5 +1,4 @@
 from uplogic.nodes import ULActionNode
-from uplogic.nodes import ULOutSocket
 from uplogic.utils.constants import VEHICLE
 from uplogic.physics import FWD
 from uplogic.physics import RWD

@@ -1,4 +1,3 @@
-from uplogic.nodes import ULOutSocket
 from uplogic.nodes import ULActionNode
 from bge import logic
 from bpy.types import Scene

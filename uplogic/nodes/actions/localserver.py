@@ -1,5 +1,4 @@
 from uplogic.nodes import ULActionNode
-from uplogic.nodes import ULOutSocket
 from uplogic.network import Server
 from uplogic.events import send, receive
 

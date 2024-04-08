@@ -3,7 +3,6 @@ from mathutils import Euler
 from mathutils import Vector
 from mathutils import Quaternion
 from uplogic.nodes import ULActionNode
-from uplogic.nodes import ULOutSocket
 
 
 class ULEditBone(ULActionNode):

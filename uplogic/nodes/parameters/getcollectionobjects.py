@@ -1,4 +1,3 @@
-from uplogic.nodes import ULOutSocket
 from uplogic.nodes import ULParameterNode
 from bpy.types import Collection
 from bge.logic import getCurrentScene

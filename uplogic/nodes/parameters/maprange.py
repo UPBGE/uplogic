@@ -1,5 +1,4 @@
 from uplogic.nodes import ULParameterNode
-from uplogic.nodes import ULOutSocket
 from uplogic.utils.math import map_range, map_range_vector
 
 

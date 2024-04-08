@@ -1,7 +1,6 @@
 from mathutils import Vector
 from uplogic.nodes import ULActionNode
 from uplogic.utils.visualize import draw_cube
-from uplogic.nodes import ULOutSocket
 
 
 class ULDrawCube(ULActionNode):

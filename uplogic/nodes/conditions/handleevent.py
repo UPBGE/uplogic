@@ -1,7 +1,6 @@
 from uplogic.events import receive
 from uplogic.events import ULEvent
 from uplogic.nodes import ULConditionNode
-from uplogic.nodes import ULOutSocket
 
 
 class ULHandleEvent(ULConditionNode):

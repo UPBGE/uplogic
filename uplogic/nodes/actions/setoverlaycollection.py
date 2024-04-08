@@ -1,6 +1,5 @@
 from bge import logic
 from uplogic.nodes import ULActionNode
-from uplogic.nodes import ULOutSocket
 from bpy.types import Collection
 from bge.types import KX_Camera
 

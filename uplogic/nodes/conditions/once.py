@@ -1,4 +1,4 @@
-from uplogic.nodes import ULConditionNode, ULOutSocket
+from uplogic.nodes import ULConditionNode
 
 
 class ULOnce(ULConditionNode):

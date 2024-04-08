@@ -1,6 +1,5 @@
 from uplogic.audio import Sound2D
 from uplogic.nodes import ULActionNode
-from uplogic.nodes import ULOutSocket
 from bpy.types import Sound
 
 

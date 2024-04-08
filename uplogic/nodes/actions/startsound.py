@@ -1,6 +1,5 @@
 from uplogic.audio import Sound3D, Sound2D, Sample3D, Sample2D
 from uplogic.nodes import ULActionNode
-from uplogic.nodes import ULOutSocket
 from mathutils import Vector
 
 

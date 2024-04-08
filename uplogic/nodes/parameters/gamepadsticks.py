@@ -1,6 +1,5 @@
 from bge import logic, types
 from uplogic.nodes import ULParameterNode
-from uplogic.nodes import ULOutSocket
 from mathutils import Vector
 
 

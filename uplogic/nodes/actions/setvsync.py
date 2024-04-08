@@ -1,6 +1,5 @@
 from bge import render
 from uplogic.nodes import ULActionNode
-from uplogic.nodes import ULOutSocket
 
 
 class ULSetVSync(ULActionNode):

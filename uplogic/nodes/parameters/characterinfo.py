@@ -1,6 +1,5 @@
 from bge import constraints
 from bge import logic
-from uplogic.nodes import ULOutSocket
 from uplogic.nodes import ULParameterNode
 import bpy
 

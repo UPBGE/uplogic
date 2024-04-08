@@ -1,4 +1,3 @@
-from uplogic.nodes import ULOutSocket
 from uplogic.nodes import ULConditionNode
 from uplogic.utils.constants import LOGIC_OPERATORS
 from mathutils import Vector

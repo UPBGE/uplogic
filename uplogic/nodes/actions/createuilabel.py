@@ -1,5 +1,4 @@
 from uplogic.nodes import ULActionNode
-from uplogic.nodes import ULOutSocket
 from uplogic.ui import Label
 from math import degrees
 

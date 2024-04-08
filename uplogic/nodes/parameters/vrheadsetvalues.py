@@ -1,4 +1,3 @@
-from uplogic.nodes import ULOutSocket
 from uplogic.nodes import ULParameterNode
 from uplogic.input import VRHeadset
 

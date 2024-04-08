@@ -1,6 +1,6 @@
 from bge import render
 from bge.types import KX_GameObject as GameObject
-from uplogic.nodes import ULActionNode, ULOutSocket
+from uplogic.nodes import ULActionNode
 from uplogic.utils.objects import rotate_to
 from uplogic.utils.objects import move_to
 

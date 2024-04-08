@@ -1,5 +1,4 @@
 from mathutils import Vector
-from uplogic.nodes import ULOutSocket
 from uplogic.nodes import ULConditionNode
 from uplogic.utils.constants import LOGIC_OPERATORS
 import math

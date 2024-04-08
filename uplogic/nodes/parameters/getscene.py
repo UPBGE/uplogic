@@ -1,6 +1,5 @@
 from bge import logic
 from uplogic.nodes import ULParameterNode
-from uplogic.nodes import ULOutSocket
 
 
 class ULGetScene(ULParameterNode):

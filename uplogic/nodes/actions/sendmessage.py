@@ -1,7 +1,6 @@
 from uplogic.nodes import ULActionNode
 from bge.types import KX_GameObject
 from bge.logic import sendMessage
-from uplogic.nodes import ULOutSocket
 
 
 class ULSendMessage(ULActionNode):

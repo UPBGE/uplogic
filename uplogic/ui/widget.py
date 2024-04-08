@@ -33,7 +33,6 @@ class Widget():
     fragment_shader = '''
     uniform vec4 color;
     out vec4 fragColor;
-    #define gl_FragColor fragColor
 
     void main()
     {

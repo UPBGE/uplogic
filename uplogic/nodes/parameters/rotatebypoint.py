@@ -1,5 +1,4 @@
 from uplogic.nodes import ULParameterNode
-from uplogic.nodes import ULOutSocket
 from uplogic.utils.math import rotate2d
 from uplogic.utils.math import rotate3d
 from uplogic.utils.math import rotate_by_axis

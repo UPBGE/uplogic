@@ -1,6 +1,5 @@
 from mathutils import Vector
 from uplogic.nodes import ULActionNode
-from uplogic.nodes import ULOutSocket
 import random
 
 

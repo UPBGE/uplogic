@@ -1,7 +1,6 @@
 from bge.types import KX_GameObject
 from uplogic.nodes import ULConditionNode
 from uplogic.nodes import ULLogicContainer
-from uplogic.nodes import ULOutSocket
 from bpy.types import Material
 from mathutils import Vector
 

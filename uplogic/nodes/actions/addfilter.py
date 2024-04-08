@@ -1,5 +1,4 @@
 from uplogic.nodes import ULActionNode
-from uplogic.nodes import ULOutSocket
 from uplogic.shaders import FXAA
 from uplogic.shaders import HBAO
 from uplogic.shaders import SSAO

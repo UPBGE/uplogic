@@ -2,7 +2,6 @@ from uplogic.animation import ActionSystem
 from uplogic.animation.action import Action
 from uplogic.data import GlobalDB
 from uplogic.nodes import ULActionNode
-from uplogic.nodes import ULOutSocket
 from bpy.types import Action as BPYAction
 from bge.types import KX_GameObject
 

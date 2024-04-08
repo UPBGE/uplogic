@@ -1,4 +1,4 @@
-from uplogic.nodes import ULActionNode, ULOutSocket
+from uplogic.nodes import ULActionNode
 
 
 class ULResumeSound(ULActionNode):

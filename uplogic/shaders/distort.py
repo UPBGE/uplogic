@@ -12,7 +12,6 @@ in vec4 bgl_TexCoord;
 vec4 glTexCoord[4] = vec4[](bgl_TexCoord,bgl_TexCoord,bgl_TexCoord,bgl_TexCoord);
 
 out vec4 fragColor;
-#define gl_FragColor fragColor
 
 
 uniform sampler2D bgl_RenderedTexture;
@@ -105,7 +104,7 @@ vec2 coordRot(in vec2 tc, in float angle)
 
 void main(void)
 {
-    vec4 original = gl_FragColor = texture(bgl_RenderedTexture, texcoord);
+    vec4 original = texture(bgl_RenderedTexture, texcoord);
     float grainsize = 100.0;
     //texture edge bleed removal
     float fade = 12;
@@ -161,7 +160,7 @@ void main(void)
     wavecolor.g = texture(bgl_RenderedTexture, wavecoordG).g;
     wavecolor.b = texture(bgl_RenderedTexture, wavecoordB).b;
 
-    gl_FragColor = mix(original, vec4(wavecolor, 1.0), power);
+    fragColor = mix(original, vec4(wavecolor, 1.0), power);
     
 }"""
 

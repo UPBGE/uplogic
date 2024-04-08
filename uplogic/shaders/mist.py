@@ -8,7 +8,6 @@ in vec4 bgl_TexCoord;
 #define gl_TexCoord glTexCoord
 vec4 glTexCoord[4] = vec4[](bgl_TexCoord,bgl_TexCoord,bgl_TexCoord,bgl_TexCoord);
 out vec4 fragColor;
-#define gl_FragColor fragColor
 
 uniform sampler2D bgl_RenderedTexture;
 uniform sampler2D bgl_DepthTexture;
@@ -72,7 +71,7 @@ void main(void)
 
     vec4 dif = texture(bgl_RenderedTexture, texcoord);
 
-    gl_FragColor = mix(dif, mix(dif, mist, clamp(factor, 0.0, 1.0)), power);
+    fragColor = mix(dif, mix(dif, mist, clamp(factor, 0.0, 1.0)), power);
 
 }
 """

@@ -1,5 +1,4 @@
 from uplogic.nodes import ULConditionNode
-from uplogic.nodes import ULOutSocket
 
 
 class ULNot(ULConditionNode):

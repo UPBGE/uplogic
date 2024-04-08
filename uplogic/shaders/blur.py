@@ -46,7 +46,7 @@ void main()
 
 class Blur(Filter2D):
 
-    def __init__(self, samples=16, power=1.0, idx: int = None) -> None:
+    def __init__(self, power=1.0, samples=16, idx: int = None) -> None:
        self.settings = {'samples': float(samples), 'power': float(power)}
        super().__init__(glsl, idx, {'samples': self.settings, 'power': self.settings})
 

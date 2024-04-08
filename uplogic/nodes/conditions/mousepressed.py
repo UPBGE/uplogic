@@ -1,5 +1,4 @@
 from uplogic.nodes import ULConditionNode
-from uplogic.nodes import ULOutSocket
 from uplogic.input import mouse_tap
 from uplogic.input import mouse_down
 from uplogic.input import mouse_up

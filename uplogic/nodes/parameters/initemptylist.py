@@ -1,6 +1,5 @@
 
 
-from uplogic.nodes import ULOutSocket
 from uplogic.nodes import ULParameterNode
 
 

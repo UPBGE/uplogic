@@ -1,4 +1,4 @@
-from uplogic.nodes import ULActionNode, ULOutSocket
+from uplogic.nodes import ULActionNode
 from uplogic.utils.objects import move_to
 
 

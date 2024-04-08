@@ -1,5 +1,4 @@
 from uplogic.nodes import ULActionNode
-from uplogic.nodes import ULOutSocket
 from uplogic.ui import Slider, FrameSlider, ProgressSlider
 from mathutils import Vector
 from math import degrees

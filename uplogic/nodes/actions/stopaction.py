@@ -1,7 +1,6 @@
 from uplogic.animation import ActionSystem
 from uplogic.data import GlobalDB
 from uplogic.nodes import ULActionNode
-from uplogic.nodes import ULOutSocket
 
 
 class ULStopAction(ULActionNode):

@@ -1,4 +1,3 @@
-from uplogic.nodes import ULOutSocket
 from uplogic.nodes import ULParameterNode
 from uplogic.utils import FPS_FACTOR
 from bge import logic

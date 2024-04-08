@@ -34,7 +34,7 @@ class Label(Widget):
         font_size=12,
         line_height=1.5,
         shadow=False,
-        shadow_offset=[2, -2],
+        shadow_offset=[1, -1],
         shadow_color=[0, 0, 0, .6],
         halign='left',
         valign='bottom',

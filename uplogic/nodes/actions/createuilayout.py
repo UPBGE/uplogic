@@ -1,5 +1,4 @@
 from uplogic.nodes import ULActionNode
-from uplogic.nodes import ULOutSocket
 from uplogic.ui import RelativeLayout, FloatLayout, BoxLayout
 from math import degrees
 

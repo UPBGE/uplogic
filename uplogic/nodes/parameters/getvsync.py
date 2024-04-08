@@ -1,5 +1,4 @@
 from bge import render
-from uplogic.nodes import ULOutSocket
 from uplogic.nodes import ULParameterNode
 
 

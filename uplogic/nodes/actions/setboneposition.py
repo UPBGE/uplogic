@@ -1,7 +1,6 @@
 from mathutils import Euler
 from mathutils import Vector
 from uplogic.nodes import ULActionNode
-from uplogic.nodes import ULOutSocket
 from uplogic.utils import debug
 
 

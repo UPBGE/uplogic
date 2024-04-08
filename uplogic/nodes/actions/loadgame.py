@@ -1,7 +1,6 @@
 from bge import logic, constraints
 from mathutils import Euler
 from uplogic.nodes import ULActionNode
-from uplogic.nodes import ULOutSocket
 import bpy
 import json
 

@@ -1,5 +1,4 @@
 from uplogic.nodes import ULParameterNode
-from uplogic.nodes import ULOutSocket
 import sys
 import random
 

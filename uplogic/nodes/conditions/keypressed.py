@@ -1,5 +1,4 @@
 from uplogic.nodes import ULConditionNode
-from uplogic.nodes import ULOutSocket
 from uplogic.input import key_tap
 from uplogic.input import key_down
 from uplogic.input import key_up

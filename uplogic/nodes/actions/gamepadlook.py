@@ -2,7 +2,6 @@ from bge import logic
 from bge.types import KX_GameObject as GameObject
 from mathutils import Vector
 from uplogic.nodes import ULActionNode
-from uplogic.nodes import ULOutSocket
 from uplogic.input.gamepad import GamepadLook
 from math import degrees
 

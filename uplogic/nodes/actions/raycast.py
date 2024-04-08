@@ -1,5 +1,4 @@
 from uplogic.nodes import ULActionNode
-from uplogic.nodes import ULOutSocket
 from uplogic.utils.raycasting import raycast, RayCastData
 from uplogic.utils.math import get_bitmask
 from bge.logic import getCurrentScene

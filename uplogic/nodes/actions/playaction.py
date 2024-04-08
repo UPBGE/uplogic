@@ -3,7 +3,6 @@ from uplogic.data import GlobalDB
 from uplogic.animation import Action
 from uplogic.events import receive
 from uplogic.nodes import ULActionNode
-from uplogic.nodes import ULOutSocket
 from uplogic.utils.math import clamp
 from bpy.types import Action as BPYAction
 

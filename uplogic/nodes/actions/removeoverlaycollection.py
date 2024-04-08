@@ -1,5 +1,5 @@
 from bge import logic
-from uplogic.nodes import ULActionNode, ULOutSocket
+from uplogic.nodes import ULActionNode
 
 
 class ULRemoveOverlayCollection(ULActionNode):

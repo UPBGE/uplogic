@@ -1,7 +1,6 @@
 from mathutils import Vector
 from uplogic.nodes import ULActionNode
 from uplogic.utils.visualize import draw_box
-from uplogic.nodes import ULOutSocket
 
 
 class ULDrawBox(ULActionNode):

@@ -1,6 +1,5 @@
 from bge import logic
 from uplogic.nodes import ULConditionNode
-from uplogic.nodes import ULOutSocket
 from uplogic.utils.raycasting import raycast_mouse
 
 

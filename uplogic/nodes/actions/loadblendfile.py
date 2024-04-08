@@ -1,6 +1,5 @@
 from bge import logic
 from uplogic.nodes import ULActionNode
-from uplogic.nodes import ULOutSocket
 
 
 class ULLoadBlendFile(ULActionNode):

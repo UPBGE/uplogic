@@ -1,6 +1,5 @@
 from bge import constraints
 from uplogic.nodes import ULActionNode
-from uplogic.nodes import ULOutSocket
 
 
 class ULCharacterJump(ULActionNode):

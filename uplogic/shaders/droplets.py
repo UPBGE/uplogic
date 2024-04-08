@@ -13,7 +13,6 @@ in vec4 bgl_TexCoord;
 vec4 glTexCoord[4] = vec4[](bgl_TexCoord,bgl_TexCoord,bgl_TexCoord,bgl_TexCoord);
 
 out vec4 fragColor;
-#define gl_FragColor fragColor
 
 uniform sampler2D bgl_RenderedTexture;
 uniform float bgl_RenderedTextureWidth;
@@ -128,7 +127,7 @@ vec2 coordRot(in vec2 tc, in float angle)
 void main(void)
 {
     if (time > 10){
-        gl_FragColor = texture(bgl_RenderedTexture, texcoord);
+        fragColor = texture(bgl_RenderedTexture, texcoord);
         return;
     }
     float grainsize = 100.0;
@@ -197,7 +196,7 @@ void main(void)
     }
     
     vec3 final = mix(frag, dropletcolor, clamp(dropletmask+mask,0.0,1.0)*dropfade);
-    gl_FragColor = vec4(final,1.0);
+    fragColor = vec4(final,1.0);
 }"""
 
 

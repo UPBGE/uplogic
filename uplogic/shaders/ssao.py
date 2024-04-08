@@ -55,6 +55,8 @@ float mistend = 100.0; //mist end
 bool onlyAO = false; //use only ambient occlusion pass?
 float lumInfluence = 0.7; //how much luminance affects occlusion
 
+out vec4 fragColor;
+
 //--------------------------------------------------------
 
 vec2 rand(vec2 coord) //generating noise/pattern texture for dithering
@@ -176,7 +178,7 @@ void main(void)
 	}
 	
 	
-	gl_FragColor = mix(vec4(color, 1.0), vec4(final, 1.0), power);
+	fragColor = mix(vec4(color, 1.0), vec4(final, 1.0), power);
 	
 }
 """

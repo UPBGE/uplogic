@@ -12,6 +12,7 @@ from uplogic.input import key_down, mouse_down, key_pulse, mouse_wheel
 import bpy
 import sys
 from datetime import datetime
+from mathutils import Vector
 
 
 def set_depth(depth):
@@ -112,7 +113,7 @@ class ConsoleLayout(Canvas):
         ray = raycast_mouse()
         mdown = mouse_down()
         if ray.obj:
-            self.nameplate.pos = world_to_screen(ray.point)
+            self.nameplate.pos = world_to_screen(ray.point) + Vector((0, .01))
             self.nameplate.text = ray.obj.blenderObject.name
             if mdown and not self._mouse_down:
                 self.input.write(self.nameplate.text)
@@ -375,3 +376,7 @@ Commands.add_command('quit', QuitCommand)
 Commands.add_command('restart', RestartCommand)
 Commands.add_command('print', PrintCommand)
 Commands.add_command('pause', PauseCommand)
+
+
+def add_command(name, command):
+    Commands.add_command(name, command)

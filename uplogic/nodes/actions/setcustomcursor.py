@@ -1,6 +1,5 @@
 from bge import render
 from uplogic.nodes import ULActionNode
-from uplogic.nodes import ULOutSocket
 from uplogic.ui import Cursor, remove_custom_cursor
 from bpy.types import Image
 

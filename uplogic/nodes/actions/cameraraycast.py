@@ -1,6 +1,5 @@
 from mathutils import Vector
 from uplogic.nodes import ULActionNode
-from uplogic.nodes import ULOutSocket
 from uplogic.utils.raycasting import raycast_camera, RayCastCameraData
 from uplogic.utils import get_bitmask
 

@@ -2,7 +2,6 @@ from bge import logic
 from mathutils import Euler
 from mathutils import Quaternion
 from mathutils import Vector
-from uplogic.nodes import ULOutSocket
 from uplogic.nodes import ULParameterNode
 
 

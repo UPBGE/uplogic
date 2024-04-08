@@ -1,5 +1,4 @@
 from uplogic.nodes import ULActionNode
-from uplogic.nodes import ULOutSocket
 from uplogic.utils import debug
 from bpy.types import Material
 from bge.types import KX_GameObject

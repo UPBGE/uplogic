@@ -1,6 +1,7 @@
 from .shader import Filter2D
 import bpy, bge
 from mathutils import Vector
+from ..console import error
 
 
 glsl = """
@@ -45,9 +46,12 @@ void main()
 
 class Texture(Filter2D):
 
-    def __init__(self, texture: bpy.types.Image = None, opacity: int = 1.0, pos=Vector((0, 0)), size=Vector((1, 1)), idx: int = None) -> None:
+    def __init__(self, texture: bpy.types.Image = None, opacity: float = 1.0, pos=Vector((0, 0)), size=Vector((1, 1)), idx: int = None) -> None:
+        if not isinstance(texture, bpy.types.Image):
+            error("'Texture': first argument requires an object of type 'bpy.types.Image'!")
+            return
         texture.gl_load()
-        self.settings = {'tex': texture, 'opacity': opacity, 'pos': pos, 'size': size}
+        self.settings = {'tex': texture, 'opacity': float(opacity), 'pos': Vector(pos), 'size': Vector(size)}
         super().__init__(glsl, idx, {'tex': self.settings, 'opacity': self.settings, 'pos': self.settings, 'size': self.settings})
 
     @property
