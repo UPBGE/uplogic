@@ -91,7 +91,7 @@ float height = bgl_RenderedTextureHeight; //texture height
 in vec4 bgl_TexCoord;
 vec2 texcoord = bgl_TexCoord.xy;
 
-out vec4 fragColor
+out vec4 fragColor;
 
 vec2 texel = vec2(1.0/width,1.0/height);
 
@@ -196,7 +196,7 @@ float bdepth(vec2 coords) //blurring depth
 
 	for( int i=0; i<9; i++ )
 	{
-		float tmp = texture2D(bgl_DepthTexture, coords + offset[i]).r;
+		float tmp = texture(bgl_DepthTexture, coords + offset[i]).r;
 		d += tmp * kernel[i];
 	}
 
@@ -208,9 +208,9 @@ vec3 color(vec2 coords,float blur) //processing the sample
 {
 	vec3 col = vec3(0.0);
 
-	col.r = texture2D(bgl_RenderedTexture,coords + vec2(0.0,1.0)*texel*fringe*blur).r;
-	col.g = texture2D(bgl_RenderedTexture,coords + vec2(-0.866,-0.5)*texel*fringe*blur).g;
-	col.b = texture2D(bgl_RenderedTexture,coords + vec2(0.866,-0.5)*texel*fringe*blur).b;
+	col.r = texture(bgl_RenderedTexture,coords + vec2(0.0,1.0)*texel*fringe*blur).r;
+	col.g = texture(bgl_RenderedTexture,coords + vec2(-0.866,-0.5)*texel*fringe*blur).g;
+	col.b = texture(bgl_RenderedTexture,coords + vec2(0.866,-0.5)*texel*fringe*blur).b;
 
 	vec3 lumcoeff = vec3(0.299,0.587,0.114);
 	float lum = dot(col.rgb, lumcoeff);
@@ -234,7 +234,7 @@ vec2 rand(in vec2 coord) //generating noise/pattern texture for dithering
 void main() 
 {
 
-	float depth = texture2D(bgl_DepthTexture, texcoord).x;
+	float depth = texture(bgl_DepthTexture, texcoord).x;
 	float blur = 0.0;
 
 	if (depthblur)
@@ -246,7 +246,7 @@ void main()
 
 	if (autofocus)
 	{
-		float fDepth = texture2D(bgl_DepthTexture, focus).x;
+		float fDepth = texture(bgl_DepthTexture, focus).x;
 		blur = clamp((abs(depth - fDepth)/fstop)*100.0,-power,power);
 	}
 
@@ -255,7 +255,7 @@ void main()
 	float w = (1.0/width)*blur+noise.x;
 	float h = (1.0/height)*blur+noise.y;
 
-	vec3 col = texture2D(bgl_RenderedTexture, texcoord).rgb;
+	vec3 col = texture(bgl_RenderedTexture, texcoord).rgb;
 	float s = 1.0;
 
 	int ringsamples;

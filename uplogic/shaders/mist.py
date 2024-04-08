@@ -34,7 +34,7 @@ float linearize(float depth)
 
 void main(void)
 {    
-    float depth = linearize(texture2D(bgl_DepthTexture,texcoord.xy).x);
+    float depth = linearize(texture(bgl_DepthTexture,texcoord.xy).x);
 
     if (depth > zfar){
     //Clip the mist to allow for skyboxes

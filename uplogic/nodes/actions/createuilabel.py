@@ -60,8 +60,6 @@ class ULCreateUILabel(ULActionNode):
         
         font = font.filepath.replace('\\', '/') if font else 0
 
-        print(rel_pos)
-
         self._widget = Label(
             pos=pos,
             relative={'pos': rel_pos},

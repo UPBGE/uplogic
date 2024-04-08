@@ -6,6 +6,8 @@ in vec4 bgl_TexCoord;
 
 uniform float power;
 
+out vec4 fragColor;
+
 void main()
 {
    vec2 texcoord = bgl_TexCoord.xy;
@@ -16,7 +18,7 @@ void main()
    sum.g = vec3(texture(bgl_RenderedTexture, (texcoord -vec2(0.5,0.5)) * distance[1] + vec2(0.5,0.5))).g;
    sum.b = vec3(texture(bgl_RenderedTexture, (texcoord -vec2(0.5,0.5)) * distance[2] + vec2(0.5,0.5))).b;
 
-   gl_FragColor = vec4(sum, 1.0);
+   fragColor = vec4(sum, 1.0);
 }
 """
 

@@ -3,6 +3,7 @@ from mathutils import Vector, Matrix
 from uplogic.utils.errors import PassIndexOccupiedError
 from uplogic.utils import debug
 from pathlib import Path
+import bpy, bge
 
 
 def load_glsl(filepath: str):
@@ -132,6 +133,8 @@ class ULFilter():
                         [value[3][0], value[2][1], value[3][2], value[3][3]]
                     ),
                 )
+        elif cls is bpy.types.Image:
+            self._filter.setTexture(0, value.bindcode, name)
 
 
 class Filter2D(ULFilter):

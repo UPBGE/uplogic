@@ -72,7 +72,7 @@ vec2 rand(vec2 coord) //generating noise/pattern texture for dithering
 
 float doMist()
 {
-	float zdepth = texture2D(bgl_DepthTexture,texCoord.xy).x;
+	float zdepth = texture(bgl_DepthTexture,texCoord.xy).x;
 	float depth = -zfar * znear / (zdepth * (zfar - znear) - zfar);
 	return clamp((depth-miststart)/mistend,0.0,1.0);
 }
@@ -81,7 +81,7 @@ float readDepth(in vec2 coord)
 {
 	coord.x = clamp(coord.x,0.001,0.999);
     coord.y = clamp(coord.y,0.001,0.999);
-	return (2.0 * znear) / (zfar + znear - texture2D(bgl_DepthTexture, coord ).x * (zfar-znear));
+	return (2.0 * znear) / (zfar + znear - texture(bgl_DepthTexture, coord ).x * (zfar-znear));
 }
 
 float compareDepths(in float depth1, in float depth2,inout int far)

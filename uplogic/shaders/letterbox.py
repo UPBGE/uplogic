@@ -12,17 +12,14 @@ out vec4 fragColor;
 
 void main()
 {
-    float pow = clamp(1.0 - power, 0.0, 1.0);
+    float pow = clamp(power, 0.0, 1.0);
 	vec4 px =  texture(bgl_RenderedTexture, bgl_TexCoord.xy);
-    if (bgl_TexCoord.y > 1.0-factor || bgl_TexCoord.y < factor){
-        fragColor = vec4(0.0, 0.0, 0.0, 1.0);
-        return;
-    }
-	fragColor = vec4(
-        px.r,
-        px.g,
-        px.b,
-        1.0
+    bool cutoff = (bgl_TexCoord.y > 1.0-factor || bgl_TexCoord.y < factor);
+
+    fragColor = mix(
+        px,
+        vec4(0.0, 0.0, 0.0, 1.0),
+        (cutoff ? 1.0 : 0.0) * pow
     );
 }
 """

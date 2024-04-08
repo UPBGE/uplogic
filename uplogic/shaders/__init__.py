@@ -14,6 +14,8 @@ from .distort import Distort
 from .droplets import Droplets
 from .blur import Blur
 from .dof import DoF
+from .lens import Lens
+from .texture import Texture
 from .chromaticaberration import ChromaticAberration
 from .sharpen import Sharpen
 from .shader import load_glsl
