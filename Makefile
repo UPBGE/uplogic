@@ -137,7 +137,7 @@ PACKAGES_ALLOW_PRERELEASES?=false
 # The command which gets executed. Defaults to the location the
 # :ref:`run-tests` template gets rendered to if configured.
 # Default: .mxmake/files/run-tests.sh
-TEST_COMMAND?= ./tests/bin/test
+TEST_COMMAND?= ./utils/run tests
 
 # Additional Python requirements for running tests to be
 # installed (via pip).
@@ -155,7 +155,7 @@ TEST_DEPENDENCY_TARGETS?=
 # Default: .mxmake/files/run-coverage.sh
 COVERAGE_COMMAND?=\
 	COVERAGE_PROCESS_START=setup.cfg \
-	./tests/bin/test coverage && \
+	./utils/run tests && \
 	coverage report && \
 	coverage html
 

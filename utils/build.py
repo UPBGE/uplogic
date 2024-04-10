@@ -27,7 +27,7 @@ def new_folder(path):
 
 # Remove old build files
 try:
-    os.remove(bpy.path.abspath('//test'))
+    os.remove(bpy.path.abspath('//run'))
 except Exception:
     pass
 try:
@@ -41,7 +41,7 @@ except Exception:
 
 
 path = bpy.path.abspath('//')
-OUTPUT_PATH = bpy.path.abspath('//test')
+OUTPUT_PATH = bpy.path.abspath('//run')
 
 def CopyPythonLibs(dst, overwrite_lib, report=print):
     import platform
