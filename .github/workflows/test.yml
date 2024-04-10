@@ -12,6 +12,11 @@ jobs:
     - name: Install system dependencies
       run: sudo apt-get install -y pulseaudio libegl1
 
+    - name: Setup dummy display
+      run: |
+        export DISPLAY=:99
+        sudo Xvfb -ac :99 -screen 0 1920x1080x24 > /dev/null 2>&1 &
+
     - name: Install Project
       run: make install
 
