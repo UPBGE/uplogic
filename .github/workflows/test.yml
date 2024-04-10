@@ -10,7 +10,7 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Install system dependencies
-      run: apt install pulseaudio
+      run: sudo apt install pulseaudio
 
     - name: Install Project
       run: make install
