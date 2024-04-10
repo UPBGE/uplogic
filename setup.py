@@ -62,6 +62,6 @@ setup(
     install_requires=['setuptools'],
     extras_require=dict(
         test=['pytest', 'coverage'],
-        docs=['sphinx']
+        docs=['sphinx', 'sphinx_rtd_theme']
     )
 )
