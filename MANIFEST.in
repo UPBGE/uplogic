@@ -1,0 +1,5 @@
+include *.md
+recursive-include uplogic *
+recursive-exclude src *.pyc *.pyo
+prune tests
+prune docs

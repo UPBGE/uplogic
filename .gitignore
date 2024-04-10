@@ -1,3 +1,11 @@
 __pycache__
-/build
 *.egg-info
+/.coverage
+/.mxmake/
+/bin/
+/build
+/requirements-mxdev.txt
+/tests/bin/3.6/
+/tests/bin/engine.license/
+/tests/bin/test
+/tests/bin/lib/
