@@ -1,0 +1,16 @@
+name: Test
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install Project
+      run: make install
+
+    - name: Generate Docs
+      run: make test
