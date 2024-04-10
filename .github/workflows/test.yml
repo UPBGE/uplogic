@@ -9,6 +9,9 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Install system dependencies
+      run: apt install pulseaudio
+
     - name: Install Project
       run: make install
 
