@@ -22,25 +22,25 @@ $(UPBGE_EXTRACT_TARGET): $(UPBGE_DOWNLOAD_TARGET)
 	@mv $(UPBGE_VERSION) bin
 	@touch $(UPBGE_EXTRACT_TARGET)
 
-UPBGE_TEST_TARGET:=$(SENTINEL_FOLDER)/upbge-test.sentinel
-$(UPBGE_TEST_TARGET):
-	@./bin/blender -b ./tests/bin/test.blend -P ./tests/bin/build.py
-	@touch $(UPBGE_TEST_TARGET)
+UPBGE_RUN_TARGET:=$(SENTINEL_FOLDER)/upbge-run.sentinel
+$(UPBGE_RUN_TARGET):
+	@./bin/blender -b ./utils/run.blend -P ./utils/build.py
+	@touch $(UPBGE_RUN_TARGET)
 
 .PHONY: upbge-install
 upbge-install: $(UPBGE_EXTRACT_TARGET)
 
-.PHONY: upbge-test-clean
-upbge-test-clean:
-	@rm -rf ./tests/bin/3.6
-	@rm -rf ./tests/bin/engine.license
-	@rm -f ./tests/bin/test
-	@rm -f ./tests/bin/test.blend1
-	@rm -rf ./tests/bin/lib/
-	@rm -f $(UPBGE_TEST_TARGET)
+.PHONY: upbge-run-clean
+upbge-run-clean:
+	@rm -rf ./utils/3.6
+	@rm -rf ./utils/engine.license
+	@rm -f ./utils/run
+	@rm -f ./utils/run.blend1
+	@rm -rf ./utils/lib/
+	@rm -f $(UPBGE_RUN_TARGET)
 
 .PHONY: upbge-clean
-upbge-clean: upbge-test-clean
+upbge-clean: upbge-run-clean
 	@rm -rf $(UPBGE_DONWLOAD_FOLDER)/$(UPBGE_TARBALL)
 	@rm -f $(UPBGE_DOWNLOAD_TARGET)
 	@rm -rf bin
@@ -50,5 +50,6 @@ upbge-clean: upbge-test-clean
 # default targets
 ##############################################################################
 
-INSTALL_TARGETS:=upbge-install $(INSTALL_TARGETS) $(UPBGE_TEST_TARGET)
+SPHINX_BIN:=./utils/run sphinx
+INSTALL_TARGETS:=upbge-install $(INSTALL_TARGETS) $(UPBGE_RUN_TARGET)
 CLEAN_TARGETS+=upbge-clean

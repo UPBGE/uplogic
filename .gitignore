@@ -6,7 +6,8 @@ __pycache__
 /build
 /docs/html/
 /requirements-mxdev.txt
-/tests/bin/3.6/
-/tests/bin/engine.license/
-/tests/bin/test
-/tests/bin/lib/
+/utils/3.6/
+/utils/engine.license/
+/utils/lib/
+/utils/run
+/utils/run.blend1
