@@ -28,7 +28,7 @@ RUN_TARGET?=
 
 # Additional files and folders to remove when running clean target
 # No default value.
-CLEAN_FS?=
+CLEAN_FS?=coverage_html
 
 # Optional makefile to include before default targets. This can
 # be used to provide custom targets or hook up to existing targets.
@@ -273,8 +273,8 @@ ifeq ("$(VENV_CREATE)", "true")
 	@rm -rf $(VENV_FOLDER)
 endif
 else
-	@$(PYTHON_PACKAGE_COMMAND) uninstall -y $(MXDEV)
-	@$(PYTHON_PACKAGE_COMMAND) uninstall -y $(MXMAKE)
+	@test -e $(MXENV_PYTHON) && $(PYTHON_PACKAGE_COMMAND) uninstall -y $(MXDEV) || :
+	@test -e $(MXENV_PYTHON) && $(PYTHON_PACKAGE_COMMAND) uninstall -y $(MXMAKE) || :
 endif
 
 INSTALL_TARGETS+=mxenv

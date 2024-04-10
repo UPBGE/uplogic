@@ -4,6 +4,7 @@ __pycache__
 /.mxmake/
 /bin/
 /build
+/docs/html/
 /requirements-mxdev.txt
 /tests/bin/3.6/
 /tests/bin/engine.license/

@@ -51,4 +51,4 @@ upbge-clean: upbge-test-clean
 ##############################################################################
 
 INSTALL_TARGETS:=upbge-install $(INSTALL_TARGETS) $(UPBGE_TEST_TARGET)
-CLEAN_TARGETS+=upbge-clean build-clean
+CLEAN_TARGETS+=upbge-clean
