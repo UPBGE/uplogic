@@ -97,13 +97,13 @@ MXMAKE?=mxmake
 
 # Source folder to scan for Python files to run ruff on.
 # Default: src
-RUFF_SRC?=src
+RUFF_SRC?=uplogic
 
 ## qa.isort
 
 # Source folder to scan for Python files to run isort on.
 # Default: src
-ISORT_SRC?=src
+ISORT_SRC?=uplogic
 
 ## docs.sphinx
 
