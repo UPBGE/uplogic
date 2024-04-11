@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     env:
       DISPLAY: ':0'
       MESA_SHADER_CACHE_DISABLE: 'true'
