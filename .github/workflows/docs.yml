@@ -5,6 +5,9 @@ on: [push, workflow_dispatch]
 jobs:
   docs:
     runs-on: ubuntu-latest
+    env:
+      MESA_SHADER_CACHE_DISABLE: 'true'
+      DISPLAY: ':99.0'
 
     steps:
     - uses: actions/checkout@v4
@@ -17,10 +20,15 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y xserver-xorg-video-dummy pulseaudio libegl1
+        sudo apt-get install -y xorg libx11-6 libxxf86vm1 libxcursor1 libxi6 \
+          libxrandr2 libxinerama1 libegl1 libxkbcommon0 libdbus-1-3 pulseaudio \
+          mesa-utils xvfb
 
-    - name: Setup dummy display
-      run: sudo X -config utils/dummy-1920x1080.conf &
+    - name: Start xvfb
+      run: |
+        /sbin/start-stop-daemon --start --quiet \
+          --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background \
+          --exec /usr/bin/Xvfb -- :99 -screen 0 1280x720x24 -ac +extension GLX
 
     - name: Install Project
       run: make install

@@ -23,13 +23,13 @@ jobs:
       run: |
         /sbin/start-stop-daemon --start --quiet \
           --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background \
-          --exec /usr/bin/Xvfb -- :99 -screen 0 1280x720x24 -ac +extension GLX +extension RANDR
-
-    - name: Install Project
-      run: make install
+          --exec /usr/bin/Xvfb -- :99 -screen 0 1280x720x24 -ac +extension GLX
 
     - name: GLX info
       run: glxinfo -B
+
+    - name: Install Project
+      run: make install
 
     - name: Run Tests
       run: make test
