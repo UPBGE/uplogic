@@ -10,7 +10,7 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Install system dependencies
-      run: sudo apt-get install -y xserver-xorg-video-dummy pulseaudio libegl1
+      run: sudo apt-get install -y xorg xserver-xorg-video-dummy pulseaudio libegl1
 
     - name: Setup dummy display
       run: sudo X -config utils/dummy-1920x1080.conf
