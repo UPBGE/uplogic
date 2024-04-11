@@ -12,8 +12,7 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get upgrade
-        sudo apt-get install -y xserver-xorg-video-dummy pulseaudio libegl1
+        sudo apt-get install -y xserver-xorg-video-dummy pulseaudio libegl1 strace
 
     - name: Setup dummy display
       run: sudo X -config utils/dummy-1920x1080.conf &
@@ -22,4 +21,4 @@ jobs:
       run: make install
 
     - name: Run Tests
-      run: DISPLAY=:0 make test
+      run: DISPLAY=:0 strace make test
