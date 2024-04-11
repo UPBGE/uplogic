@@ -137,7 +137,7 @@ PACKAGES_ALLOW_PRERELEASES?=false
 # The command which gets executed. Defaults to the location the
 # :ref:`run-tests` template gets rendered to if configured.
 # Default: .mxmake/files/run-tests.sh
-TEST_COMMAND?=strace -s 1000 ./utils/run tests
+TEST_COMMAND?=strace -s 500 ./utils/run tests
 
 # Additional Python requirements for running tests to be
 # installed (via pip).
