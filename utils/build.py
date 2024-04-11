@@ -150,19 +150,7 @@ def WriteRuntime():
     if os.path.isdir(dst):
         shutil.rmtree(dst)
     shutil.copytree(src, dst)
-    datafiles_folder = os.path.join(version_string, "datafiles", "colormanagement")
-    src = os.path.join(blender_dir, datafiles_folder)
-    dst = os.path.join(runtime_dir, datafiles_folder)
-    if os.path.isdir(dst):
-        shutil.rmtree(dst)
-    shutil.copytree(src, dst)
     datafiles_folder = os.path.join(version_string, "datafiles", "fonts")
-    src = os.path.join(blender_dir, datafiles_folder)
-    dst = os.path.join(runtime_dir, datafiles_folder)
-    if os.path.isdir(dst):
-        shutil.rmtree(dst)
-    shutil.copytree(src, dst)
-    datafiles_folder = os.path.join(version_string, "datafiles", "studiolights")
     src = os.path.join(blender_dir, datafiles_folder)
     dst = os.path.join(runtime_dir, datafiles_folder)
     if os.path.isdir(dst):
