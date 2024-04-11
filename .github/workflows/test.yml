@@ -14,7 +14,10 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y xserver-xorg-video-dummy pulseaudio libegl1 mesa-utils
+        sudo apt-get install -y xserver-xorg-video-dummy pulseaudio libegl1 mesa-utils strace
+
+    - name: Show runners
+      run: sudo cat /var/lib/act-runner/.runner
 
     - name: Setup dummy display
       run: sudo X -config utils/dummy-1920x1080.conf &
