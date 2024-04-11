@@ -14,6 +14,14 @@ jobs:
 
     - run: npm install -g @mermaid-js/mermaid-cli
 
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y xserver-xorg-video-dummy pulseaudio libegl1
+
+    - name: Setup dummy display
+      run: sudo X -config utils/dummy-1920x1080.conf &
+
     - name: Install Project
       run: make install
 
