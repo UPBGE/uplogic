@@ -8,7 +8,7 @@ jobs:
     env:
       DISPLAY: ':0'
       MESA_SHADER_CACHE_DISABLE: 'true'
-      MESA_DEBUG: 'flush,incomplete_tex,incomplete_fbo,context'
+      MESA_DEBUG: '1'
 
     steps:
     - uses: actions/checkout@v4
