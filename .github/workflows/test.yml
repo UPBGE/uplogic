@@ -7,6 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DISPLAY: ':0'
+      MESA_SHADER_CACHE_DISABLE: 'true'
 
     steps:
     - uses: actions/checkout@v4
