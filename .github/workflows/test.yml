@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
   test:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     env:
       DISPLAY: ':99.0'
       MESA_SHADER_CACHE_DISABLE: 'true'
@@ -19,9 +19,10 @@ jobs:
         sudo apt-get install -y xserver-xorg-video-dummy pulseaudio libegl1 mesa-utils strace xvfb
 
     - name: Start xvfb
-      run: /sbin/start-stop-daemon --start --quiet \
-        --pidfile /tmp/custom_xvfb_99.pid --make-pidfile \
-        --background --exec /usr/bin/Xvfb -- :99 -screen 0 1280x720x24 -ac +extension GLX
+      run: |
+        /sbin/start-stop-daemon --start --quiet \
+          --pidfile /tmp/custom_xvfb_99.pid --make-pidfile \
+          --background --exec /usr/bin/Xvfb -- :99 -screen 0 1280x720x24 -ac +extension GLX
 
     #- name: Setup dummy display
     #  run: sudo X -config utils/dummy-1920x1080.conf &
