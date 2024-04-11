@@ -14,15 +14,7 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y xserver-xorg-video-dummy pulseaudio libegl1 \
-          fonts-dejavu libavcodec58 libavdevice58 libavformat58 libavutil56 \
-          libboost-locale1.74.0 libc6 libfftw3-double3 libfreetype6 libgcc-s1 \
-          libgl1 libglew2.1 libgomp1 libilmbase25 libjack-jackd2-0 libjemalloc2 \
-          libjpeg62-turbo libopenal1 libopencolorio1v5 libopenexr25 \
-          libopenimageio2.2 libopenjp2-7 libopenvdb7.1 libosdcpu3.4.3 \
-          libosdgpu3.4.3 libpcre3 libpng16-16 libpython3.9 libsdl2-2.0-0 \
-          libsndfile1 libspnav0 libstdc++6 libswscale5 libtbb2 libtiff5 \
-          libx11-6 libxfixes3 libxi6 libxml2 libxrender1 libxxf86vm1 zlib1g
+        sudo apt-get install -y xserver-xorg-video-dummy blender
 
     - name: Setup dummy display
       run: sudo X -config utils/dummy-1920x1080.conf &
