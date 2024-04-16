@@ -20,16 +20,16 @@ def set_depth(depth):
 
 def _get_globals():
     scene = logic.getCurrentScene()
-    globals = {'scene': scene, 'bge': bge, 'logic': logic, 'render': render}
+    globals = {'scene': scene, 'bpy': bpy, 'bge': bge, 'logic': logic, 'render': render}
     for obj in scene.objects:
         globals[obj.blenderObject.name] = obj
     return globals
 
 
-def enable(toggle_key='BACKSLASH', visible=False):
+def enable(toggle_key='F12', visible=False):
     get_console(True, toggle_key=toggle_key, visible=visible)
     sys.stdout = Console()
-    log('On-Screen Console active; Check System Console for Errors.')
+    debug('On-Screen Console active; Check System Console for Errors.')
 
 
 def disable():
@@ -67,15 +67,15 @@ class ConsoleLayout(Canvas):
     max_msg = 50
     opacity = 1
     padding = [5, 10]
-    toggle_key = 'BACKSLASH'
+    toggle_key = 'F12'
 
-    def __init__(self, toggle_key='BACKSLASH', visible=False):
+    def __init__(self, toggle_key='F12', visible=False):
         scene = logic.getCurrentScene()
         self.toggle_key = toggle_key
         self._mouse_down = False
         self._goback_index = 0
         super().__init__()
-        if not getattr(bpy.context.scene, 'screen_console_open', True) and not visible:
+        if not getattr(bpy.context.scene, 'screen_console_open', False) and not visible:
             self.show = False
         self.input = TextInput(text='', shadow=True, valign='center')
         self.input.on_enter = self.on_enter
@@ -170,7 +170,7 @@ class ConsoleLayout(Canvas):
         self._prev_msg = msg
 
 
-def get_console(create=False, toggle_key='BACKSLASH', visible=False) -> ConsoleLayout:
+def get_console(create=False, toggle_key='F12', visible=False) -> ConsoleLayout:
     consoles = GlobalDB.retrieve('uplogic.consoles')
     console = consoles.get('default')
     if console is None and create:
@@ -240,8 +240,7 @@ def debug(msg):
 
 nodeprefs = bpy.context.preferences.addons.get('bge_netlogic', None)
 if nodeprefs and getattr(bpy.context.scene, 'use_screen_console', False):
-    # print(nodeprefs.preferences.screen_console_key)
-    enable(toggle_key='BACKSLASH')
+    enable(toggle_key='F12')
 
 
 import bpy
@@ -249,14 +248,15 @@ import bge
 
 
 class Command:
+    command = ''
     usage = ''
-    arg_number = 0
+    arg_count = 0
 
     @classmethod
     def invoke(cls, message):
         args = message.split(' ')
-        if len(args) - 1 != cls.arg_number:
-            debug(f'Usage: "{cls.usage}"')
+        if len(args) - 1 != cls.arg_count:
+            debug(f'Usage: "{cls.command} {cls.usage}"')
             return
         try:
             cls.execute(args)
@@ -269,8 +269,9 @@ class Command:
 
 
 class RemoveObjectCommand(Command):
-    arg_number = 1
-    usage = 'remove OBJECT_ID'
+    command = 'remove'
+    arg_count = 1
+    usage = 'OBJECT_ID'
 
     @classmethod
     def execute(cls, args):
@@ -282,8 +283,9 @@ class RemoveObjectCommand(Command):
 
 
 class DisableCommand(Command):
-    arg_number = 1
-    usage = 'disable OBJECT_ID'
+    command = 'disable'
+    arg_count = 1
+    usage = 'OBJECT_ID'
 
     @classmethod
     def execute(cls, args):
@@ -295,8 +297,9 @@ class DisableCommand(Command):
 
 
 class EnableCommand(Command):
-    arg_number = 1
-    usage = 'enable OBJECT_ID'
+    command = 'enable'
+    arg_count = 1
+    usage = 'OBJECT_ID'
 
     @classmethod
     def execute(cls, args):
@@ -308,8 +311,9 @@ class EnableCommand(Command):
 
 
 class ShowInfoCommand(Command):
-    arg_number = 1
-    usage = 'showinfo STAGE(0-3)'
+    command = 'showinfo'
+    arg_count = 1
+    usage = 'STAGE(0-3)'
 
     @classmethod
     def execute(cls, args):
@@ -320,8 +324,9 @@ class ShowInfoCommand(Command):
 
 
 class QuitCommand(Command):
-    arg_number = 0
-    usage = 'quit'
+    command = 'quit'
+    arg_count = 0
+    usage = ''
 
     @classmethod
     def execute(cls, args):
@@ -329,8 +334,9 @@ class QuitCommand(Command):
 
 
 class RestartCommand(Command):
-    arg_number = 0
-    usage = 'restart'
+    command = 'restart'
+    arg_count = 0
+    usage = ''
 
     @classmethod
     def execute(cls, args):
@@ -338,8 +344,9 @@ class RestartCommand(Command):
 
 
 class PrintCommand(Command):
-    arg_number = 1
-    usage = 'print'
+    command = 'print'
+    arg_count = 1
+    usage = 'MESSAGE'
 
     @classmethod
     def execute(cls, args):
@@ -348,8 +355,9 @@ class PrintCommand(Command):
 
 
 class PauseCommand(Command):
-    arg_number = 1
-    usage = 'pause (0 or 1)'
+    command = 'pause'
+    arg_count = 1
+    usage = '(0 or 1)'
 
     @classmethod
     def execute(cls, args):
@@ -364,19 +372,23 @@ class Commands:
     commands = {}
 
     @classmethod
-    def add_command(cls, name, command):
-        cls.commands[name] = command
+    def add_command(cls, command):
+        cls.commands[command.command] = command
 
 
-Commands.add_command('remove', RemoveObjectCommand)
-Commands.add_command('disable', DisableCommand)
-Commands.add_command('enable', EnableCommand)
-Commands.add_command('showinfo', ShowInfoCommand)
-Commands.add_command('quit', QuitCommand)
-Commands.add_command('restart', RestartCommand)
-Commands.add_command('print', PrintCommand)
-Commands.add_command('pause', PauseCommand)
+Commands.add_command(RemoveObjectCommand)
+Commands.add_command(DisableCommand)
+Commands.add_command(EnableCommand)
+Commands.add_command(ShowInfoCommand)
+Commands.add_command(QuitCommand)
+Commands.add_command(RestartCommand)
+Commands.add_command(PrintCommand)
+Commands.add_command(PauseCommand)
 
 
-def add_command(name, command):
-    Commands.add_command(name, command)
+def add_command(command):
+    Commands.add_command(command)
+
+
+def console_command(command):
+    Commands.add_command(command)

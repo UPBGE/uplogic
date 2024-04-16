@@ -53,7 +53,7 @@ class TextInput(Label):
         for evt in events.values():
             self._key_evts[evt] = 0.0
         self.multiline = multiline
-        self.cursor = Layout(bg_color=(1, 1, 1, 1))
+        self.cursor = Layout(bg_color=(1, 1, 1, 1), size=(0, 0))
         self.add_widget(self.cursor)
         self.edit = False
         self._index = 0
@@ -136,7 +136,7 @@ class TextInput(Label):
     def _set_cursor_position(self):
         dsize = self._current_char_pos
         dim = blf.dimensions(self.font, self.lines[self.line_index])
-        charsize = blf.dimensions(self.font, 'A')
+        # charsize = blf.dimensions(self.font, 'A')
         if self.text_halign == 'center':
             dsize[0] -= dim[0] * .5
         if self.text_halign == 'right':
@@ -176,6 +176,8 @@ class TextInput(Label):
                 if evt.type == 71:  # Arrow Right
                     self.index += 1
                     self.edit = True
+                if len(self.lines) <= 0:
+                    return
                 line_length = len(self.lines[clamp(self.line_index, 0, len(self.lines) - 1)])
                 if evt.type == 110:  # Home
                     self.index -= line_length - (line_length - self.character_index)
@@ -222,5 +224,4 @@ class TextInput(Label):
         if self.edit:
             self._listen()
         super().draw()
-        if self.edit:
-            self._set_cursor_position()
+        self._set_cursor_position()
