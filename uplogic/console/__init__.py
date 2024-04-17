@@ -15,15 +15,29 @@ from datetime import datetime
 from mathutils import Vector
 
 
+GLOBALS = {}
+
+
 def set_depth(depth):
     ConsoleLayout.max_msg = depth
 
+
+def set_global(key, val):
+    global GLOBALS
+    GLOBALS[key] = val
+
+
 def _get_globals():
     scene = logic.getCurrentScene()
-    globals = {'scene': scene, 'bpy': bpy, 'bge': bge, 'logic': logic, 'render': render}
+    global GLOBALS
+    GLOBALS['scene'] = scene
+    GLOBALS['bpy'] = bpy
+    GLOBALS['bge'] = bge
+    GLOBALS['logic'] = logic
+    GLOBALS['render'] = render
     for obj in scene.objects:
-        globals[obj.blenderObject.name] = obj
-    return globals
+        GLOBALS[obj.blenderObject.name] = obj
+    return GLOBALS
 
 
 def enable(toggle_key='F12', visible=False):
@@ -102,10 +116,10 @@ class ConsoleLayout(Canvas):
         if command:
             command.invoke(self.input.text)
         else:
-            try:
-                exec(self.input.text, _get_globals())
-            except:
-                error(f'Command "{command_name}" not found.')
+            # try:
+            exec(self.input.text, _get_globals())
+            # except:
+            #     error(f'Command "{command_name}" not found.')
         self._goback_index = 0
         self.input.text = ''
 
