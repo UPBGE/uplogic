@@ -261,16 +261,44 @@ import bpy
 import bge
 
 
+
+
+class Commands:
+    commands = {}
+
+    @classmethod
+    def add_command(cls, command):
+        cls.commands[command.command] = command
+
+
+# Commands.add_command(RemoveObjectCommand)
+# Commands.add_command(DisableCommand)
+# Commands.add_command(EnableCommand)
+# Commands.add_command(ShowInfoCommand)
+# Commands.add_command(QuitCommand)
+# Commands.add_command(RestartCommand)
+# Commands.add_command(PrintCommand)
+# Commands.add_command(PauseCommand)
+
+
+def add_command(command):
+    Commands.add_command(command)
+
+
+def console_command(command):
+    Commands.add_command(command)
+
 class Command:
     command = ''
     usage = ''
     arg_count = 0
+    description = ''
 
     @classmethod
     def invoke(cls, message):
         args = message.split(' ')
         args = args[1:]
-        if len(args) != cls.arg_count:
+        if len(args) < cls.arg_count:
             debug(f'Usage: "{cls.command} {cls.usage}"')
             return
         try:
@@ -283,10 +311,12 @@ class Command:
         pass
 
 
+@console_command
 class RemoveObjectCommand(Command):
     command = 'remove'
     arg_count = 1
     usage = 'OBJECT_ID'
+    description = 'Remove an object from the current scene.'
 
     @classmethod
     def execute(cls, args):
@@ -297,10 +327,12 @@ class RemoveObjectCommand(Command):
         ).endObject()
 
 
+@console_command
 class DisableCommand(Command):
     command = 'disable'
     arg_count = 1
     usage = 'OBJECT_ID'
+    description = 'Set an object to invisible and inactive.'
 
     @classmethod
     def execute(cls, args):
@@ -311,10 +343,12 @@ class DisableCommand(Command):
         ).setVisible(False)
 
 
+@console_command
 class EnableCommand(Command):
     command = 'enable'
     arg_count = 1
     usage = 'OBJECT_ID'
+    description = 'Set an object to visible and active.'
 
     @classmethod
     def execute(cls, args):
@@ -325,10 +359,12 @@ class EnableCommand(Command):
         ).setVisible(True)
 
 
+@console_command
 class ShowInfoCommand(Command):
     command = 'showinfo'
     arg_count = 1
     usage = 'STAGE(0-3)'
+    description = 'Show game info. 1: Show FPS, 2: Show Profile, 3: Show Properties'
 
     @classmethod
     def execute(cls, args):
@@ -338,30 +374,36 @@ class ShowInfoCommand(Command):
         render.showProperties(int(stage) > 2)
 
 
+@console_command
 class QuitCommand(Command):
     command = 'quit'
     arg_count = 0
     usage = ''
+    description = 'Quit the game.'
 
     @classmethod
     def execute(cls, args):
         logic.endGame()
 
 
+@console_command
 class RestartCommand(Command):
     command = 'restart'
     arg_count = 0
     usage = ''
+    description = 'Restart the game.'
 
     @classmethod
     def execute(cls, args):
         logic.restartGame()
 
 
+@console_command
 class PrintCommand(Command):
     command = 'print'
     arg_count = 1
     usage = 'MESSAGE'
+    description = 'Print a message or variable.'
 
     @classmethod
     def execute(cls, args):
@@ -369,41 +411,34 @@ class PrintCommand(Command):
         print(eval(msg, _get_globals()))
 
 
-class PauseCommand(Command):
-    command = 'pause'
-    arg_count = 1
-    usage = '(0 or 1)'
+# @console_command
+# class PauseCommand(Command):
+#     command = 'pause'
+#     arg_count = 1
+#     usage = 'STATE(0 or 1)'
+
+#     @classmethod
+#     def execute(cls, args):
+#         state = args[0]
+#         if state:
+#             logic.getCurrentScene().suspend()
+#         else:
+#             logic.getCurrentScene().resume()
+
+
+@console_command
+class HelpCommand(Command):
+    command = 'help'
+    description = 'Print out all available commands.'
 
     @classmethod
-    def execute(cls, *args):
-        state = args[0]
-        if state:
-            logic.getCurrentScene().suspend()
-        else:
-            logic.getCurrentScene().resume()
-
-
-class Commands:
-    commands = {}
-
-    @classmethod
-    def add_command(cls, command):
-        cls.commands[command.command] = command
-
-
-Commands.add_command(RemoveObjectCommand)
-Commands.add_command(DisableCommand)
-Commands.add_command(EnableCommand)
-Commands.add_command(ShowInfoCommand)
-Commands.add_command(QuitCommand)
-Commands.add_command(RestartCommand)
-Commands.add_command(PrintCommand)
-Commands.add_command(PauseCommand)
-
-
-def add_command(command):
-    Commands.add_command(command)
-
-
-def console_command(command):
-    Commands.add_command(command)
+    def execute(cls, args):
+        print('Available Commands:')
+        mode = None
+        if len(args) > 0:
+            mode = args[0]
+        for command in Commands.commands.values():
+            if mode == '-d':
+                print(f' -  "{command.command} {command.usage}"    -    {command.description}')
+            else:
+                print(f' -  "{command.command} {command.usage}"')
