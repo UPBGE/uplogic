@@ -140,9 +140,12 @@ class ConsoleLayout(Canvas):
         if key_pulse('DOWNARROW'):
             self.input.text = ''
         if key_pulse('UPARROW'):
-            self.input.text = self.layout.children[self._goback_index].text[13:]
-            self._goback_index = cycle(self._goback_index + 1, 0, len(self.layout.children) - 1)
-        if key_down(self.toggle_key):
+            if not self._toggle_key:
+                line = self.layout.children[self._goback_index]
+                self.input.text = line.text[13:] if line is not self.input else ''
+                self._goback_index = cycle(self._goback_index + 1, 0, len(self.layout.children) - 1)
+            self._toggle_key = True
+        elif key_down(self.toggle_key):
             if not self._toggle_key:
                 self.show = not self.show
                 self.opacity = 1
