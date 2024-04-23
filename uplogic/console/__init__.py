@@ -87,7 +87,7 @@ class ConsoleLayout(Canvas):
         scene = logic.getCurrentScene()
         self.toggle_key = toggle_key
         self._mouse_down = False
-        self._goback_index = 0
+        self._goback_index = 1
         super().__init__()
         if not getattr(bpy.context.scene, 'screen_console_open', False) and not visible:
             self.show = False
