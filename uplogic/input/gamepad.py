@@ -169,6 +169,10 @@ def gamepad_stick(
 
     :returns: set `(x, y)`
     '''
+    if stick == 'LS':
+        stick = LS
+    elif stick == 'RS':
+        stick = RS
     xaxis = STICKS[stick][0]
     yaxis = STICKS[stick][1]
     return Vector((
@@ -255,8 +259,8 @@ def gamepad_vibrate(idx: int = 0, strength: tuple = (.5, .5), time: float = 1.0)
     joystick.startVibration()
 
 
-class ULGamePad():
-    """Wrapper class for a controller. The index determines which connected
+class Gamepad():
+    """Wrapper class for a gamepad/controller. The index determines which connected
     gamepad to use, the layout determines whether to use XBox or Sony button
     naming.
     
@@ -265,7 +269,7 @@ class ULGamePad():
     `'SONY'`].
     """
 
-    _deprecated = True
+    _deprecated = False
 
     def __init__(
         self,
@@ -278,7 +282,7 @@ class ULGamePad():
         self.layout = layout
         if not logic.joysticks[idx]:
             print(f'No Joystick found at index: {idx}')
-        self.joystick = logic.joysticks[idx]
+        self.device = logic.joysticks[idx]
 
     def button_down(self, button: str):
         return gamepad_down(button, self.idx, self.layout)
@@ -292,19 +296,22 @@ class ULGamePad():
     def sticks(self, stick: str = LS, threshold: float = 0.07):
         return gamepad_stick(stick, self.idx, threshold)
     
-    def vibrate(self, strength: tuple = (.5, .5), time: float = 1.0):
-        if not self.joystick.hasVibration:
+    def rumble(self, strength: tuple = (.5, .5), time: float = 1.0):
+        if not self.device.hasVibration:
             print('Joystick at index {} has no vibration!'.format(self.idx))
             return
-        self.joystick.strengthLeft = strength[0]
-        self.joystick.strengthRight = strength[1]
-        self.joystick.duration = int(round(time * 1000))
+        self.device.strengthLeft = strength[0]
+        self.device.strengthRight = strength[1]
+        self.device.duration = int(round(time * 1000))
 
-        self.joystick.startVibration()
+        self.device.startVibration()
+
+    def vibrate(self, strength: tuple = (.5, .5), time: float = 1.0):
+        self.rumble(strength, time)
 
 
-class Gamepad(ULGamePad):
-    _deprecated = False
+class ULGamePad(Gamepad):
+    _deprecated = True
 
 
 class ULGamepadLook():

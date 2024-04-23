@@ -1,6 +1,6 @@
 from uplogic.nodes import ULParameterNode
 
-print('Hello')
+
 class ULKeyCode(ULParameterNode):
     def __init__(self):
         ULParameterNode.__init__(self)

@@ -41,10 +41,8 @@ class ActionCallback:
         self.args = args
 
 
-class ULAction():
+class Action():
     '''
-    [DEPRECATED] Use `uplogic.animation.Action` instead.
-
     Wrapper class for animated actions that provides additional parameters
     and quick access properties.
 
@@ -67,7 +65,7 @@ class ULAction():
     action state.
     '''
 
-    _deprecated = True
+    _deprecated = False
 
     def __init__(
         self,
@@ -390,8 +388,11 @@ class ULAction():
         '''
         self.frame = frame
 
-class Action(ULAction):
-    '''Wrapper class for animated actions that provides additional parameters
+class ULAction(Action):
+    '''
+    [DEPRECATED] Use `uplogic.animation.Action` instead.
+
+    Wrapper class for animated actions that provides additional parameters
     and quick access properties.
 
     :param `game_object`: The `KX_GameObject` on which to play the action.
@@ -411,5 +412,4 @@ class Action(ULAction):
     :param `keep`: Whether to keep the animation cached after playback has
     finished. This is useful for setting animation frames regardless of the
     action state.'''
-    _deprecated = False
-    pass
+    _deprecated = True

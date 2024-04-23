@@ -269,7 +269,8 @@ class Command:
     @classmethod
     def invoke(cls, message):
         args = message.split(' ')
-        if len(args) - 1 != cls.arg_count:
+        args = args[1:]
+        if len(args) != cls.arg_count:
             debug(f'Usage: "{cls.command} {cls.usage}"')
             return
         try:
@@ -289,7 +290,7 @@ class RemoveObjectCommand(Command):
 
     @classmethod
     def execute(cls, args):
-        command, object_name = args
+        object_name = args[0]
         scene = bge.logic.getCurrentScene()
         scene.getGameObjectFromObject(
             bpy.data.objects[object_name]
@@ -303,7 +304,7 @@ class DisableCommand(Command):
 
     @classmethod
     def execute(cls, args):
-        command, object_name = args
+        object_name = args[0]
         scene = bge.logic.getCurrentScene()
         scene.getGameObjectFromObject(
             bpy.data.objects[object_name]
@@ -317,7 +318,7 @@ class EnableCommand(Command):
 
     @classmethod
     def execute(cls, args):
-        command, object_name = args
+        object_name = args[0]
         scene = bge.logic.getCurrentScene()
         scene.getGameObjectFromObject(
             bpy.data.objects[object_name]
@@ -331,7 +332,7 @@ class ShowInfoCommand(Command):
 
     @classmethod
     def execute(cls, args):
-        command, stage = args
+        stage = args[0]
         render.showFramerate(int(stage) > 0)
         render.showProfile(int(stage) > 1)
         render.showProperties(int(stage) > 2)
@@ -364,7 +365,7 @@ class PrintCommand(Command):
 
     @classmethod
     def execute(cls, args):
-        command, msg = args
+        msg = args[0]
         print(eval(msg, _get_globals()))
 
 
@@ -374,8 +375,8 @@ class PauseCommand(Command):
     usage = '(0 or 1)'
 
     @classmethod
-    def execute(cls, args):
-        command, state = args
+    def execute(cls, *args):
+        state = args[0]
         if state:
             logic.getCurrentScene().suspend()
         else:
