@@ -116,10 +116,11 @@ class ConsoleLayout(Canvas):
         if command:
             command.invoke(self.input.text)
         else:
-            # try:
-            exec(self.input.text, _get_globals())
-            # except:
-            #     error(f'Command "{command_name}" not found.')
+            try:
+                exec(self.input.text, _get_globals())
+            except Exception as e:
+                error(f'Error occured when executing command "{command_name}":')
+                error(e)
         self._goback_index = 0
         self.input.text = ''
 
