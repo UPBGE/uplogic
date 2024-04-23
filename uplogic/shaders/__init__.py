@@ -18,6 +18,7 @@ from .lens import Lens
 from .texture import Texture
 from .chromaticaberration import ChromaticAberration
 from .sharpen import Sharpen
+from .splitscreen import SplitScreen
 from .shader import load_glsl
 from .shader import remove_filter
 from .shader import toggle_filter

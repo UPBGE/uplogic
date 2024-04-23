@@ -15,27 +15,27 @@ class ULVectorMath(ULParameterNode):
         self.OUT = self.add_output(self.get_done)
         self.VOUT = self.add_output(self.get_done)
         self.calculations = {
+            'add': self.get_add,
+            'subtract': self.get_subtract,
+            'multiply': self.get_multiply,
+            'divide': self.get_divide,
+            'multadd': self.get_multadd,
+            'matmul': self.get_matmul,
             'scale': self.get_scale,
             'length': self.get_length,
             'distance': self.get_distance,
-            'angle': self.get_angle,
-            'angle_signed': self.get_angle_signed,
             'dot': self.get_dot,
-            'faceforward': self.get_faceforward,
+            'angle': self.get_angle,
             'refract': self.get_refract,
             'reflect': self.get_reflect,
+            'angle_signed': self.get_angle_signed,
+            'faceforward': self.get_faceforward,
             'project': self.get_project,
             'cross': self.get_cross,
-            'multadd': self.get_multadd,
-            'divide': self.get_divide,
-            'multiply': self.get_multiply,
-            'subtract': self.get_subtract,
-            'add': self.get_add,
-            'matmul': self.get_matmul,
             'normalize': self.get_normalize,
             'lerp': self.get_lerp,
             'slerp': self.get_slerp,
-            'negate': self.get_negate,
+            'negate': self.get_negate
         }
 
     def get_done(self):
