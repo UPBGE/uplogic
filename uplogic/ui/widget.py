@@ -117,7 +117,7 @@ class Widget():
 
     @property
     def _children_reversed(self):
-        return self.children.__reversed__()
+        return list(self.children.__reversed__())
 
     @property
     def canvas(self):

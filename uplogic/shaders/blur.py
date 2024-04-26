@@ -25,18 +25,18 @@ void main()
 
     float quality = 3.0;
    
-    vec2 radius = power/resolution.xy;
+    vec2 radius = power / resolution.xy;
     
     vec2 uv = texcoord;
 
     vec4 color = texture(bgl_RenderedTexture, uv);
     
     // Blur calculations
-    for( float d=0.0; d<Pi; d+=Pi/samples)
+    for (float d = 0.0; d < Pi; d += Pi / samples)
     {
-		for(float i=1.0/quality; i<=1.0; i+=1.0/quality)
+		for(float i = 1.0 / quality; i <= 1.0; i += 1.0 / quality)
         {
-			color += texture(bgl_RenderedTexture, uv+vec2(cos(d),sin(d)) * radius * i);
+			color += texture(bgl_RenderedTexture, uv + vec2(cos(d), sin(d)) * radius * i);
         }
     }
     color /= quality * samples - 15.0;

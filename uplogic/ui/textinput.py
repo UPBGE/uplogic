@@ -46,6 +46,7 @@ class TextInput(Label):
         multiline=False,
         angle=0
     ):
+        self.lines = None
         Label.__init__(self, pos, relative, text, font, font_color, font_size, line_height, shadow, shadow_offset, shadow_color, halign, valign, wrap, angle)
         self._key_evts = {}
         events = logic.keyboard.inputs.copy()
@@ -110,6 +111,11 @@ class TextInput(Label):
     def text(self, val):
         self._text = str(val)
 
+    def move_cursor_to_end(self):
+        line_length = len(self.lines[clamp(self.line_index, 0, len(self.lines) - 1)])
+        self.index = len(self.text) #line_length - self.character_index
+        self.edit = True
+
     def write(self, text):
         self.text += text
         self.index = len(self.text)
@@ -155,8 +161,6 @@ class TextInput(Label):
         right_shift = logic.keyboard.inputs[events.RIGHTSHIFTKEY].active
         keyboard_events = logic.keyboard.inputs.copy()
         tpf = (1 / (logic.getAverageFrameRate() or 0.01))
-
-        # print(logic.keyboard.activeInputs)
 
         for evt in keyboard_events.values():
 

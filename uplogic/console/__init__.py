@@ -10,7 +10,7 @@ from uplogic.utils.math import world_to_screen
 from uplogic.utils.math import cycle
 from uplogic.input import key_down, mouse_down, key_pulse, mouse_wheel
 import bpy
-import sys
+import sys, os
 from datetime import datetime
 from mathutils import Vector
 
@@ -87,7 +87,7 @@ class ConsoleLayout(Canvas):
         scene = logic.getCurrentScene()
         self.toggle_key = toggle_key
         self._mouse_down = False
-        self._goback_index = 1
+        self._goback_index = 0
         super().__init__()
         if not getattr(bpy.context.scene, 'screen_console_open', False) and not visible:
             self.show = False
@@ -137,18 +137,22 @@ class ConsoleLayout(Canvas):
         self._mouse_down = mdown
 
     def update(self):
-        if key_pulse('DOWNARROW'):
-            self.input.text = ''
-        if key_pulse('UPARROW'):
-            if not self._toggle_key:
-                line = self.layout.children[self._goback_index]
-                self.input.text = line.text[13:] if line is not self.input else ''
-                self._goback_index = cycle(self._goback_index + 1, 0, len(self.layout.children) - 1)
-            self._toggle_key = True
-        elif key_down(self.toggle_key):
+        if key_down(self.toggle_key):
             if not self._toggle_key:
                 self.show = not self.show
                 self.opacity = 1
+            self._toggle_key = True
+        elif not self.show:
+            return
+        elif key_pulse('DOWNARROW'):
+            self.input.text = ''
+            self._goback_index = 0
+        elif key_pulse('UPARROW'):
+            if not self._toggle_key:
+                line = self.layout._children_reversed[self._goback_index]
+                self.input.text = line.text[13:] if line is not self.input else ''
+                self.input.move_cursor_to_end()
+                self._goback_index = cycle(self._goback_index + 1, 0, len(self.layout.children) - 1)
             self._toggle_key = True
         else:
             self._toggle_key = False
@@ -197,8 +201,19 @@ def get_console(create=False, toggle_key='F12', visible=False) -> ConsoleLayout:
     return console
 
 
+class ansicol:
+    RED = '\033[31m'
+    GREEN = '\033[32m'
+    YELLOW = '\033[33m'
+    BYELLOW = '\033[93m'
+    BBLUE = '\033[36m'
+    END = '\033[0m'
+
+
 def log(msg, type='INFO'):
     console = get_console()
+    sysmsg = f'{msg}'
+
     if console is None:
         print(msg)
         return
@@ -208,53 +223,62 @@ def log(msg, type='INFO'):
             msg = msg.replace('  ', '    ')
             console.add_message(f'{msg}', type, time=show_time)
             show_time = False
+            # sys.__stdout__.write(f'{sysmsg}\n')
 
 
 def warning(msg):
     console = get_console()
+    sysmsg = f'{ansicol.YELLOW}Warning{ansicol.END}: {msg}'
     if console is None:
-        print(msg)
+        print(sysmsg)
         return
     for msg in str(msg).split('\n'):
         if msg:
             msg.replace('  ', '    ')
             console.add_message(f'WARNING:\t{msg}', 'WARNING')
+            sys.__stdout__.write(f'{sysmsg}\n')
 
 
 def error(msg):
     console = get_console()
+    sysmsg = f'{ansicol.RED}Error{ansicol.END}: {msg}'
     if console is None:
-        print(msg)
+
+        os.system('color')
+        print(sysmsg)
+        # print(msg)
         return
     for msg in str(msg).split('\n'):
         if msg:
             msg.replace('  ', '    ')
             console.add_message(f'{msg}', 'ERROR')
-            sys.__stdout__.write(f'{msg}\n')
+            sys.__stdout__.write(f'{sysmsg}\n')
 
 
 def success(msg):
     console = get_console()
+    sysmsg = f'{ansicol.GREEN}Success{ansicol.END}: {msg}'
     if console is None:
-        print(msg)
+        print(sysmsg)
         return
     for msg in str(msg).split('\n'):
         if msg:
             msg.replace('  ', '    ')
             console.add_message(f'{msg}', 'SUCCESS')
-            sys.__stdout__.write(f'{msg}\n')
+            sys.__stdout__.write(f'{sysmsg}\n')
 
 
 def debug(msg):
     console = get_console()
+    sysmsg = f'{ansicol.BYELLOW}Debug{ansicol.END}: {msg}'
     if console is None:
-        print(msg)
+        print(sysmsg)
         return
     for msg in str(msg).split('\n'):
         if msg:
             msg.replace('  ', '    ')
             console.add_message(f'{msg}', 'DEBUG')
-            sys.__stdout__.write(f'{msg}\n')
+            sys.__stdout__.write(f'{sysmsg}\n')
 
 nodeprefs = bpy.context.preferences.addons.get('bge_netlogic', None)
 if nodeprefs and getattr(bpy.context.scene, 'use_screen_console', False):
