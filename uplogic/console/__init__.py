@@ -97,7 +97,7 @@ class ConsoleLayout(Canvas):
         self.input = TextInput(text='', shadow=True, valign='center')
         self.input.on_enter = self.on_enter
         self.input.edit = True
-        self.layout = RelativeLayout(relative={'size': True, 'pos': True}, pos=[0, 0], size=(1, .4), bg_color=[0, 0, 0, .3])
+        self.layout = RelativeLayout(relative={'size': True, 'pos': True}, pos=[0, 0], size=(1, .4), bg_color=[0, 0, 0, .4])
         self.layout.use_clipping = True
         self.add_widget(self.layout)
         self.layout.add_widget(self.input)
@@ -176,7 +176,7 @@ class ConsoleLayout(Canvas):
             try:
                 exec(self.input.text, _get_globals())
             except Exception as e:
-                error(f'Error occured when executing command "{command_name}": {e}')
+                error(f'Error occured when executing command "{command_name}":\n{e}')
         self._goback_index = -1
         self.input.text = ''
         self.input.edit = True
@@ -234,7 +234,7 @@ class ConsoleLayout(Canvas):
         # if len(self.layout.children) > self.max_msg -1:
         #     self.layout.remove_widget(self.layout.children[0])
         now = datetime.now()
-        current_time = f'[{now.strftime("%H:%M:%S")}]' if time else "\t\t\t\t\t\t".replace('\t', '    ')
+        current_time = f'[{now.strftime("%H:%M:%S")}]' if time else "\t\t\t\t  ".replace('\t', '    ')
         self.layout.add_widget(Label(text=f'>{current_time}  {msg}', pos=[5, 10], font_color=COLORS[type], shadow=True, font_size=self.font_size))
         self._prev_msg = msg
         self.arrange()
@@ -273,8 +273,7 @@ def get_console(create=False, toggle_key='F12', visible=False) -> ConsoleLayout:
 
 class ansicol:
     RED = '\033[31m\033[1m'
-    GREEN = '\033[32m'
-    # GREEN = '\033[1minfo'
+    GREEN = '\033[32m\033[1m'
     YELLOW = '\033[33m'
     BYELLOW = '\033[93m'
     BBLUE = '\033[36m'
@@ -283,7 +282,6 @@ class ansicol:
 
 def log(msg, type='INFO'):
     console = get_console()
-    sysmsg = f'{msg}'
 
     if console is None:
         print(msg)
@@ -303,10 +301,12 @@ def warning(msg):
     if console is None:
         print(sysmsg)
         return
+    show_time = True
     for msg in str(msg).split('\n'):
         if msg:
             msg.replace('  ', '    ')
-            console.add_message(f'WARNING:\t{msg}', 'WARNING')
+            console.add_message(f'WARNING:\t{msg}', 'WARNING', time=show_time)
+            show_time = False
             sys.__stdout__.write(f'{sysmsg}\n')
 
 
@@ -314,16 +314,16 @@ def error(msg):
     console = get_console()
     sysmsg = f'{ansicol.RED}Error{ansicol.END}: {msg}'
     if console is None:
-
-        os.system('color')
         print(sysmsg)
         # print(msg)
         return
+    show_time = True
     for msg in str(msg).split('\n'):
         if msg:
             msg.replace('  ', '    ')
-            console.add_message(f'{msg}', 'ERROR')
+            console.add_message(f'{msg}', 'ERROR', time=show_time)
             sys.__stdout__.write(f'{sysmsg}\n')
+            show_time = False
 
 
 def success(msg):
@@ -332,11 +332,13 @@ def success(msg):
     if console is None:
         print(sysmsg)
         return
+    show_time = True
     for msg in str(msg).split('\n'):
         if msg:
             msg.replace('  ', '    ')
-            console.add_message(f'{msg}', 'SUCCESS')
+            console.add_message(f'{msg}', 'SUCCESS', time=show_time)
             sys.__stdout__.write(f'{sysmsg}\n')
+            show_time = False
 
 
 def debug(msg):
@@ -345,11 +347,13 @@ def debug(msg):
     if console is None:
         print(sysmsg)
         return
+    show_time = True
     for msg in str(msg).split('\n'):
         if msg:
             msg.replace('  ', '    ')
-            console.add_message(f'{msg}', 'DEBUG')
+            console.add_message(f'{msg}', 'DEBUG', time=show_time)
             sys.__stdout__.write(f'{sysmsg}\n')
+            show_time = False
 
 nodeprefs = bpy.context.preferences.addons.get('bge_netlogic', None)
 if nodeprefs and getattr(bpy.context.scene, 'use_screen_console', False):
@@ -532,15 +536,16 @@ class HelpCommand(Command):
 
     @classmethod
     def execute(cls, args):
-        print('Available Commands:')
         mode = None
+        msg = 'Available Commands:'
         if len(args) > 0:
             mode = args[0]
         for command in Commands.commands.values():
             if mode == '-d':
-                print(f' -  "{command.command} {command.usage}"    -    {command.description}')
+                msg += f'\n -  "{command.command} {command.usage}"    -    {command.description}'
             else:
-                print(f' -  "{command.command} {command.usage}"')
+                msg += f'\n -  "{command.command} {command.usage}"'
+        print(msg)
 
 
 @console_command
