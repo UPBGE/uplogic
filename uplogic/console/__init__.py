@@ -71,15 +71,15 @@ class ErrorConsole(StringIO):
         error(__s)
         # sys.__stderr__.write(__s)
 
+COLORS = {
+    'INFO': [1, 1, 1, 1],
+    'DEBUG': [1, 1, .6, 1],
+    'WARNING': [1, 1, .3, 1],
+    'ERROR': [1, .3, .3, 1],
+    'SUCCESS': [.3, 1, .3, 1]
+}
 
 class ConsoleLayout(Canvas):
-    colors = {
-        'INFO': [1, 1, 1, 1],
-        'DEBUG': [1, 1, .6, 1],
-        'WARNING': [1, 1, .3, 1],
-        'ERROR': [1, .3, .3, 1],
-        'SUCCESS': [.3, 1, .3, 1]
-    }
     max_msg = 50
     opacity = 1
     padding = [5, 10]
@@ -196,6 +196,7 @@ class ConsoleLayout(Canvas):
     def update(self):
         if self.input.edit != self.show:
             self.input.edit = self.show
+        move_goback = key_pulse('UPARROW') - key_pulse('DOWNARROW')
         if key_down(self.toggle_key):
             if not self._toggle_key:
                 self.show = not self.show
@@ -204,14 +205,14 @@ class ConsoleLayout(Canvas):
         elif not self.show:
             self._toggle_key = False
             return
-        elif key_pulse('DOWNARROW'):
-            self.input.text = ''
-            self._goback_index = -1
-        elif key_pulse('UPARROW'):
+        # elif key_pulse('DOWNARROW'):
+        #     self.input.text = ''
+        #     self._goback_index = -1
+        elif move_goback:
             if not self.issued_commands:
                 pass
             elif not self._toggle_key:
-                self._goback_index = cycle(self._goback_index + 1, 0, len(self.issued_commands) - 1)
+                self._goback_index = cycle(self._goback_index + move_goback, 0, len(self.issued_commands) - 1)
                 self.input.text = list(self.issued_commands.__reversed__())[self._goback_index]
                 self.input.move_cursor_to_end()
             self._toggle_key = True
@@ -234,7 +235,7 @@ class ConsoleLayout(Canvas):
         #     self.layout.remove_widget(self.layout.children[0])
         now = datetime.now()
         current_time = f'[{now.strftime("%H:%M:%S")}]' if time else "\t\t\t\t\t\t".replace('\t', '    ')
-        self.layout.add_widget(Label(text=f'>{current_time}  {msg}', pos=[5, 10], font_color=self.colors[type], shadow=True, font_size=self.font_size))
+        self.layout.add_widget(Label(text=f'>{current_time}  {msg}', pos=[5, 10], font_color=COLORS[type], shadow=True, font_size=self.font_size))
         self._prev_msg = msg
         self.arrange()
 
@@ -271,8 +272,9 @@ def get_console(create=False, toggle_key='F12', visible=False) -> ConsoleLayout:
 
 
 class ansicol:
-    RED = '\033[31m'
+    RED = '\033[31m\033[1m'
     GREEN = '\033[32m'
+    # GREEN = '\033[1minfo'
     YELLOW = '\033[33m'
     BYELLOW = '\033[93m'
     BBLUE = '\033[36m'
