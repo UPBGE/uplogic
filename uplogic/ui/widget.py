@@ -513,7 +513,7 @@ class Widget():
     def remove_widget(self, widget):
         '''Remove a `Widget` from this widget.
 
-        :param `widget`: `Widget` which to remove.
+        :param `widget`: `Widget` to remove.
         '''
         if widget in self.children:
             self.children.remove(widget)

@@ -19,10 +19,6 @@ from mathutils import Vector
 GLOBALS = {}
 
 
-def set_depth(depth):
-    ConsoleLayout.max_msg = depth
-
-
 def set_global(key, val):
     global GLOBALS
     GLOBALS[key] = val
@@ -58,9 +54,6 @@ def disable():
 
 class Console(StringIO):
 
-    # def writelines(self, __lines: Iterable[str]) -> None:
-    #     log(__lines, newline=False)
-
     def write(self, __s: str) -> int:
         log(__s)
         sys.__stdout__.write(__s)
@@ -69,7 +62,6 @@ class Console(StringIO):
 class ErrorConsole(StringIO):
     def write(self, __s: str) -> int:
         error(__s)
-        # sys.__stderr__.write(__s)
 
 COLORS = {
     'INFO': [1, 1, 1, 1],
@@ -80,7 +72,6 @@ COLORS = {
 }
 
 class ConsoleLayout(Canvas):
-    max_msg = 50
     opacity = 1
     padding = [5, 10]
     toggle_key = 'F12'
@@ -143,11 +134,13 @@ class ConsoleLayout(Canvas):
             self.layout.halign = 'left'
             self.layout.pos = (0, 1)
             self.layout.size = (1, .4)
+            self._position = val
         elif val == 'bottom':
             self.layout.valign = 'bottom'
             self.layout.halign = 'left'
             self.layout.pos = (0, 0)
             self.layout.size = (1, .4)
+            self._position = val
         else:
             error(f'"{val}" not recognized.')
 
@@ -231,8 +224,6 @@ class ConsoleLayout(Canvas):
             self.layout.children[-1].text += msg
             self._prev_msg = msg
             return
-        # if len(self.layout.children) > self.max_msg -1:
-        #     self.layout.remove_widget(self.layout.children[0])
         now = datetime.now()
         current_time = f'[{now.strftime("%H:%M:%S")}]' if time else "\t\t\t\t  ".replace('\t', '    ')
         self.layout.add_widget(Label(text=f'{current_time}  {msg}', pos=[5, 10], font_color=COLORS[type], shadow=True, font_size=self.font_size))
@@ -254,7 +245,6 @@ class ConsoleLayout(Canvas):
             child.pos[1] = y
             y += cheight * 1.5
             if child.pos[1] > lheight - cheight:
-                # sys.__stdout__.write(child)
                 self.layout.remove_widget(child)
             child.opacity = 1 - (i * (1/amount))
             child.shadow_color[3] = child.font_color[3]
