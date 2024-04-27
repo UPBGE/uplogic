@@ -50,8 +50,7 @@ class Texture(Filter2D):
         if not isinstance(texture, bpy.types.Image):
             error("'Texture': first argument requires an object of type 'bpy.types.Image'!")
             return
-        texture.gl_load()
-        self.settings = {'tex': texture, 'opacity': float(opacity), 'pos': Vector(pos), 'size': Vector(size)}
+        self.settings = {'opacity': float(opacity), 'pos': Vector(pos), 'size': Vector(size)}
         super().__init__(glsl, idx, {'tex': self.settings, 'opacity': self.settings, 'pos': self.settings, 'size': self.settings})
 
     @property
@@ -60,8 +59,10 @@ class Texture(Filter2D):
 
     @texture.setter
     def texture(self, val):
+        self.settings['tex'].gl_free()
         if not isinstance(val, bpy.types.Image):
             raise TypeError
+        val.gl_load()
         self.settings['tex'] = val
 
     @property
