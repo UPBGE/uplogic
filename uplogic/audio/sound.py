@@ -146,9 +146,8 @@ class ULSound():
         pass
 
 
-class ULSound2D(ULSound):
-    '''[DEPRECATED] Use `uplogic.audio.Sound2D` instead
-    
+class Sound2D(ULSound):
+    '''
     Non-spacial sound, e.g. Music or Voice-Overs.\n
     This class allows for modification of pitch and volume while playing.
 
@@ -159,7 +158,7 @@ class ULSound2D(ULSound):
     :param `aud_sys`: Audiosystem to play this sound on.
     '''
 
-    _deprecated = True
+    _deprecated = False
 
     def __init__(
         self,
@@ -255,8 +254,9 @@ class ULSound2D(ULSound):
             return
 
 
-class Sound2D(ULSound2D):
-    '''
+class ULSound2D(Sound2D):
+    '''[DEPRECATED] Use `uplogic.audio.Sound2D` instead
+
     Non-spacial sound, e.g. Music or Voice-Overs.\n
     This class allows for modification of pitch and volume while playing.
 
@@ -267,7 +267,7 @@ class Sound2D(ULSound2D):
     :param `aud_sys`: Audiosystem to play this sound on.
     '''
 
-    _deprecated = False
+    _deprecated = True
 
 
 class Sample2D(Sound2D):
@@ -325,12 +325,12 @@ class Sample2D(Sound2D):
         self.lowpass = self.aud_system.lowpass
 
 
-class ULSound3D(ULSound):
+class Sound3D(ULSound):
     '''Spacial sound, e.g. World Effects or Voices.\n
     This class allows for modification of pitch and volume as well as other attributes while playing.
     '''
 
-    _deprecated = True
+    _deprecated = False
 
     @property
     def position(self):
@@ -556,8 +556,8 @@ class ULSound3D(ULSound):
             sound.stop()
 
 
-class Sound3D(ULSound3D):
-    _deprecated = False
+class ULSound3D(Sound3D):
+    _deprecated = True
 
 
 class Sample3D(Sound3D):
@@ -653,9 +653,9 @@ class Sample3D(Sound3D):
         self.update(True)
 
 
-class ULSpeaker2D(ULSound2D):
+class Speaker2D(Sound2D):
 
-    _deprecated = True
+    _deprecated = False
 
     def __init__(
         self,
@@ -680,13 +680,13 @@ class ULSpeaker2D(ULSound2D):
         )
 
 
-class Speaker2D(ULSpeaker2D):
-    _deprecated = False
-
-
-class ULSpeaker3D(ULSound3D):
-
+class ULSpeaker2D(Speaker2D):
     _deprecated = True
+
+
+class Speaker3D(Sound3D):
+
+    _deprecated = False
 
     def __init__(
         self,
@@ -721,5 +721,5 @@ class ULSpeaker3D(ULSound3D):
         )
 
 
-class Speaker3D(ULSpeaker3D):
-    _deprecated = False
+class ULSpeaker3D(Speaker3D):
+    _deprecated = True

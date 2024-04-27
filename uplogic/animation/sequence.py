@@ -7,9 +7,8 @@ from bpy.types import ShaderNodeTexImage
 from bpy.types import Material
 
 
-class ULSequence():
-    '''[DEPRECATED] Use `uplogic.animation.Sequence` instead
-
+class Sequence():
+    '''
     Play an image animation through a material node.
 
     :param `material`: Name of the material to play the animation on.
@@ -21,7 +20,7 @@ class ULSequence():
     :param `mode`: Animation mode, `str` of [`play`, `loop`, `pingpong`]
     '''
 
-    _deprecated = True
+    _deprecated = False
 
     @property
     def frame(self):
@@ -183,8 +182,11 @@ class ULSequence():
             self.stop()
 
 
-class Sequence(ULSequence):
-    '''Play an image animation through a material node.
+class ULSequence(Sequence):
+
+    '''[DEPRECATED] Use `uplogic.animation.Sequence` instead
+
+    Play an image animation through a material node.
 
     :param `material`: Name of the material to play the animation on.
     Each Object with this material applied will play the animation.
@@ -194,4 +196,4 @@ class Sequence(ULSequence):
     :param `fps`: Frames per second.
     :param `mode`: Animation mode, `str` of [`play`, `loop`, `pingpong`]
     '''
-    _deprecated = False
+    _deprecated = True

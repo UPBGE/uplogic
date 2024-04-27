@@ -65,9 +65,9 @@ def remove_constraint(constraint: GameConstraint) -> None:
     constraints.removeConstraint(constraint.getConstraintId())
 
 
-class ULTrackTo():
+class TrackTo():
 
-    _deprecated = True
+    _deprecated = False
 
     def __init__(
         self,
@@ -125,11 +125,11 @@ class ULTrackTo():
             self.rotate_func(self.game_object, self.target, self.front, self.speed)
 
 
-class TrackTo(ULTrackTo):
-    _deprecated = False
+class ULTrackTo(TrackTo):
+    _deprecated = True
 
 
-class ULSpring():
+class Spring():
     """Spring Physics Constraint. The two objects connected by the string will
     be pulled towards each other if the string is streched, optionally they will
     be pushed apart when the spring is being compacted.
@@ -147,7 +147,7 @@ class ULSpring():
     :param `visualize`: Enable a visual representation of the spring.
     """
 
-    _deprecated = True
+    _deprecated = False
 
     def __init__(
         self,
@@ -240,5 +240,5 @@ class ULSpring():
             rbt.applyImpulse(o.worldPosition, get_direction(t, o) * force)
 
 
-class Spring(ULSpring):
-    _deprecated = False
+class ULSpring(Spring):
+    _deprecated = True

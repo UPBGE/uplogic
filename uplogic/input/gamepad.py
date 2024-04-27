@@ -314,7 +314,7 @@ class ULGamePad(Gamepad):
     _deprecated = True
 
 
-class ULGamepadLook():
+class GamepadLook():
     """Automatically track the mouse movement and translate it to a rotate a
     body and optionally a head.
 
@@ -337,7 +337,7 @@ class ULGamepadLook():
     :param `active`: Whether to start this component in active or inactive mode
     (can be changed later).
     """
-    _deprecated = True
+    _deprecated = False
     def __init__(
         self,
         obj: GameObject,
@@ -512,8 +512,8 @@ class ULGamepadLook():
         self.done = True
 
 
-class GamepadLook(ULGamepadLook):
-    _deprecated = False
+class ULGamepadLook(GamepadLook):
+    _deprecated = True
 
 
 def gamepad_active(idx) -> bool:

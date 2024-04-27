@@ -3,7 +3,7 @@ from bge import logic
 from bge.types import KX_GameObject as GameObject
 
 
-class ULCollision():
+class Collision():
     """Collision Handler.
 
     Not intended for manual use."""
@@ -17,7 +17,7 @@ class ULCollision():
     _old_objs = []
     done_objs = []
 
-    _deprecated = True
+    _deprecated = False
 
     def __init__(
         self,
@@ -86,8 +86,8 @@ class ULCollision():
         logic.getCurrentScene().pre_draw.remove(self.reset)
 
 
-class Collision(ULCollision):
-    _deprecated = False
+class ULCollision(Collision):
+    _deprecated = True
 
 
 def on_collision(

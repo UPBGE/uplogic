@@ -144,6 +144,8 @@ class Label(Widget):
 
     def draw(self):
         super()._setup_draw()
+        if self.parent is None:
+            return
         parsize = self.parent._draw_size
         relative = self.relative.get('font_size', False)
         font = self.font

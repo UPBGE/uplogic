@@ -429,7 +429,7 @@ def get_curve_length(curve: KX_GameObject):
     return sum(s.calc_length() for s in curve.blenderObject.evaluated_get(depsgraph).data.splines)
 
 
-class ULCurve(GameObject):
+class Curve(GameObject):
     """Wrapper class for creating and handling curves more easily.
 
     :param `name`: Name of this curve object.
@@ -442,7 +442,7 @@ class ULCurve(GameObject):
     `None` to use scene collection.
     """
 
-    _deprecated = True
+    _deprecated = False
 
     def __init__(
         self,
@@ -525,8 +525,8 @@ class ULCurve(GameObject):
         self.game_object.blenderObject.data.path_duration = val
 
 
-class Curve(ULCurve):
-    _deprecated = False
+class ULCurve(Curve):
+    _deprecated = True
 
 
 class Mesh():

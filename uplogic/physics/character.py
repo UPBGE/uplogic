@@ -6,8 +6,8 @@ from mathutils import Vector
 import bpy
 
 
-class ULCharacter():
-    _deprecated = True
+class Character():
+    _deprecated = False
 
     def __init__(self, owner: GameObject) -> None:
         if self._deprecated:
@@ -126,5 +126,5 @@ class ULCharacter():
         self.wrapper.jump()
 
 
-class Character(ULCharacter):
-    _deprecated = False
+class ULCharacter(Character):
+    _deprecated = True

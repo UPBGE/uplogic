@@ -18,8 +18,8 @@ FOURWD = 'ALL'
 This will adress all wheels on the vehicle."""
 
 
-class ULVehicle():
-    _deprecated = True
+class Vehicle():
+    _deprecated = False
 
     def __init__(
         self,
@@ -312,5 +312,5 @@ class ULVehicle():
         self.steering = power
 
 
-class Vehicle(ULVehicle):
-    _deprecated = False
+class ULVehicle(Vehicle):
+    _deprecated = True

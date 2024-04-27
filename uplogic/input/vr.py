@@ -18,7 +18,7 @@ def get_vr_headset_data() -> tuple[Vector, Matrix]:
     return (Vector(session.viewer_pose_location), Quaternion(session.viewer_pose_rotation).to_matrix())
 
 
-class ULControllerVR():
+class VRController():
     """Wrapper class for VR Controllers.
 
     This wrapper provides `position`, `position_aim`, `orientation`,
@@ -27,7 +27,7 @@ class ULControllerVR():
     :param `idx`: Controller index; 0 for left, 1 for right controller.
     """
 
-    _deprecated = True
+    _deprecated = False
 
     def __init__(self, idx: int=0) -> None:
         if self._deprecated:
@@ -135,18 +135,18 @@ class ULControllerVR():
         print("Attribute 'thumbstick' of 'ULControllerVR' is read-only!")
 
 
-class VRController(ULControllerVR):
-    _deprecated = False
+class ULControllerVR(VRController):
+    _deprecated = True
 
 
-class ULHeadsetVR():
+class VRHeadset():
     """Wrapper class for a VR Headset.
 
     This wrapper provides a `position` and an `orientation`
     attribute.
     """
 
-    _deprecated = True
+    _deprecated = False
 
     def __init__(self) -> None:
         if self._deprecated:
@@ -172,7 +172,7 @@ class ULHeadsetVR():
         print("Attribute 'orientation' of 'ULHeadsetVR' is read-only!")
 
 
-class ULHeadsetVRWrapper(ULHeadsetVR):
+class ULHeadsetVRWrapper(VRHeadset):
     """Wrapper class for a VR Headset to be used for audio calculations.
 
     Not intended for manual use.
@@ -203,20 +203,19 @@ class ULHeadsetVRWrapper(ULHeadsetVR):
         return logic.getCurrentScene().active_camera.rayCast(obj_to, obj_from, distance, xray=xray)
 
 
-class VRHeadset(ULHeadsetVR):
-    _deprecated = False
+class ULHeadsetVR(VRHeadset):
+    _deprecated = True
 
 
-class ULCharacterVR():
+class VRCharacter():
     """Wrapper class for all VR Devices. This wrapper contains 2 `ULControllerVR` objects as well as one
     `ULHeadsetVR` object.
 
     Optionally, `KX_GameObjects` can be defined for both left and right controller. These objects will by
     automatically synched with their respective controller's position and orientation.
-
-    This class provides a `position` an `orientation` and a `scale` attribute.
     """
-    _deprecated = True
+    _deprecated = False
+
     def __init__(
         self,
         left_hand_object: GameObject = None,
@@ -268,5 +267,5 @@ class ULCharacterVR():
         print("Attribute 'scale' of 'ULHeadsetVR' is read-only!")
 
 
-class VRCharacter(ULCharacterVR):
-    _deprecated = False
+class ULCharacterVR(VRCharacter):
+    _deprecated = True

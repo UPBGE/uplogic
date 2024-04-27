@@ -22,8 +22,8 @@ class ULBuoy():
         raise NotImplementedError
 
 
-class ULFlotsam(ULBuoy):
-    _deprecated = True
+class Flotsam(ULBuoy):
+    _deprecated = False
 
     def __init__(self, game_object, buoyancy=1, height=200, align=True) -> None:
         if self._deprecated:
@@ -70,12 +70,12 @@ class ULFlotsam(ULBuoy):
         logic.getCurrentScene().pre_draw.remove(self.update)
 
 
-class Flotsam(ULFlotsam):
-    _deprecated = False
-
-
-class ULShip(ULBuoy):
+class ULFlotsam(Flotsam):
     _deprecated = True
+
+
+class Ship(ULBuoy):
+    _deprecated = False
 
     def __init__(self, game_object, buoyancy=1, height=200, water=None) -> None:
         if self._deprecated:
@@ -131,5 +131,5 @@ class ULShip(ULBuoy):
         logic.getCurrentScene().pre_draw.remove(self.update)
 
 
-class Ship(ULShip):
-    _deprecated = False
+class ULShip(Ship):
+    _deprecated = True

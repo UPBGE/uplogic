@@ -150,10 +150,10 @@ def mouse_wheel(tap: bool = False) -> int:
         )
 
 
-class ULMouse():
+class Mouse():
     """Mouse Wrapper for accessing mouse data."""
 
-    _deprecated = True
+    _deprecated = False
 
     def __init__(self) -> None:
         if self._deprecated:
@@ -243,13 +243,14 @@ class ULMouse():
         return mouse_tap(MOUSE_BUTTONS[button])
 
 
-class Mouse(ULMouse):
-    _deprecated = False
+class ULMouse(Mouse):
+    _deprecated = True
+
 
 MOUSE = Mouse()
 
 
-class ULMouseLook():
+class MouseLook():
     """Automatically track the mouse movement and translate it to a rotate a
     body and optionally a head.
 
@@ -273,7 +274,7 @@ class ULMouseLook():
     (can be changed later).
     """
 
-    _deprecated = True
+    _deprecated = False
 
     def __init__(
         self,
@@ -471,5 +472,5 @@ class ULMouseLook():
         self.done = True
 
 
-class MouseLook(ULMouseLook):
-    _deprecated = False
+class ULMouseLook(MouseLook):
+    _deprecated = True

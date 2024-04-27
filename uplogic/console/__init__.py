@@ -8,8 +8,9 @@ from uplogic.data import GlobalDB
 from uplogic.utils.raycasting import raycast_mouse
 from uplogic.utils.math import world_to_screen
 from uplogic.utils.math import cycle
+from uplogic.utils.math import clamp
 from uplogic.input import key_down, mouse_down, key_pulse, mouse_wheel
-import bpy
+import bpy, blf
 import sys, os
 from datetime import datetime
 from mathutils import Vector
@@ -35,6 +36,7 @@ def _get_globals():
     GLOBALS['bge'] = bge
     GLOBALS['logic'] = logic
     GLOBALS['render'] = render
+    GLOBALS['console'] = get_console()
     for obj in scene.objects:
         GLOBALS[obj.blenderObject.name] = obj
     return GLOBALS
@@ -86,8 +88,9 @@ class ConsoleLayout(Canvas):
     def __init__(self, toggle_key='F12', visible=False):
         scene = logic.getCurrentScene()
         self.toggle_key = toggle_key
+        self.issued_commands = []
         self._mouse_down = False
-        self._goback_index = 0
+        self._goback_index = -1
         super().__init__()
         if not getattr(bpy.context.scene, 'screen_console_open', False) and not visible:
             self.show = False
@@ -108,8 +111,62 @@ class ConsoleLayout(Canvas):
         self.nameplate = Label(text='', shadow=True, relative={'pos': True}, halign='center', font_size=13)
         self.nameplate.update = self.update_nameplate
         self.canvas.add_widget(self.nameplate)
+        self.position = 'bottom'
+        self.font_size = 14
+
+    @property
+    def position(self):
+        return self._position
+
+    @position.setter
+    def position(self, val):
+        if val == 'center':
+            self.layout.valign = val
+            self.layout.halign = val
+            self.layout.pos = (.5, .5)
+            self.layout.size = (.4, .4)
+            self._position = val
+        elif val == 'left':
+            self.layout.valign = 'bottom'
+            self.layout.halign = val
+            self.layout.size = (.4, 1)
+            self.layout.pos = (0, 0)
+            self._position = val
+        elif val == 'right':
+            self.layout.valign = 'bottom'
+            self.layout.halign = val
+            self.layout.pos = (1, 0)
+            self.layout.size = (.4, 1)
+            self._position = val
+        elif val == 'top':
+            self.layout.valign = 'top'
+            self.layout.halign = 'left'
+            self.layout.pos = (0, 1)
+            self.layout.size = (1, .4)
+        elif val == 'bottom':
+            self.layout.valign = 'bottom'
+            self.layout.halign = 'left'
+            self.layout.pos = (0, 0)
+            self.layout.size = (1, .4)
+        else:
+            error(f'"{val}" not recognized.')
+
+    @property
+    def font_size(self):
+        return self._font_size
+
+    @font_size.setter
+    def font_size(self, val):
+        val = clamp(val, 5, 30)
+        self._font_size = int(val)
+        for c in self.layout.children:
+            c.font_size = int(val)
+        self.nameplate.font_size = int(val)
+        self.arrange()
 
     def on_enter(self):
+        self.issued_commands.append(self.input.text)
+        sys.__stdout__.write(f'{self.input.text}\n')
         self.add_message(self.input.text)
         command_name = self.input.text.split(' ')[0]
         command = Commands.commands.get(command_name)
@@ -119,10 +176,10 @@ class ConsoleLayout(Canvas):
             try:
                 exec(self.input.text, _get_globals())
             except Exception as e:
-                error(f'Error occured when executing command "{command_name}":')
-                error(e)
-        self._goback_index = 0
+                error(f'Error occured when executing command "{command_name}": {e}')
+        self._goback_index = -1
         self.input.text = ''
+        self.input.edit = True
 
     def update_nameplate(self):
         ray = raycast_mouse()
@@ -137,22 +194,26 @@ class ConsoleLayout(Canvas):
         self._mouse_down = mdown
 
     def update(self):
+        if self.input.edit != self.show:
+            self.input.edit = self.show
         if key_down(self.toggle_key):
             if not self._toggle_key:
                 self.show = not self.show
                 self.opacity = 1
             self._toggle_key = True
         elif not self.show:
+            self._toggle_key = False
             return
         elif key_pulse('DOWNARROW'):
             self.input.text = ''
-            self._goback_index = 0
+            self._goback_index = -1
         elif key_pulse('UPARROW'):
-            if not self._toggle_key:
-                line = self.layout._children_reversed[self._goback_index]
-                self.input.text = line.text[13:] if line is not self.input else ''
+            if not self.issued_commands:
+                pass
+            elif not self._toggle_key:
+                self._goback_index = cycle(self._goback_index + 1, 0, len(self.issued_commands) - 1)
+                self.input.text = list(self.issued_commands.__reversed__())[self._goback_index]
                 self.input.move_cursor_to_end()
-                self._goback_index = cycle(self._goback_index + 1, 0, len(self.layout.children) - 1)
             self._toggle_key = True
         else:
             self._toggle_key = False
@@ -169,27 +230,35 @@ class ConsoleLayout(Canvas):
             self.layout.children[-1].text += msg
             self._prev_msg = msg
             return
-        if len(self.layout.children) > self.max_msg -1:
-            self.layout.remove_widget(self.layout.children[0])
+        # if len(self.layout.children) > self.max_msg -1:
+        #     self.layout.remove_widget(self.layout.children[0])
         now = datetime.now()
         current_time = f'[{now.strftime("%H:%M:%S")}]' if time else "\t\t\t\t\t\t".replace('\t', '    ')
-        self.layout.add_widget(Label(text=f'>{current_time}  {msg}', pos=[5, 10], font_color=self.colors[type], shadow=True))
-        dim = self.layout.children[0].dimensions[1]
+        self.layout.add_widget(Label(text=f'>{current_time}  {msg}', pos=[5, 10], font_color=self.colors[type], shadow=True, font_size=self.font_size))
+        self._prev_msg = msg
+        self.arrange()
+
+    def arrange(self):
+        # dim = self.layout.children[0].dimensions[1]
+        blf.size(0, self.font_size)
+        dim = blf.dimensions(0, 'A')
+        cheight = dim[1]
+        cwidth = dim[0]
         lheight = self.layout._draw_size[1]
-        amount = lheight / dim
-        y = 40
+        amount = lheight / cheight
+        y = cheight * 2.4 * 1.5
         for i, child in enumerate(self.layout._children_reversed):
             if child is self.input:
                 continue
             child.pos[1] = y
-            y+=15
-            if child.pos[1] > lheight - dim:
+            y += cheight * 1.5
+            if child.pos[1] > lheight - cheight:
+                # sys.__stdout__.write(child)
                 self.layout.remove_widget(child)
             child.opacity = 1 - (i * (1/amount))
             child.shadow_color[3] = child.font_color[3]
-        self.input.pos[1] = 20
-        self.input.pos[0] = 5
-        self._prev_msg = msg
+        self.input.pos[1] = self.font_size + 3
+        self.input.pos[0] = cwidth
 
 
 def get_console(create=False, toggle_key='F12', visible=False) -> ConsoleLayout:
@@ -470,3 +539,16 @@ class HelpCommand(Command):
                 print(f' -  "{command.command} {command.usage}"    -    {command.description}')
             else:
                 print(f' -  "{command.command} {command.usage}"')
+
+
+@console_command
+class FontSizeCommand(Command):
+    command = 'fontsize'
+    arg_count = 1
+    usage = 'PX_SIZE'
+    description = 'Modify the font size of the console.'
+
+    @classmethod
+    def execute(cls, args):
+        size = args[0]
+        get_console().font_size = int(size)

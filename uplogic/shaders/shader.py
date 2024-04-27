@@ -24,7 +24,7 @@ def set_filter_state(pass_idx, state=True):
     filter.active = state
 
 
-class ULFilter():
+class Filter2D():
     '''Wrapper for KX_2DFilter.
 
     :param `program`: GLSL code as `str`.
@@ -33,7 +33,7 @@ class ULFilter():
     the filter in the form "key of dictionary".
     '''
 
-    _deprecated = True
+    _deprecated = False
 
     @property
     def active(self):
@@ -137,13 +137,11 @@ class ULFilter():
             self._filter.setTexture(0, value.bindcode, name)
 
 
-class Filter2D(ULFilter):
-    _deprecated = False
+class ULFilter(Filter2D):
+    _deprecated = True
 
 
-class Attachment2D(ULFilter):
-
-    _deprecated = False
+class Attachment2D(Filter2D):
 
     def __init__(self, program: str, idx: int = None, uniforms: dict = {}) -> None:
         super().__init__(program, idx, uniforms)

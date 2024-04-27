@@ -46,13 +46,12 @@ class ULMusicEffect():
             self._fade_event = schedule_callback(self.fade_in, arg=factor)
 
 
-class ULMusic(ULMusicEffect):
-    '''[DEPRECATED] Use `uplogic.audio.Music` instead
-
+class Music(ULMusicEffect):
+    '''
     Management class for controlling multiple music tracks.
 
     :param `name`: Name of this music.'''
-    _deprecated = True
+    _deprecated = False
 
     def __init__(
         self,
@@ -164,19 +163,20 @@ class ULMusic(ULMusicEffect):
         self.position = 0.0
 
 
-class Music(ULMusic):
-    _deprecated = False
+class ULMusic(Music):
+    """[DEPRECATED] Use `uplogic.audio.Music` instead"""
+
+    _deprecated = True
 
 
-class ULMusicTrack(ULMusicEffect):
-    '''[DEPRECATED] Use `uplogic.audio.MusicTrack` instead
-
-    Track to be played on a `ULMusic` instance.
+class MusicTrack(ULMusicEffect):
+    '''
+    Track to be played on a `Music` instance.
     
     :param `music`: The music object this track will be played on.
     :param `sound`: Path to the soundfile of this track.
     :param `name`: Name of this track (e.g. "Drums).'''
-    _deprecated = True
+    _deprecated = False
 
     def __init__(
         self,
@@ -234,5 +234,5 @@ class ULMusicTrack(ULMusicEffect):
         self.music.tracks.remove(self)
 
 
-class MusicTrack(ULMusicTrack):
-    _deprecated = False
+class ULMusicTrack(MusicTrack):
+    _deprecated = True

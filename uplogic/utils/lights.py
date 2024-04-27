@@ -19,7 +19,7 @@ def make_unique_light(light: KX_GameObject) -> KX_GameObject:
     return light
 
 
-class ULLight(GameObject):
+class Light(GameObject):
     """Wrapper for `KX_LightObject`. Can either convert a given scene light or create a new one.
 
     :param `name`: The name of the new light (only relevant if `light` argument is None).
@@ -27,7 +27,7 @@ class ULLight(GameObject):
     :param `light`: The scene light to be converted. Leave at `None` to create new.
     """
 
-    _deprecated = True
+    _deprecated = False
 
     def __init__(
         self,
@@ -139,5 +139,5 @@ class ULLight(GameObject):
         self.game_object.blenderObject.data.shadow_soft_size = val
 
 
-class Light(ULLight):
-    _deprecated = False
+class ULLight(Light):
+    _deprecated = True

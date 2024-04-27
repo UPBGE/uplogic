@@ -62,14 +62,17 @@ class File3D(Sound):
         self.channel.sounds.append(self)
         sound = FMod.studio.core_system.create_sound(path)
         self.channel: pyfmodex.channel.Channel = sound.play()
-    
+        self.channel.paused = True
+
     def update(self):
+        self.channel.paused = False
         if not self.channel.is_playing:
             self.stop()
             return
 
     def stop(self):
         self.channel.stop()
+        # self.channel.current_sound.release()
         self.channel.sounds.remove(self)
 
 
