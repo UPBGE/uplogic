@@ -39,14 +39,22 @@ INCLUDE_MAKEFILE?=include.mk
 # `/path/to/dir/:/path/to/other/dir`. Gets inserted first, thus gets searched
 # first.
 # No default value.
+ifeq ("$(OS)", "Windows_NT")
+EXTRA_PATH?=./bin/3.6/python/bin:./bin/3.6/python/Scripts
+else
 EXTRA_PATH?=./bin/3.6/python/bin
+endif
 
 ## core.mxenv
 
 # Primary Python interpreter to use. It is used to create the
 # virtual environment if `VENV_ENABLED` and `VENV_CREATE` are set to `true`.
 # Default: python3
+ifeq ("$(OS)", "Windows_NT")
+PRIMARY_PYTHON?=python
+else
 PRIMARY_PYTHON?=python3.10
+endif
 
 # Minimum required Python version.
 # Default: 3.7
