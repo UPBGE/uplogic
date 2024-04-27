@@ -235,7 +235,7 @@ class ConsoleLayout(Canvas):
         #     self.layout.remove_widget(self.layout.children[0])
         now = datetime.now()
         current_time = f'[{now.strftime("%H:%M:%S")}]' if time else "\t\t\t\t  ".replace('\t', '    ')
-        self.layout.add_widget(Label(text=f'>{current_time}  {msg}', pos=[5, 10], font_color=COLORS[type], shadow=True, font_size=self.font_size))
+        self.layout.add_widget(Label(text=f'{current_time}  {msg}', pos=[5, 10], font_color=COLORS[type], shadow=True, font_size=self.font_size))
         self._prev_msg = msg
         self.arrange()
 
