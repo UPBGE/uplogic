@@ -59,7 +59,7 @@ class Widget():
         self.use_clipping = False
         self.copy_height = False
         self.copy_width = False
-        self.opacity = 1
+        self.opacity = 1.
         self.z = 0
         self._active = True
         self.start()
