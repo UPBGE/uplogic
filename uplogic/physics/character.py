@@ -11,7 +11,8 @@ class Character():
 
     def __init__(self, owner: GameObject) -> None:
         if self._deprecated:
-            print('Warning: ULCharacter class will be renamed to "Character" in future releases!')
+            from uplogic.console import warning
+            warning('Warning: ULCharacter class will be renamed to "Character" in future releases!')
         self.owner = owner
         self.wrapper = getCharacter(owner)
         self._old_position = owner.worldPosition.copy()

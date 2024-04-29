@@ -33,7 +33,8 @@ class Vehicle():
         steer_axle: str = FWD
     ) -> None:
         if self._deprecated:
-            print('Warning: ULVehicle class will be renamed to "Vehicle" in future releases!')
+            from uplogic.console import warning
+            warning('Warning: ULVehicle class will be renamed to "Vehicle" in future releases!')
         orig_ori = body.localOrientation.copy()
         body.localOrientation = Euler((0, 0, 0), 'XYZ')
         ph_id = body.getPhysicsId()

@@ -9,6 +9,7 @@ from uplogic.audio import ULAudioSystem
 from uplogic.audio import get_audio_system
 from uplogic.events import schedule_callback
 from uplogic.utils.math import interpolate
+from uplogic.console import warning
 from uplogic.utils import DELTA_TIME
 import bpy
 import aud
@@ -171,7 +172,7 @@ class Sound2D(ULSound):
         aud_sys: str = 'default'
     ):
         if self._deprecated:
-            print('Warning: ULSound2D class will be renamed to "Sound2D" in future releases!')
+            warning('Warning: ULSound2D class will be renamed to "Sound2D" in future releases!')
         self.file = file
         self._volume = 1
         self.finished = False
@@ -361,7 +362,7 @@ class Sound3D(ULSound):
         aud_sys: str = 'default'
     ):
         if self._deprecated:
-            print('Warning: ULSound3D class will be renamed to "Sound3D" in future releases!')
+            warning('Warning: ULSound3D class will be renamed to "Sound3D" in future releases!')
         self._is_vector = isinstance(speaker, Vector)
         self.file = file
         self.finished = False
@@ -666,7 +667,7 @@ class Speaker2D(Sound2D):
         aud_sys: str = 'default'
     ):
         if self._deprecated:
-            print('Warning: ULSpeaker2D class will be renamed to "Speaker2D" in future releases!')
+            warning('Warning: ULSpeaker2D class will be renamed to "Speaker2D" in future releases!')
         speaker_data = speaker.blenderObject.data
         # ULSound2D()
         super().__init__(
@@ -700,7 +701,7 @@ class Speaker3D(Sound3D):
         aud_sys: str = 'default'
     ):
         if self._deprecated:
-            print('Warning: ULSpeaker3D class will be renamed to "Speaker3D" in future releases!')
+            warning('Warning: ULSpeaker3D class will be renamed to "Speaker3D" in future releases!')
         speaker_data = speaker.blenderObject.data
         super().__init__(
             speaker,

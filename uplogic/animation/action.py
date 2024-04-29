@@ -8,6 +8,7 @@ from random import random
 from uplogic.animation import ActionSystem
 from uplogic.animation.actionsystem import get_action_system
 from uplogic.events import schedule
+from uplogic.console import warning
 import bpy
 from uplogic.utils.math import clamp
 
@@ -83,7 +84,7 @@ class Action():
         keep: bool = False
     ):
         if self._deprecated:
-            print('Warning: ULAction class will be renamed to "Action" in future releases!')
+            warning('Warning: ULAction class will be renamed to "Action" in future releases!')
         self._fps_factor = bpy.context.scene.render.fps / 60
         self._locked = False
         self._speed = speed
@@ -106,7 +107,8 @@ class Action():
         '''Priority of this animation; This is only relevant if multiple
         animations are playing on the same layer.'''
         if priority != 0:
-            print("'uplogic.animation.Action' attribute 'priority' is disabled.")
+            from uplogic.console import debug
+            debug("'uplogic.animation.Action' attribute 'priority' is disabled.")
         self.blendin = blendin
         '''The amount of blending frames when starting the animation.'''
         self.layer = layer

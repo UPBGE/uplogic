@@ -14,6 +14,7 @@ import bpy, blf
 import sys, os
 from datetime import datetime
 from mathutils import Vector
+import uplogic
 
 
 GLOBALS = {}
@@ -30,6 +31,7 @@ def _get_globals():
     GLOBALS['scene'] = scene
     GLOBALS['bpy'] = bpy
     GLOBALS['bge'] = bge
+    GLOBALS['uplogic'] = uplogic
     GLOBALS['logic'] = logic
     GLOBALS['render'] = render
     GLOBALS['console'] = get_console()
@@ -66,7 +68,7 @@ class ErrorConsole(StringIO):
 COLORS = {
     'INFO': [1, 1, 1, 1],
     'DEBUG': [1, 1, .6, 1],
-    'WARNING': [1, 1, .3, 1],
+    'WARNING': [1, .8, .2, 1],
     'ERROR': [1, .3, .3, 1],
     'SUCCESS': [.3, 1, .3, 1]
 }
@@ -102,8 +104,8 @@ class ConsoleLayout(Canvas):
         self.nameplate = Label(text='', shadow=True, relative={'pos': True}, halign='center', font_size=13)
         self.nameplate.update = self.update_nameplate
         self.canvas.add_widget(self.nameplate)
-        self.position = 'bottom'
         self.font_size = 14
+        self.position = 'bottom'
 
     @property
     def position(self):
@@ -143,6 +145,7 @@ class ConsoleLayout(Canvas):
             self._position = val
         else:
             error(f'"{val}" not recognized.')
+        self.arrange()
 
     @property
     def font_size(self):
@@ -198,15 +201,15 @@ class ConsoleLayout(Canvas):
         elif not self.show:
             self._toggle_key = False
             return
-        # elif key_pulse('DOWNARROW'):
-        #     self.input.text = ''
-        #     self._goback_index = -1
         elif move_goback:
             if not self.issued_commands:
                 pass
             elif not self._toggle_key:
-                self._goback_index = cycle(self._goback_index + move_goback, 0, len(self.issued_commands) - 1)
-                self.input.text = list(self.issued_commands.__reversed__())[self._goback_index]
+                self._goback_index = clamp(self._goback_index + move_goback, -1, len(self.issued_commands) - 1)
+                if self._goback_index < 0:
+                    self.input.text = ''
+                else:
+                    self.input.text = list(self.issued_commands.__reversed__())[self._goback_index]
                 self.input.move_cursor_to_end()
             self._toggle_key = True
         else:
@@ -231,7 +234,6 @@ class ConsoleLayout(Canvas):
         self.arrange()
 
     def arrange(self):
-        # dim = self.layout.children[0].dimensions[1]
         blf.size(0, self.font_size)
         dim = blf.dimensions(0, 'A')
         cheight = dim[1]
@@ -295,7 +297,7 @@ def warning(msg):
     for msg in str(msg).split('\n'):
         if msg:
             msg.replace('  ', '    ')
-            console.add_message(f'WARNING:\t{msg}', 'WARNING', time=show_time)
+            console.add_message(f'{msg}', 'WARNING', time=show_time)
             show_time = False
             sys.__stdout__.write(f'{sysmsg}\n')
 
