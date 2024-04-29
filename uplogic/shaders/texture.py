@@ -60,7 +60,7 @@ class Texture(Filter2D):
 
     @texture.setter
     def texture(self, val):
-        self.settings['tex'].gl_free()
+        # self.settings['tex'].gl_free()
         if not isinstance(val, bpy.types.Image):
             raise TypeError
         val.gl_load()
