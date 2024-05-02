@@ -61,7 +61,7 @@ class Filter2D():
         self.idx = idx
         scene = logic.getCurrentScene()
         self.manager = scene.filterManager
-        self.uniforms = uniforms
+        self._uniforms = uniforms
         self._filter = None
         FilterSystem.add_filter(self)
 
@@ -80,19 +80,19 @@ class Filter2D():
             raise PassIndexOccupiedError(self.idx)
         FilterSystem.filters[self.idx] = self
         self._filter = self.manager.addFilter(self.idx, 12, self.program)
-        uniforms = self.uniforms
+        uniforms = self._uniforms
         for uniform in uniforms:
-            self.set_uniform(uniform, uniforms.get(uniform))
+            self.set_uniform(uniform, uniforms[uniform].get(uniform))
 
     def activate(self):
         self._filter.enabled = True
-        if self.uniforms.keys():
+        if self._uniforms.keys():
             logic.getCurrentScene().post_draw.append(self.update)
 
     def update(self):
-        uniforms = self.uniforms
+        uniforms = self._uniforms
         for uniform in uniforms:
-            self.set_uniform(uniform, uniforms.get(uniform))
+            self.set_uniform(uniform, uniforms[uniform].get(uniform))
 
     def pause(self):
         self._filter.enabled = False
