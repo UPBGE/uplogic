@@ -2,6 +2,8 @@ import sys, os
 from ..console import error
 from ..console import success
 from ..console import debug
+from ..utils.math import get_local
+from ..events import schedule
 from sys import platform
 import bge
 from mathutils import Vector
@@ -88,17 +90,27 @@ class File2D(Sound):
 class File3D(File2D):
     _mode = flags.MODE.THREED
 
-    def __init__(self, path, channel='default') -> None:
+    def __init__(self, path, position=Vector((0, 0, 0)), channel='default') -> None:
         super().__init__(path, channel)
 
 
 class Event(Sound):
     
-    def __init__(self, name, channel='default') -> None:
+    def __init__(self, name, position=Vector((0, 0, 0)), channel='default') -> None:
         self.channel = FMod.channels.get(channel, None)
-        self.channel.sounds.append(self)
         self.evt = FMod.studio.get_event(name).create_instance()
         self.evt.start()
+        FMod.studio.update()
+        self._position = position
+        self.channel.sounds.append(self)
+
+    @property
+    def position(self):
+        return self._position
+
+    @position.setter
+    def position(self, val):
+        self._position = Vector(val)
     
     def update(self):
         if self.evt.playback_state is enums.PLAYBACK_STATE.STOPPED:
@@ -106,14 +118,13 @@ class Event(Sound):
             return
         for setting in self.channel:
             self.evt.set_parameter_by_name(setting, self.channel[setting])
-        # if self.evt.channel_group.mode is not flags.MODE.THREED:
-        #     self.evt.channel_group.mode = flags.MODE.THREED
-        # self.evt.channel_group.position = (0, 0, 0)
-        # self.evt.channel_group.cone_orientation = (0, 0, 0)
+        cam = bge.logic.getCurrentScene().active_camera
+        self.evt.set_3d_attributes(get_local(cam, self.position), Vector((0, 100, 0)))
 
     def stop(self):
         self.evt.stop()
-        self.channel.sounds.remove(self)
+        if self in self.channel.sounds:
+            self.channel.sounds.remove(self)
 
 
 class Channel(dict):
@@ -126,8 +137,8 @@ class Channel(dict):
             sound.stop()
         del FMod.channels[self.name]
     
-    def event(self, event):
-        evt = Event(event, self.name)
+    def event(self, event, position):
+        evt = Event(event, position, self.name)
         return evt
 
     def update(self):
@@ -145,6 +156,8 @@ class FMod:
             fmodstudio = fstudio.StudioSystem()
             fmodstudio.initialize()
             cls.studio = fmodstudio
+            cls.studio.core_system.advanced_settings.randomSeed = 1024
+            print(cls.studio.core_system.advanced_settings.randomSeed)
             scene = bge.logic.getCurrentScene()
             scene.pre_draw.append(cls.update)
             scene.onRemove.append(cls.destroy)
@@ -167,7 +180,6 @@ class FMod:
         studio.update()
         for channel in cls.channels.values():
             channel.update()
-        print(len(cls.channels))
 
     @classmethod
     def add_channel(cls, name):
@@ -187,11 +199,11 @@ class FMod:
         cls.studio = None
 
     @classmethod
-    def event(cls, event, channel='default'):
+    def event(cls, event, position=Vector((0, 0, 0)), channel='default'):
         _channel = cls.channels.get(channel, None)
         if _channel is None:
             _channel = cls.channels[channel] = Channel(channel)
-        return Event(event, channel)
+        return Event(event, position, channel)
 
     @classmethod
     def file3d(cls, path, channel='default'):
