@@ -52,8 +52,8 @@ class Texture(Filter2D):
             return
         texture.gl_load()
         self.free_textures = True
-        self.settings = {'tex': texture, 'opacity': float(opacity), 'pos': Vector(pos), 'size': Vector(size)}
-        super().__init__(glsl, idx, {'tex': self.settings, 'opacity': self.settings, 'pos': self.settings, 'size': self.settings})
+        self.uniforms = {'tex': texture, 'opacity': float(opacity), 'pos': Vector(pos), 'size': Vector(size)}
+        super().__init__(glsl, idx, {'tex': self.uniforms, 'opacity': self.uniforms, 'pos': self.uniforms, 'size': self.uniforms})
 
     @property
     def texture(self):
@@ -62,7 +62,7 @@ class Texture(Filter2D):
     @texture.setter
     def texture(self, val):
         if self.free_textures:
-            self.settings['tex'].gl_free()
+            self.uniforms['tex'].gl_free()
         if not isinstance(val, bpy.types.Image):
             raise TypeError
         val.gl_load()
