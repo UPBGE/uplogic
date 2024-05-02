@@ -4,6 +4,7 @@ from ..console import success
 from ..console import debug
 from sys import platform
 import bge
+from mathutils import Vector
 
 
 pypath = sys.executable
@@ -20,10 +21,11 @@ elif platform == "win32":
     exists_fmodL = os.path.exists(fmodL)
     if not (exists_fmodL and exists_fmodstudioL):
         if not exists_fmodstudioL:
-            error(f'Missing {fmodstudioL}')
+            error(f'Missing "{fmodstudioL}"')
         if not exists_fmodL:
-            error(f'Missing {fmodL}')
-        error('One or more FMod Libraries not found, go to "https://www.fmod.com/download#fmodengine" and install FMOD Engine, then from ".../api/core/lib/x64" copy "fmodL" and "fmodstudioL" to your local python installation.')
+            error(f'Missing "{fmodL}"')
+        error('One or more FMod Libraries not found, go to "https://www.fmod.com/download" and install FMOD Engine, then from ".../api/core/lib/x64" copy "fmodL.dll" and "fmodstudioL.dll" to your local python installation.')
+        sys.exit(1)
     else:
         os.environ["PYFMODEX_STUDIO_DLL_PATH"] = fmodstudioL
         os.environ["PYFMODEX_DLL_PATH"] = fmodL
@@ -47,6 +49,15 @@ def get_studio():
 
 
 class Sound:
+    _mode = flags.MODE.TWOD
+
+    @property
+    def position(self):
+        return self._position
+
+    @position.setter
+    def position(self, val):
+        self._position = Vector(val)
 
     def stop(self):
         raise NotImplementedError
@@ -55,25 +66,30 @@ class Sound:
         raise NotImplementedError
 
 
-class File3D(Sound):
+class File2D(Sound):
 
     def __init__(self, path, channel='default') -> None:
         self.channel = FMod.channels.get(channel, None)
         self.channel.sounds.append(self)
-        sound = FMod.studio.core_system.create_sound(path)
-        self.channel: pyfmodex.channel.Channel = sound.play()
-        self.channel.paused = True
+        system = FMod.studio.core_system
+        self.sound: pyfmodex.sound.Sound = system.create_sound(path, self._mode)
+        self.channel: pyfmodex.channel.Channel = system.play_sound(self.sound, paused=True)
+        self.channel.paused = False
 
     def update(self):
-        self.channel.paused = False
-        if not self.channel.is_playing:
-            self.stop()
-            return
+        pass
 
     def stop(self):
         self.channel.stop()
-        # self.channel.current_sound.release()
+        self.sound.release()
         self.channel.sounds.remove(self)
+
+
+class File3D(File2D):
+    _mode = flags.MODE.THREED
+
+    def __init__(self, path, channel='default') -> None:
+        super().__init__(path, channel)
 
 
 class Event(Sound):
@@ -90,11 +106,10 @@ class Event(Sound):
             return
         for setting in self.channel:
             self.evt.set_parameter_by_name(setting, self.channel[setting])
-        try:
-            self.evt.channel_group.mode = flags.MODE.THREED
-            self.evt.channel_group.position = (0, 0, 0)
-        except Exception:
-            pass
+        # if self.evt.channel_group.mode is not flags.MODE.THREED:
+        #     self.evt.channel_group.mode = flags.MODE.THREED
+        # self.evt.channel_group.position = (0, 0, 0)
+        # self.evt.channel_group.cone_orientation = (0, 0, 0)
 
     def stop(self):
         self.evt.stop()
@@ -152,10 +167,19 @@ class FMod:
         studio.update()
         for channel in cls.channels.values():
             channel.update()
+        print(len(cls.channels))
 
     @classmethod
     def add_channel(cls, name):
         cls.channels[name] = Channel(name)
+
+    @classmethod
+    def set_channel_parameter(cls, parameter_name, value, channel='default'):
+        _channel = cls.channels.get(channel, None)
+        if _channel is None:
+            error(f'Channel {channel} not found.')
+            return
+        _channel[parameter_name] = value
 
     @classmethod
     def destroy(cls):

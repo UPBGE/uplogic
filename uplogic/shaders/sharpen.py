@@ -74,13 +74,13 @@ void main(void)
 class Sharpen(Filter2D):
 
     def __init__(self, sharpness=0.0, idx: int = None) -> None:
-        self.settings = {'sharpness': float(sharpness)}
-        super().__init__(glsl, idx, {'sharpness': self.settings})
+        self.uniforms = {'sharpness': float(sharpness)}
+        super().__init__(glsl, idx, {'sharpness': self.uniforms})
 
     @property
     def sharpness(self):
-        return self.settings['sharpness']
+        return self.uniforms['sharpness']
 
     @sharpness.setter
     def sharpness(self, val):
-        self.settings['sharpness'] = val
+        self.uniforms['sharpness'] = val

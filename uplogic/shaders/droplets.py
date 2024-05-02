@@ -32,12 +32,12 @@ float height = bgl_RenderedTextureHeight;
 //a random texture generator, but you can also use a pre-computed perturbation texture
 vec4 rnm(in vec2 tc) 
 {
-    float noise =  sin(dot(tc ,vec2(12.9898,78.233))) * 43758.5453;
+    float noise = sin(dot(tc, vec2(12.9898, 78.233))) * 43758.5453;
 
-    float noiseR =  fract(noise)*2.0-1.0;
-    float noiseG =  fract(noise*1.2154)*2.0-1.0; 
-    float noiseB =  fract(noise*1.3453)*2.0-1.0;
-    float noiseA =  fract(noise*1.3647)*2.0-1.0;
+    float noiseR = fract(noise)*2.0-1.0;
+    float noiseG = fract(noise*1.2154)*2.0-1.0; 
+    float noiseB = fract(noise*1.3453)*2.0-1.0;
+    float noiseA = fract(noise*1.3647)*2.0-1.0;
     
     return vec4(noiseR,noiseG,noiseB,noiseA);
 }
@@ -205,7 +205,7 @@ class Droplets(Filter2D):
     def __init__(self, color=(1, 1, 1), speed=1.0, blur=0.0, idx: int = None) -> None:
         now = logic.getRealTime()
         self.speed = speed
-        self.settings = {
+        self.uniforms = {
             'blur': float(blur),
             'color': Vector(color),
             'timer': float(now),
@@ -215,11 +215,11 @@ class Droplets(Filter2D):
         self._last_time = now
         self.randomize()
         super().__init__(glsl, idx, {
-            'blur': self.settings,
-            'color': self.settings,
-            'timer': self.settings,
-            'time': self.settings,
-            'randomtime': self.settings
+            'blur': self.uniforms,
+            'color': self.uniforms,
+            'timer': self.uniforms,
+            'time': self.uniforms,
+            'randomtime': self.uniforms
         })
 
     def update(self):
@@ -240,40 +240,40 @@ class Droplets(Filter2D):
 
     @property
     def blur(self):
-        return self.settings['blur']
+        return self.uniforms['blur']
 
     @blur.setter
     def blur(self, val):
-        self.settings['blur'] = float(val)
+        self.uniforms['blur'] = float(val)
 
     @property
     def color(self):
-        return self.settings['color']
+        return self.uniforms['color']
 
     @color.setter
     def color(self, val):
-        self.settings['color'] = Vector(val).to_3d()
+        self.uniforms['color'] = Vector(val).to_3d()
 
     @property
     def timer(self):
-        return self.settings['timer']
+        return self.uniforms['timer']
 
     @timer.setter
     def timer(self, val):
-        self.settings['timer'] = float(val)
+        self.uniforms['timer'] = float(val)
 
     @property
     def randomtime(self):
-        return self.settings['randomtime']
+        return self.uniforms['randomtime']
 
     @randomtime.setter
     def randomtime(self, val):
-        self.settings['randomtime'] = float(val)
+        self.uniforms['randomtime'] = float(val)
 
     @property
     def time(self):
-        return self.settings['time']
+        return self.uniforms['time']
 
     @time.setter
     def time(self, val):
-        self.settings['time'] = float(val)
+        self.uniforms['time'] = float(val)

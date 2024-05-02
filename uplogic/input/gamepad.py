@@ -277,7 +277,8 @@ class Gamepad():
         layout: dict = XBOX
     ) -> None:
         if self._deprecated:
-            print('Warning: ULGamePad class will be renamed to "Gamepad" in future releases!')
+            from uplogic.console import warning
+            warning('Warning: ULGamePad class will be renamed to "Gamepad" in future releases!')
         self.idx = idx
         self.layout = layout
         if not logic.joysticks[idx]:
@@ -358,7 +359,8 @@ class GamepadLook():
         active=True
     ) -> None:
         if self._deprecated:
-            print('Warning: ULGamepadLook class will be renamed to "GamepadLook" in future releases!')
+            from uplogic.console import warning
+            warning('Warning: ULGamepadLook class will be renamed to "GamepadLook" in future releases!')
         self.obj = obj
         self.head = head if head else obj
         self._defaults = [

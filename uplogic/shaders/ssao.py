@@ -188,27 +188,27 @@ class SSAO(Filter2D):
 
     def __init__(self, power=1.0, idx: int = None) -> None:
         cam = logic.getCurrentScene().active_camera
-        self.settings = {
+        self.uniforms = {
 			'power': float(power),
             'znear': cam.near,
             'zfar': cam.far
         }
         super().__init__(glsl, idx, {
-			'power': self.settings,
-            'znear': self.settings,
-            'zfar': self.settings
+			'power': self.uniforms,
+            'znear': self.uniforms,
+            'zfar': self.uniforms
         })
 
     @property
     def power(self):
-        return self.settings['power']
+        return self.uniforms['power']
 
     @power.setter
     def power(self, val):
-        self.settings['power'] = val
+        self.uniforms['power'] = val
 
     def update(self):
         super().update()
         cam = logic.getCurrentScene().active_camera
-        self.settings['znear'] = cam.near
-        self.settings['zfar'] = cam.far
+        self.uniforms['znear'] = cam.near
+        self.uniforms['zfar'] = cam.far

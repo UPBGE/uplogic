@@ -28,23 +28,23 @@ void main( )
 class Vignette(Filter2D):
 
     def __init__(self, power: float = 0.25, color=(0., 0., 0.), idx: int = None) -> None:
-        self.settings = {'power': float(power), 'color': Vector(color)}
-        super().__init__(glsl, idx, {'power': self.settings, 'color': self.settings})
+        self.uniforms = {'power': float(power), 'color': Vector(color)}
+        super().__init__(glsl, idx, {'power': self.uniforms, 'color': self.uniforms})
 
     @property
     def power(self):
-        return self.settings['power']
+        return self.uniforms['power']
 
     @power.setter
     def power(self, val):
-        self.settings['power'] = val
+        self.uniforms['power'] = val
 
     @property
     def color(self):
-        return self.settings['color']
+        return self.uniforms['color']
 
     @color.setter
     def color(self, val):
         if not isinstance(val, Vector):
             val = Vector(val)
-        self.settings['color'] = val
+        self.uniforms['color'] = val

@@ -170,9 +170,9 @@ class Distort(Filter2D):
     def __init__(self, power=1.0, speed=1.0, idx: int = None) -> None:
         now = logic.getRealTime()
         self.speed = speed
-        self.settings = {'power': float(power), 'timer': now, 'resettimer': 0.0}
+        self.uniforms = {'power': float(power), 'timer': now, 'resettimer': 0.0}
         self._last_time = now
-        super().__init__(glsl, idx, {'power': self.settings, 'timer': self.settings, 'resettimer': self.settings})
+        super().__init__(glsl, idx, {'power': self.uniforms, 'timer': self.uniforms, 'resettimer': self.uniforms})
 
     def update(self):
         now = logic.getRealTime()
@@ -183,24 +183,24 @@ class Distort(Filter2D):
 
     @property
     def timer(self):
-        return self.settings['timer']
+        return self.uniforms['timer']
 
     @timer.setter
     def timer(self, val):
-        self.settings['timer'] = float(val)
+        self.uniforms['timer'] = float(val)
 
     @property
     def resettimer(self):
-        return self.settings['resettimer']
+        return self.uniforms['resettimer']
 
     @resettimer.setter
     def resettimer(self, val):
-        self.settings['resettimer'] = float(val)
+        self.uniforms['resettimer'] = float(val)
 
     @property
     def power(self):
-        return self.settings['power']
+        return self.uniforms['power']
 
     @power.setter
     def power(self, val):
-        self.settings['power'] = float(val)
+        self.uniforms['power'] = float(val)

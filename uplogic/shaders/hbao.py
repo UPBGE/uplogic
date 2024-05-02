@@ -14,7 +14,7 @@ uniform float power;
 in vec4 bgl_TexCoord;
 out vec4 fragColor;
 
-//THIS NEEDS TO MATCH YOUR CAMERA SETTINGS---------------------
+//THIS NEEDS TO MATCH YOUR CAMERA uniforms---------------------
 uniform float znear;                    //Z-near
 uniform float zfar;                     //Z-far
 uniform float fov;                      //FoV
@@ -304,31 +304,31 @@ class HBAO(Filter2D):
 
     def __init__(self, power=1.0, idx: int = None) -> None:
         cam = logic.getCurrentScene().active_camera
-        self.settings = {
+        self.uniforms = {
             'power': float(power),
             'znear': cam.near,
             'zfar': cam.far,
             'fov': cam.fov
         }
         super().__init__(glsl, idx, {
-            'power': self.settings,
-            'znear': self.settings,
-            'zfar': self.settings,
-            'fov': self.settings
+            'power': self.uniforms,
+            'znear': self.uniforms,
+            'zfar': self.uniforms,
+            'fov': self.uniforms
         })
 
     @property
     def power(self):
-        return self.settings['power']
+        return self.uniforms['power']
 
     @power.setter
     def power(self, val):
-        self.settings['power'] = val
+        self.uniforms['power'] = val
 
     def update(self):
         super().update()
         cam = logic.getCurrentScene().active_camera
-        self.settings['znear'] = cam.near
-        self.settings['zfar'] = cam.far
-        self.settings['fov'] = cam.fov
+        self.uniforms['znear'] = cam.near
+        self.uniforms['zfar'] = cam.far
+        self.uniforms['fov'] = cam.fov
 

@@ -26,13 +26,13 @@ void main()
 class ChromaticAberration(Filter2D):
 
     def __init__(self, power: float = 2.0, idx: int = None) -> None:
-        self.settings = {'power': float(power)}
-        super().__init__(glsl, idx, {'power': self.settings})
+        self.uniforms = {'power': float(power)}
+        super().__init__(glsl, idx, {'power': self.uniforms})
 
     @property
     def power(self):
-        return self.settings['power']
+        return self.uniforms['power']
 
     @power.setter
     def power(self, val):
-        self.settings['power'] = val
+        self.uniforms['power'] = val

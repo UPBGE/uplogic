@@ -157,7 +157,8 @@ class Mouse():
 
     def __init__(self) -> None:
         if self._deprecated:
-            print('Warning: ULMouse class will be renamed to "Mouse" in future releases!')
+            from uplogic.console import warning
+            warning('Warning: ULMouse class will be renamed to "Mouse" in future releases!')
         self._position = get_mouse_position()
         """Staggered updated mouse position for pos difference calculation."""
         self.movement = (0, 0)
@@ -293,7 +294,8 @@ class MouseLook():
         active: bool = True,
     ) -> None:
         if self._deprecated:
-            print('Warning: ULMouseLook class will be renamed to "MouseLook" in future releases!')
+            from uplogic.console import warning
+            warning('Warning: ULMouseLook class will be renamed to "MouseLook" in future releases!')
         self.obj = obj
         self.head = head if head else obj
         self._defaults = [

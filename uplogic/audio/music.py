@@ -59,7 +59,8 @@ class Music(ULMusicEffect):
         audio_system: str = 'music'
     ):
         if self._deprecated:
-            print('Warning: ULMusic class will be renamed to "Music" in future releases!')
+            from uplogic.console import warning
+            warning('Warning: ULMusic class will be renamed to "Music" in future releases!')
         super().__init__()
         self.name = name if name else uuid4()
         self.audio_system = get_audio_system(audio_system, '2D')
@@ -185,7 +186,8 @@ class MusicTrack(ULMusicEffect):
         name: str
     ):
         if self._deprecated:
-            print('Warning: ULMusic class will be renamed to "Music" in future releases!')
+            from uplogic.console import warning
+            warning('Warning: ULMusic class will be renamed to "Music" in future releases!')
         super().__init__()
         self.music = music
         self.name = name

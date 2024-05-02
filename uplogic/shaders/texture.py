@@ -51,41 +51,41 @@ class Texture(Filter2D):
             error("'Texture': first argument requires an object of type 'bpy.types.Image'!")
             return
         texture.gl_load()
-        self.settings = {'tex': texture, 'opacity': float(opacity), 'pos': Vector(pos), 'size': Vector(size)}
-        super().__init__(glsl, idx, {'tex': self.settings, 'opacity': self.settings, 'pos': self.settings, 'size': self.settings})
+        self.uniforms = {'tex': texture, 'opacity': float(opacity), 'pos': Vector(pos), 'size': Vector(size)}
+        super().__init__(glsl, idx, {'tex': self.uniforms, 'opacity': self.uniforms, 'pos': self.uniforms, 'size': self.uniforms})
 
     @property
     def texture(self):
-        return self.settings['tex']
+        return self.uniforms['tex']
 
     @texture.setter
     def texture(self, val):
-        self.settings['tex'].gl_free()
+        self.uniforms['tex'].gl_free()
         if not isinstance(val, bpy.types.Image):
             raise TypeError
         val.gl_load()
-        self.settings['tex'] = val
+        self.uniforms['tex'] = val
 
     @property
     def opacity(self):
-        return self.settings['opacity']
+        return self.uniforms['opacity']
 
     @opacity.setter
     def opacity(self, val):
-        self.settings['opacity'] = float(val)
+        self.uniforms['opacity'] = float(val)
 
     @property
     def pos(self):
-        return self.settings['pos']
+        return self.uniforms['pos']
 
     @pos.setter
     def pos(self, val):
-        self.settings['pos'] = Vector(val).to_2d()
+        self.uniforms['pos'] = Vector(val).to_2d()
 
     @property
     def size(self):
-        return self.settings['size']
+        return self.uniforms['size']
 
     @size.setter
     def size(self, val):
-        self.settings['size'] = Vector(val).to_2d()
+        self.uniforms['size'] = Vector(val).to_2d()

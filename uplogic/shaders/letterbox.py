@@ -28,21 +28,21 @@ void main()
 class Letterbox(Filter2D):
 
     def __init__(self, power: float = 1.0, factor: float = 0.1, idx: int = None) -> None:
-        self.settings = {'power': float(power), 'factor': float(factor)}
-        super().__init__(glsl, idx, {'power': self.settings, 'factor': self.settings})
+        self.uniforms = {'power': float(power), 'factor': float(factor)}
+        super().__init__(glsl, idx, {'power': self.uniforms, 'factor': self.uniforms})
 
     @property
     def power(self):
-        return self.settings['power']
+        return self.uniforms['power']
 
     @power.setter
     def power(self, val):
-        self.settings['power'] = float(val)
+        self.uniforms['power'] = float(val)
     
     @property
     def factor(self):
-        return self.settings['factor']
+        return self.uniforms['factor']
 
     @factor.setter
     def factor(self, val):
-        self.settings['factor'] = float(val)
+        self.uniforms['factor'] = float(val)

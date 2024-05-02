@@ -18,8 +18,8 @@ void main()
 class Buffer(Filter2D):
 
     def __init__(self, gamma=1, idx: int = None) -> None:
-        self.settings = {'gamma': float(gamma)}
-        super().__init__(glsl, idx, {'gamma': self.settings})
+        self.uniforms = {'gamma': float(gamma)}
+        super().__init__(glsl, idx, {'gamma': self.uniforms})
         self._filter.addOffScreen(0)
 
     @property
@@ -48,7 +48,7 @@ void main()
 class DepthBuffer(Buffer):
 
     def __init__(self, gamma=1, idx: int = None) -> None:
-        self.settings = {'gamma': float(gamma)}
-        super().__init__(depth_glsl, idx, {'gamma': self.settings})
+        self.uniforms = {'gamma': float(gamma)}
+        super().__init__(depth_glsl, idx, {'gamma': self.uniforms})
         self._filter.addOffScreen(0)
 

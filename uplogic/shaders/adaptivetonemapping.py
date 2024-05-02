@@ -24,13 +24,13 @@ void main(void)
 class AdaptiveToneMapping(Filter2D):
 
     def __init__(self, power=1.0, avgL=2.0, idx: int = None) -> None:
-        self.settings = {'power': float(power), 'avgL': float(avgL)}
-        super().__init__(glsl, idx, {'power': self.settings, 'avgL': self.settings})
+        self.uniforms = {'power': float(power), 'avgL': float(avgL)}
+        super().__init__(glsl, idx, {'power': self.uniforms, 'avgL': self.uniforms})
 
     @property
     def power(self):
-        return self.settings['power']
+        return self.uniforms['power']
 
     @power.setter
     def power(self, val):
-        self.settings['power'] = float(val)
+        self.uniforms['power'] = float(val)

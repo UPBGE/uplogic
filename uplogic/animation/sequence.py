@@ -46,7 +46,8 @@ class Sequence():
         mode: str = 'play'
     ) -> None:
         if self._deprecated:
-            print('Warning: ULSequence class will be renamed to "ULSequence" in future releases!')
+            from uplogic.console import warning
+            warning('Warning: ULSequence class will be renamed to "ULSequence" in future releases!')
 
         self.material = bpy.data.materials[material]
         """The material this sequence is played on."""

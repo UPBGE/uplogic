@@ -81,7 +81,7 @@ class Mist(Filter2D):
 
     def __init__(self, start=.1, density=0.5, color=(0.5, 0.7, 0.9), power=1.0, idx: int = None) -> None:
         cam = logic.getCurrentScene().active_camera
-        self.settings = {
+        self.uniforms = {
             'start': float(start),
             'density': float(density),
             'color': Vector(color),
@@ -92,52 +92,52 @@ class Mist(Filter2D):
             'aspect': render.getWindowWidth() / render.getWindowHeight()
         }
         super().__init__(glsl, idx, {
-            'start': self.settings,
-            'density': self.settings,
-            'color': self.settings,
-            'power': self.settings,
-            'znear': self.settings,
-            'zfar': self.settings,
-            'fov': self.settings,
-            'aspect': self.settings
+            'start': self.uniforms,
+            'density': self.uniforms,
+            'color': self.uniforms,
+            'power': self.uniforms,
+            'znear': self.uniforms,
+            'zfar': self.uniforms,
+            'fov': self.uniforms,
+            'aspect': self.uniforms
         })
 
     def update(self):
         super().update()
         cam = logic.getCurrentScene().active_camera
-        self.settings['znear'] = cam.near
-        self.settings['zfar'] = cam.far
-        self.settings['fov'] = cam.fov
-        self.settings['aspect'] = render.getWindowWidth() / render.getWindowHeight()
+        self.uniforms['znear'] = cam.near
+        self.uniforms['zfar'] = cam.far
+        self.uniforms['fov'] = cam.fov
+        self.uniforms['aspect'] = render.getWindowWidth() / render.getWindowHeight()
 
     @property
     def start(self):
-        return self.settings['start']
+        return self.uniforms['start']
 
     @start.setter
     def start(self, val):
-        self.settings['start'] = float(val)
+        self.uniforms['start'] = float(val)
 
     @property
     def density(self):
-        return self.settings['density']
+        return self.uniforms['density']
 
     @density.setter
     def density(self, val):
-        self.settings['density'] = float(val)
+        self.uniforms['density'] = float(val)
 
     @property
     def power(self):
-        return self.settings['power']
+        return self.uniforms['power']
 
     @power.setter
     def power(self, val):
-        self.settings['power'] = val
+        self.uniforms['power'] = val
 
     @property
     def color(self):
-        return self.settings['color']
+        return self.uniforms['color']
 
     @color.setter
     def color(self, val):
-        self.settings['color'] = Vector(val).to_3d()
+        self.uniforms['color'] = Vector(val).to_3d()

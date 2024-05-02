@@ -292,7 +292,7 @@ class DoF(Filter2D):
         
     def __init__(self, distance=1.0, autofocus=False, power=1.0, fstop=1, samples=16, idx: int = None) -> None:
         cam = logic.getCurrentScene().active_camera
-        self.settings = {
+        self.uniforms = {
             'distance': float(distance),
             'power': float(power),
             'fstop': float(fstop),
@@ -302,57 +302,57 @@ class DoF(Filter2D):
             # 'zfar': cam.far
         }
         super().__init__(glsl, idx, {
-            'distance': self.settings,
-            'power': self.settings,
-            'fstop': self.settings,
-            'samples': self.settings,
-            'autofocus': self.settings
-            # 'znear': self.settings,
-            # 'zfar': self.settings
+            'distance': self.uniforms,
+            'power': self.uniforms,
+            'fstop': self.uniforms,
+            'samples': self.uniforms,
+            'autofocus': self.uniforms
+            # 'znear': self.uniforms,
+            # 'zfar': self.uniforms
         })
 
     def update(self):
         super().update()
         cam = logic.getCurrentScene().active_camera
-        self.settings['znear'] = cam.near
-        self.settings['zfar'] = cam.far
+        self.uniforms['znear'] = cam.near
+        self.uniforms['zfar'] = cam.far
 
     @property
     def distance(self):
-        return self.settings['distance']
+        return self.uniforms['distance']
 
     @distance.setter
     def distance(self, val):
-        self.settings['distance'] = float(val)
+        self.uniforms['distance'] = float(val)
 
     @property
     def autofocus(self):
-        return self.settings['autofocus']
+        return self.uniforms['autofocus']
 
     @autofocus.setter
     def autofocus(self, val):
-        self.settings['autofocus'] = bool(val)
+        self.uniforms['autofocus'] = bool(val)
 
     @property
     def fstop(self):
-        return self.settings['fstop']
+        return self.uniforms['fstop']
 
     @fstop.setter
     def fstop(self, val):
-        self.settings['fstop'] = float(val)
+        self.uniforms['fstop'] = float(val)
 
     @property
     def power(self):
-        return self.settings['power']
+        return self.uniforms['power']
 
     @power.setter
     def power(self, val):
-        self.settings['power'] = val
+        self.uniforms['power'] = val
 
     @property
     def samples(self):
-        return self.settings['samples']
+        return self.uniforms['samples']
 
     @samples.setter
     def samples(self, val):
-        self.settings['samples'] = int(val)
+        self.uniforms['samples'] = int(val)

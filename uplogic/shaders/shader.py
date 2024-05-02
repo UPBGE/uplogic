@@ -1,7 +1,7 @@
 from bge import logic
 from mathutils import Vector, Matrix
 from uplogic.utils.errors import PassIndexOccupiedError
-from uplogic.utils import debug
+from uplogic.console import debug, warning
 from pathlib import Path
 import bpy, bge
 
@@ -61,28 +61,38 @@ class Filter2D():
         self.idx = idx
         scene = logic.getCurrentScene()
         self.manager = scene.filterManager
-        self._uniforms = uniforms
+        self.uniforms = uniforms
         self._filter = None
         FilterSystem.add_filter(self)
+
+    @property
+    def settings(self):
+        warning('"Filter2D.settings" will be replaced by "Filter2D.uniforms" in future releases!')
+        return self.uniforms
+
+    @settings.setter
+    def settings(self, val):
+        warning('"Filter2D.settings" will be replaced by "Filter2D.uniforms" in future releases!')
+        self.uniforms = val
 
     def startup(self):
         if FilterSystem.filters.get(self.idx) is not None:
             raise PassIndexOccupiedError(self.idx)
         FilterSystem.filters[self.idx] = self
         self._filter = self.manager.addFilter(self.idx, 12, self.program)
-        uniforms = self._uniforms
+        uniforms = self.uniforms
         for uniform in uniforms:
-            self.set_uniform(uniform, uniforms[uniform].get(uniform))
+            self.set_uniform(uniform, uniforms.get(uniform))
 
     def activate(self):
         self._filter.enabled = True
-        if self._uniforms.keys():
+        if self.uniforms.keys():
             logic.getCurrentScene().post_draw.append(self.update)
 
     def update(self):
-        uniforms = self._uniforms
+        uniforms = self.uniforms
         for uniform in uniforms:
-            self.set_uniform(uniform, uniforms[uniform].get(uniform))
+            self.set_uniform(uniform, uniforms.get(uniform))
 
     def pause(self):
         self._filter.enabled = False

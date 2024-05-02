@@ -29,7 +29,8 @@ class Collision():
         post_call: bool = False
     ):
         if self._deprecated:
-            print('Warning: ULCollision class will be renamed to "Collision" in future releases!')
+            from uplogic.console import warning
+            warning('Warning: ULCollision class will be renamed to "Collision" in future releases!')
         self.callback: Callable = callback
         self.prop: str = prop
         self.mat: str = mat

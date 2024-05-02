@@ -34,13 +34,13 @@ void main (void)
 class Levels(Filter2D):
 
     def __init__(self, color=(1., 1., 1.), idx: int = None) -> None:
-        self.settings = {'color': Vector(color)}
-        super().__init__(glsl, idx, {'color': self.settings})
+        self.uniforms = {'color': Vector(color)}
+        super().__init__(glsl, idx, {'color': self.uniforms})
 
     @property
     def color(self):
-        return self.settings.get('color', Vector((0, 0, 0)))
+        return self.uniforms.get('color', Vector((0, 0, 0)))
 
     @color.setter
     def color(self, val):
-        self.settings['color'] = val
+        self.uniforms['color'] = val
