@@ -116,10 +116,11 @@ class Event(Sound):
         if self.evt.playback_state is enums.PLAYBACK_STATE.STOPPED:
             self.stop()
             return
-        for setting in self.channel:
-            self.evt.set_parameter_by_name(setting, self.channel[setting])
         cam = bge.logic.getCurrentScene().active_camera
         self.evt.set_3d_attributes(get_local(cam, self.position), Vector((0, 100, 0)))
+
+    def set_parameter(self, parameter, value):
+        self.evt.set_parameter_by_name(parameter, value)
 
     def stop(self):
         self.evt.stop()
@@ -131,6 +132,11 @@ class Channel(dict):
     def __init__(self, name):
         self.name = name
         self.sounds: list[Sound] = []
+
+    def set(self, key, value):
+        self[key] = value
+        for sound in self.sounds:
+            sound.evt.set_parameter_by_name(key, value)
     
     def destroy(self):
         for sound in self.sounds.copy():
@@ -157,7 +163,6 @@ class FMod:
             fmodstudio.initialize()
             cls.studio = fmodstudio
             cls.studio.core_system.advanced_settings.randomSeed = 1024
-            print(cls.studio.core_system.advanced_settings.randomSeed)
             scene = bge.logic.getCurrentScene()
             scene.pre_draw.append(cls.update)
             scene.onRemove.append(cls.destroy)
@@ -191,7 +196,7 @@ class FMod:
         if _channel is None:
             error(f'Channel {channel} not found.')
             return
-        _channel[parameter_name] = value
+        _channel.set(parameter_name, value)
 
     @classmethod
     def destroy(cls):
