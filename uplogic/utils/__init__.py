@@ -228,7 +228,14 @@ def is_water(game_object: GameObject):
     return WATER in game_object.getPropertyNames()
 
 
-def get_child_by_name(obj, child, recursive=True, partial=False):
+def get_child_by_name(obj: GameObject, child: str, recursive: bool = True, partial: bool = False) -> GameObject:
+    """Get a named child object.
+
+    :param `obj`: The parent object.
+    :param `child`: The child's name.
+    :param `recursive`: If True, children's children will be seached too.
+    :param `partial`: If a child object name has the given name in it, it counts as a hit.
+    """
     children = obj.childrenRecursive if recursive else obj.children
     if partial:
         for c in children:
@@ -238,9 +245,8 @@ def get_child_by_name(obj, child, recursive=True, partial=False):
         return children.get(child)
 
 
-def check_vr_session_status() -> tuple[Vector, Matrix]:
-    """Get the current position and orientation of connected VR headset.
-    :returns: `tuple` of (`Vector`, `Matrix`)
+def check_vr_session_status() -> bool:
+    """Check if a VR session is currently running.
     """
     session = bpy.context.window_manager.xr_session_state
     return session is not None

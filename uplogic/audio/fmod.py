@@ -3,9 +3,12 @@ from ..console import error
 from ..console import success
 from ..console import debug
 from ..utils.math import get_local
+from ..utils.raycasting import raycast
+from ..utils import check_vr_session_status
 from ..events import schedule
+from ..input.vr import VRHeadset
 from sys import platform
-import bge
+import bge, bpy
 from mathutils import Vector
 
 
@@ -31,7 +34,7 @@ elif platform == "win32":
     else:
         os.environ["PYFMODEX_STUDIO_DLL_PATH"] = fmodstudioL
         os.environ["PYFMODEX_DLL_PATH"] = fmodL
-        success("FMod support successfully loaded.")
+        success('FMod support successfully loaded. Please check license at "https://www.fmod.com/licensing".')
 
 
 try:
@@ -99,18 +102,23 @@ class Event(Sound):
     def __init__(self, name, position=Vector((0, 0, 0)), channel='default') -> None:
         self.channel = FMod.channels.get(channel, None)
         self.evt = FMod.studio.get_event(name).create_instance()
+        self.occlusion_mask = self.channel.occlusion_mask
         self.evt.start()
         FMod.studio.update()
         self._position = position
         self.channel.sounds.append(self)
 
     @property
-    def position(self):
-        return self._position
+    def occluded(self):
+        return raycast(FMod.listener, self.position, FMod.listener.worldPosition, mask=self.occlusion_mask).obj is not None
 
-    @position.setter
-    def position(self, val):
-        self._position = Vector(val)
+    # @property
+    # def position(self):
+    #     return self._position
+
+    # @position.setter
+    # def position(self, val):
+    #     self._position = Vector(val)
     
     def update(self):
         if self.evt.playback_state is enums.PLAYBACK_STATE.STOPPED:
@@ -129,9 +137,20 @@ class Event(Sound):
 
 
 class Channel(dict):
-    def __init__(self, name):
+    def __init__(self, name, occlusion_mask=65535):
         self.name = name
         self.sounds: list[Sound] = []
+        self.occlusion_mask = occlusion_mask
+
+    @property
+    def occlusion_mask(self):
+        return self._occlusion_mask
+
+    @occlusion_mask.setter
+    def occlusion_mask(self, val):
+        self._occlusion_mask = val
+        for s in self.sounds:
+            s.occlusion_mask = val
 
     def set(self, key, value):
         self[key] = value
@@ -155,6 +174,9 @@ class Channel(dict):
 class FMod:
     channels = {'default': Channel('default')}
     studio: fstudio.StudioSystem = None
+    listener = None
+    use_vr = False
+    vr_headset = None
 
     @classmethod
     def initialize(cls):
@@ -162,21 +184,24 @@ class FMod:
             fmodstudio = fstudio.StudioSystem()
             fmodstudio.initialize()
             cls.studio = fmodstudio
-            cls.studio.core_system.advanced_settings.randomSeed = 1024
             scene = bge.logic.getCurrentScene()
+            cls.listener = scene.active_camera
             scene.pre_draw.append(cls.update)
             scene.onRemove.append(cls.destroy)
+            cls.use_vr = getattr(bpy.data.scenes[scene.name], 'use_vr_audio_space', False)
+            cls.vr_headset = VRHeadset() if check_vr_session_status() else None
         return cls.studio
 
     @classmethod
     def load_bank(cls, path):
-        cls.studio.load_bank_file(path)
+        if cls.studio is not None:
+            cls.studio.load_bank_file(path)
 
     @classmethod
     def update(cls):
         studio = cls.studio
         scene = bge.logic.getCurrentScene()
-        cam = scene.active_camera
+        cam = cls.listener
         studio.core_system.listener().position = cam.worldPosition
         studio.core_system.listener().set_orientation(
             list(cam.getAxisVect((0, 0, 1))),
@@ -192,6 +217,8 @@ class FMod:
 
     @classmethod
     def set_channel_parameter(cls, parameter_name, value, channel='default'):
+        if cls.studio is None:
+            return
         _channel = cls.channels.get(channel, None)
         if _channel is None:
             error(f'Channel {channel} not found.')
@@ -199,12 +226,25 @@ class FMod:
         _channel.set(parameter_name, value)
 
     @classmethod
+    def set_channel_occlusion_mask(cls, mask=65535, channel='default'):
+        _channel = cls.channels.get(channel, None)
+        if _channel is None:
+            error(f'Channel {channel} not found.')
+            return
+        _channel.occlusion_mask = mask
+
+    @classmethod
     def destroy(cls):
-        cls.studio.release()
-        cls.studio = None
+        scene = bge.logic.getCurrentScene()
+        if cls.update in scene.pre_draw:
+            scene.pre_draw.remove(cls.update)
+            cls.studio.release()
+            cls.studio = None
 
     @classmethod
     def event(cls, event, position=Vector((0, 0, 0)), channel='default'):
+        if cls.studio is None:
+            return
         _channel = cls.channels.get(channel, None)
         if _channel is None:
             _channel = cls.channels[channel] = Channel(channel)
@@ -212,6 +252,8 @@ class FMod:
 
     @classmethod
     def file3d(cls, path, channel='default'):
+        if cls.studio is None:
+            return
         _channel = cls.channels.get(channel, None)
         if _channel is None:
             _channel = cls.channels[channel] = Channel(channel)

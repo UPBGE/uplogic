@@ -173,6 +173,9 @@ class VRHeadset():
     def orientation(self, val):
         print("Attribute 'orientation' of 'ULHeadsetVR' is read-only!")
 
+    def getAxisVect(self, vector):
+        return self.orientation @ vector
+
 
 class ULHeadsetVRWrapper(VRHeadset):
     """Wrapper class for a VR Headset to be used for audio calculations.
