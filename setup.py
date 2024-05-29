@@ -31,7 +31,7 @@ setup(
     author='Leopold Auersperg-Castell',
     author_email='lauersperg@gmx.at',
     url='https://github.com/UPBGE/uplogic',
-    download_url='https://github.com/UPBGE/uplogic/archive/refs/tags/v2.2.tar.gz',
+    download_url='https://github.com/UPBGE/uplogic/archive/refs/tags/v3.2.tar.gz',
     license='GPLv2',
     packages=[
         'uplogic',
