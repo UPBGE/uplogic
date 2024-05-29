@@ -58,6 +58,7 @@ class Slider(RelativeLayout):
         self._released = False
         self._in_focus = False
         self._down = False
+        self.start()
 
     @property
     def parent(self):
@@ -181,6 +182,7 @@ class FrameSlider(Slider):
         self._released = False
         self._in_focus = False
         self._down = False
+        self.start()
 
 
 class ProgressSlider(FrameSlider):
@@ -192,6 +194,7 @@ class ProgressSlider(FrameSlider):
         self.knob.relative = {'size': True}
         self.knob.halign = 'left'
         self.knob.valign = 'bottom'
+        self.start()
 
     @property
     def value(self):

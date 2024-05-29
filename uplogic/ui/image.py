@@ -42,6 +42,7 @@ class Image(Widget):
         self._opacity = 1
         super().__init__(pos, size, relative=relative, halign=halign, valign=valign, angle=angle)
         self.texture = texture
+        self.start()
 
     @property
     def texture(self):

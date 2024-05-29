@@ -21,6 +21,7 @@ class Canvas(Widget):
         self.use_clipping = False
         self._to_evaluate: list[Widget] = []
         bge.logic.getCurrentScene().post_draw.append(self.draw)
+        self.start()
 
     def remove(self):
         while self.draw in bge.logic.getCurrentScene().post_draw:
@@ -76,6 +77,7 @@ class Canvas(Widget):
         gpu.state.blend_set('ALPHA')
         super().draw()
         self._hover_consumed = False
+        self._click_consumed = False
         for w in self._to_evaluate.__reversed__():
             w.evaluate()
         while self._to_evaluate:

@@ -13,10 +13,15 @@ class ULMoveTo(ULActionNode):
         self.dynamic = None
         self.distance = None
         self.done = False
+        self._reached = False
         self.OUT = self.add_output(self.get_done)
+        self.REACHED = self.add_output(self.get_reached)
 
     def get_done(self):
         return self.done
+
+    def get_reached(self):
+        return self._reached
 
     def evaluate(self):
         self.done = False
@@ -27,7 +32,7 @@ class ULMoveTo(ULActionNode):
         speed = self.get_input(self.speed)
         distance = self.get_input(self.distance)
         dynamic = self.get_input(self.dynamic)
-        move_to(
+        self._reached = move_to(
             moving_object,
             destination_point,
             speed,

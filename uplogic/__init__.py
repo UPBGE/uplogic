@@ -81,6 +81,9 @@ import time
 import os, sys
 
 
+__version__ = '3.2'
+
+
 class MainLoop:
     _handles = {}
 

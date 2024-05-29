@@ -1,6 +1,7 @@
 import gpu
 from gpu_extras.batch import batch_for_shader
 from uplogic.utils.math import rotate2d
+from uplogic.events import schedule
 from mathutils import Vector
 
 
@@ -62,7 +63,6 @@ class Widget():
         self.opacity = 1.
         self.z = 0
         self._active = True
-        self.start()
 
     def toggle(self, *args):
         """Toggle the widget on/off."""
@@ -104,7 +104,8 @@ class Widget():
     @property
     def show(self):
         """If `False`, this widget and all its children will not be rendered."""
-        return self._show
+        pshow = self.parent.show if self.parent is not None else True
+        return self._show and pshow
 
     @show.setter
     def show(self, val):
@@ -164,7 +165,7 @@ class Widget():
         return widgets
 
     @property
-    def childrenRecursive(self):
+    def childrenRecursive(self) -> list:
         """All children and children's children of this widget."""
         widgets = []
         for w in self.children:

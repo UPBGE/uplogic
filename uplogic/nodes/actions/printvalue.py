@@ -1,5 +1,5 @@
 from uplogic.nodes import ULActionNode
-from uplogic.console import log
+from uplogic.console import write
 
 
 class ULPrintValue(ULActionNode):
@@ -20,5 +20,5 @@ class ULPrintValue(ULActionNode):
         if not self.get_input(self.condition):
             return
         value = self.get_input(self.value)
-        log(value, self.msg_type)
+        write(value, self.msg_type)
         self.done = True

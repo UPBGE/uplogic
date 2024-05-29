@@ -13,6 +13,7 @@ class RenderedTexture(Widget):
     def __init__(self):
         super().__init__()
         self.buffer = Buffer()
+        self.start()
 
     def _build_shader(self):
         size = self._draw_size

@@ -16,6 +16,7 @@ class TweenValueNode(ULParameterNode):
         self.duration = 1.0
 
         self._time = 0.0
+        self._done = False
 
         self.mapping = None
         self.active = False
@@ -30,11 +31,15 @@ class TweenValueNode(ULParameterNode):
         self._direction = 1
 
         self.DONE = self.add_output(self.get_done)
+        self.REACHED = self.add_output(self.get_reached)
         self.RESULT_FLOAT = self.add_output(self.get_float)
         self.RESULT_VEC = self.add_output(self.get_vec)
         self.FAC = self.add_output(self.get_fac)
 
     def get_done(self):
+        return self._done
+
+    def get_reached(self):
         return self._factor == self._direction
 
     def get_fac(self):
@@ -57,6 +62,7 @@ class TweenValueNode(ULParameterNode):
         return self._result
 
     def evaluate(self):
+        self._done = False
         forward = self.get_input(self.forward)
         back = self.get_input(self.back)
         if forward or back:
@@ -91,3 +97,4 @@ class TweenValueNode(ULParameterNode):
         if self.on_demand:
             self.forward = False
             self.back = True
+        self._done = True

@@ -46,7 +46,7 @@ class VRController():
 
     @position.setter
     def position(self, val):
-        print("Attribute 'position' of 'ULControllerVR' is read-only!")
+        print("Attribute 'position' of 'VRController' is read-only!")
 
     @property
     def orientation(self) -> Matrix:
@@ -55,7 +55,7 @@ class VRController():
 
     @orientation.setter
     def orientation(self, val):
-        print("Attribute 'orientation' of 'ULControllerVR' is read-only!")
+        print("Attribute 'orientation' of 'VRController' is read-only!")
 
     @property
     def position_aim(self) -> Vector:
@@ -64,7 +64,7 @@ class VRController():
 
     @position_aim.setter
     def position_aim(self, val):
-        print("Attribute 'position_aim' of 'ULControllerVR' is read-only!")
+        print("Attribute 'position_aim' of 'VRController' is read-only!")
 
     @property
     def orientation_aim(self) -> Matrix:
@@ -73,7 +73,7 @@ class VRController():
 
     @orientation_aim.setter
     def orientation_aim(self, val):
-        print("Attribute 'orientation_aim' of 'ULControllerVR' is read-only!")
+        print("Attribute 'orientation_aim' of 'VRController' is read-only!")
 
     @property
     def aim(self) -> Vector:
@@ -83,7 +83,7 @@ class VRController():
 
     @aim.setter
     def aim(self, val):
-        print("Attribute 'aim' of 'ULControllerVR' is read-only!")
+        print("Attribute 'aim' of 'VRController' is read-only!")
 
     @property
     def trigger(self) -> float:
@@ -97,7 +97,7 @@ class VRController():
 
     @trigger.setter
     def trigger(self, val):
-        print("Attribute 'trigger' of 'ULControllerVR' is read-only!")
+        print("Attribute 'trigger' of 'VRController' is read-only!")
 
     @property
     def thumbstick(self) -> Vector:
@@ -133,7 +133,7 @@ class VRController():
 
     @thumbstick.setter
     def thumbstick(self, val):
-        print("Attribute 'thumbstick' of 'ULControllerVR' is read-only!")
+        print("Attribute 'thumbstick' of 'VRController' is read-only!")
 
 
 class ULControllerVR(VRController):
@@ -142,9 +142,6 @@ class ULControllerVR(VRController):
 
 class VRHeadset():
     """Wrapper class for a VR Headset.
-
-    This wrapper provides a `position` and an `orientation`
-    attribute.
     """
 
     _deprecated = False
@@ -275,3 +272,11 @@ class VRCharacter():
 
 class ULCharacterVR(VRCharacter):
     _deprecated = True
+
+
+from uplogic.utils import check_vr_session_status
+
+
+VR_STATE = check_vr_session_status()
+VR_AUDIO = getattr(bpy.data.scenes[logic.getCurrentScene().name], 'use_vr_audio_space', False)
+VR_HEADSET = VRHeadset() if check_vr_session_status() else None

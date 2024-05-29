@@ -1,25 +1,27 @@
 import sys, os
-from ..console import error
-from ..console import success
-from ..console import debug
-from ..utils.math import get_local
-from ..utils.raycasting import raycast
-from ..utils import check_vr_session_status
-from ..events import schedule
-from ..input.vr import VRHeadset
+from uplogic.console import error
+from uplogic.console import success
+from uplogic.console import debug
+from uplogic.utils.math import get_local
+from uplogic.utils.raycasting import raycast
+from uplogic.utils import check_vr_session_status
+from uplogic.utils.visualize import draw_arrow, draw_cube
+from uplogic.events import schedule
+from uplogic.input.vr import VR_HEADSET, VR_STATE
 from sys import platform
 import bge, bpy
-from mathutils import Vector
-
+from bge.types import KX_GameObject
+from mathutils import Vector, Matrix
 
 pypath = sys.executable
 if platform == "linux" or platform == "linux2":
-    error('Linux support not added yet.')
+    error('FMod: Linux support not added yet.')
 elif platform == "darwin":
-    error('OS X support not added yet.')
+    error('FMod: OS X not supported, please consider contributing.')
 elif platform == "win32":
     debug("Loading FMod...")
-    dllpath = os.path.join(pypath, os.path.pardir, os.path.pardir, 'DLLs')
+    version = bpy.app.version
+    dllpath = os.path.join(os.getcwd(), f'{version[0]}.{version[1]}', 'python', 'DLLs')
     fmodstudioL = os.path.join(dllpath, "fmodstudioL.dll")
     fmodL = os.path.join(dllpath, "fmodL.dll")
     exists_fmodstudioL = os.path.exists(fmodstudioL)
@@ -30,11 +32,11 @@ elif platform == "win32":
         if not exists_fmodL:
             error(f'Missing "{fmodL}"')
         error('One or more FMod Libraries not found, go to "https://www.fmod.com/download" and install FMOD Engine, then from ".../api/core/lib/x64" copy "fmodL.dll" and "fmodstudioL.dll" to your local python installation.')
-        sys.exit(1)
+        sys.exit(0)
     else:
         os.environ["PYFMODEX_STUDIO_DLL_PATH"] = fmodstudioL
         os.environ["PYFMODEX_DLL_PATH"] = fmodL
-        success('FMod support successfully loaded. Please check license at "https://www.fmod.com/licensing".')
+        success('FMod libraries successfully loaded. Please check license at "https://www.fmod.com/licensing".')
 
 
 try:
@@ -46,6 +48,12 @@ except ImportError:
 from pyfmodex import studio as fstudio
 from pyfmodex.studio import enums
 from pyfmodex import flags
+
+
+version = pyfmodex.__version__.split('.')
+if int(version[1]) <= 7 and int(version[2]) <= 2:
+    error('"pyfmodex" module version not supported, please update!')
+    sys.exit(0)
 
 
 def get_studio():
@@ -63,6 +71,9 @@ class Sound:
     @position.setter
     def position(self, val):
         self._position = Vector(val)
+
+    def visualize(self, color=(1, 1, 1, 1), size=.2):
+        raise NotImplementedError
 
     def stop(self):
         raise NotImplementedError
@@ -100,6 +111,7 @@ class File3D(File2D):
 class Event(Sound):
     
     def __init__(self, name, position=Vector((0, 0, 0)), channel='default') -> None:
+        self._orientation = Matrix()
         self.channel = FMod.channels.get(channel, None)
         self.evt = FMod.studio.get_event(name).create_instance()
         self.occlusion_mask = self.channel.occlusion_mask
@@ -107,25 +119,54 @@ class Event(Sound):
         FMod.studio.update()
         self._position = position
         self.channel.sounds.append(self)
+        self._caster = bge.logic.getCurrentScene().active_camera
+
+    @property
+    def volume(self):
+        return self.evt.get_volume()
+    
+    @volume.setter
+    def volume(self, vol):
+        self.evt.set_volume(vol)
+
+    @property
+    def orientation(self):
+        return self._orientation
+
+    @orientation.setter
+    def orientation(self, val):
+        self.evt.forward = val @ Vector((0, 1, 0))
+        self.evt.up = val @ Vector((0, 0, 1))
+        self._orientation = val
+
+    @property
+    def up(self):
+        return self.orientation @ Vector((0, 0, 1))
+
+    @property
+    def forward(self):
+        return self.orientation @ Vector((0, 1, 0))
 
     @property
     def occluded(self):
-        return raycast(FMod.listener, self.position, FMod.listener.worldPosition, mask=self.occlusion_mask).obj is not None
+        return raycast(
+            self._caster,
+            self.position,
+            FMod.listener.worldPosition,
+            mask=self.occlusion_mask
+        ).obj is not None
 
-    # @property
-    # def position(self):
-    #     return self._position
-
-    # @position.setter
-    # def position(self, val):
-    #     self._position = Vector(val)
-    
     def update(self):
         if self.evt.playback_state is enums.PLAYBACK_STATE.STOPPED:
+            self.evt.release()
             self.stop()
             return
         cam = bge.logic.getCurrentScene().active_camera
-        self.evt.set_3d_attributes(get_local(cam, self.position), Vector((0, 100, 0)))
+        self.evt.set_3d_attributes(get_local(cam, self.position), Vector((0, 0, 0)), self.forward)
+
+    def visualize(self, color=(1, 1, 1, 1), size=.2):
+        draw_arrow(self.position, self.position + Vector(self.evt.forward) * size, color)
+        # draw_cube(self.position, size * .5, centered=True)
 
     def set_parameter(self, parameter, value):
         self.evt.set_parameter_by_name(parameter, value)
@@ -134,6 +175,32 @@ class Event(Sound):
         self.evt.stop()
         if self in self.channel.sounds:
             self.channel.sounds.remove(self)
+
+
+class EventSpeaker(Event):
+
+    def __init__(self, name, speaker: KX_GameObject, channel='default') -> None:
+        self.speaker = speaker
+        super().__init__(name, speaker.worldPosition, channel)
+        self._caster = speaker
+
+    @property
+    def position(self):
+        return self.speaker.worldPosition
+
+    @position.setter
+    def position(self, val):
+        self.speaker.worldPosition = Vector(val)
+
+    @property
+    def orientation(self):
+        return self.speaker.worldOrientation
+
+    @orientation.setter
+    def orientation(self, val):
+        self.evt.forward = val @ Vector((0, 1, 0))
+        self.evt.up = val @ Vector((0, 0, 1))
+        self.speaker.worldOrientation = val
 
 
 class Channel(dict):
@@ -175,8 +242,6 @@ class FMod:
     channels = {'default': Channel('default')}
     studio: fstudio.StudioSystem = None
     listener = None
-    use_vr = False
-    vr_headset = None
 
     @classmethod
     def initialize(cls):
@@ -185,22 +250,27 @@ class FMod:
             fmodstudio.initialize()
             cls.studio = fmodstudio
             scene = bge.logic.getCurrentScene()
-            cls.listener = scene.active_camera
+            cls.listener = VR_HEADSET if VR_STATE else scene.active_camera
             scene.pre_draw.append(cls.update)
             scene.onRemove.append(cls.destroy)
-            cls.use_vr = getattr(bpy.data.scenes[scene.name], 'use_vr_audio_space', False)
-            cls.vr_headset = VRHeadset() if check_vr_session_status() else None
         return cls.studio
 
     @classmethod
+    def set_occlusion_mask(self, mask: int):
+        for channel in self.channels.values():
+            channel.occlusion_mask = mask
+
+    @classmethod
     def load_bank(cls, path):
+        if not os.path.exists(path):
+            error(f"Couldn't load bank from '{path}'")
         if cls.studio is not None:
             cls.studio.load_bank_file(path)
 
     @classmethod
     def update(cls):
         studio = cls.studio
-        scene = bge.logic.getCurrentScene()
+        # scene = bge.logic.getCurrentScene()
         cam = cls.listener
         studio.core_system.listener().position = cam.worldPosition
         studio.core_system.listener().set_orientation(
@@ -242,13 +312,17 @@ class FMod:
             cls.studio = None
 
     @classmethod
-    def event(cls, event, position=Vector((0, 0, 0)), channel='default'):
+    def event(cls, event, source=Vector((0, 0, 0)), channel='default') -> Event | EventSpeaker:
         if cls.studio is None:
             return
         _channel = cls.channels.get(channel, None)
         if _channel is None:
             _channel = cls.channels[channel] = Channel(channel)
-        return Event(event, position, channel)
+        if isinstance(source, KX_GameObject):
+            evt = EventSpeaker(event, source, channel)
+        else:
+            evt = Event(event, Vector(source), channel)
+        return evt
 
     @classmethod
     def file3d(cls, path, channel='default'):
@@ -258,3 +332,6 @@ class FMod:
         if _channel is None:
             _channel = cls.channels[channel] = Channel(channel)
         return File3D(path, channel)
+
+
+FMod.initialize()

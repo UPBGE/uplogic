@@ -47,20 +47,21 @@ class TextInput(Label):
         angle=0
     ):
         self.lines = None
+        self.cursor_evt = None
+        self.cursor = Layout(bg_color=(1, 1, 1, 1), size=(0, 0))
+        self.cursor_flash_time = .5
         Label.__init__(self, pos, relative, text, font, font_color, font_size, line_height, shadow, shadow_offset, shadow_color, halign, valign, wrap, angle)
+        self.add_widget(self.cursor)
         self._key_evts = {}
         events = logic.keyboard.inputs.copy()
-        self.cursor_evt = None
         for evt in events.values():
             self._key_evts[evt] = 0.0
         self.multiline = multiline
-        self.cursor = Layout(bg_color=(1, 1, 1, 1), size=(0, 0))
-        self.add_widget(self.cursor)
         self.edit = False
         self._index = 0
         self.line_index = 0
         self.character_index = 0
-        self.cursor_flash_time = .3
+        self.start()
 
     def on_enter(self):
         self.edit = False
@@ -109,6 +110,10 @@ class TextInput(Label):
 
     @text.setter
     def text(self, val):
+        if self.cursor_evt:
+            self.cursor_evt.cancel()
+        self.cursor.show = False
+        self._cursor_visible()
         self._text = str(val)
 
     def move_cursor_to_end(self):

@@ -27,9 +27,6 @@ class Cursor(Widget):
         self.rows = rows
         self.cols = cols
         self._idx = idx
-        # self._idx = 0
-        # self._rows = 1
-        # self._cols = 1
         remove_custom_cursor()
         super().__init__(MOUSE.position, size)
         self._texture = None
@@ -38,6 +35,7 @@ class Cursor(Widget):
         self.pos = MOUSE.position
         self._last_visible = logic.mouse.visible
         bge.logic.getCurrentScene().post_draw.append(self._draw_custom_cursor)
+        self.start()
 
     @property
     def idx(self):

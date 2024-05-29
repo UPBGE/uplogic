@@ -57,6 +57,7 @@ class Label(Widget):
         Widget.__init__(self, pos, (0, 0), (0, 0, 0, 0), relative, angle=angle)
         self.text_halign = halign
         self.text_valign = valign
+        self.start()
 
     @property
     def text(self):

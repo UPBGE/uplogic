@@ -58,7 +58,7 @@ class Console(StringIO):
 
     def write(self, __s: str) -> int:
         log(__s)
-        sys.__stdout__.write(__s)
+        # sys.__stdout__.write(__s)
 
 
 class ErrorConsole(StringIO):
@@ -81,6 +81,7 @@ class ConsoleLayout(Canvas):
     def __init__(self, toggle_key='F12', visible=False):
         scene = logic.getCurrentScene()
         self.toggle_key = toggle_key
+        self._mouse_visible = False
         self.issued_commands = []
         self._mouse_down = False
         self._goback_index = -1
@@ -194,6 +195,8 @@ class ConsoleLayout(Canvas):
             self.input.edit = self.show
         move_goback = key_pulse('UPARROW') - key_pulse('DOWNARROW')
         if key_down(self.toggle_key):
+            if not self.show:
+                self._mouse_visible = logic.mouse.visible
             if not self._toggle_key:
                 self.show = not self.show
                 self.opacity = 1
@@ -214,7 +217,7 @@ class ConsoleLayout(Canvas):
             self._toggle_key = True
         else:
             self._toggle_key = False
-        logic.mouse.visible = self.show
+        logic.mouse.visible = self.show or self._mouse_visible
 
     def stop(self):
         self.clear()
@@ -272,6 +275,18 @@ class ansicol:
     END = '\033[0m'
 
 
+def write(msg, type):
+    _f = {
+        'INFO': log,
+        'DEBUG': debug,
+        'WARNING': warning,
+        'ERROR': error,
+        'SUCCESS': success
+    }
+
+    _f[type](msg)
+
+
 def log(msg, type='INFO'):
     console = get_console()
 
@@ -284,7 +299,7 @@ def log(msg, type='INFO'):
             msg = msg.replace('  ', '    ')
             console.add_message(f'{msg}', type, time=show_time)
             show_time = False
-            # sys.__stdout__.write(f'{sysmsg}\n')
+            sys.__stdout__.write(f'{msg}\n')
 
 
 def warning(msg):
@@ -348,7 +363,7 @@ def debug(msg):
             show_time = False
 
 nodeprefs = bpy.context.preferences.addons.get('bge_netlogic', None)
-if nodeprefs and getattr(bpy.context.scene, 'use_screen_console', False):
+if nodeprefs and getattr(bpy.context.scene, 'use_screen_console', True):
     enable(toggle_key='F12')
 
 

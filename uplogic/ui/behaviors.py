@@ -2,6 +2,7 @@ from bge import render
 from uplogic.input import MOUSE
 from uplogic.input.mouse import MOUSE_EVENTS, LMB, RMB
 from mathutils import Vector
+from uplogic.utils.math import rotate2d
 
 
 class HoverBehavior():
@@ -10,13 +11,15 @@ class HoverBehavior():
         if not self.active:
             return False
         screen_size = [render.getWindowWidth(), render.getWindowHeight()]
-        mpos = Vector((MOUSE.position.x, 1 - MOUSE.position.y))
+        mpos = Vector((MOUSE.position.x * screen_size[0], (1 - MOUSE.position.y) * screen_size[1]))
+        mpos = rotate2d(mpos, self.pivot, -self._draw_angle)
         dsize = self._draw_size
-        return (
-            self.pos_abs[0] <= mpos.x * screen_size[0] <= self.pos_abs[0] + dsize[0] and
-            self.pos_abs[1] <= mpos.y * screen_size[1] <= self.pos_abs[1] + dsize[1] and
+        is_hover = (
+            self.pos_abs[0] <= mpos.x <= self.pos_abs[0] + dsize[0] and
+            self.pos_abs[1] <= mpos.y <= self.pos_abs[1] + dsize[1] and
             not self.canvas._hover_consumed
         )
+        return is_hover
 
 
 class MouseListener():

@@ -104,5 +104,7 @@ from .resizevector import ResizeVectorNode
 from .curveinterpolation import CurveInterpolationNode
 from .tweenvalue import TweenValueNode
 from .getcollisiongroup import GetCollisionGroupNode
+from .getmasterfolder import GetMasterFolderNode
+from .joinpath import JoinPathNode
 
 from .randomvalue import ULRandomValue

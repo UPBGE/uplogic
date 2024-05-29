@@ -38,6 +38,7 @@ class Button(Widget, HoverBehavior):
         self._hover = False
         if on_press is not None:
             self.on_press = on_press
+        self.start()
 
     @property
     def border_color(self):
@@ -65,7 +66,7 @@ class Button(Widget, HoverBehavior):
 
     @property
     def current_color(self):
-        return self.click_color if self._clicked else (self.hover_color if self._in_focus else self.bg_color).copy()
+        return self.click_color if self._clicked or self._down else (self.hover_color if self._in_focus else self.bg_color).copy()
 
     def draw(self):
         super()._setup_draw()
@@ -98,7 +99,7 @@ class Button(Widget, HoverBehavior):
             self.canvas._hover_consumed = True
         else:
             self._in_focus = False
-        if self._in_focus and MOUSE_EVENTS[LMB].active and not self.canvas._click_consumed:
+        if self._in_focus and MOUSE_EVENTS[LMB].active and not self.canvas._click_consumed and not self._down:
             self.on_click(self)
             self.on_press(self)
             self._clicked = True
@@ -108,11 +109,10 @@ class Button(Widget, HoverBehavior):
             self.on_release(self)
             self._down = False
             self._released = True
-            self.canvas._click_consumed = False
         elif self._down:
+            self.canvas._click_consumed = True
             self.on_hold(self)
         self.override_color = None
-        
 
     def on_enter(self, widget):
         pass
@@ -189,6 +189,7 @@ class LabelButton(Button, HoverBehavior):
         )
         self.add_widget(self.label)
         self._in_focus = False
+        self.start()
 
     @property
     def text(self):
@@ -281,6 +282,7 @@ class ImageButton(Button, HoverBehavior):
         self.hover_texture = hover_texture if hover_texture else texture
         self.click_texture = click_texture if click_texture else texture
         self.add_widget(self.image)
+        self.start()
 
     @property
     def texture(self):
@@ -333,6 +335,7 @@ class SpriteButton(Button, HoverBehavior):
         self.hover_texture = hover_texture if hover_texture else texture
         self.click_texture = click_texture if click_texture else texture
         self.add_widget(self.image)
+        self.start()
 
     @property
     def texture(self):

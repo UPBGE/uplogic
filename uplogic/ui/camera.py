@@ -12,6 +12,7 @@ class Camera(Widget):
     def __init__(self, pos=[0, 0], size=(100, 100), relative={}, camera=None, halign='left', valign='bottom') -> None:
         self.camera = camera
         Widget.__init__(self, pos, size, (0, 0, 0, 0), relative, halign, valign, 0)
+        self.start()
 
     @property
     def parent(self):

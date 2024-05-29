@@ -32,6 +32,7 @@ class Path(Widget):
         self.points = points
         self.line_color = line_color
         self.line_width = line_width
+        self.start()
 
     @property
     def line_color(self) -> list:
@@ -100,6 +101,7 @@ class WorldPath(Path):
         self.points = points
         self.line_color = line_color
         self.line_width = line_width
+        self.start()
     
     def _build_shader(self):
         if self.parent is None:
@@ -128,6 +130,7 @@ class ObjectPath(Path):
         self.object: KX_GameObject = object
         self.line_color = line_color
         self.line_width = line_width
+        self.start()
 
     def _build_shader(self):
         if self.parent is None:

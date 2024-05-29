@@ -32,6 +32,7 @@ class Layout(Widget):
         self.border_width = border_width
         self.border_color = border_color
         super().__init__(pos, size, bg_color, relative, halign=halign, valign=valign, angle=angle)
+        self.start()
 
     @property
     def border_color(self):
@@ -187,6 +188,7 @@ class BoxLayout(ArrangedLayout):
         self.children_align = ['left', 'bottom']
         super().__init__(pos, size, bg_color, relative, border_width, border_color, halign=halign, valign=valign, angle=angle)
         self.use_clipping = False
+        self.start()
 
     def arrange(self):
         '''Arrange the widgets according to the specified orientation.'''
@@ -268,6 +270,7 @@ class GridLayout(BoxLayout):
         )
         self.rows = rows
         self.cols = cols
+        self.start()
 
     def add_widget(self, widget):
         max = self.rows * self.cols
@@ -345,6 +348,7 @@ class PolarLayout(BoxLayout):
         )
         self.starting_angle = starting_angle
         self.distance = distance
+        self.start()
 
     @property
     def starting_angle(self):

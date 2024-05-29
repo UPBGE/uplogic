@@ -49,6 +49,7 @@ class ULLogicContainer(ULLogicBase):
         self._uid = None
         self._value = None
         self._children = []
+        self._done = False
         self.network = None
 
     def get_value(self):
