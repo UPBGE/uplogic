@@ -1,6 +1,7 @@
 from bge import logic
 from bge.types import KX_GameObject
 from bge.constraints import createVehicle
+from uplogic.utils.visualize import draw_cube, draw_mesh
 from mathutils import Euler
 from mathutils import Vector
 from uplogic.utils.constants import VEHICLE
@@ -100,6 +101,11 @@ class Vehicle():
 
     def rebuild(self):
         pass
+
+    def visualize(self):
+        for wheel in self.wheels:
+            draw_cube(wheel, color=(0, 0, 1, 1))
+        draw_mesh(self.body)
 
     def add_wheel(self, wheel, steering=False):
         body = self.body

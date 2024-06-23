@@ -197,15 +197,18 @@ class Action():
 
     @intensity.setter
     def intensity(self, value: float):
+        if value == self._intensity:
+            return
         value = float(value)
-        if not value:
-            self.game_object.stopAction(self.layer)
-        if not self.is_playing:
+        if value <= 0:
+            if self.is_playing:
+                self.game_object.stopAction(self.layer)
             return
-        if not self.is_playing or value == self._intensity:
-            return
+        # if not self.is_playing:
+        #     return
         self._intensity = clamp(value, 0, 1)
         self._restart_action()
+        self._act_system._get_uppermost_layer(self.game_object)
 
     @property
     def speed(self) -> float:
@@ -219,7 +222,8 @@ class Action():
         if not self.is_playing or value == self._speed:
             return
         self._speed = value
-        self._restart_action()
+        if self.intensity > 0:
+            self._restart_action()
 
     def _restart_action(self):
         '''Restart action to use updated values.
@@ -270,6 +274,7 @@ class Action():
     def update(self):
         '''This is called each frame.
         '''
+        # print(self.name, self.is_playing)
         self._locked = False
         game_object = self.game_object
         if game_object.invalid:
@@ -336,11 +341,14 @@ class Action():
             self._frozen_speed = -1
 
     def stop(self):
-        self._act_system.remove(self)
-
-    def _stop(self):
         '''Stop playback of this action.
         '''
+        self._act_system.remove(self)
+
+    def disable(self):
+        self.game_object.stopAction(self.layer)
+
+    def _stop(self):
         self.stopped = True
         self.on_finish()
         self.game_object.stopAction(self.layer)
@@ -355,7 +363,6 @@ class Action():
             self.start_frame,
             self.end_frame,
             layer=self.layer,
-            # priority=self.priority,
             blendin=self.blendin,
             play_mode=self.play_mode,
             speed=self.speed,

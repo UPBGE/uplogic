@@ -58,8 +58,13 @@ mainloop on purpose, use the following code:
     get_mainloop().stop(
 """
 
-from collections import deque
 
+__version__ = '3.2'
+
+import signal
+import time
+import os, sys
+import bge
 from .utils import load_user_module
 from .utils import make_valid_name
 from .input import key_tap
@@ -74,14 +79,9 @@ from . import physics
 from . import shaders
 from . import ui
 from . import utils
-import bge
 import bpy
-import signal
-import time
-import os, sys
 
-
-__version__ = '3.2'
+from collections import deque
 
 
 class MainLoop:

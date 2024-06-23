@@ -1,8 +1,10 @@
 from uplogic.events import receive, ULEvent
+from uplogic.console import warning
 from uplogic.utils.errors import TypeMismatchError
 from bge.types import KX_PythonComponent, KX_GameObject
 from uplogic import CustomLoop
 from bge import logic
+import bpy
 
 
 def listener(original_class: KX_PythonComponent) -> KX_PythonComponent:
@@ -82,7 +84,7 @@ def game_props(*prop_names) -> KX_PythonComponent:
         pass
 
     def deco(cls: KX_PythonComponent) -> KX_PythonComponent:
-        print('@game_props decorator is deprecated, use @game_property instead.')
+        warning('@game_props decorator is deprecated, use @game_property instead.')
         if not (issubclass(cls, KX_PythonComponent) or issubclass(cls, KX_GameObject)):
             raise TypeMismatchError('Decorator only viable for KX_PythonComponent subclasses!')
         if not (isinstance(prop_names, list) or isinstance(prop_names, tuple)):
@@ -178,7 +180,7 @@ def instance_props(*prop_names) -> KX_PythonComponent:
         pass
 
     def deco(cls: KX_PythonComponent) -> KX_PythonComponent:
-        print('@instance_props decorator is deprecated, use @instance_property instead.')
+        warning('@instance_props decorator is deprecated, use @instance_property instead.')
         if not (issubclass(cls, KX_PythonComponent) or issubclass(cls, KX_GameObject)):
             raise TypeMismatchError('Decorator only viable for KX_PythonComponent subclasses!')
         if not (isinstance(prop_names, list) or isinstance(prop_names, tuple)):
@@ -275,7 +277,7 @@ def bl_attrs(*attr_names) -> KX_PythonComponent:
         pass
 
     def deco(cls: KX_PythonComponent) -> KX_PythonComponent:
-        print('@bl_attrs decorator is deprecated, use @attribute instead.')
+        warning('@bl_attrs decorator is deprecated, use @attribute instead.')
         if not (issubclass(cls, KX_PythonComponent) or issubclass(cls, KX_GameObject)):
             raise TypeMismatchError('Decorator only viable for KX_PythonComponent subclasses!')
         if not (isinstance(attr_names, list) or isinstance(attr_names, tuple)):
@@ -362,6 +364,56 @@ def attribute(*attr_names) -> KX_PythonComponent:
     return deco
 
 
+def scene_attribute(*attr_names) -> KX_PythonComponent:
+    """Decorator for `KX_PythonComponent` or `KX_GameObject` classes and subclasses.
+
+    Automatically adds attribute handlers for this class to use the
+    `Scene[attribute]` syntax instead of saving values on the
+    instance itself.
+
+    :param `attr_names`: Names of custom attributes as a list.
+    """
+
+    def on_attr(self, val):
+        pass
+
+    def deco(cls: KX_PythonComponent) -> KX_PythonComponent:
+        if not (issubclass(cls, KX_PythonComponent) or issubclass(cls, KX_GameObject)):
+            raise TypeMismatchError('Decorator only viable for KX_PythonComponent subclasses!')
+        if not (isinstance(attr_names, list) or isinstance(attr_names, tuple)):
+            raise TypeMismatchError('Expected attribute names as a list or tuple!')
+        for attr_name in attr_names:
+
+            def getPropComponent(self, attr_name=attr_name):
+                return bpy.data.scenes[self.object.scene.name].get(attr_name)
+
+            def setPropComponent(self, value, attr_name=attr_name):
+                getattr(self, f'on_{attr_name}')(value)
+                bpy.data.scenes[self.object.scene.name] = value
+                self.object.color = self.object.color
+
+            def getPropObject(self, attr_name=attr_name):
+                return self.blenderObject.get(attr_name)
+
+            def setPropObject(self, value, attr_name=attr_name):
+                getattr(self, f'on_{attr_name}')(value)
+                self.blenderObject[attr_name] = value
+                self.object.color = self.object.color
+
+            if issubclass(cls, KX_PythonComponent):
+                prop = property(getPropComponent, setPropComponent)
+            elif issubclass(cls, KX_GameObject):
+                prop = property(getPropObject, setPropObject)
+            else:
+                return
+
+            setattr(cls, attr_name, prop)
+            if not hasattr(cls, f'on_{attr_name}'):
+                setattr(cls, f'on_{attr_name}', on_attr)
+        return cls
+    return deco
+
+
 def global_dict(*prop_names):
     """Automatically adds property handlers for this class to use the `bge.logic.globalDict[key]`
     syntax instead of saving values on the instance itself.
@@ -396,7 +448,7 @@ def scene_props(*prop_names):
     :param `prop_names`: Names of properties as a list.
     """
     def deco(cls: KX_PythonComponent) -> KX_PythonComponent:
-        print('@bl_attrs decorator is deprecated, use @attribute instead.')
+        warning('@scene_props decorator is deprecated, use @scene_property instead.')
         if not (issubclass(cls, KX_PythonComponent) or issubclass(cls, KX_GameObject) or issubclass(cls, CustomLoop)):
             raise TypeMismatchError('Decorator only viable for KX_PythonComponent, KX_GameObject or CustomLoop subclasses!')
         if not (isinstance(prop_names, list) or isinstance(prop_names, tuple)):
@@ -428,9 +480,8 @@ def scene_props(*prop_names):
 
 
 def scene_property(*prop_names):
-    """Decorator for `KX_PythonComponent` or `KX_GameObject` classes and subclasses.
-
-    Automatically adds property handlers for this class to use the `game_object.scene[prop]`
+    """
+    Automatically adds property handlers for this class to use the `logic.getCurrentScene()[prop]`
     syntax instead of saving values on the instance itself.
 
     :param `prop_names`: Names of properties as a list.

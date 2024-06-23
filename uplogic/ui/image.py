@@ -5,6 +5,7 @@ from math import ceil
 from uplogic.utils.math import rotate2d
 from gpu_extras.batch import batch_for_shader
 from mathutils import Vector
+from os.path import isfile
 
 
 class Image(Widget):
@@ -41,6 +42,8 @@ class Image(Widget):
         self.use_aspect_ratio = use_aspect_ratio
         self._opacity = 1
         super().__init__(pos, size, relative=relative, halign=halign, valign=valign, angle=angle)
+        if texture not in bpy.data.images and isfile(texture):
+            bpy.data.images.load(texture)
         self.texture = texture
         self.start()
 

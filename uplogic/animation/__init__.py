@@ -7,3 +7,4 @@ from .action import ACTION_FINISHED  # noqa
 from .action import ACTION_STARTED  # noqa
 from .action import ULAction, Action  # noqa
 from .sequence import ULSequence, Sequence  # noqa
+from .rig import Rig

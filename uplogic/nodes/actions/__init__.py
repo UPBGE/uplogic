@@ -159,3 +159,4 @@ from .applytransform import ULApplyTransform
 from .setlogictreeproperty import ULSetLogicTreeProperty
 from .draw import DrawNode
 from .setconstraintattribute import SetConstraintAttributeNode
+from .setrigboneattribute import SetRigBoneAttributeNode

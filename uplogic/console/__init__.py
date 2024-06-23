@@ -9,7 +9,8 @@ from uplogic.utils.raycasting import raycast_mouse
 from uplogic.utils.math import world_to_screen
 from uplogic.utils.math import cycle
 from uplogic.utils.math import clamp
-from uplogic.input import key_down, mouse_down, key_pulse, mouse_wheel
+from uplogic.input.keyboard import key_down, key_pulse
+from uplogic.input.mouse import mouse_down, mouse_wheel
 import bpy, blf
 import sys, os
 from datetime import datetime
@@ -43,7 +44,6 @@ def _get_globals():
 def enable(toggle_key='F12', visible=False):
     get_console(True, toggle_key=toggle_key, visible=visible)
     sys.stdout = Console()
-    debug('On-Screen Console active; Check System Console for Errors.')
 
 
 def disable():
@@ -52,13 +52,14 @@ def disable():
     console = get_console()
     if console:
         console.stop()
+    consoles = GlobalDB.retrieve('uplogic.consoles')
+    consoles.remove('default')
 
 
 class Console(StringIO):
 
     def write(self, __s: str) -> int:
         log(__s)
-        # sys.__stdout__.write(__s)
 
 
 class ErrorConsole(StringIO):
@@ -263,6 +264,7 @@ def get_console(create=False, toggle_key='F12', visible=False) -> ConsoleLayout:
     if console is None and create:
         console = ConsoleLayout(toggle_key=toggle_key, visible=visible)
         consoles.put('default', console)
+        debug('On-Screen Console active; Check System Console for Errors.')
     return console
 
 

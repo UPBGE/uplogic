@@ -196,7 +196,7 @@ def raycast_face(
 
     :returns: (`obj`, `point`, `normal`, `direction`, `face`, `uv`)
     """
-    print("'uplogic.utils.raycasting.raycast_face()' is deprecated, use '...raycasting.raycast()' instead")
+    print("WARNING: 'uplogic.utils.raycasting.raycast_face()' is deprecated, use '...raycasting.raycast()' instead")
     if exclude:
         exclude_prop, prop = prop, ''
     direction, distance, dest = ray_data(origin, dest, local, distance)

@@ -60,6 +60,13 @@ def draw_cube(origin: Vector, width: float = 1, color: list = [1, 1, 1, 1], cent
 
 
 def draw_box(origin: Vector, width: float, length: float, height: float, color: list = [1, 1, 1, 1], centered: bool = False):
+    is_obj = isinstance(origin, KX_GameObject)
+
+    if is_obj:
+        obj = origin
+        origin = origin.worldPosition.copy()
+        origin -= obj.worldPosition
+        centered = True
     if centered:
         origin = origin.copy() - Vector((width * .5, length * .5, height * .5))
 
@@ -89,6 +96,18 @@ def draw_box(origin: Vector, width: float, length: float, height: float, color: 
 
     c7[1] += width
     c7[2] += height
+
+    if is_obj:
+        ori = obj.worldOrientation
+        offset = obj.worldPosition
+        origin = ori @ origin + offset
+        c1 = ori @ c1 + offset
+        c2 = ori @ c2 + offset
+        c3 = ori @ c3 + offset
+        c4 = ori @ c4 + offset
+        c5 = ori @ c5 + offset
+        c6 = ori @ c6 + offset
+        c7 = ori @ c7 + offset
 
     drawLine(origin, c1, color)
     drawLine(c1, c2, color)

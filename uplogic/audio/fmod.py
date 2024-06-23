@@ -124,7 +124,7 @@ class Event(Sound):
     @property
     def volume(self):
         return self.evt.get_volume()
-    
+
     @volume.setter
     def volume(self, vol):
         self.evt.set_volume(vol)

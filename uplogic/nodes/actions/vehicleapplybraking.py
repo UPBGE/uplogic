@@ -1,5 +1,5 @@
 from uplogic.nodes import ULActionNode
-from uplogic.physics import RWD
+from uplogic.physics import RWD, Vehicle
 from uplogic.utils.constants import VEHICLE
 
 
@@ -22,7 +22,7 @@ class ULVehicleApplyBraking(ULActionNode):
         if not self.get_input(self.condition):
             return
         game_object = self.get_input(self.vehicle)
-        vehicle = game_object.get(VEHICLE, None)
+        vehicle: Vehicle = game_object.get(VEHICLE, None)
         if vehicle is None:
             return
         value_type = self.get_input(self.value_type)

@@ -17,10 +17,6 @@ def clamp(value: float or Vector, lower: float = 0, upper: float = 1) -> float:
     """
     if isinstance(value, Vector):
         return vec_clamp(value, min, max)
-    # if value < min:
-    #     return min
-    # if value > max:
-    #     return max
     return max(lower, min(value, upper))
 
 
@@ -35,10 +31,12 @@ def cycle(value: float, min: float = 0, max: float = 1) -> float:
     """
     if isinstance(value, Vector):
         return vec_clamp(value, min, max)
-    if value < min:
-        return max
     if value > max:
+        # return value - max
         return min
+    if value < min:
+        # return max - abs(value - min)
+        return max
     return value
 
 

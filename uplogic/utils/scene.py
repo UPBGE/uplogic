@@ -1,6 +1,5 @@
 from bge import logic
 import bpy
-# from uplogic.events import schedule
 
 
 def set_scene(scene: str or bpy.types.Scene) -> None:
@@ -76,10 +75,10 @@ class FileLoader():
             self.on_progress(self.status)
             return
         logic.getCurrentScene().pre_draw.remove(self.load_next)
-        self.object.endObject()
-        bpy.data.materials.remove(self.temp_map)
-        bpy.data.meshes.remove(self.bmesh)
-        bpy.data.objects.remove(self.bobj)
+        # self.object.endObject()
+        # bpy.data.materials.remove(self.temp_map)
+        # bpy.data.meshes.remove(self.bmesh)
+        # bpy.data.objects.remove(self.bobj)
         self.finished = True
         self.on_finish()
 

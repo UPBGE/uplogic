@@ -3,7 +3,7 @@
 
 from bge import logic
 import time
-from uplogic.physics import on_collision  # noqa
+# from uplogic.physics import on_collision  # noqa
 
 
 def on_pre_draw(callback):

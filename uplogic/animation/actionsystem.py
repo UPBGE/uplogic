@@ -8,7 +8,7 @@ class ActionSystem():
     usually addressed indirectly through `Action` and is not intended for
     manual use.
     '''
-    layers: dict = {}
+    layers: dict[KX_GameObject, dict] = {}
 
     def __init__(self, name: str):
         self.actions: list = []
@@ -72,13 +72,21 @@ class ActionSystem():
         action = cls.layers.get(game_object, {}).get(str(layer))
         return action
 
+    @classmethod
+    def _get_uppermost_layer(cls, object):
+        layers = cls.layers.get(object, {})
+        found = False
+        for action in layers.values().__reversed__():
+            if found:
+                action.disable()
+            elif action.intensity >= 1.0:
+                found = True
+
     def update(self):
         """This is called each frame.
         """
         for action in self.actions:
             action.update()
-            # if action.layer_weight >= 1.0:
-            #     pass
 
     def add(self, action):
         '''Add a `Action` to this system.

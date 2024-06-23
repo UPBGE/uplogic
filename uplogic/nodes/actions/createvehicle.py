@@ -1,5 +1,5 @@
 from uplogic.nodes import ULActionNode
-from uplogic.physics.vehicle import ULVehicle
+from uplogic.physics.vehicle import Vehicle
 from uplogic.utils.constants import VEHICLE
 
 
@@ -15,7 +15,6 @@ class ULCreateVehicle(ULActionNode):
         self.wheel_size = None
         self.done = None
         self.vehicle = None
-        self.wheels = None
         self.OUT = self.add_output(self.get_done)
         self.VEHICLE = self.add_output(self.get_vehicle)
         self.WHEELS = self.add_output(self.get_wheels)
@@ -27,7 +26,7 @@ class ULCreateVehicle(ULActionNode):
         return self.vehicle
 
     def get_wheels(self):
-        return self.wheels
+        return self.vehicle.wheels
 
     def evaluate(self):
         self.done = False
@@ -41,7 +40,7 @@ class ULCreateVehicle(ULActionNode):
         damping = self.get_input(self.damping)
         friction = self.get_input(self.friction)
         wheel_size = self.get_input(self.wheel_size)
-        self.vehicle = ULVehicle(
+        self.vehicle = Vehicle(
             game_object,
             suspension,
             stiffness,

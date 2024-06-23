@@ -239,7 +239,7 @@ class Sound2D(ULSound):
         sound.position = self.sound.position + DELTA_TIME()
         sound.volume = self.sound.volume
         sound.pitch = self.sound.pitch
-        schedule_callback(self.sound.stop, .5)
+        schedule_callback(self.sound.stop)
         self.sound = sound
 
     def update(self):
@@ -516,13 +516,17 @@ class Sound3D(ULSound):
                     else (1 - cs) * sustained
                 )
                 master_volume = self.aud_system.volume
-                handle.volume = self.volume * mult * master_volume
-                handle.cone_volume_outer = (
-                    self.cone_outer_volume *
-                    self.volume *
-                    mult *
-                    master_volume
-                )
+                try:
+                    handle.volume = self.volume * mult * master_volume
+                
+                    handle.cone_volume_outer = (
+                        self.cone_outer_volume *
+                        self.volume *
+                        mult *
+                        master_volume
+                    )
+                except Exception:
+                    pass
             elif handle.status:
                 master_volume = self.aud_system.volume
                 handle.volume = self.volume * master_volume

@@ -456,6 +456,9 @@ class Curve(GameObject):
             print('[UPLOGIC] ULCurve class will be renamed to "Curve" in future releases!')
         self.type = type
         self._loop = loop
+        if isinstance(name, KX_GameObject):
+            self.game_object = name
+            return
         self.game_object = create_curve(
             name=name,
             bevel_depth=bevel_depth,

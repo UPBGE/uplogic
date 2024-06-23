@@ -1,6 +1,7 @@
 from typing import Callable
 from bge import logic
 from bge.types import KX_GameObject as GameObject
+from ..console import error
 
 
 class Collision():
@@ -54,13 +55,17 @@ class Collision():
         if prop:
             if prop not in obj.getPropertyNames():
                 return
-        if self.tap and self.consumed:
-            self.active = True
-            return
+            # self.active = True
 
         self.active = True
+        # if self.tap and self.consumed:
+        #     return
         if obj not in self.done_objs:
-            if self.game_object.collisionGroup & obj.collisionMask and self.game_object.collisionMask & obj.collisionGroup:
+            if (
+                self.game_object.collisionGroup & obj.collisionMask and
+                self.game_object.collisionMask & obj.collisionGroup and
+                not (self.tap and self.consumed)
+            ):
                 self.callback(obj, point, normal)
             self.done_objs.append(obj)
 
@@ -108,6 +113,6 @@ def on_collision(
     :param `tap`: Only validate the first frame of the collision.
     """
     if not isinstance(obj, GameObject):
-        print("'on_collision()' Argument 0 is required to be a 'KX_GameObject' type!")
+        error("'on_collision()' Argument 0: Expected 'KX_GameObject' type!")
         return
     return Collision(obj, callback, prop, material, tap, post_call)

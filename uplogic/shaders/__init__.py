@@ -19,6 +19,7 @@ from .texture import Texture
 from .chromaticaberration import ChromaticAberration
 from .sharpen import Sharpen
 from .splitscreen import SplitScreen
+from .eyelids import Eyelids
 from .shader import load_glsl
 from .shader import remove_filter
 from .shader import toggle_filter
