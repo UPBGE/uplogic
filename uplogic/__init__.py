@@ -59,7 +59,7 @@ mainloop on purpose, use the following code:
 """
 
 
-__version__ = '3.2'
+__version__ = '3.2.1'
 
 import signal
 import time
