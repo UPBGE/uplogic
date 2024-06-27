@@ -31,12 +31,10 @@ def cycle(value: float, min: float = 0, max: float = 1) -> float:
     """
     if isinstance(value, Vector):
         return vec_clamp(value, min, max)
-    if value > max:
-        # return value - max
-        return min
+    if value >= max:
+        return value - max
     if value < min:
-        # return max - abs(value - min)
-        return max
+        return max - abs(value - min)
     return value
 
 
