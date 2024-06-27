@@ -65,7 +65,8 @@ class Texture(Filter2D):
             self.free_texture()
         if not isinstance(val, bpy.types.Image):
             raise TypeError
-        val.gl_load()
+        if not val.has_data:
+            val.gl_load()
         self.uniforms['tex'] = val
 
     def free_texture(self):
