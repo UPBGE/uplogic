@@ -68,6 +68,11 @@ class Texture(Filter2D):
         val.gl_load()
         self.uniforms['tex'] = val
 
+    def free_textue(self):
+        self.uniforms['tex'].gl_free()
+        self.uniforms['tex'].buffers_free()
+        
+
     @property
     def opacity(self):
         return self.uniforms['opacity']

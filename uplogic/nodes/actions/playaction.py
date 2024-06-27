@@ -45,14 +45,17 @@ class ULPlayAction(ULActionNode):
         else:
             return ActionSystem('default')
 
+    def on_start(self):
+        self._started = True
+
     def _get_started(self):
-        return self._action and self._action.started
+        return self._started
     
     def on_finish(self):
         self._finished = True
 
     def _get_finished(self):
-        return self._action and self._action.finished
+        return self._finished
 
     def _get_running(self):
         if self._action:
@@ -66,6 +69,7 @@ class ULPlayAction(ULActionNode):
     
     def reset(self):
         self._finished = False
+        self._started = False
         return super().reset()
 
     def evaluate(self):
@@ -113,17 +117,18 @@ class ULPlayAction(ULActionNode):
             speed = 0.01
 
         self._action = Action(
-            game_object,
-            bpy_action.name,
-            start_frame,
-            end_frame,
-            layer,
-            priority,
-            blendin,
-            play_mode,
-            speed,
-            intensity,
-            blend_mode
+            game_object=game_object,
+            action_name=bpy_action.name,
+            start_frame=start_frame,
+            end_frame=end_frame,
+            layer=layer,
+            priority=priority,
+            blendin=blendin,
+            play_mode=play_mode,
+            speed=speed,
+            intensity=intensity,
+            blend_mode=blend_mode,
+            on_start=self.on_start
         )
         self._action.on_finish = self.on_finish
         self.in_use = True

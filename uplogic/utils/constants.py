@@ -1,6 +1,7 @@
 import operator
 from mathutils import Vector
 from bge import logic
+import bpy
 
 
 # uplogic game properties
@@ -60,7 +61,7 @@ FRONT_AXIS_VECTOR_SIGNED = {
 }
 
 
-FRAMETIME_COMPARE = 1 / 60
+FRAMETIME_COMPARE = 1 / bpy.data.scenes[logic.getCurrentScene().name].render.fps
 
 
 def FPS_FACTOR() -> float:

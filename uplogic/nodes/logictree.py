@@ -103,7 +103,7 @@ class ULLogicTree(ULLogicContainer):
     def stop(self, network=None):
         if self.stopped:
             return
-        self._time_then = None
+        # self._time_then = None  # XXX: Was this important? Causes issues when stopping and restarting
         self.stopped = True
         for cell in self._cells:
             cell.stop(self)

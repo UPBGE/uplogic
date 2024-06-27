@@ -9,6 +9,7 @@ from uplogic.animation import ActionSystem
 from uplogic.animation.actionsystem import get_action_system
 from uplogic.events import schedule
 from uplogic.console import warning
+from uplogic.utils.constants import FRAMETIME_COMPARE
 import bpy
 from uplogic.utils.math import clamp
 
@@ -28,8 +29,9 @@ BLEND_MODES = {
 """Available blending modes of [`"blend"`, `"add"`]"""
 
 
-ACTION_STARTED = 'ACTION_STARTED'
-ACTION_FINISHED = 'ACTION_FINISHED'
+ACTION_STARTED = 0
+ACTION_RUNNING = 1
+ACTION_FINISHED = 2
 
 
 class ActionCallback:
@@ -81,7 +83,8 @@ class Action():
         speed: float = 1,
         intensity: float = 1,
         blend_mode: str = 'blend',
-        keep: bool = False
+        keep: bool = False,
+        on_start = None
     ):
         if self._deprecated:
             warning('Warning: ULAction class will be renamed to "Action" in future releases!')
@@ -126,6 +129,8 @@ class Action():
         layer_action_name = game_object.getActionName(layer)
         same_action = layer_action_name == action_name
         self._callbacks: list[ActionCallback] = []
+        if on_start:
+            self.on_start = on_start
         if (not same_action and self.is_playing):
             game_object.stopAction(layer)
         if not (self.is_playing or same_action):
@@ -172,11 +177,12 @@ class Action():
 
     @property
     def started(self):
-        return self.frame - self.start_frame < self.speed
+        return self.frame - self.start_frame < self.speed * FRAMETIME_COMPARE
 
     @property
     def finished(self):
-        return self.end_frame - self.frame < self.speed
+        # print(self.end_frame - self.frame, self.speed * FRAMETIME_COMPARE)
+        return self.end_frame - self.frame < 1
 
     @property
     def frame(self) -> float:
