@@ -62,16 +62,15 @@ class Texture(Filter2D):
     @texture.setter
     def texture(self, val):
         if self.free_textures:
-            self.uniforms['tex'].gl_free()
+            self.free_texture()
         if not isinstance(val, bpy.types.Image):
             raise TypeError
         val.gl_load()
         self.uniforms['tex'] = val
 
-    def free_textue(self):
+    def free_texture(self):
         self.uniforms['tex'].gl_free()
         self.uniforms['tex'].buffers_free()
-        
 
     @property
     def opacity(self):
