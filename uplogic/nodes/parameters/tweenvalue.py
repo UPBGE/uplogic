@@ -23,7 +23,7 @@ class TweenValueNode(ULParameterNode):
 
         self.on_demand = True
         self.value_type = 0  # 0 -> float, 1 -> Vector
-        
+
         self._result = 0.0
         self._factor = 0.
         self._eval = 0.

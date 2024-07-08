@@ -5,6 +5,7 @@ from bge import render
 from bge.types import KX_GameObject as GameObject
 from mathutils import Vector
 from uplogic.utils.math import interpolate
+from uplogic.utils.math import clamp
 from uplogic.events import schedule_callback
 
 
@@ -470,7 +471,17 @@ class MouseLook():
             game_object_y.applyRotation((*rot, ), True)
         if self.center_mouse and (Vector(self.mouse.position) - Vector(self.screen_center)).length > .00001:
             self.mouse.position = self.screen_center
-        self._old_mouse_pos = self.mouse.position
+            self._old_mouse_pos = self.mouse.position
+        elif not self.center_mouse:
+            mpos = list(self.mouse.position)
+            opos = self._old_mouse_pos
+            xpos = mpos[0] if 0 <= mpos[0] <= 1 else opos[0]
+            ypos = mpos[1] if 0 <= mpos[1] <= 1 else opos[1]
+            self._old_mouse_pos = (xpos, ypos)
+            threshold = 0.001
+            mpos[0] = clamp(mpos[0], threshold, 1-threshold)
+            mpos[1] = clamp(mpos[1], threshold, 1-threshold)
+            self.mouse.position = (mpos[0], mpos[1])
         self.done = True
 
 

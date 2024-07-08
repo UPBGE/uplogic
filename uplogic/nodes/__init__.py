@@ -164,7 +164,14 @@ class ULParameterNode(ULLogicNode):
 
 
 class ULActionNode(ULLogicNode):
-    pass
+
+    def __init__(self):
+        self.done = False
+        super().__init__()
+
+    def reset(self):
+        super().reset()
+        self.done = False
 
 
 class ULConditionNode(ULLogicNode):

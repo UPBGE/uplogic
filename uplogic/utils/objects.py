@@ -174,6 +174,15 @@ def controller_brick_status(owner, controller_name):
         raise LogicControllerNotSupportedError
 
 
+def move_to(game_object: KX_GameObject, target: Vector, speed: float):
+    direction = (game_object.worldPosition - target)
+    if direction.length < speed:
+        game_object.worldPosition = target
+        return True
+    direction.normalize()
+    game_object.worldPosition += direction * speed
+
+
 class ControllerBrick(tuple):
 
     @property
@@ -420,6 +429,9 @@ class GameObject:
     @worldTransform.setter
     def worldTransform(self, val: Matrix):
         self.game_object.worldTransform = val
+    
+    def move_to(self, target, speed):
+        return move_to(self, target, speed)
 
 
 def get_curve_length(curve: KX_GameObject):
@@ -543,7 +555,7 @@ class Mesh():
 
 
 def add_object(name: str | KX_GameObject, position=Vector((0, 0, 0)), rotation=Vector((0, 0, 0)), scale=Vector((1, 1, 1))):
-    orig_ob = bpy.data.objects.get(name, None)
+    orig_ob = bpy.data.objects.get(name, name)
     if orig_ob is None:
         return
     game_scene = logic.getCurrentScene()

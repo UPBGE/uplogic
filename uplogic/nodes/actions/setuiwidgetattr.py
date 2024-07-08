@@ -34,6 +34,7 @@ attrs = {
     "icon": 'int_value',
     "rows": 'int_value',
     "cols": 'int_value',
+    "points": 'points_value',
 }
 
 
@@ -53,6 +54,7 @@ class ULSetUIWidgetAttr(ULActionNode):
         self.img_value = None
         self.widget_attr = 'show'
         self.show = None
+        self.points = None
         self._done = False
         self.OUT = self.add_output(self._get_done)
 

@@ -11,16 +11,16 @@ class ULKeyLogger(ULParameterNode):
         self.KEYCODE = self.add_output(self.get_keycode)
 
     def get_pressed(self):
-        return self.scan()[0]
+        return len(self.scan()) > 0
 
     def get_keycode(self):
-        return self.scan()[1]
+        return self.scan()[0].keycode
 
     def get_character(self):
-        return self.scan()[2]
+        return self.scan()[0].character
 
     def scan(self):
-        data = record_keyboard(not self.get_input(self.only_characters))
+        data = record_keyboard(False, not self.get_input(self.only_characters))
         return data
 
     def reset(self):

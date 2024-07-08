@@ -184,7 +184,7 @@ class RecordedCharacter(tuple):
         return self[2]
 
 
-def record_keyboard(down=True, all=False) -> RecordedCharacter[bool, int, str]:
+def record_keyboard(down=True, all=False) -> list[RecordedCharacter[bool, int, str]]:
     '''Listen to keyboard events.
 
     :param `down`: Record if key is down.
@@ -201,7 +201,6 @@ def record_keyboard(down=True, all=False) -> RecordedCharacter[bool, int, str]:
 
     for keycode in active_events:
         if func(keycode):
-            # print(keycode)
             event = active_events[keycode]
             char = events.EventToCharacter(
                 event.type,

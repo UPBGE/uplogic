@@ -30,8 +30,8 @@ class Slider(RelativeLayout):
         self.knob = None
         super().__init__(pos, size, (0, 0, 0, 0), relative, halign=halign, valign=valign, angle=angle)
         self._value = 0
-        self.border_width = 1
-        self.border_color = (0, 0, 0, 1)
+        # self.border_width = 1
+        # self.border_color = (0, 0, 0, 1)
         self._horiz = orientation != 'vertical'
         bar_size = (1, bar_width) if self._horiz else (bar_width, 1)
         self.bar = Button(
@@ -41,6 +41,7 @@ class Slider(RelativeLayout):
             halign='center',
             relative={'size': True, 'pos': True},
             bg_color=bar_color,
+            click_color=bar_color,
             hover_color=bar_hover_color
         )
         self._slide_axis = 0 if self._horiz else 1
@@ -48,7 +49,7 @@ class Slider(RelativeLayout):
         self.add_widget(self.bar)
         if allow_bar_click:
             self.bar.on_hold = self._on_press
-        self.knob = Button(size=(0, 0), bg_color=knob_color, hover_color=knob_hover_color, valign='center', halign='center')
+        self.knob = Button(size=(0, 0), bg_color=knob_color, click_color=knob_color, hover_color=knob_hover_color, valign='center', halign='center')
         self.knob_size = knob_size
         self.knob.on_hold = self._on_press
         self.add_widget(self.knob)
@@ -163,6 +164,7 @@ class FrameSlider(Slider):
             relative={'size': True, 'pos': True},
             border_color=border_color,
             bg_color=bg_color,
+            click_color=bg_color,
             border_width=border_width,
             hover_color=bar_hover_color
         )

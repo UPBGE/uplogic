@@ -1,4 +1,6 @@
 from uplogic.nodes import ULActionNode
+from uplogic.nodes import ULOutSocket
+from uplogic.utils import not_met
 import bpy
 import json
 import os
@@ -7,10 +9,10 @@ import os
 class ULClearVariables(ULActionNode):
     def __init__(self):
         ULActionNode.__init__(self)
-        self.condition = None
-        self.file_name = None
+        self.condition = False
+        self.file_name = ''
         self.path = ''
-        self.done = None
+        self.done = False
         self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
@@ -19,7 +21,7 @@ class ULClearVariables(ULActionNode):
     def write_to_json(self, path):
         data = None
         if not path.endswith('.json'):
-            path = path + f'{self.get_input(self.file_name)}.json'
+            path = os.path.join(path, f'{self.get_input(self.file_name)}.json')
         if os.path.isfile(path):
             data = {}
             f = open(path, 'w')
@@ -31,22 +33,14 @@ class ULClearVariables(ULActionNode):
             json.dump(data, f, indent=2)
         f.close()
 
-    def get_custom_path(self, path):
-        if not path.endswith('/') and not path.endswith('json'):
-            path = path + '/'
-        return path
-
     def evaluate(self):
         self.done = False
-        if not self.get_input(self.condition):
+        condition = self.get_input(self.condition)
+        if not condition:
             return
-        cust_path = self.get_custom_path(self.path)
+        path = self.get_input(self.path)
 
-        path = (
-            bpy.path.abspath('//Data/')
-            if self.path == ''
-            else bpy.path.abspath(cust_path)
-        )
+        path = (bpy.path.abspath(path=path))
         os.makedirs(path, exist_ok=True)
 
         self.write_to_json(path)

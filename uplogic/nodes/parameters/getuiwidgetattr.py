@@ -15,6 +15,7 @@ class ULGetUIWidgetAttr(ULParameterNode):
         self.FLOAT = self.add_output(self._get_attr)
         self.FONT = self.add_output(self._get_attr)
         self.IMG = self.add_output(self._get_attr)
+        self.POINTS = self.add_output(self._get_attr)
 
     def _get_attr(self):
         widget = self.get_input(self.widget)

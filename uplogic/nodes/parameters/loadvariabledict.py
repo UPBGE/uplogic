@@ -13,13 +13,9 @@ class ULLoadVariableDict(ULParameterNode):
         self.VAR = self.add_output(self.get_var)
 
     def get_var(self):
-        cust_path = self.get_custom_path(self.path)
+        path = self.get_input(self.path)
 
-        path = (
-            bpy.path.abspath('//Data/')
-            if self.path == ''
-            else bpy.path.abspath(cust_path)
-        )
+        path = (bpy.path.abspath(path))
         os.makedirs(path, exist_ok=True)
 
         return self.read_from_json(path)
@@ -27,7 +23,7 @@ class ULLoadVariableDict(ULParameterNode):
     def read_from_json(self, path):
         self.done = False
         if not path.endswith('.json'):
-            path = path + f'{self.get_input(self.file_name)}.json'
+            path = os.path.join(path, f'{self.get_input(self.file_name)}.json')
         if not os.path.isfile(path):
             debug('No Saved Variables!')
             return
@@ -35,8 +31,3 @@ class ULLoadVariableDict(ULParameterNode):
         data = json.load(f)
         f.close()
         return data
-
-    def get_custom_path(self, path):
-        if not path.endswith('/') and not path.endswith('json'):
-            path = path + '/'
-        return path

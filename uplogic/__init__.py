@@ -84,6 +84,20 @@ import bpy
 from collections import deque
 
 
+def check_version(version: str):
+    nums = version.split('.')
+    vnums = __version__.split('.')
+    
+    while len(vnums) < len(nums):
+        vnums.append(0)
+    
+    for i, num in enumerate(nums):
+        if int(num) < int(vnums[i]):
+            return False
+
+    return True
+
+
 class MainLoop:
     _handles = {}
 

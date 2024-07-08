@@ -265,7 +265,13 @@ class FMod:
         if not os.path.exists(path):
             error(f"Couldn't load bank from '{path}'")
         if cls.studio is not None:
-            cls.studio.load_bank_file(path)
+            from pyfmodex.exceptions import FmodError
+            try:
+                cls.studio.load_bank_file(path)
+            except FmodError:
+                error(f"Bank '{path}' already loaded!")
+                return
+        success(f"Bank '{path}' successfully loaded.")
 
     @classmethod
     def update(cls):

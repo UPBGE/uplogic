@@ -20,7 +20,7 @@ class ULSaveVariableDict(ULActionNode):
 
     def write_to_json(self, path, val):
         if not path.endswith('.json'):
-            path = path + f'{self.get_input(self.file_name)}.json'
+            path = os.path.join(path, f'{self.get_input(self.file_name)}.json')
         if os.path.isfile(path):
             f = open(path, 'w')
             json.dump(val, f, indent=2)
@@ -30,23 +30,14 @@ class ULSaveVariableDict(ULActionNode):
             json.dump(val, f, indent=2)
         f.close()
 
-    def get_custom_path(self, path):
-        if not path.endswith('/') and not path.endswith('json'):
-            path = path + '/'
-        return path
-
     def evaluate(self):
         self.done = False
         if not self.get_input(self.condition):
             return
         val = self.get_input(self.val)
 
-        cust_path = self.get_custom_path(self.path)
-        path = (
-            bpy.path.abspath('//Data/')
-            if self.path == ''
-            else bpy.path.abspath(cust_path)
-        )
+        path = self.get_input(self.path)
+        path = (bpy.path.abspath(path))
         os.makedirs(path, exist_ok=True)
 
         self.write_to_json(path, val)
