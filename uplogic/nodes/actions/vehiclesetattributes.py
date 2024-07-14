@@ -23,7 +23,7 @@ class ULVehicleSetAttributes(ULActionNode):
         self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def set_attributes(self, vehicle, wheel, attrs, values):
         if attrs[0] is True:
@@ -36,7 +36,6 @@ class ULVehicleSetAttributes(ULActionNode):
             vehicle.set_wheel_friction(wheel, values[3])
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         game_object = self.get_input(self.vehicle)
@@ -83,4 +82,4 @@ class ULVehicleSetAttributes(ULActionNode):
                     attrs_to_set,
                     values_to_set
                 )
-        self.done = True
+        self._done = True

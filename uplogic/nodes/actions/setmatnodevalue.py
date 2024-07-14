@@ -12,14 +12,12 @@ class ULSetMatNodeValue(ULActionNode):
         self.internal = None
         self.attribute = None
         self.value = None
-        self.done = False
         self.OUT = self.add_output(self._get_done)
 
     def _get_done(self):
-        return self.done
+        return self._done
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         material: Material = self.get_input(self.mat_name)
@@ -36,4 +34,4 @@ class ULSetMatNodeValue(ULActionNode):
             target = getattr(target, internal, target)
         if hasattr(target, attribute):
             setattr(target, attribute, value)
-        self.done = True
+        self._done = True

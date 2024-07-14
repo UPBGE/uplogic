@@ -27,7 +27,6 @@ class ULCreateUIButton(ULActionNode):
         self._hovering = False
         self._released = False
         self._widget = None
-        self._done = False
         self.halign_type = 'left'
         self.valign_type = 'bottom'
         self.text_halign_type = 'left'
@@ -63,7 +62,6 @@ class ULCreateUIButton(ULActionNode):
         return False
 
     def evaluate(self):
-        self._done = False
         condition = self.get_input(self.condition)
         if not condition:
             return

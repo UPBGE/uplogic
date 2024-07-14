@@ -10,18 +10,16 @@ class ULDispatchEvent(ULActionNode):
         self.body = None
         self.target = None
         self.old_subject = None
-        self.done = None
         self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         subject = self.get_input(self.subject)
         body = self.get_input(self.body)
         target = self.get_input(self.target)
         send(subject, body, target)
-        self.done = True
+        self._done = True

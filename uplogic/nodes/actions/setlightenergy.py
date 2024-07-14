@@ -9,18 +9,16 @@ class ULSetLightEnergy(ULActionNode):
         self.condition = None
         self.lamp = None
         self.energy = None
-        self.done = None
         self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         light: KX_GameObject = self.get_input(self.lamp)
         energy = self.get_input(self.energy)
         light = light.blenderObject.data
         light.energy = energy
-        self.done = True
+        self._done = True

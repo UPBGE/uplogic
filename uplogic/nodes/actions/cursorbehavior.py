@@ -8,14 +8,12 @@ class ULCursorBehavior(ULActionNode):
         self.condition = None
         self.cursor_object = None
         self.world_z = None
-        self.done = None
         self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def evaluate(self):
-        self.done = False
         cursor_object = self.get_input(self.cursor_object)
         if not self.get_input(self.condition):
             if cursor_object.visible:
@@ -34,4 +32,4 @@ class ULCursorBehavior(ULActionNode):
             point = origin + aim
             cursor_object.worldOrientation = camera.worldOrientation
             cursor_object.worldPosition = point
-        self.done = True
+        self._done = True

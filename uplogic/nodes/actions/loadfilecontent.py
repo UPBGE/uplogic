@@ -7,7 +7,6 @@ class ULLoadFileContent(ULActionNode):
     def __init__(self):
         ULActionNode.__init__(self)
         self.condition = None
-        self.done = False
         self.updated = False
         self.status = 0.0
         self.datatype = ''
@@ -29,13 +28,12 @@ class ULLoadFileContent(ULActionNode):
         return self.item
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def get_updated(self):
         return self.updated
 
     def evaluate(self):
-        self.done = False
         condition = self.get_input(self.condition)
         if condition and self.loader is None:
             self.loader = FileLoader()
@@ -45,7 +43,7 @@ class ULLoadFileContent(ULActionNode):
             self.item = self.loader.item
             self.datatype = self.loader.data
             if self.loader.finished:
-                self.done = True
+                self._done = True
                 self.loader = None
         else:
             self.updated = False

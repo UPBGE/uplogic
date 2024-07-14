@@ -8,17 +8,15 @@ class ULSetFilterState(ULActionNode):
         self.condition = None
         self.pass_idx = None
         self.state = None
-        self.done = False
         self.OUT = self.add_output(self._get_done)
 
     def _get_done(self):
-        return self.done
+        return self._done
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         pass_idx = self.get_input(self.pass_idx)
         state = self.get_input(self.state)
         set_filter_state(pass_idx, state)
-        self.done = True
+        self._done = True

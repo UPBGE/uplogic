@@ -47,7 +47,8 @@ from .listextend import ULListExtend
 from .materialgetattribute import ULGetMaterialAttribute  # noqa
 from .materialgetnode import ULGetMaterialNode  # noqa
 from .materialgetsocket import ULGetMaterialSocket  # noqa
-from .math import ULMath  # noqa
+from .math_old import ULMath  # noqa
+from .math import MathNode  # noqa
 from .matrixtoxyz import ULMatrixToXYZ  # noqa
 from .mousedata import ULMouseData  # noqa
 from .objectattr import ULObjectAttribute  # noqa
@@ -106,5 +107,7 @@ from .tweenvalue import TweenValueNode
 from .getcollisiongroup import GetCollisionGroupNode
 from .getmasterfolder import GetMasterFolderNode
 from .joinpath import JoinPathNode
+from .stringoperation import StringOperationNode
+from .getobjectbyname import GetObjectByNameNode
 
 from .randomvalue import ULRandomValue

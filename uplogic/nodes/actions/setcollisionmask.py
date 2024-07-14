@@ -7,18 +7,16 @@ class ULSetCollisionMask(ULActionNode):
         self.condition = None
         self.game_object = None
         self.slots = None
-        self.done = None
         self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         game_object = self.get_input(self.game_object)
         slots = self.get_input(self.slots)
         game_object.collisionMask = slots
 
-        self.done = True
+        self._done = True

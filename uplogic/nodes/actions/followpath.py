@@ -45,14 +45,12 @@ class ULFollowPath(ULActionNode):
         self.rot_axis = None
         self.front_axis = None
         self._motion_path = None
-        self.done = None
         self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             if not self.get_input(self.path_continue):
                 self._motion_path = None
@@ -99,7 +97,7 @@ class ULFollowPath(ULActionNode):
             if reached:
                 has_more = self._motion_path.advance()
                 if not has_more:
-                    self.done = True
+                    self._done = True
 
     def generate_path(self, start_position, path_points, navmesh_object, loop):
         if not path_points:

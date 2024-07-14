@@ -12,7 +12,7 @@ class ULAlignAxisToVector(ULActionNode):
         self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def evaluate(self):
         if not self.get_input(self.condition):
@@ -27,4 +27,4 @@ class ULAlignAxisToVector(ULActionNode):
             v.negate()
             axis -= 3
         game_object.alignAxisToVect(v, axis, factor)
-        self.done = True
+        self._done = True

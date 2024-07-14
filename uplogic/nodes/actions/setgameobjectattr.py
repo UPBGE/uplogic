@@ -10,14 +10,12 @@ class ULSetGameObjectAttribue(ULActionNode):
         self.xyz = None
         self.game_object = None
         self.attribute_value = None
-        self.done = None
         self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         xyz = self.get_input(self.xyz)
@@ -49,4 +47,4 @@ class ULSetGameObjectAttribue(ULActionNode):
                 game_object,
                 game_object.meshes[0]
             )
-        self.done = True
+        self._done = True

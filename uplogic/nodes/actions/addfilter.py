@@ -24,14 +24,12 @@ class ULAddFilter(ULActionNode):
         self.end = None
         self.filter = None
         self.filter_type = 'FXAA'
-        self.done = False
         self.OUT = self.add_output(self._get_done)
 
     def _get_done(self):
-        return self.done
+        return self._done
 
     def evaluate(self):
-        self.done = False
         condition = self.get_input(self.condition)
         ftype = self.filter_type
         if not condition or self.filter:
@@ -102,4 +100,4 @@ class ULAddFilter(ULActionNode):
                 self.get_input(self.power),
                 self.get_input(self.pass_idx)
             )
-        self.done = True
+        self._done = True

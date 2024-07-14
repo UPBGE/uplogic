@@ -8,17 +8,15 @@ class ULSetResolution(ULActionNode):
         self.condition = None
         self.x_res = None
         self.y_res = None
-        self.done = None
         self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         x_res = self.get_input(self.x_res)
         y_res = self.get_input(self.y_res)
         render.setWindowSize(x_res, y_res)
-        self.done = True
+        self._done = True

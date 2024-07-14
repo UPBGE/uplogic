@@ -9,13 +9,12 @@ class ULPopDictKey(ULActionNode):
         self.dict = None
         self.key = None
         self.new_dict = None
-        self.done = None
         self.OUT = self.add_output(self.get_done)
         self.DICT = self.add_output(self.get_dict)
         self.VALUE = self.add_output(self.get_value)
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def get_dict(self):
         return self.new_dict
@@ -24,7 +23,6 @@ class ULPopDictKey(ULActionNode):
         return self.value
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         dictionary = self.get_input(self.dict)
@@ -35,4 +33,4 @@ class ULPopDictKey(ULActionNode):
             debug("Dict Delete Key Node: Key '{}' not in Dict!".format(key))
             return
         self.new_dict = dictionary
-        self.done = True
+        self._done = True

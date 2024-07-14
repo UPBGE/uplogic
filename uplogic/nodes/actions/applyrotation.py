@@ -8,14 +8,12 @@ class ULApplyRotation(ULActionNode):
         self.game_object = None
         self.rotation = None
         self.local = False
-        self.done = None
         self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         game_object = self.get_input(self.game_object)
@@ -26,4 +24,4 @@ class ULApplyRotation(ULActionNode):
                 game_object.applyRotation(rotation, local)
             else:
                 game_object.applyRotation(rotation.to_euler("XYZ"), local)
-        self.done = True
+        self._done = True

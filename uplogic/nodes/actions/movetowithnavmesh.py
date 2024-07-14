@@ -42,14 +42,14 @@ class ULMoveToWithNavmesh(ULActionNode):
         self.rot_speed: float = None
         self.visualize: bool = None
         self._motion_path = None
-        self.done: bool = False
+        self._done: bool = False
         self.finished: bool = False
         self.OUT = self.add_output(self.get_done)
         self.FINISHED = self.add_output(self.get_finished)
         self.POINT = self.add_output(self.get_point)
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def get_finished(self):
         return self.finished
@@ -58,7 +58,6 @@ class ULMoveToWithNavmesh(ULActionNode):
         return self._motion_path.next_point()
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         moving_object: GameObject = self.get_input(self.moving_object)
@@ -119,4 +118,4 @@ class ULMoveToWithNavmesh(ULActionNode):
                 has_more = self._motion_path.advance()
                 if not has_more:
                     self.finished = True
-            self.done = True
+            self._done = True

@@ -23,14 +23,13 @@ class ULGamepadLook(ULActionNode):
         self.cap_y: Vector = None
         self.threshold: float = None
         self.gamepadlook: GamepadLook = None
-        self.done: bool = None
-        self.DONE = self.add_output(self.get_done)
+        self._done: bool = None
+        self._done = self.add_output(self.get_done)
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def evaluate(self):
-        self.done = False
         condition = self.get_input(self.condition)
         if condition:
             obj = self.get_input(self.main_obj)
@@ -67,4 +66,4 @@ class ULGamepadLook(ULActionNode):
                 )
         if self.gamepadlook is not None:
             self.gamepadlook.active = condition
-        self.done = True
+        self._done = True

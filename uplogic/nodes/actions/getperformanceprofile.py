@@ -12,13 +12,12 @@ class ULGetPerformanceProfile(ULActionNode):
         self.check_evaluated_cells = False
         self.check_average_cells_per_sec = False
         self.check_cells_per_tick = False
-        self.done = None
         self.data = ''
         self.OUT = self.add_output(self.get_done)
         self.DATA = self.add_output(self.get_data)
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def get_data(self):
         return self.data
@@ -27,7 +26,6 @@ class ULGetPerformanceProfile(ULActionNode):
         self.network = network
 
     def evaluate(self):
-        self.done = False
         self.data = '----------------------------------Start Profile\n'
         if not self.get_input(self.condition):
             return
@@ -58,4 +56,4 @@ class ULGetPerformanceProfile(ULActionNode):
         self.data += '----------------------------------End Profile'
         if print_profile:
             print(self.data)
-        self.done = True
+        self._done = True

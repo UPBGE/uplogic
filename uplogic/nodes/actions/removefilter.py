@@ -7,16 +7,14 @@ class ULRemoveFilter(ULActionNode):
         ULActionNode.__init__(self)
         self.condition = None
         self.pass_idx = None
-        self.done = False
         self.OUT = self.add_output(self._get_done)
 
     def _get_done(self):
-        return self.done
+        return self._done
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         pass_idx = self.get_input(self.pass_idx)
         remove_filter(pass_idx)
-        self.done = True
+        self._done = True

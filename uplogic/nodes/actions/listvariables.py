@@ -11,13 +11,12 @@ class ULListVariables(ULActionNode):
         self.print_list = None
         self.file_name = None
         self.path = ''
-        self.done = None
         self.items = None
         self.OUT = self.add_output(self.get_done)
         self.LIST = self.add_output(self.get_list)
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def get_list(self):
         return self.items
@@ -43,7 +42,6 @@ class ULListVariables(ULActionNode):
         f.close()
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         print_list = self.get_input(self.print_list)
@@ -53,4 +51,4 @@ class ULListVariables(ULActionNode):
         os.makedirs(path, exist_ok=True)
 
         self.write_to_json(path, print_list)
-        self.done = True
+        self._done = True

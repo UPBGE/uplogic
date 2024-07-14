@@ -12,11 +12,10 @@ class ULStartSound(ULActionNode):
         self.pitch = None
         self.volume = None
         self.ignore_timescale = None
-        self.done = None
         self.device = None
         self.on_finish = False
         self._handle = None
-        self.DONE = self.add_output(self.get_done)
+        self._done = self.add_output(self.get_done)
         self.ON_FINISH = self.add_output(self.get_on_finish)
         self.HANDLE = self.add_output(self.get_handle)
 
@@ -31,7 +30,7 @@ class ULStartSound(ULActionNode):
         return False
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def reset(self):
         super().reset()
@@ -39,7 +38,6 @@ class ULStartSound(ULActionNode):
             self._handle = None
 
     def evaluate(self):
-        self.done = False
         self.on_finish = False
         pitch = self.get_input(self.pitch)
         volume = self.get_input(self.volume)
@@ -60,4 +58,4 @@ class ULStartSound(ULActionNode):
             ignore_timescale,
             'ln_audio_system'
         )
-        self.done = True
+        self._done = True

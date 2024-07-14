@@ -8,14 +8,12 @@ class ULApplyTorque(ULActionNode):
         self.game_object = None
         self.torque = None
         self.local = False
-        self.done = None
         self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         game_object = self.get_input(self.game_object)
@@ -23,4 +21,4 @@ class ULApplyTorque(ULActionNode):
         local = self.local
         if torque:
             game_object.applyTorque(torque, local)
-        self.done = True
+        self._done = True

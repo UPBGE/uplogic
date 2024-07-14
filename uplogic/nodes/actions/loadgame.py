@@ -11,11 +11,10 @@ class ULLoadGame(ULActionNode):
         self.condition = None
         self.slot = None
         self.path = ''
-        self.done = None
         self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def get_game_vec(self, data):
         return Euler((data['x'], data['y'], data['z']))
@@ -26,7 +25,6 @@ class ULLoadGame(ULActionNode):
         return path
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         slot = self.get_input(self.slot)
@@ -103,4 +101,4 @@ class ULLoadGame(ULActionNode):
                 f'Load Game Node: Could not load saved game on slot {slot}!\n{e}'
             )
 
-        self.done = True
+        self._done = True

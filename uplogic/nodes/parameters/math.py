@@ -1,55 +1,26 @@
 from mathutils import Vector
 from uplogic.nodes import ULParameterNode
+from inspect import signature
 
 
-class ULMath(ULParameterNode):
+class MathNode(ULParameterNode):
 
     def __init__(self):
         ULParameterNode.__init__(self)
-        self.operand_a = None
-        self.operand_b = None
+        self.value_a = 0.0
+        self.value_b = 0.0
+        self.value_c = 0.0
         self.operator = None
-        self.OUT = self.add_output(self.get_done)
+        self.RESULT = self.add_output(self.get_result)
 
-    def get_done(self):
-        a = self.get_input(self.operand_a)
-        b = self.get_input(self.operand_b)
-        return self.operator(a, b)
-
-    def get_vec_calc(self, vec, num):
-        if len(vec) == 4:
-            return Vector(
-                (
-                    self.operator(vec.x, num),
-                    self.operator(vec.y, num),
-                    self.operator(vec.z, num),
-                    self.operator(vec.w, num)
-                )
-            )
-        else:
-            return Vector(
-                (
-                    self.operator(vec.x, num),
-                    self.operator(vec.y, num),
-                    self.operator(vec.z, num)
-                )
-            )
-
-    def get_vec_vec_calc(self, vec, vec2):
-        if len(vec) == 4 and len(vec2) == 4:
-            return Vector(
-                (
-                    self.operator(vec.x, vec2.x),
-                    self.operator(vec.y, vec2.y),
-                    self.operator(vec.z, vec2.z),
-                    self.operator(vec.w, vec2.w)
-                )
-            )
-        else:
-            return Vector(
-                (
-                    self.operator(vec.x, vec2.x),
-                    self.operator(vec.y, vec2.y),
-                    self.operator(vec.z, vec2.z)
-                )
-            )
+    def get_result(self):
+        a = self.get_input(self.value_a)
+        b = self.get_input(self.value_b)
+        c = self.get_input(self.value_c)
+        op = self.operator
+        args = len(signature(op).parameters)
+        if args == 1:
+            return self.operator(a)
+        if args == 2:
+            return self.operator(a, b)
+        return self.operator(a, b, c)

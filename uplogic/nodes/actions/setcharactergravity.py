@@ -8,14 +8,12 @@ class ULSetCharacterGravity(ULActionNode):
         self.condition = None
         self.game_object = None
         self.gravity = None
-        self.done = None
         self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         game_object = self.get_input(self.game_object)
@@ -25,4 +23,4 @@ class ULSetCharacterGravity(ULActionNode):
             physics.gravity = gravity
         else:
             game_object.gravity = gravity
-        self.done = True
+        self._done = True

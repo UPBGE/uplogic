@@ -11,14 +11,12 @@ class ULReplaceMesh(ULActionNode):
         self.new_mesh_name = None
         self.use_display = None
         self.use_physics = None
-        self.done = None
         self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         target: KX_GameObject = self.get_input(self.target_game_object)
@@ -28,4 +26,4 @@ class ULReplaceMesh(ULActionNode):
         target.replaceMesh(mesh.name, display, physics)
         if physics:
             target.reinstancePhysicsMesh()
-        self.done = True
+        self._done = True

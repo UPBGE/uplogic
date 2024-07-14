@@ -10,17 +10,15 @@ class ULExecuteSubNetwork(ULActionNode):
         self.target_object = None
         self.tree_name = None
         self._network = None
-        self.done = None
         self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def setup(self, network):
         self._network = network
 
     def evaluate(self):
-        self.done = False
         condition = self.get_input(self.condition)
         if condition != self._condition:
             target_object = self.get_input(self.target_object)
@@ -35,4 +33,4 @@ class ULExecuteSubNetwork(ULActionNode):
                 )
             network.stopped = not condition
             self._condition = condition
-            self.done = True
+            self._done = True

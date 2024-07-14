@@ -29,7 +29,6 @@ class ULCreateUILayout(ULActionNode):
         self.boxlayout_type = 'vertical'
         self.halign_type = 'left'
         self.valign_type = 'bottom'
-        self._done = False
         self.OUT = self.add_output(self._get_done)
         self.WIDGET = self.add_output(self._get_widget)
 
@@ -40,7 +39,6 @@ class ULCreateUILayout(ULActionNode):
         return self._widget
 
     def evaluate(self):
-        self._done = False
         if not self.get_input(self.condition):
             return
         ipt = self.get_input

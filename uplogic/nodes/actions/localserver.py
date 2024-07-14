@@ -56,7 +56,6 @@ class ULLocalServer(ULActionNode):
         self._server.on_receive = self.on_receive
 
     def evaluate(self):
-        self.done = False
         self._started = False
         self._stopped = False
         self._received = receive(self._server)

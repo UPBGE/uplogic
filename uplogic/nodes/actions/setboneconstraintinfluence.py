@@ -9,14 +9,12 @@ class ULSetBoneConstraintInfluence(ULActionNode):
         self.bone = None
         self.constraint = None
         self.influence = None
-        self.done = None
         self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         armature = self.get_input(self.armature)
@@ -31,4 +29,4 @@ class ULSetBoneConstraintInfluence(ULActionNode):
             .constraints[constraint]
             .influence
         ) = influence
-        self.done = True
+        self._done = True

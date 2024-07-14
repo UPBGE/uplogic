@@ -9,14 +9,12 @@ class ULSetLightColor(ULActionNode):
         self.condition = None
         self.lamp = None
         self.color = None
-        self.done = None
         self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         light: KX_GameObject = self.get_input(self.lamp)
@@ -25,4 +23,4 @@ class ULSetLightColor(ULActionNode):
             color = color[:-1]
         light = light.blenderObject.data
         light.color = color
-        self.done = True
+        self._done = True

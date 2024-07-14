@@ -13,14 +13,12 @@ class ULSetCharacterWalkDir(ULActionNode):
         self.walkDir = None
         self.local = False
         self.active = False
-        self.done = None
         self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             if self.active:
                 game_object = self.get_input(self.game_object)
@@ -42,4 +40,4 @@ class ULSetCharacterWalkDir(ULActionNode):
                 logic.getCurrentScene().name
             ].game_settings.physics_step_sub
         )
-        self.done = True
+        self._done = True

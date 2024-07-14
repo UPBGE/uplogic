@@ -58,7 +58,6 @@ class ULLocalClient(ULActionNode):
         self._client.on_receive = self.on_receive
 
     def evaluate(self):
-        self.done = False
         self._connect = False
         self._disconnect = False
         self._received = receive(self._client)

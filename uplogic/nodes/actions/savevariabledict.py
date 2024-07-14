@@ -12,11 +12,10 @@ class ULSaveVariableDict(ULActionNode):
         self.val = None
         self.file_name = None
         self.path = ''
-        self.done = None
         self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def write_to_json(self, path, val):
         if not path.endswith('.json'):
@@ -31,7 +30,6 @@ class ULSaveVariableDict(ULActionNode):
         f.close()
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         val = self.get_input(self.val)
@@ -41,4 +39,4 @@ class ULSaveVariableDict(ULActionNode):
         os.makedirs(path, exist_ok=True)
 
         self.write_to_json(path, val)
-        self.done = True
+        self._done = True

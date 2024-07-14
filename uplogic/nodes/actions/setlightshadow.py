@@ -9,18 +9,16 @@ class ULSetLightShadow(ULActionNode):
         self.condition = None
         self.lamp = None
         self.use_shadow = None
-        self.done = None
         self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         light: KX_GameObject = self.get_input(self.lamp)
         use_shadow = self.get_input(self.use_shadow)
         light = light.blenderObject.data
         light.use_shadow = use_shadow
-        self.done = True
+        self._done = True

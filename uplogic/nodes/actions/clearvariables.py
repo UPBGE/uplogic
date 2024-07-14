@@ -12,11 +12,10 @@ class ULClearVariables(ULActionNode):
         self.condition = False
         self.file_name = ''
         self.path = ''
-        self.done = False
         self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def write_to_json(self, path):
         data = None
@@ -34,7 +33,6 @@ class ULClearVariables(ULActionNode):
         f.close()
 
     def evaluate(self):
-        self.done = False
         condition = self.get_input(self.condition)
         if not condition:
             return
@@ -44,4 +42,4 @@ class ULClearVariables(ULActionNode):
         os.makedirs(path, exist_ok=True)
 
         self.write_to_json(path)
-        self.done = True
+        self._done = True

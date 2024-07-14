@@ -108,7 +108,7 @@ class ULPlayAction(ULActionNode):
             self._action = None
         start_frame = self.get_input(self.start_frame)
         end_frame = self.get_input(self.end_frame)
-        priority = self.get_input(self.priority)
+        # priority = self.get_input(self.priority)
         blendin = self.get_input(self.blendin)
         blend_mode = self.get_input(self.blend_mode)
         if play_mode > 2:
@@ -122,7 +122,7 @@ class ULPlayAction(ULActionNode):
             start_frame=start_frame,
             end_frame=end_frame,
             layer=layer,
-            priority=priority,
+            # priority=priority,
             blendin=blendin,
             play_mode=play_mode,
             speed=speed,

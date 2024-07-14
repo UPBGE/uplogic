@@ -16,7 +16,6 @@ class DrawNode(ULActionNode):
         self.height = 1.0
         self.object = None
         self.use_volume_origin = False
-        self.done = False
         self.OUT = self.add_output(self.get_out)
         self.mode = 0
         self.modes = [
@@ -30,7 +29,7 @@ class DrawNode(ULActionNode):
         ]
 
     def get_out(self):
-        return self.done
+        return self._done
 
     def draw_line(self):
         draw_line(
@@ -83,8 +82,7 @@ class DrawNode(ULActionNode):
         )
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         self.modes[self.mode]()
-        self.done = True
+        self._done = True

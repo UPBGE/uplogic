@@ -31,7 +31,6 @@ class ULCreateUISlider(ULActionNode):
         self.valign_type = 'bottom'
         self.orientation_type = 'horizontal'
         self.slider_type = '0'
-        self._done = False
         self.OUT = self.add_output(self._get_done)
         self.WIDGET = self.add_output(self._get_widget)
         self.VALUE = self.add_output(self._get_value)
@@ -112,5 +111,4 @@ class ULCreateUISlider(ULActionNode):
             )
         if parent:
             parent.add_widget(self._widget)
-        self._done = True
         

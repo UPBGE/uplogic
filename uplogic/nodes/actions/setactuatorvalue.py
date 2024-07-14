@@ -10,14 +10,12 @@ class ULSetActuatorValue(ULActionNode):
         self.act_name = None
         self.field = None
         self.value = None
-        self.done = None
         self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def evaluate(self):
-        self.done = False
         game_obj = self.get_input(self.game_obj)
         act_name = self.get_input(self.act_name)
         if not self.get_input(self.condition):
@@ -28,4 +26,4 @@ class ULSetActuatorValue(ULActionNode):
         field = self.get_input(self.field)
         value = self.get_input(self.value)
         setattr(actuator, field, value)
-        self.done = True
+        self._done = True

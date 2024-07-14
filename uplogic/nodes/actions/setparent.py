@@ -9,14 +9,12 @@ class ULSetParent(ULActionNode):
         self.parent_object = None
         self.compound = True
         self.ghost = True
-        self.done = None
         self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         child_object = self.get_input(self.child_object)
@@ -24,4 +22,4 @@ class ULSetParent(ULActionNode):
         compound = self.get_input(self.compound)
         ghost = self.get_input(self.ghost)
         child_object.setParent(parent_object, compound, ghost)
-        self.done = True
+        self._done = True

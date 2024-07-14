@@ -9,14 +9,12 @@ class ULCopyProperty(ULActionNode):
         self.to_object = None
         self.property_name = None
         self.mode = 0
-        self.done = False
         self.OUT = self.add_output(self._get_done)
 
     def _get_done(self):
-        return self.done
+        return self._done
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         from_object = self.get_input(self.from_object)
@@ -27,4 +25,4 @@ class ULCopyProperty(ULActionNode):
         val = from_object.get(property_name)
         if val is not None:
             to_object[property_name] = val
-            self.done = True
+            self._done = True

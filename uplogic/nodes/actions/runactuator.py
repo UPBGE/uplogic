@@ -9,14 +9,12 @@ class ULRunActuator(ULActionNode):
         self.game_obj = None
         self.cont_name = None
         self.act_name = None
-        self.done = None
         self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def evaluate(self):
-        self.done = False
         game_obj = self.get_input(self.game_obj)
         cont_name = self.get_input(self.cont_name)
         act_name = self.get_input(self.act_name)
@@ -27,4 +25,4 @@ class ULRunActuator(ULActionNode):
         if not self.get_input(self.condition):
             return
         controller.activate(actuator)
-        self.done = True
+        self._done = True

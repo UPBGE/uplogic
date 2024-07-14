@@ -482,7 +482,6 @@ class MouseLook():
             mpos[0] = clamp(mpos[0], threshold, 1-threshold)
             mpos[1] = clamp(mpos[1], threshold, 1-threshold)
             self.mouse.position = (mpos[0], mpos[1])
-        self.done = True
 
 
 class ULMouseLook(MouseLook):

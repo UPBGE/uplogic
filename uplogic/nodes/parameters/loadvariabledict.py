@@ -21,7 +21,6 @@ class ULLoadVariableDict(ULParameterNode):
         return self.read_from_json(path)
 
     def read_from_json(self, path):
-        self.done = False
         if not path.endswith('.json'):
             path = os.path.join(path, f'{self.get_input(self.file_name)}.json')
         if not os.path.isfile(path):

@@ -16,8 +16,7 @@ class CreateUIPathNode(ULActionNode):
         self.line_color = (9, 0, 0, 0)
         self.line_width = 0
         self._widget = None
-        self._done = False
-        self.DONE = self.add_output(self._get_done)
+        self._done = self.add_output(self._get_done)
         self.PATH = self.add_output(self._get_widget)
 
     def _get_done(self):
@@ -51,5 +50,4 @@ class CreateUIPathNode(ULActionNode):
         )
         if parent:
             parent.add_widget(self._widget)
-        self._done = True
         

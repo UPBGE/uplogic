@@ -340,7 +340,7 @@ def attribute(*attr_names) -> KX_PythonComponent:
             def setPropComponent(self, value, attr_name=attr_name):
                 getattr(self, f'on_{attr_name}')(value)
                 self.object.blenderObject[attr_name] = value
-                self.object.color = self.object.color
+                self.object.blenderObject.update_tag()
 
             def getPropObject(self, attr_name=attr_name):
                 return self.blenderObject.get(attr_name)
@@ -348,7 +348,7 @@ def attribute(*attr_names) -> KX_PythonComponent:
             def setPropObject(self, value, attr_name=attr_name):
                 getattr(self, f'on_{attr_name}')(value)
                 self.blenderObject[attr_name] = value
-                self.object.color = self.object.color
+                self.object.blenderObject.update_tag()
 
             if issubclass(cls, KX_PythonComponent):
                 prop = property(getPropComponent, setPropComponent)

@@ -9,18 +9,16 @@ class ULListGlobalValues(ULActionNode):
         self.data_id = None
         self.print_d = None
         self.gv_dict = None
-        self.done = False
         self.OUT = self.add_output(self.get_done)
         self.VALUE = self.add_output(self.get_dict)
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def get_dict(self):
         return self.gv_dict
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         data_id = self.get_input(self.data_id)
@@ -31,5 +29,5 @@ class ULListGlobalValues(ULActionNode):
             for e in db.data:
                 print('{}\t->\t{}'.format(e, db.data[e]))
             print('END ------------------------------------')
-        self.done = True
+        self._done = True
         self.gv_dict = db.data

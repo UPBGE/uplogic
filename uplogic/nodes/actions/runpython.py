@@ -20,13 +20,12 @@ class ULRunPython(ULActionNode):
         self._modfun = None
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def get_val(self):
         return self.val
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         text = self.get_input(self.module_name)
@@ -54,4 +53,4 @@ class ULRunPython(ULActionNode):
                 self._old_mod_name = mname
                 self._code_as_str = compile(bpy.data.texts[mname].as_string(), 'custom', 'exec')
             exec(self._code_as_str, globals())
-        self.done = True
+        self._done = True

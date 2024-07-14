@@ -10,7 +10,6 @@ class ULStopAction(ULActionNode):
         self.condition = None
         self.game_object = None
         self.action_layer = None
-        self.done = None
         self.act_system = self.get_act_system()
         self.OUT = self.add_output(self.get_done)
         
@@ -22,10 +21,9 @@ class ULStopAction(ULActionNode):
             return ActionSystem('default')
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         game_object = self.get_input(self.game_object)
@@ -34,4 +32,4 @@ class ULStopAction(ULActionNode):
         action = self.act_system.get_layer(game_object, action_layer)
         if action is not None:
             self.act_system.remove(action)
-        self.done = True
+        self._done = True

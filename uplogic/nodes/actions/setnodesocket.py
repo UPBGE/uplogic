@@ -10,14 +10,12 @@ class ULSetNodeSocket(ULActionNode):
         self.node_name = None
         self.input_slot = None
         self.value = None
-        self.done = False
         self.OUT = self.add_output(self._get_done)
 
     def _get_done(self):
-        return self.done
+        return self._done
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         tree: NodeTree = self.get_input(self.tree_name)
@@ -30,4 +28,4 @@ class ULSetNodeSocket(ULActionNode):
             .inputs[input_slot]
             .default_value
         ) = value
-        self.done = True
+        self._done = True

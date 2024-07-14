@@ -8,14 +8,12 @@ class ULSetLogicTreeProperty(ULActionNode):
         self.condition = None
         self.prop_name = None
         self.value = None
-        self._done = False
         self.OUT = self.add_output(self.get_property)
 
     def get_property(self):
         return self._done
 
     def evaluate(self):
-        self._done = False
         property_name = self.get_input(self.prop_name)
         condition = self.get_input(self.condition)
         if not condition:

@@ -27,14 +27,13 @@ class StartSoundNode(ULActionNode):
         self.cone_angle = Vector((360, 360))
         self.cone_outer_volume = 1.0
         self.ignore_timescale = True
-        self.done = False
         self.on_finish = False
         self.mode = 0
         self.update_running = False
         self._clear_sound = 1
         self._sustained = 1
         self._handle = None
-        self.DONE = self.add_output(self.get_done)
+        self._done = self.add_output(self.get_done)
         self.ON_FINISH = self.add_output(self.get_on_finish)
         self.HANDLE = self.add_output(self.get_handle)
         self._start = [
@@ -55,7 +54,7 @@ class StartSoundNode(ULActionNode):
         return False
 
     def get_done(self):
-        return self.done
+        return self._done
     
     def reset(self):
         super().reset()
@@ -63,7 +62,6 @@ class StartSoundNode(ULActionNode):
             self._handle = None
 
     def evaluate(self):
-        self.done = False
         self.on_finish = False
         volume = self.get_input(self.volume)
         pitch = self.get_input(self.pitch)
@@ -75,7 +73,7 @@ class StartSoundNode(ULActionNode):
         if not self.get_input(self.condition):
             return
         self._start[self.mode](volume, pitch)
-        self.done = True
+        self._done = True
 
     def start_2D(self, volume, pitch):
         self._handle = Sound2D(

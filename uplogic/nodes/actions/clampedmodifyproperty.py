@@ -12,14 +12,12 @@ class ULClampedModifyProperty(ULActionNode):
         self.mode = 0
         self.operator = None
         self.range = None
-        self.done = False
         self.OUT = self.add_output(self._get_done)
 
     def _get_done(self):
-        return self.done
+        return self._done
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         game_object = self.get_input(self.game_object)
@@ -32,4 +30,4 @@ class ULClampedModifyProperty(ULActionNode):
         obj[property_name] = (
             clamp(new_val, val_range.x, val_range.y)
         )
-        self.done = True
+        self._done = True

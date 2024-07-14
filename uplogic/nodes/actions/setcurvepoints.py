@@ -7,14 +7,13 @@ class ULSetCurvePoints(ULActionNode):
         self.condition = None
         self.curve_object = None
         self.points: list = None
-        self.done: bool = None
+        self._done: bool = None
         self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         curve_object = self.get_input(self.curve_object)
@@ -33,4 +32,4 @@ class ULSetCurvePoints(ULActionNode):
                 new_co.y - pos.y,
                 new_co.z - pos.z
             ] + [1.0])
-        self.done = True
+        self._done = True

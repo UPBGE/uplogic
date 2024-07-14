@@ -60,22 +60,22 @@ class Collision():
         self.active = True
         # if self.tap and self.consumed:
         #     return
-        if obj not in self.done_objs:
+        if obj not in self._done_objs:
             if (
                 self.game_object.collisionGroup & obj.collisionMask and
                 self.game_object.collisionMask & obj.collisionGroup and
                 not (self.tap and self.consumed)
             ):
                 self.callback(obj, point, normal)
-            self.done_objs.append(obj)
+            self._done_objs.append(obj)
 
     def reset(self):
         if self.post_call:
             for obj in self._old_objs:
-                if obj not in self.done_objs:
+                if obj not in self._done_objs:
                     self.callback(None, None, None)
-        self._old_objs = self.done_objs
-        self.done_objs = []
+        self._old_objs = self._done_objs
+        self._done_objs = []
         if not self.consumed and self.active:
             self.consumed = True
         elif self.consumed and not self.active:

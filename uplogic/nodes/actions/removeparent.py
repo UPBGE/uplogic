@@ -6,13 +6,12 @@ class ULRemoveParent(ULActionNode):
         ULActionNode.__init__(self)
         self.condition = None
         self.child_object = None
-        self.done = None
         self._parent = None
         self.OUT = self.add_output(self.get_done)
         self.PARENT = self.add_output(self.get_parent)
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def get_parent(self):
         return self._parent
@@ -27,4 +26,4 @@ class ULRemoveParent(ULActionNode):
         child_object = self.get_input(self.child_object)
         self._parent = child_object.parent
         child_object.removeParent()
-        self.done = True
+        self._done = True

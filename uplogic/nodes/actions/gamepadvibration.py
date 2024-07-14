@@ -10,11 +10,10 @@ class ULGamepadVibration(ULActionNode):
         self.left = None
         self.right = None
         self.time = None
-        self.done = None
-        self.DONE = self.add_output(self.get_done)
+        self._done = self.add_output(self.get_done)
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def evaluate(self):
         if not self.get_input(self.condition):
@@ -35,4 +34,4 @@ class ULGamepadVibration(ULActionNode):
         joystick.duration = int(round(time * 1000))
 
         joystick.startVibration()
-        self.done = True
+        self._done = True

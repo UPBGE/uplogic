@@ -11,14 +11,12 @@ class ULDrawCube(ULActionNode):
         self.origin = None
         self.width = None
         self.use_volume_origin = False
-        self.done = False
         self.OUT = self.add_output(self.get_out)
 
     def get_out(self):
-        return self.done
+        return self._done
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         origin = self.get_input(self.origin)
@@ -29,4 +27,4 @@ class ULDrawCube(ULActionNode):
             offset = width * 0.5
             origin -= Vector((offset, offset, offset))
         draw_cube(origin, width, color)
-        self.done = True
+        self._done = True

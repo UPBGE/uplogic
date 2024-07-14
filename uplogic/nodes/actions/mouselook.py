@@ -26,19 +26,17 @@ class ULMouseLook(ULActionNode):
         self.use_local_head = False
         self._x = 0
         self._y = 0
-        self.done = None
         self.OUT = self.add_output(self.get_done)
         self.mouselook = None
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def reset(self):
         if self.mouselook:
             self.mouselook.get_data()
 
     def evaluate(self):
-        self.done = False
         condition = self.get_input(self.condition)
         if condition:
             obj = self.get_input(self.game_object_x)
@@ -73,4 +71,4 @@ class ULMouseLook(ULActionNode):
                 )
         if self.mouselook is not None and condition:
             self.mouselook.update()
-        self.done = True
+        self._done = True

@@ -79,7 +79,7 @@ class ActionSystem():
         for action in layers.values().__reversed__():
             if found:
                 action.disable()
-            elif action.intensity >= 1.0:
+            elif action.intensity >= 1.0 and action.blend_mode == 0:
                 found = True
 
     def update(self):

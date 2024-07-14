@@ -8,18 +8,16 @@ class ULSetCharacterMaxJumps(ULActionNode):
         self.condition = None
         self.game_object = None
         self.max_jumps = None
-        self.done = None
         self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         game_object = self.get_input(self.game_object)
         max_jumps = self.get_input(self.max_jumps)
         physics = constraints.getCharacter(game_object)
         physics.maxJumps = max_jumps
-        self.done = True
+        self._done = True

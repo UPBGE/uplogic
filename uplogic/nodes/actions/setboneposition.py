@@ -13,14 +13,12 @@ class ULSetBonePosition(ULActionNode):
         self.set_translation = None
         self._eulers = Euler((0, 0, 0), "XYZ")
         self._vector = Vector((0, 0, 0))
-        self.done = None
         self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         armature = self.get_input(self.armature)
@@ -33,4 +31,4 @@ class ULSetBonePosition(ULActionNode):
         else:
             debug('Set Bone Node: Position is None!')
         armature.update()
-        self.done = True
+        self._done = True

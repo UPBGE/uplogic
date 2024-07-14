@@ -13,14 +13,12 @@ class SetRigBoneAttributeNode(ULActionNode):
         self.attribute = 'inherit_rotation'
         self.scale_mode = 'FULL'
         self._rig: Rig = None
-        self.done = None
-        self.DONE = self.add_output(self.get_done)
+        self._done = self.add_output(self.get_done)
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         armature = self.get_input(self.armature)
@@ -35,4 +33,4 @@ class SetRigBoneAttributeNode(ULActionNode):
         for bone in self._rig.bones.values():
             print(bone.name, bone.inherit_rotation)
         # self._rig.blenderObject.update_tag()
-        self.done = True
+        self._done = True

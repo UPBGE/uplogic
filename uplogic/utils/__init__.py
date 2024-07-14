@@ -67,6 +67,7 @@ from .objects import zrot_to
 from .objects import rotate_to
 from .constants import WATER
 from .constants import OPERATORS
+from .constants import MATH_OPERATORS
 from .constants import LOGIC_OPERATORS
 from .constants import RED
 from .constants import GREEN

@@ -12,7 +12,9 @@ class ULChildByName(ULParameterNode):
     def get_child(self):
         parent: KX_GameObject = self.get_input(self.from_parent)
         child: KX_GameObject = self.get_input(self.child)
-        return parent.childrenRecursive.get(child.name)
+        if isinstance(child, str):
+            return parent.childrenRecursive.get(child, None)
+        return parent.childrenRecursive.get(child.name, None)
 
     def evaluate(self):
         pass

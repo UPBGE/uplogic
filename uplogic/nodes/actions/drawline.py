@@ -9,14 +9,12 @@ class ULDrawLine(ULActionNode):
         self.color = None
         self.from_point = None
         self.to_point = None
-        self.done = False
         self.OUT = self.add_output(self.get_out)
 
     def get_out(self):
-        return self.done
+        return self._done
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         from_point = self.get_input(self.from_point)
@@ -32,4 +30,4 @@ class ULDrawLine(ULActionNode):
                 1
             ]
         )
-        self.done = True
+        self._done = True

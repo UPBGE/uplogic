@@ -8,7 +8,6 @@ class ULCreateUICanvas(ULActionNode):
         self.condition = None
         self._canvas = None
         self.on_init = False
-        self._done = False
         self.OUT = self.add_output(self._get_done)
         self.CANVAS = self.add_output(self._get_canvas)
 
@@ -19,7 +18,6 @@ class ULCreateUICanvas(ULActionNode):
         return self._canvas
 
     def evaluate(self):
-        self._done = False
         if self.get_input(self.condition) or self.on_init:
             self._canvas = Canvas()
             self.on_init = False

@@ -24,7 +24,6 @@ class ULSpawnPool(ULActionNode):
 
         self._pool = None
 
-        self.done = None
         self.OUT = self.add_output(self.get_done)
         self.SPAWNED = self.add_output(self.get_spawned)
         self.ONHIT = self.add_output(self.get_hit)
@@ -55,7 +54,7 @@ class ULSpawnPool(ULActionNode):
         }
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def get_spawned(self):
         r = self._spawned
@@ -93,10 +92,9 @@ class ULSpawnPool(ULActionNode):
                 raycast_mask=self.get_input(self.bitmask),
                 visualize=self.get_input(self.visualize)
             )
-        self.done = True
+        self._done = True
 
     def evaluate(self):
-        self.done = False
         spawn = self.get_input(self.spawn)
         if self._pool:
             self._hit_evt = receive(self._pool)
@@ -115,4 +113,4 @@ class ULSpawnPool(ULActionNode):
                 self.spawn_types[self.get_input(self.spawn_type)],
                 visualize=self.get_input(self.visualize)
             )
-            self.done = True
+            self._done = True

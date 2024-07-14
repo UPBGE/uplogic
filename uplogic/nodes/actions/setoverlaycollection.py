@@ -9,17 +9,15 @@ class ULSetOverlayCollection(ULActionNode):
         self.condition = None
         self.camera = None
         self.collection = None
-        self.done = False
         self.OUT = self.add_output(self.get_out)
 
     def get_out(self):
-        return self.done
+        return self._done
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         collection:Collection = self.get_input(self.collection)
         camera: KX_Camera = self.get_input(self.camera)
         logic.getCurrentScene().addOverlayCollection(camera, collection)
-        self.done = True
+        self._done = True

@@ -14,7 +14,7 @@ class ULTranslate(ULActionNode):
         self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def evaluate(self):
         print('"Translate" node is deprecated!')

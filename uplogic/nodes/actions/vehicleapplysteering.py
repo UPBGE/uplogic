@@ -15,10 +15,9 @@ class ULVehicleApplySteering(ULActionNode):
         self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         game_object = self.get_input(self.vehicle)
@@ -29,4 +28,4 @@ class ULVehicleApplySteering(ULActionNode):
         wheelcount = self.get_input(self.wheelcount)
         power = self.get_input(self.power)
         vehicle.steer(power, value_type, wheelcount)
-        self.done = True
+        self._done = True

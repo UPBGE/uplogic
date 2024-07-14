@@ -9,17 +9,15 @@ class ULInstallSubNetwork(ULActionNode):
         self.tree_name = None
         self.initial_status = None
         self._network = None
-        self.done = None
         self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def setup(self, network):
         self._network = network
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         target_object = self.get_input(self.target_object)
@@ -30,4 +28,4 @@ class ULInstallSubNetwork(ULActionNode):
             tree_name,
             initial_status
         )
-        self.done = True
+        self._done = True

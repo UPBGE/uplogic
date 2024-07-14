@@ -9,18 +9,16 @@ class ULRemoveListValue(ULActionNode):
         self.items = None
         self.val = None
         self.new_list = None
-        self.done = None
         self.OUT = self.add_output(self.get_done)
         self.LIST = self.add_output(self.get_list)
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def get_list(self):
         return self.new_list
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         list_d = self.get_input(self.items)
@@ -31,4 +29,4 @@ class ULRemoveListValue(ULActionNode):
             debug("List Remove Value Node: Item '{}' not in List!".format(val))
             return
         self.new_list = list_d
-        self.done = True
+        self._done = True

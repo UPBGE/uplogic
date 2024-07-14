@@ -1,6 +1,27 @@
 import operator
 from mathutils import Vector
 from bge import logic
+import math
+from .math import matmul
+from .math import multadd
+from .math import isqrt
+from .math import smin
+from .math import smax
+from .math import sign
+from .math import compare
+from .math import fraction
+from .math import trunc_mod
+from .math import floor_mod
+from .math import wrap
+from .math import snap
+from .math import ping_pong
+from .math import _round
+from .math import _log
+from .math import _min
+from .math import _max
+from .math import _asin
+from .math import _acos
+from .math import _atan
 import bpy
 
 
@@ -25,21 +46,62 @@ LOGIC_OPERATORS = [
     operator.le
 ]
 
-
-def MATMUL (a, b):
-    return a @ b
-
-
 OPERATORS = {
     "ADD": operator.add,
     "DIV": operator.truediv,
     "MUL": operator.mul,
     "SUB": operator.sub,
     'FDIV': operator.floordiv,
-    'MATMUL': MATMUL,#operator.matmul,
+    'MATMUL': matmul, #operator.matmul,
     'MOD': operator.mod,
     'POW': operator.pow
 }
+
+MATH_OPERATORS = [
+    operator.add,  # 0
+    operator.sub,  # 1
+    operator.mul,  # 2
+    operator.truediv,  # 3
+    multadd,  # 4
+    operator.mod,  # 5
+    operator.floordiv,  # 6
+    operator.pow,  # 7
+    _log,  # 8
+    math.sqrt,  # 9
+    isqrt,  # 10
+    abs,  # 11
+    math.exp,  # 12
+    _min,  # 13
+    _max,  # 14
+    operator.lt,  # 15
+    operator.gt,  # 16
+    sign,  # 17
+    compare,  # 18
+    smin,  # 19
+    smax,  # 20
+    _round,  # 21
+    math.floor,  # 22
+    math.ceil,  # 23
+    math.trunc,  # 24
+    fraction,  # 25
+    trunc_mod,  # 26
+    floor_mod,  # 27
+    wrap,  # 28
+    snap,  # 29
+    ping_pong,  # 30
+    math.sin,  # 31
+    math.cos,  # 32
+    math.tan,  # 33
+    _asin,  # 34
+    _acos,  # 35
+    _atan,  # 36
+    math.atan2,  # 37
+    math.sinh,  # 38
+    math.cosh,  # 39
+    math.tanh,  # 40
+    math.radians,  # 41
+    math.degrees  # 42
+]
 
 
 LO_AXIS_TO_STRING_CODE = {

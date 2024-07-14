@@ -7,14 +7,12 @@ class ULSendNetworkMessage(ULActionNode):
         self.entity = None
         self.data = None
         self.subject = None
-        self._done = False
         self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
         return self._done
 
     def evaluate(self):
-        self._done = False
         if not self.get_input(self.condition):
             return
         entity = self.get_input(self.entity)

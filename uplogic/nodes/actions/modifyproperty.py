@@ -15,14 +15,12 @@ class ULModifyProperty(ULActionNode):
         self.clamp = False
         self.min_val = 0.0
         self.max_val = 1.0
-        self.done = False
         self.OUT = self.add_output(self._get_done)
 
     def _get_done(self):
-        return self.done
+        return self._done
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         game_object = self.get_input(self.game_object)
@@ -38,4 +36,4 @@ class ULModifyProperty(ULActionNode):
                 self.get_input(self.max_val)
             )
         obj[property_name] = result
-        self.done = True
+        self._done = True

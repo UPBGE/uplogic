@@ -13,21 +13,19 @@ class ULSetVisibility(ULActionNode):
         self.game_object = None
         self.visible: bool = None
         self.recursive: bool = None
-        self.done: bool = None
         self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         game_object: KX_GameObject = self.get_input(self.game_object)
         visible: bool = self.get_input(self.visible)
         recursive: bool = self.get_input(self.recursive)
         game_object.setVisible(visible, recursive)
-        self.done = True
+        self._done = True
 
 
 class ULSetCollectionVisibility(ULActionNode):
@@ -36,12 +34,11 @@ class ULSetCollectionVisibility(ULActionNode):
         self.condition = None
         self.collection = None
         self.visible: bool = None
-        self.done: bool = None
         self.recursive: bool = None
         self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def set_collection_visible(
         self,
@@ -61,7 +58,6 @@ class ULSetCollectionVisibility(ULActionNode):
                 self.set_collection_visible(visible, recursive, scene, child)
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         collection: Collection = self.get_input(self.collection)
@@ -69,4 +65,4 @@ class ULSetCollectionVisibility(ULActionNode):
         recursive: bool = self.get_input(self.recursive)
         scene = logic.getCurrentScene()
         self.set_collection_visible(visible, recursive, scene, collection)
-        self.done = True
+        self._done = True

@@ -9,7 +9,6 @@ class ULLoadScene(ULActionNode):
         ULActionNode.__init__(self)
         self.condition = None
         self.scene = None
-        self.done = False
         self.updated = False
         self.status = 0.0
         self.datatype = ''
@@ -31,13 +30,12 @@ class ULLoadScene(ULActionNode):
         return self.item
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def get_updated(self):
         return self.updated
 
     def evaluate(self):
-        self.done = False
         condition: bool = self.get_input(self.condition)
         scene: Scene = self.get_input(self.scene)
         if condition and self.loader is None:
@@ -48,7 +46,7 @@ class ULLoadScene(ULActionNode):
             self.item = self.loader.item
             self.datatype = self.loader.data
             if self.loader.finished:
-                self.done = True
+                self._done = True
                 self.loader = None
         else:
             self.updated = False

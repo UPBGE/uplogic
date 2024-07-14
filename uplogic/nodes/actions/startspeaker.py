@@ -13,12 +13,11 @@ class ULStartSpeaker(ULActionNode):
         self.loop_count = None
         self.ignore_timescale = None
         self.speaker = None
-        self.done = None
         self.on_finish = False
         self._clear_sound = 1
         self._sustained = 1
         self._handle = None
-        self.DONE = self.add_output(self.get_done)
+        self._done = self.add_output(self.get_done)
         self.ON_FINISH = self.add_output(self.get_on_finish)
         self.HANDLE = self.add_output(self.get_handle)
 
@@ -34,10 +33,9 @@ class ULStartSpeaker(ULActionNode):
         return False
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def evaluate(self):
-        self.done = False
         self.on_finish = False
         if not self.get_input(self.condition):
             return
@@ -75,4 +73,4 @@ class ULStartSpeaker(ULActionNode):
             ignore_timescale,
             'ln_audio_system'
         )
-        self.done = True
+        self._done = True

@@ -11,14 +11,12 @@ class ULSetMaterial(ULActionNode):
         self.game_object = None
         self.slot = None
         self.mat_name = None
-        self.done = False
         self.OUT = self.add_output(self._get_done)
 
     def _get_done(self):
-        return self.done
+        return self._done
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         game_object: KX_GameObject = self.get_input(self.game_object)
@@ -29,4 +27,4 @@ class ULSetMaterial(ULActionNode):
             debug('Set Material: Slot does not exist!')
             return
         bl_obj.material_slots[slot].material = material
-        self.done = True
+        self._done = True

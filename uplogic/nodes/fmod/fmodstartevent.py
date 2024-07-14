@@ -9,7 +9,6 @@ class FModStartEventNode(ULActionNode):
         self.event = ''
         self.source = ''
         self.channel = 'default'
-        self._done = False
         self._evt = None
         self.OUT = self.add_output(self.get_done)
         self.EVT = self.add_output(self.get_evt)
@@ -21,7 +20,6 @@ class FModStartEventNode(ULActionNode):
         return self._evt
 
     def evaluate(self):
-        self._done = False
         if not self.get_input(self.condition):
             return
         self._evt = FMod.event(

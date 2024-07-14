@@ -13,14 +13,13 @@ class ULCreateVehicle(ULActionNode):
         self.damping = None
         self.friction = None
         self.wheel_size = None
-        self.done = None
         self.vehicle = None
         self.OUT = self.add_output(self.get_done)
         self.VEHICLE = self.add_output(self.get_vehicle)
         self.WHEELS = self.add_output(self.get_wheels)
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def get_vehicle(self):
         return self.vehicle
@@ -29,7 +28,6 @@ class ULCreateVehicle(ULActionNode):
         return self.vehicle.wheels
 
     def evaluate(self):
-        self.done = False
         game_object = self.get_input(self.game_object)
         if not self.get_input(self.condition):
             if game_object.get(VEHICLE):
@@ -48,4 +46,4 @@ class ULCreateVehicle(ULActionNode):
             friction,
             wheel_size
         )
-        self.done = True
+        self._done = True

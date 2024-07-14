@@ -10,7 +10,6 @@ class ULApplyTransform(ULActionNode):
         self.vec2 = None
         self.vec3 = None
         self.local = False
-        self.done = None
         self.mode = 0
         self._actions = [
             self.apply_movement,
@@ -22,7 +21,7 @@ class ULApplyTransform(ULActionNode):
         self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def apply_movement(self, obj, local):
         obj.applyMovement(self.get_input(self.vec1), local)
@@ -40,10 +39,9 @@ class ULApplyTransform(ULActionNode):
         obj.applyImpulse(self.get_input(self.vec1), self.get_input(self.vec2), local)
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         game_object = self.get_input(self.game_object)
         local = self.local
         self._actions[self.mode](game_object, local)
-        self.done = True
+        self._done = True

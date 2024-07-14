@@ -11,14 +11,12 @@ class ULSendMessage(ULActionNode):
         self.to_obj = None
         self.subject = None
         self.body = None
-        self.done = False
         self.OUT = self.add_output(self.get_out)
 
     def get_out(self):
-        return self.done
+        return self._done
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         from_obj: KX_GameObject = self.get_input(self.from_obj)
@@ -31,4 +29,4 @@ class ULSendMessage(ULActionNode):
             to_obj.name if to_obj else '',
             from_obj.name if from_obj else ''
         )
-        self.done = True
+        self._done = True

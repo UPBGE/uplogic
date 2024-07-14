@@ -17,7 +17,6 @@ class ULSetActionFrame(ULActionNode):
         self.action_name = None
         self.layer_weight = None
         self.freeze = None
-        self.done = None
         self.act_system = self.get_act_system()
         self.OUT = self.add_output(self.get_done)
 
@@ -29,10 +28,9 @@ class ULSetActionFrame(ULActionNode):
             return ActionSystem('default')
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         game_object: KX_GameObject = self.get_input(self.game_object)
@@ -60,4 +58,4 @@ class ULSetActionFrame(ULActionNode):
         if freeze:
             action._speed=.00000000001
         action._restart_action()
-        self.done = True
+        self._done = True

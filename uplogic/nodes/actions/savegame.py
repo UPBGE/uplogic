@@ -13,11 +13,10 @@ class ULSaveGame(ULActionNode):
         self.condition = None
         self.slot = None
         self.path = ''
-        self.done = None
         self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def get_custom_path(self, path):
         if not path.endswith('/') and not path.endswith('json'):
@@ -25,7 +24,6 @@ class ULSaveGame(ULActionNode):
         return path
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         slot = self.get_input(self.slot)
@@ -204,4 +202,4 @@ class ULSaveGame(ULActionNode):
         with open(path + 'save' + str(slot) + ".json", "w") as file:
             json.dump(data, file, indent=2)
 
-        self.done = True
+        self._done = True

@@ -166,12 +166,12 @@ class ULParameterNode(ULLogicNode):
 class ULActionNode(ULLogicNode):
 
     def __init__(self):
-        self.done = False
+        self._done = False
         super().__init__()
 
     def reset(self):
         super().reset()
-        self.done = False
+        self._done = False
 
 
 class ULConditionNode(ULLogicNode):

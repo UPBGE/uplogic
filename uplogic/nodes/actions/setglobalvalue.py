@@ -10,14 +10,12 @@ class ULSetGlobalValue(ULActionNode):
         self.key = None
         self.value = None
         self.persistent = None
-        self.done = None
         self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         data_id = self.get_input(self.data_id)
@@ -26,4 +24,4 @@ class ULSetGlobalValue(ULActionNode):
         value = self.get_input(self.value)
         db = GlobalDB.retrieve(data_id)
         db.put(key, value, persistent)
-        self.done = True
+        self._done = True

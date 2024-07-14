@@ -8,14 +8,12 @@ class ULApplyImpulse(ULActionNode):
         self.game_object = None
         self.point = None
         self.impulse = None
-        self.done = None
         self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         game_object = self.get_input(self.game_object)
@@ -24,4 +22,4 @@ class ULApplyImpulse(ULActionNode):
         local = self.local
         if impulse:
             game_object.applyImpulse(point, impulse, local)
-        self.done = True
+        self._done = True

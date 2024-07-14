@@ -6,7 +6,101 @@ from bge.types import KX_GameObject as GameObject
 import math
 
 
-def clamp(value: float or Vector, lower: float = 0, upper: float = 1) -> float:
+def matmul (a, b):
+    return a @ b
+
+
+def multadd (a, b, c):
+    return a * b + c
+
+
+def isqrt (a):
+    return a ** 1/2
+
+
+def smin(a, b, c):
+    if (c != 0):
+        h = max(c - abs(a - b), 0) / c
+        return min(a, b) - h * h * h * c * (.166666666666666)
+    else:
+        return min(a, b)
+
+
+def smax(a, b, c):
+    return -smin(-a, -b, c)
+
+
+def sign(a):
+    return (
+        a if a == 0 else (
+            1.0 if a > 0 else -1.0
+        )
+    )
+
+
+def compare(a, b, c):
+    return abs(a-b) <= c
+
+
+def fraction(a):
+    return a - math.floor(a)
+
+
+def trunc_mod(a, b):
+    return math.trunc(a % b)
+
+
+def floor_mod(a, b):
+    return math.floor(a % b)
+
+
+def wrap(value, max, min):
+    _range = max - min
+    return value - (_range * math.floor((value - min) / _range)) if _range != 0 else min
+
+
+def snap(value, step):
+    if (step == 0):
+        return  0.0
+    else:
+        return math.floor(value / step) * step
+
+
+def ping_pong(value, scale):
+    if (scale == 0.0):
+        return 0.0
+    return abs(fraction((value - scale) / (scale * 2.0)) * scale * 2.0 - scale)
+
+
+def _min(a, b):
+    return min(a, b)
+
+
+def _max(a, b):
+    return max(a, b)
+
+
+def _round(value):
+    return round(value)
+
+
+def _log(value, base):
+    return math.log(value, base)
+
+
+def _acos(value):
+    return math.acos(clamp(value))
+
+
+def _asin(value):
+    return math.asin(clamp(value))
+
+
+def _atan(value):
+    return math.atan(clamp(value))
+
+
+def clamp(value: float, lower: float = 0, upper: float = 1) -> float:
     """Clamp a value in between two other values.
 
     :param `value`: input value

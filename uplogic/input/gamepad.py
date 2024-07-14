@@ -470,7 +470,6 @@ class GamepadLook():
         self._x = x = interpolate(self._x, x if invert[0] else -x, smooth)
         self._y = y = interpolate(self._y, y if invert[1] else -y, smooth)
         if self._x == self._y == 0:
-            self.done = True
             return
 
         x *= sensitivity
@@ -511,7 +510,6 @@ class GamepadLook():
         rot = [0, 0, 0]
         rot[1-self.front] = y
         game_object_y.applyRotation((*rot, ), True)
-        self.done = True
 
 
 class ULGamepadLook(GamepadLook):

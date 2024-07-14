@@ -55,14 +55,12 @@ class ULSetUIWidgetAttr(ULActionNode):
         self.widget_attr = 'show'
         self.show = None
         self.points = None
-        self._done = False
         self.OUT = self.add_output(self._get_done)
 
     def _get_done(self):
         return self._done
 
     def evaluate(self):
-        self._done = False
         if not self.get_input(self.condition):
             return
         widget = self.get_input(self.widget)

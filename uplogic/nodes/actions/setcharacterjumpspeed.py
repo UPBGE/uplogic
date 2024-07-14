@@ -8,18 +8,16 @@ class ULSetCharacterJumpSpeed(ULActionNode):
         self.condition = None
         self.game_object = None
         self.force = None
-        self.done = None
         self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
-        return self.done
+        return self._done
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         game_object = self.get_input(self.game_object)
         force = self.get_input(self.force)
         physics = constraints.getCharacter(game_object)
         physics.jumpSpeed = force
-        self.done = True
+        self._done = True

@@ -8,18 +8,16 @@ class ULSetPyInstanceAttr(ULActionNode):
         self.instance = None
         self.attr = None
         self.value = None
-        self.done = False
         self.OUT = self.add_output(self.get_out)
 
     def get_out(self):
-        return self.done
+        return self._done
 
     def evaluate(self):
-        self.done = False
         if not self.get_input(self.condition):
             return
         instance = self.get_input(self.instance)
         attr = self.get_input(self.attr)
         value = self.get_input(self.value)
         setattr(instance, attr, value)
-        self.done = True
+        self._done = True

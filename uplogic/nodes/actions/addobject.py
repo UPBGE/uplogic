@@ -10,19 +10,17 @@ class ULAddObject(ULActionNode):
         self.reference = None
         self.life = None
         self.full_copy = False
-        self.done = False
         self.obj = False
         self.OBJ = self.add_output(self._get_obj)
         self.OUT = self.add_output(self._get_done)
 
     def _get_done(self):
-        return self.done
+        return self._done
 
     def _get_obj(self):
         return self.obj
 
     def evaluate(self):
-        self.done = False
         condition = self.get_input(self.condition)
         if not condition:
             return
@@ -32,4 +30,4 @@ class ULAddObject(ULActionNode):
         reference = self.get_input(self.reference)
         scene = logic.getCurrentScene()
         self.obj = scene.addObject(name, reference, life, full_copy)
-        self.done = True
+        self._done = True
