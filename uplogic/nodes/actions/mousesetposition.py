@@ -17,7 +17,7 @@ class ULSetMousePosition(ULActionNode):
         self.network = network
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         screen_x = self.get_input(self.screen_x)
         screen_y = self.get_input(self.screen_y)

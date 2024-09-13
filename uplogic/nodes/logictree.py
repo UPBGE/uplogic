@@ -1,7 +1,7 @@
 from bge import events
 from bge import logic
 from bge.types import KX_GameObject as GameObject
-from uplogic.audio import ULAudioSystem
+from uplogic.audio import AudioSystem
 from uplogic.data import GlobalDB
 from uplogic.nodes import ULLogicContainer
 from uplogic.utils import load_user_module
@@ -47,7 +47,7 @@ class ULLogicTree(ULLogicContainer):
         aud_sys = GlobalDB.retrieve('uplogic.audio').get('default')
         if not aud_sys:
             self.aud_system_owner = True
-            return ULAudioSystem('default')
+            return AudioSystem('default')
         return aud_sys
 
     def init_glob_cats(self):

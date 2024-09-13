@@ -106,6 +106,14 @@ class Label(Widget):
         val = list(val)
         self._font_color = val
 
+    @property
+    def color(self):
+        return self.font_color
+
+    @color.setter
+    def color(self, val):
+        self.font_color = val
+
     # @property
     # def opacity(self):
     #     return self.bg_color[3]

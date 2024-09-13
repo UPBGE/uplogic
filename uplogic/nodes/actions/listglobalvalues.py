@@ -19,7 +19,7 @@ class ULListGlobalValues(ULActionNode):
         return self.gv_dict
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         data_id = self.get_input(self.data_id)
         print_d = self.get_input(self.print_d)

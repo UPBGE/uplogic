@@ -14,7 +14,7 @@ class ULSetCurvePoints(ULActionNode):
         return self._done
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         curve_object = self.get_input(self.curve_object)
         points = self.get_input(self.points)

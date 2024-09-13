@@ -15,7 +15,7 @@ class ULSetOverlayCollection(ULActionNode):
         return self._done
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         collection:Collection = self.get_input(self.collection)
         camera: KX_Camera = self.get_input(self.camera)

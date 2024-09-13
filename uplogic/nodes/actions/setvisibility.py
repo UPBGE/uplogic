@@ -19,7 +19,7 @@ class ULSetVisibility(ULActionNode):
         return self._done
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         game_object: KX_GameObject = self.get_input(self.game_object)
         visible: bool = self.get_input(self.visible)
@@ -58,7 +58,7 @@ class ULSetCollectionVisibility(ULActionNode):
                 self.set_collection_visible(visible, recursive, scene, child)
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         collection: Collection = self.get_input(self.collection)
         visible: bool = self.get_input(self.visible)

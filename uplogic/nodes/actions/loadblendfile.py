@@ -13,7 +13,7 @@ class ULLoadBlendFile(ULActionNode):
         return self._done
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         file_name = self.get_input(self.file_name)
         logic.startGame(file_name)

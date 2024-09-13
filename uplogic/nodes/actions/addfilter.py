@@ -30,7 +30,7 @@ class ULAddFilter(ULActionNode):
         return self._done
 
     def evaluate(self):
-        condition = self.get_input(self.condition)
+        condition = self.get_condition()
         ftype = self.filter_type
         if not condition or self.filter:
             if self.filter:

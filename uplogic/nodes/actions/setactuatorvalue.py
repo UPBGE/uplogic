@@ -18,7 +18,7 @@ class ULSetActuatorValue(ULActionNode):
     def evaluate(self):
         game_obj = self.get_input(self.game_obj)
         act_name = self.get_input(self.act_name)
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         actuator = game_obj.actuators.get(act_name)
         if not actuator:

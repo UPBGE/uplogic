@@ -33,7 +33,7 @@ class StartSoundNode(ULActionNode):
         self._clear_sound = 1
         self._sustained = 1
         self._handle = None
-        self._done = self.add_output(self.get_done)
+        self.DONE = self.add_output(self.get_done)
         self.ON_FINISH = self.add_output(self.get_on_finish)
         self.HANDLE = self.add_output(self.get_handle)
         self._start = [
@@ -70,7 +70,7 @@ class StartSoundNode(ULActionNode):
             self._handle.pitch = pitch
             if hasattr(self._handle, 'lowpass'):
                 self._handle.lowpass = self.get_input(self.lowpass) * 20000
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         self._start[self.mode](volume, pitch)
         self._done = True

@@ -10,13 +10,13 @@ class ULGamepadVibration(ULActionNode):
         self.left = None
         self.right = None
         self.time = None
-        self._done = self.add_output(self.get_done)
+        self.DONE = self.add_output(self.get_done)
 
     def get_done(self):
         return self._done
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         index = self.get_input(self.index)
         left = self.get_input(self.left)

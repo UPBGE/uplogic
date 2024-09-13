@@ -14,7 +14,7 @@ class ULSetPyInstanceAttr(ULActionNode):
         return self._done
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         instance = self.get_input(self.instance)
         attr = self.get_input(self.attr)

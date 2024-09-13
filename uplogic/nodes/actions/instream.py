@@ -34,7 +34,7 @@ class ULKeyLogger(ULActionNode):
         self._character = None
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         network = self.network
         keyboard_status = keyboard.inputs.copy()

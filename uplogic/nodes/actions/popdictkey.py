@@ -23,7 +23,7 @@ class ULPopDictKey(ULActionNode):
         return self.value
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         dictionary = self.get_input(self.dict)
         key = self.get_input(self.key)

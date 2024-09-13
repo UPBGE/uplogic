@@ -33,7 +33,7 @@ class ULClearVariables(ULActionNode):
         f.close()
 
     def evaluate(self):
-        condition = self.get_input(self.condition)
+        condition = self.get_condition()
         if not condition:
             return
         path = self.get_input(self.path)

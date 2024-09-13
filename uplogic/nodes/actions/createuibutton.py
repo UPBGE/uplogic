@@ -62,7 +62,7 @@ class ULCreateUIButton(ULActionNode):
         return False
 
     def evaluate(self):
-        condition = self.get_input(self.condition)
+        condition = self.get_condition()
         if not condition:
             return
         ipt = self.get_input

@@ -6,7 +6,7 @@ from uplogic.ui.label import Label
 from uplogic.ui.textinput import TextInput
 from uplogic.data import GlobalDB
 from uplogic.utils.raycasting import raycast_mouse
-from uplogic.utils.math import world_to_screen
+from uplogic.utils.scene import world_to_screen
 from uplogic.utils.math import cycle
 from uplogic.utils.math import clamp
 from uplogic.input.keyboard import key_down, key_pulse

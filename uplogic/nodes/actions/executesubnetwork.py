@@ -19,7 +19,7 @@ class ULExecuteSubNetwork(ULActionNode):
         self._network = network
 
     def evaluate(self):
-        condition = self.get_input(self.condition)
+        condition = self.get_condition()
         if condition != self._condition:
             target_object = self.get_input(self.target_object)
             tree_name = self.get_input(self.tree_name)

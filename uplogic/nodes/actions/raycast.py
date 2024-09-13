@@ -57,7 +57,7 @@ class ULRaycast(ULActionNode):
         return self._data.uv
 
     def evaluate(self):
-        condition = self.get_input(self.condition)
+        condition = self.get_condition()
         if not condition:
             self._data = RayCastData((None, None, None, None, None, None))
             return

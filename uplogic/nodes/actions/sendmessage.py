@@ -17,7 +17,7 @@ class ULSendMessage(ULActionNode):
         return self._done
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         from_obj: KX_GameObject = self.get_input(self.from_obj)
         to_obj: KX_GameObject = self.get_input(self.to_obj)

@@ -17,7 +17,7 @@ class ULStartSpeaker(ULActionNode):
         self._clear_sound = 1
         self._sustained = 1
         self._handle = None
-        self._done = self.add_output(self.get_done)
+        self.DONE = self.add_output(self.get_done)
         self.ON_FINISH = self.add_output(self.get_on_finish)
         self.HANDLE = self.add_output(self.get_handle)
 
@@ -37,7 +37,7 @@ class ULStartSpeaker(ULActionNode):
 
     def evaluate(self):
         self.on_finish = False
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         speaker = self.get_input(self.speaker)
         transition = self.get_input(self.transition)

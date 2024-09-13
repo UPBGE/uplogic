@@ -1,8 +1,9 @@
 from bge import logic
+from mathutils import Vector
 import bpy
 
 
-def set_scene(scene: str or bpy.types.Scene) -> None:
+def set_scene(scene: str | bpy.types.Scene) -> None:
     logic.getCurrentScene().replace(scene)
 
 
@@ -10,8 +11,35 @@ def get_custom_loop():
     return logic.globalDict.get('loop', None)
 
 
+def world_to_screen(position: Vector = Vector((0, 0, 0)), inv_y: bool = True) -> Vector:
+    pos = Vector(logic.getCurrentScene().active_camera.getScreenPosition(position))
+    if inv_y:
+        pos[1] = 1 - pos[1]
+    return pos
+
+
+def screen_to_world(x:float = None, y: float = None, distance: float = 10) -> Vector:
+    """Get the world coordinates of a point on the screen in a given distance.
+    
+    :param `x`: X position on the screen. Leave at `None` to use mouse position.
+    :param `y`: Y position on the screen. Leave at `None` to use mouse position.
+    :param `distance`: The distance from the camera at which to get the position.
+    
+    :returns: Position as `Vector`
+    """
+
+    camera = logic.getCurrentScene().active_camera
+    mouse = logic.mouse
+    x = x if x is not None else mouse.position[0]
+    y = y if y is not None else mouse.position[1]
+    direction = camera.getScreenVect(x, y)
+    origin = camera.worldPosition
+    aim = direction * -distance
+    return origin + (aim)
+
+
 class FileLoader():
-    '''Load the content of the currently'''
+    '''Load the content of the currently open .blend file'''
 
     def __init__(self, start=False):
         self.status = 0.0
@@ -75,10 +103,11 @@ class FileLoader():
             self.on_progress(self.status)
             return
         logic.getCurrentScene().pre_draw.remove(self.load_next)
-        # self.object.endObject()
-        # bpy.data.materials.remove(self.temp_map)
-        # bpy.data.meshes.remove(self.bmesh)
-        # bpy.data.objects.remove(self.bobj)
+        # XXX: Remove when crashing!
+        self.object.endObject()
+        bpy.data.materials.remove(self.temp_map)
+        bpy.data.meshes.remove(self.bmesh)
+        bpy.data.objects.remove(self.bobj)
         self.finished = True
         self.on_finish()
 

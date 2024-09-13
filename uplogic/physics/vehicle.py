@@ -122,7 +122,7 @@ class Vehicle():
             down,
             axle_dir,
             self.suspension,
-            abs(wheel.worldScale.x/2) * self.wheel_size,
+            abs(wheel.worldScale.y/2) * self.wheel_size,
             steering
         )
         self.wheels.append(wheel)

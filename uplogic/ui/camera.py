@@ -47,7 +47,6 @@ class Camera(Widget):
     def _build_shader(self):
         if self.camera is None:
             return
-        # self.camera.useViewport = True
         pos = self._draw_pos
         size = self._draw_size
         self.camera.setViewport(

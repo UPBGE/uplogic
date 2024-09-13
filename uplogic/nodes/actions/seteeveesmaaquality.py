@@ -15,7 +15,7 @@ class ULSetEeveeSMAAQuality(ULActionNode):
         return self._done
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         print("SMAA has been removed from UPBGE. Delete 'Set SMAA Quality' node to avoid issues.")
         self._done = True

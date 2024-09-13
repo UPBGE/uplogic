@@ -24,13 +24,13 @@ class ULGamepadLook(ULActionNode):
         self.threshold: float = None
         self.gamepadlook: GamepadLook = None
         self._done: bool = None
-        self._done = self.add_output(self.get_done)
+        self.DONE = self.add_output(self.get_done)
 
     def get_done(self):
         return self._done
 
     def evaluate(self):
-        condition = self.get_input(self.condition)
+        condition = self.get_condition()
         if condition:
             obj = self.get_input(self.main_obj)
             head = self.get_input(self.head_obj)

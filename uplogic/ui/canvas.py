@@ -20,12 +20,18 @@ class Canvas(Widget):
         self._old_height = bge.render.getWindowHeight()
         self.use_clipping = False
         self._to_evaluate: list[Widget] = []
-        bge.logic.getCurrentScene().post_draw.append(self.draw)
+        self.register()
         self.start()
+    
+    def register(self):
+        bge.logic.getCurrentScene().post_draw.append(self.draw)
 
-    def remove(self):
+    def unregister(self):
         while self.draw in bge.logic.getCurrentScene().post_draw:
             bge.logic.getCurrentScene().post_draw.remove(self.draw)
+
+    def remove(self):
+        self.unregister()
 
     def fetch_size(self):
         for c in self.children:

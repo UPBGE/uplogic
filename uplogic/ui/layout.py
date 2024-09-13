@@ -1,6 +1,9 @@
 from .widget import Widget
 import gpu
 from bge import render
+from mathutils import Vector
+from ..utils.math import rotate2d
+from ..events import schedule, ScheduledEvent
 
 
 class Layout(Widget):
@@ -48,6 +51,8 @@ class Layout(Widget):
 
     @border_width.setter
     def border_width(self, val):
+        if val < 1:
+            val = 1
         self._border_width = int(val)
 
     def draw(self):
@@ -110,6 +115,16 @@ class FloatLayout(Layout):
 
 class ArrangedLayout(Layout):
     """Metaclass"""
+    
+    @property
+    def arrange_event(self) -> ScheduledEvent:
+        return getattr(self, '_arrange_evt', None)
+
+    @arrange_event.setter
+    def arrange_event(self, val):
+        if self.arrange_event:
+            self.arrange_event.cancel()
+        self._arrange_evt = val
 
     @property
     def parent(self):
@@ -296,7 +311,6 @@ class GridLayout(BoxLayout):
                 idx += 1
                 if idx >= self.cols:
                     _offset_y = min(_widget_sizes)
-                    print(_widget_sizes)
                     _widget_sizes = []
                     idx = 0
                     row += 1
@@ -317,37 +331,38 @@ class GridLayout(BoxLayout):
                     offset = dsize[1]
 
 
-class PolarLayout(BoxLayout):
+class PolarLayout(ArrangedLayout):
+    '''The Polar Layout allows you automatically arrange widgets in a circular fashion.
+
+    :param `pos`: Initial position of this widget in either pixels or factor.
+    :param `relative`: Whether to use pixels or factor for size or pos; example: `{'pos': True}`.
+    :param `starting_angle`: Position angle of the first widget. 0 is to the right, 90 is up, 180 is left, 270 is down.
+    :param `angle`: Rotation in degrees of this widget around the pivot defined by the alignment.
+    '''
 
     def __init__(
             self,
             pos: list = [0, 0],
-            size: list = [100, 100],
-            bg_color: list = (0, 0, 0, 0),
             relative: dict = {},
-            border_width: int = 1,
-            border_color: list = (0, 0, 0, 0),
-            halign: str = 'center',
-            valign: str = 'center',
             starting_angle: str = 0,
-            distance: int = 100,
-            angle: float =0
+            radius: int = 100,
+            angle: float = 0
         ):
         self._starting_angle = starting_angle
-        self._distance = distance
+        self._radius = radius
         super().__init__(
             pos,
-            size,
-            bg_color,
+            (0, 0),
+            (0, 0, 0, 0),
             relative,
-            border_width,
-            border_color,
-            halign,
-            valign,
+            0,
+            (0, 0, 0, 0),
+            'center',
+            'center',
             angle
         )
         self.starting_angle = starting_angle
-        self.distance = distance
+        self.radius = radius
         self.start()
 
     @property
@@ -360,10 +375,26 @@ class PolarLayout(BoxLayout):
         self.arrange()
 
     @property
-    def distance(self):
-        return self._distance
+    def radius(self):
+        return self._radius
 
-    @distance.setter
-    def distance(self, val):
-        self._distance = val
+    @radius.setter
+    def radius(self, val):
+        self._radius = val
         self.arrange()
+
+    def add_widget(self, widget):
+        super().add_widget(widget)
+        w = self.children[-1]
+        w.pos = Vector((self.radius, 0))
+
+    def arrange(self):
+        if len(self.children) == 0:
+            return
+        step = 360 / len(self.children)
+        _angle = self.starting_angle
+        pos = Vector((self.radius, 0))
+        for widget in self.children:
+            widget.relative['pos'] = False
+            widget.pos = rotate2d(pos, (0, 0), _angle)
+            _angle += step

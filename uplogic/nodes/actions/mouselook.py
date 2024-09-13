@@ -37,7 +37,7 @@ class ULMouseLook(ULActionNode):
             self.mouselook.get_data()
 
     def evaluate(self):
-        condition = self.get_input(self.condition)
+        condition = self.get_condition()
         if condition:
             obj = self.get_input(self.game_object_x)
             head = self.get_input(self.game_object_y)

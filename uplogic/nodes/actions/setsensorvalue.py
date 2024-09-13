@@ -16,7 +16,7 @@ class ULSetSensorValue(ULActionNode):
         return self._done
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         game_obj = self.get_input(self.game_obj)
         sens_name = self.get_input(self.sens_name)

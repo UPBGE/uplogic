@@ -19,7 +19,7 @@ class ULSetBonePosition(ULActionNode):
         return self._done
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         armature = self.get_input(self.armature)
         bone_name = self.get_input(self.bone_name)

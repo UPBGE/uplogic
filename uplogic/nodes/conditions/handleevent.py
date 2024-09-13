@@ -1,5 +1,5 @@
 from uplogic.events import receive
-from uplogic.events import ULEvent
+from uplogic.events import Event
 from uplogic.nodes import ULConditionNode
 
 
@@ -13,7 +13,7 @@ class ULHandleEvent(ULConditionNode):
         self.TARGET = self.add_output(self.get_target)
 
     def get_received(self):
-        return isinstance(self.event, ULEvent)
+        return isinstance(self.event, Event)
 
     def get_body(self):
         return self.event.content if self.event else None

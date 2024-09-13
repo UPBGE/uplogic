@@ -28,6 +28,7 @@ from .mouse import mouse_tap  # noqa
 from .mouse import mouse_press  # noqa
 from .mouse import mouse_up  # noqa
 from .mouse import mouse_wheel  # noqa
+from .mouse import mouse_over  # noqa
 from .mouse import set_mouse_position  # noqa
 from .mouse import ULMouse, Mouse  # noqa
 from .mouse import ULMouseLook, MouseLook  # noqa

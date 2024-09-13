@@ -104,9 +104,6 @@ class Slider(RelativeLayout):
         knob_width = (size[1] if self._horiz else size[0])
         self.knob.size = (knob_width * self.knob_size - self.border_width, knob_width * self.knob_size - self.border_width)
 
-    # def draw(self):
-    #     super().draw()
-
     def _on_press(self, widget):
         pos = self._draw_pos
         knob_size = self.knob._draw_size[self._slide_axis] * .5

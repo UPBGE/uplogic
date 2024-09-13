@@ -1,16 +1,16 @@
-from uplogic.nodes import ULParameterNode
+from uplogic.nodes import ULActionNode
 
 
-class ULStoreValue(ULParameterNode):
+class ULStoreValue(ULActionNode):
     def __init__(self):
-        ULParameterNode.__init__(self)
+        ULActionNode.__init__(self)
         self.value = None
         self.initialize = True
         self.condition = None
         self._stored_value = None
 
-        # WEIRD NAMING: self._done = Condition, self.OUT = Stored value
-        self._done = self.add_output(self.get_stored)
+        # WEIRD NAMING: self.DONE = Condition, self.OUT = Stored value
+        self.DONE = self.add_output(self.get_stored)
         self.OUT = self.add_output(self.get_done)
 
     def get_stored(self):

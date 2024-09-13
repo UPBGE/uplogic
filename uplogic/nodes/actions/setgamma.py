@@ -15,7 +15,7 @@ class ULSetGamma(ULActionNode):
         return self._done
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         value = self.get_input(self.value)
         scene = logic.getCurrentScene()

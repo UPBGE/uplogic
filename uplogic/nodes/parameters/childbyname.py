@@ -15,6 +15,3 @@ class ULChildByName(ULParameterNode):
         if isinstance(child, str):
             return parent.childrenRecursive.get(child, None)
         return parent.childrenRecursive.get(child.name, None)
-
-    def evaluate(self):
-        pass

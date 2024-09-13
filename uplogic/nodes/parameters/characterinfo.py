@@ -13,6 +13,7 @@ class ULCharacterInfo(ULParameterNode):
         self.gravity = None
         self.walk_dir = None
         self.on_ground = None
+        self._physics = None
         self.local = False
         self.MAX_JUMPS = self.add_output(self.get_max_jumps)
         self.CUR_JUMP = self.add_output(self.get_current_jump)
@@ -43,6 +44,6 @@ class ULCharacterInfo(ULParameterNode):
     def get_on_ground(self):
         return self.physics.onGround
 
-    def evaluate(self):
+    def fetch(self):
         game_object = self.owner = self.get_input(self.game_object)
         self.physics = constraints.getCharacter(game_object)

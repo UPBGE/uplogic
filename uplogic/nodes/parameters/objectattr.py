@@ -6,7 +6,7 @@ class ULObjectAttribute(ULParameterNode):
     def __init__(self):
         ULParameterNode.__init__(self)
         self.game_object = None
-        self.attribute_name = None
+        self.attribute_name = ''
         self.OUT = self.add_output(self.get_done)
 
     def get_done(self):
@@ -14,5 +14,5 @@ class ULObjectAttribute(ULParameterNode):
         attribute_name = self.get_input(self.attribute_name)
         if not hasattr(game_object, attribute_name):
             return Vector((0, 0, 0))
-        val = getattr(game_object, attribute_name)
+        val = getattr(game_object, attribute_name, None)
         return val.copy() if isinstance(val, Vector) else val

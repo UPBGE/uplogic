@@ -12,7 +12,7 @@ class ULStopSound(ULActionNode):
         return self._done
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         sound = self.get_input(self.sound)
         sound.stop()

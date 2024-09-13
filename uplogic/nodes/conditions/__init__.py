@@ -36,6 +36,8 @@ from .sensorpositive import ULSensorPositive  # noqa
 from .timer import ULTimer  # noqa
 from .truefalse import ULTrueFalse  # noqa
 from .valuevalid import ULValueValid  # noqa
+from .loop import LoopNode
+from .tweenvalue import TweenValueNode
 
 from .barrier import ULBarrier
 from .controllerstatus import ULControllerStatus  # noqa

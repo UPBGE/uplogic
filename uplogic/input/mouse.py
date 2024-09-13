@@ -24,6 +24,20 @@ MOUSE_BUTTONS = {
 }
 
 
+def mouse_over(game_object: GameObject) -> bool:
+    scene = game_object.scene
+    camera = scene.active_camera
+    distance = 2.0 * camera.getDistanceTo(game_object)
+    mouse = logic.mouse
+    mouse_position = mouse.position
+    target = camera.getScreenRay(
+        mouse_position[0],
+        mouse_position[1],
+        distance
+    )
+    return target is game_object
+
+
 def set_mouse_position(x: int, y: int, absolute: bool = False) -> None:
     if absolute:
         render.setMousePosition(x, y)

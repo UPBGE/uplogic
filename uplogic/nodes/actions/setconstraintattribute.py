@@ -16,7 +16,7 @@ class SetConstraintAttributeNode(ULActionNode):
         return self._done
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         consts = self.get_input(self.object).blenderObject.constraints
         const = consts[self.get_input(self.constraint)]

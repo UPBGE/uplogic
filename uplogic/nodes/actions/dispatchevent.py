@@ -16,7 +16,7 @@ class ULDispatchEvent(ULActionNode):
         return self._done
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         subject = self.get_input(self.subject)
         body = self.get_input(self.body)

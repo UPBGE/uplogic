@@ -37,7 +37,7 @@ class ULSaveVariable(ULActionNode):
         f.close()
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         name = self.get_input(self.name)
         val = self.get_input(self.val)

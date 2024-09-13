@@ -18,7 +18,7 @@ class ULInstallSubNetwork(ULActionNode):
         self._network = network
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         target_object = self.get_input(self.target_object)
         tree_name = self.get_input(self.tree_name)

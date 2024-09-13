@@ -27,7 +27,7 @@ class ULGetPerformanceProfile(ULActionNode):
 
     def evaluate(self):
         self.data = '----------------------------------Start Profile\n'
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         print_profile = self.get_input(
             self.print_profile

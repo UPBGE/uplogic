@@ -103,7 +103,7 @@ class ULSpawnPool(ULActionNode):
             self.spawn_types[self.spawn_type].speed = self.get_input(self.speed)
             self._spawned = True
 
-        if self.get_input(self.condition):
+        if self.get_condition():
             inst: KX_GameObject = self.get_input(self.object_instance)
             self._pool = SpawnPool(
                 getattr(inst, 'name', inst),

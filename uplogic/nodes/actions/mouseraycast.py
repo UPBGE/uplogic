@@ -36,7 +36,7 @@ class ULMouseRayCast(ULActionNode):
         return self._data.point
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             self._data = RayCastData((None, None, None, None, None, None))
             return
         self._data = raycast_mouse(

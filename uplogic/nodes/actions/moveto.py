@@ -23,7 +23,7 @@ class ULMoveTo(ULActionNode):
         return self._reached
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         moving_object = self.get_input(self.moving_object)
         destination_point = self.get_input(self.destination_point)
@@ -33,9 +33,9 @@ class ULMoveTo(ULActionNode):
         self._reached = move_to(
             moving_object,
             destination_point,
-            speed,
-            self.network.time_per_frame,
-            dynamic,
-            distance
+            speed
+            # self.network.time_per_frame,
+            # dynamic,
+            # distance
         )
         self._done = True

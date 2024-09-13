@@ -15,7 +15,7 @@ class ULSetLogicTreeProperty(ULActionNode):
 
     def evaluate(self):
         property_name = self.get_input(self.prop_name)
-        condition = self.get_input(self.condition)
+        condition = self.get_condition()
         if not condition:
             return
         setattr(self.network.component, make_valid_name(property_name).lower(), self.get_input(self.value))

@@ -34,7 +34,7 @@ class ULRemoveVariable(ULActionNode):
             debug('File does not exist!')
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         name = self.get_input(self.name)
         path = self.get_input(self.path)

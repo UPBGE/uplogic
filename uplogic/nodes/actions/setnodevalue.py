@@ -18,7 +18,7 @@ class ULSetNodeValue(ULActionNode):
         return self._done
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         tree: NodeTree = self.get_input(self.tree_name)
         node_name = self.get_input(self.node_name)
@@ -33,4 +33,5 @@ class ULSetNodeValue(ULActionNode):
             target = getattr(target, internal, target)
         if hasattr(target, attribute):
             setattr(target, attribute, value)
+        tree.update_tag()
         self._done = True

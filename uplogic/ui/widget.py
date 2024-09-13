@@ -1,8 +1,20 @@
 import gpu
 from gpu_extras.batch import batch_for_shader
-from uplogic.utils.math import rotate2d
-from uplogic.events import schedule
+
+import math
 from mathutils import Vector
+
+try:
+    from uplogic.utils.math import rotate2d
+
+except Exception:
+    print('Not in game mode!')
+    def rotate2d(origin, pivot, angle):
+        angle = math.radians(angle)
+        return Vector((
+            ((origin[0] - pivot[0]) * math.cos(angle)) - ((origin[1] - pivot[1]) * math.sin(angle)) + pivot[0],
+            ((origin[0] - pivot[0]) * math.sin(angle)) + ((origin[1] - pivot[1]) * math.cos(angle)) + pivot[1]
+        ))
 
 
 class Widget():
@@ -63,6 +75,9 @@ class Widget():
         self.opacity = 1.
         self.z = 0
         self._active = True
+
+    def register(self):
+        pass
 
     def toggle(self, *args):
         """Toggle the widget on/off."""
@@ -134,11 +149,13 @@ class Widget():
         if self.parent is None:
             return (0, 0)
         v = self._vertices
+        if v is None:
+            return (0, 0)
         x0 = Vector(v[0])
         x1 = Vector(v[1])
         y1 = Vector(v[2])
         y0 = Vector(v[3])
-        return self._get_pivot(x0, x1, y0, y1)
+        return Vector(self._get_pivot(x0, x1, y0, y1))
 
     @property
     def _draw_angle(self):
@@ -351,7 +368,6 @@ class Widget():
     def _draw_pos(self):
         if self.parent is None:
             return [0, 0]
-        # inherit_pos = self.parent.pos_abs if self.parent else [0, 0]
         inherit_pos = self.parent._draw_pos if self.parent else [0, 0]
         pdsize = self.parent._draw_size
         pos = [
@@ -359,7 +375,7 @@ class Widget():
             self.pos[1] * pdsize[1]
         ] if self.relative.get('pos') else self.pos
         if self.parent and self.parent._draw_angle and self._vertices is not None:
-            pos = rotate2d(pos, (0, 0), self.parent._draw_angle)
+            pos = rotate2d(pos, self.parent.pivot - Vector(inherit_pos), self.parent._draw_angle)
         offset = [0, 0]
         dsize = self._draw_size
         if self.halign == 'center':
@@ -401,12 +417,12 @@ class Widget():
             return (0, 0)
         if halign == 'center' and valign == 'center':
             return x0.lerp(y1, .5)
-        elif halign == 'left' and valign == 'bottom':
-            return x0
         elif halign == 'center' and valign == 'top':
             return y0.lerp(y1, .5)
         elif halign == 'center' and valign == 'bottom':
             return x0.lerp(x1, .5)
+        elif halign == 'left' and valign == 'bottom':
+            return x0
         elif halign == 'left' and valign == 'center':
             return x0.lerp(y0, .5)
         elif halign == 'left' and valign == 'top':
@@ -458,7 +474,7 @@ class Widget():
         indices = (
             (0, 1, 2), (2, 3, 0)
         )
-        # self._shader = gpu.shader.from_builtin('UNIFORM_COLOR')
+        # self._shader = gpu.shader.from_builtin('2D_UNIFORM_COLOR')
         self._shader = gpu.types.GPUShader(self.vertex_shader, self.fragment_shader)
         self._batch = batch_for_shader(self._shader, 'TRIS', {"pos": vertices}, indices=indices)
         self._batch_line = batch_for_shader(self._shader, 'LINE_STRIP', {"pos": vertices})

@@ -17,7 +17,7 @@ class ULStartSubNetwork(ULActionNode):
         self._network = network
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         game_object = self.get_input(self.game_object)
         logic_network_name = self.get_input(self.logic_network_name)

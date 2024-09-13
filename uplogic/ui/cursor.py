@@ -3,8 +3,9 @@ from uplogic.input import MOUSE
 import gpu
 import bge, bpy
 from gpu_extras.batch import batch_for_shader
-from bge import logic
+from bge import logic, render
 from math import ceil
+from mathutils import Vector
 
 
 CURSOR = None
@@ -27,6 +28,7 @@ class Cursor(Widget):
         self.rows = rows
         self.cols = cols
         self._idx = idx
+        self._to_evaluate = []
         remove_custom_cursor()
         super().__init__(MOUSE.position, size)
         self._texture = None
@@ -108,6 +110,13 @@ class Cursor(Widget):
             },
         )
 
+    @property
+    def _draw_pos(self):
+        return Vector((
+            self.pos[0] * render.getWindowWidth(),
+            (1 - self.pos[1]) * render.getWindowHeight()
+        ))
+
     def _draw_custom_cursor(self):
         self._build_shader()
         scene = bge.logic.getCurrentScene()
@@ -120,3 +129,6 @@ class Cursor(Widget):
             self._shader.bind()
             self._shader.uniform_sampler("image", self.texture)
             self._batch.draw(self._shader)
+        for widget in self.children:
+            if widget.show:
+                widget.draw()

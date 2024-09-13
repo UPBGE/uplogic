@@ -22,7 +22,7 @@ class ULRunActuator(ULActionNode):
         if act_name not in controller.actuators:
             return
         actuator = controller.actuators[act_name]
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         controller.activate(actuator)
         self._done = True

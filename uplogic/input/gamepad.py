@@ -195,11 +195,12 @@ def gamepad_tap(
 
     :returns: float or boolean
     '''
-    btn_idx = layout.get(button.upper(), button.upper())
-    if button in [15, 16, 'R2', 'L2', 'RT', 'LT']:
-        return gamepad_axis(btn_idx, idx, True)
+    if isinstance(button, str):
+        button = layout.get(button.upper(), button.upper())
+    if button in [15, 16]:
+        return gamepad_axis(button, idx, True)
     else:
-        return gamepad_button(btn_idx, idx, True)
+        return gamepad_button(button, idx, True)
 
 
 def gamepad_down(

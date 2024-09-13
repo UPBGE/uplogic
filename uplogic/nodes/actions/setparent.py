@@ -15,7 +15,7 @@ class ULSetParent(ULActionNode):
         return self._done
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         child_object = self.get_input(self.child_object)
         parent_object = self.get_input(self.parent_object)

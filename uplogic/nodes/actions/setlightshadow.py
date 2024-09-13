@@ -15,7 +15,7 @@ class ULSetLightShadow(ULActionNode):
         return self._done
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         light: KX_GameObject = self.get_input(self.lamp)
         use_shadow = self.get_input(self.use_shadow)

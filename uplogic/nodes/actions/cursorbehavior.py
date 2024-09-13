@@ -15,7 +15,7 @@ class ULCursorBehavior(ULActionNode):
 
     def evaluate(self):
         cursor_object = self.get_input(self.cursor_object)
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             if cursor_object.visible:
                 cursor_object.setVisible(False, True)
             return

@@ -30,7 +30,7 @@ class ULSaveVariableDict(ULActionNode):
         f.close()
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         val = self.get_input(self.val)
 

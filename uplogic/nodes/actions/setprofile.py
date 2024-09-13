@@ -13,7 +13,7 @@ class ULSetProfile(ULActionNode):
         return self._done
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         use_profile = self.get_input(self.use_profile)
         render.showProfile(use_profile)

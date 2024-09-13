@@ -1,5 +1,6 @@
 from bge import logic
 from uplogic.nodes import ULActionNode
+from uplogic.utils.objects import add_object
 
 
 class ULAddObject(ULActionNode):
@@ -21,7 +22,7 @@ class ULAddObject(ULActionNode):
         return self.obj
 
     def evaluate(self):
-        condition = self.get_input(self.condition)
+        condition = self.get_condition()
         if not condition:
             return
         life = self.get_input(self.life)
@@ -29,5 +30,6 @@ class ULAddObject(ULActionNode):
         full_copy = self.get_input(self.full_copy)
         reference = self.get_input(self.reference)
         scene = logic.getCurrentScene()
-        self.obj = scene.addObject(name, reference, life, full_copy)
+        # self.obj = scene.addObject(name, reference, life, full_copy)
+        self.obj = add_object(name, reference, life, full_copy)
         self._done = True

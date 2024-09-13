@@ -13,7 +13,7 @@ class ULSendNetworkMessage(ULActionNode):
         return self._done
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         entity = self.get_input(self.entity)
         if entity:

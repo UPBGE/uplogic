@@ -29,7 +29,7 @@ class ULCreateVehicle(ULActionNode):
 
     def evaluate(self):
         game_object = self.get_input(self.game_object)
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             if game_object.get(VEHICLE):
                 self.vehicle = game_object[VEHICLE]
             return

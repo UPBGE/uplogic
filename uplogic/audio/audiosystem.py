@@ -5,6 +5,8 @@ from bge import logic
 from uplogic.data.globaldb import GlobalDB
 from uplogic.input.vr import ULHeadsetVRWrapper
 from uplogic.utils import check_vr_session_status
+from uplogic.console import warning
+from mathutils import Vector
 import aud
 import bpy
 
@@ -21,7 +23,7 @@ DISTANCE_MODELS = {
 
 
 def set_lowpass(frequency, system_name='default') -> None:
-    """Set the overall volume of a `ULAudioSystem`. All sounds played via this
+    """Set the overall volume of a `AudioSystem`. All sounds played via this
     system will have their volume multiplied by this value.
     """
     aud_sys = get_audio_system(system_name)
@@ -30,18 +32,16 @@ def set_lowpass(frequency, system_name='default') -> None:
 
 
 def set_master_volume(volume, system_name='default') -> None:
-    """Set the overall volume of a `ULAudioSystem`. All sounds played via this
+    """Set the overall volume of a `AudioSystem`. All sounds played via this
     system will have their volume multiplied by this value.
     """
     aud_sys = get_audio_system(system_name)
     if aud_sys:
         aud_sys.volume = volume
-        for sound in aud_sys._active_sounds:
-            sound.volume = sound.volume
 
 
 def set_vr_audio(flag, system_name='default') -> None:
-    """Set the audio mode for a `ULAudioSystem`. If set to `True`, the system
+    """Set the audio mode for a `AudioSystem`. If set to `True`, the system
     will track a VR Headset instead of the active scene camera.
     """
     aud_sys = get_audio_system(system_name)
@@ -50,19 +50,26 @@ def set_vr_audio(flag, system_name='default') -> None:
 
 
 def stop_all_audio() -> None:
-    """Stop every `ULAudioSystem` in this scene.
+    """Stop every `AudioSystem` in this scene.
     """
     for sys in GlobalDB.retrieve('uplogic.audio'):
         sys.shutdown()
 
 
-class ULAudioSystem(object):
+class AudioSystem(object):
     '''System for managing sounds started using `Sound2D` or `Sound3D`.
-
-    This is usually addressed indirectly through `Sound2D` or `Sound3D` and
-    is not intended for manual use.
+    
+    :param `name`: ID of this AudioSystem; must be unique.
+    :param `mode`: Playback mode for sounds of this system, must be one of `['2D', '3D']`
     '''
+    _deprecated = False
+
     def __init__(self, name: str, mode: str = '3D'):
+        if self._deprecated:
+            warning('Warning: ULAudioSystem class will be renamed to "AudioSystem" in future releases!')
+        if mode not in ['2D', '3D']:
+            warning(f"AudioSystem argument 'mode': '{mode}' not recognized in ['2D', '3D'], defaulting to '3D'.")
+            mode = '3D'
         self._active_sounds = []
         self.name = name
         self.mode = mode
@@ -79,12 +86,13 @@ class ULAudioSystem(object):
         self.use_vr = getattr(bpy.data.scenes[self.scene.name], 'use_vr_audio_space', False)
         self.vr_headset = ULHeadsetVRWrapper() if check_vr_session_status() else None
         self.listener = self.vr_headset if self.use_vr else self.scene.active_camera
-        self.old_lis_pos = self.listener.worldPosition.copy()
+        self._old_listener_pos = self.listener.worldPosition.copy()
         self.setup(self.scene)
         self.scene.onRemove.append(self.shutdown)
 
     @property
     def lowpass(self):
+        '''Frequency cutoff for muffled sounds.'''
         return self._lowpass
 
     @lowpass.setter
@@ -94,6 +102,27 @@ class ULAudioSystem(object):
         self._lowpass = val
         for sound in self._active_sounds:
             sound.lowpass = val
+
+    @property
+    def volume(self):
+        '''Playback amplitude multiplier for all sounds played through this system'''
+        return self._volume
+
+    @volume.setter
+    def volume(self, val):
+        self._volume = val
+        for sound in self._active_sounds:
+            sound.volume = sound.volume
+
+    def pause(self):
+        '''Pause all sounds in this system.'''
+        for sound in self._active_sounds:
+            sound.pause()
+
+    def resume(self):
+        '''Resume all sounds in this system.'''
+        for sound in self._active_sounds:
+            sound.resume()
 
     def setup(self, scene=None):
         """Get necessary scene data.
@@ -109,24 +138,21 @@ class ULAudioSystem(object):
         GlobalDB.retrieve('uplogic.audio').put(self.name, self)
         self.scene.pre_draw.append(self.update)
 
-    def get_distance_model(self, name):
-        return DISTANCE_MODELS.get(name, aud.DISTANCE_MODEL_INVERSE_CLAMPED)
-
-    def compute_listener_velocity(self, listener):
+    def compute_listener_velocity(self, listener) -> Vector:
         """Compare positions of the listener to calculate velocity.
         """
         wpos = listener.worldPosition.copy()
-        olp = self.old_lis_pos
-        vel = (
+        olp = self._old_listener_pos
+        vel = Vector((
             (wpos.x - olp.x) * 50,
             (wpos.y - olp.y) * 50,
             (wpos.z - olp.z) * 50
-        )
-        self.old_lis_pos = wpos
+        ))
+        self._old_listener_pos = wpos
         return vel
 
     def update(self):
-        """This is called each frame.
+        """This is called each frame and updates every sound currently playing.
         """
         if self.mode == '3D':
             scene = logic.getCurrentScene()
@@ -191,19 +217,24 @@ class ULAudioSystem(object):
         self.device.stopAll()
 
 
-def get_audio_system(system_name: str = 'default', mode: str = '3D') -> ULAudioSystem:
-    '''Get or create a `ULAudioSystem` with the given name.
+class ULAudioSystem(AudioSystem):
+    _deprecated = True
+
+
+def get_audio_system(system_name: str = 'default', mode: str = '3D') -> AudioSystem:
+    '''Get or create a `AudioSystem` with the given name.
 
     :param `system_name`: Look for this name.
+    :param `mode`: Playback mode of `['2D', '3D']`. Only relevant a new system is created.
 
-    :returns: `ULAudioSystem`, new system is created if none is found.
+    :returns: `AudioSystem`, new system is created if none is found.
     '''
     scene = logic.getCurrentScene()
     aud_systems = GlobalDB.retrieve('uplogic.audio')
     if aud_systems.check(system_name):
         aud_sys = aud_systems.get(system_name)
     else:
-        aud_sys = ULAudioSystem(system_name, mode)
+        aud_sys = AudioSystem(system_name, mode)
     if aud_sys.update not in scene.pre_draw:
         scene.pre_draw.append(aud_sys.update)
     return aud_sys

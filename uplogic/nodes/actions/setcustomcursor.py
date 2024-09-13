@@ -22,7 +22,7 @@ class ULSetCustomCursor(ULActionNode):
         return self._cursor
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         remove_custom_cursor()
         texture: Image = self.get_input(self.texture)

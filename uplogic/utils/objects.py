@@ -10,6 +10,7 @@ from .math import get_local
 from .math import rotate2d
 from .math import rotate3d
 from .math import rotate_by_axis
+from ..events import schedule
 from mathutils import Vector, Matrix, Euler
 from math import degrees
 from math import radians
@@ -102,7 +103,16 @@ def rotate_to(
         )
 
 
-def move_to(
+def move_to(game_object: KX_GameObject, target: Vector, speed: float):
+    direction = (game_object.worldPosition - target)
+    if direction.length < speed:
+        game_object.worldPosition = target
+        return True
+    direction.normalize()
+    game_object.worldPosition -= direction * speed
+
+
+def _move_to(
     moving_object,
     destination_point,
     speed,
@@ -116,6 +126,7 @@ def move_to(
             moving_object.worldPosition)
         dst = direction.length
         if(dst <= distance):
+            moving_object.worldPosition = destination_point
             return True
         direction.z = 0
         direction.normalize()
@@ -130,6 +141,7 @@ def move_to(
             )
         dst = direction.length
         if(dst <= distance):
+            moving_object.worldPosition = destination_point
             return True
         direction.normalize()
         displacement = speed * time_per_frame
@@ -172,15 +184,6 @@ def controller_brick_status(owner, controller_name):
         ]
     else:
         raise LogicControllerNotSupportedError
-
-
-def move_to(game_object: KX_GameObject, target: Vector, speed: float):
-    direction = (game_object.worldPosition - target)
-    if direction.length < speed:
-        game_object.worldPosition = target
-        return True
-    direction.normalize()
-    game_object.worldPosition += direction * speed
 
 
 class ControllerBrick(tuple):
@@ -554,7 +557,30 @@ class Mesh():
         )
 
 
-def add_object(name: str | KX_GameObject, position=Vector((0, 0, 0)), rotation=Vector((0, 0, 0)), scale=Vector((1, 1, 1))):
+def add_object(name: str | KX_GameObject, ref: str | KX_GameObject = None, time = 0, dupli = False):
+    scene = logic.getCurrentScene()
+    if isinstance(name, KX_GameObject):
+        name = name.name
+    obj = bpy.data.objects.get(name, None)
+    if obj is None:
+        return
+    new_obj = obj.copy()
+    new_obj.hide_viewport = False
+    if dupli:
+        new_obj.data = obj.data.copy()
+    bpy.context.scene.collection.objects.link(new_obj)
+    game_object = scene.convertBlenderObject(new_obj)
+    if ref:
+        if isinstance(ref, KX_GameObject):
+            ref = ref.name
+        ref_obj = scene.objects.get(ref, ref)
+        game_object.worldTransform = ref_obj.worldTransform
+    if time > 0:
+        schedule(game_object.endObject, time)
+    return game_object
+
+
+def add_object_copy(name: str | KX_GameObject, position=Vector((0, 0, 0)), rotation=Vector((0, 0, 0)), scale=Vector((1, 1, 1))):
     orig_ob = bpy.data.objects.get(name, name)
     if orig_ob is None:
         return

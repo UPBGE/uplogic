@@ -19,7 +19,7 @@ class ULMakeUniqueLight(ULActionNode):
         return self._light
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         self._light = make_unique_light(self.get_input(self.light))
         self._done = True

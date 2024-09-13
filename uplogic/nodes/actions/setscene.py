@@ -15,7 +15,7 @@ class ULSetScene(ULActionNode):
         return self._done
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         scene: Scene = self.get_input(self.scene)
         logic.getCurrentScene().replace(scene.name)

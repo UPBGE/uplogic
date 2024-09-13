@@ -1,6 +1,6 @@
-from mathutils import Vector
 from uplogic.nodes import ULParameterNode
 from inspect import signature
+from uplogic.utils.math import clamp
 
 
 class MathNode(ULParameterNode):
@@ -10,6 +10,7 @@ class MathNode(ULParameterNode):
         self.value_a = 0.0
         self.value_b = 0.0
         self.value_c = 0.0
+        self.clamp = False
         self.operator = None
         self.RESULT = self.add_output(self.get_result)
 
@@ -20,7 +21,9 @@ class MathNode(ULParameterNode):
         op = self.operator
         args = len(signature(op).parameters)
         if args == 1:
-            return self.operator(a)
-        if args == 2:
-            return self.operator(a, b)
-        return self.operator(a, b, c)
+            result = self.operator(a)
+        elif args == 2:
+            result = self.operator(a, b)
+        else:
+            result = self.operator(a, b, c)
+        return clamp(result) if self.clamp else result

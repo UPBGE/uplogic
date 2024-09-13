@@ -23,7 +23,7 @@ class ULRebuildData(ULParameterNode):
     def get_data(self):
         return self.ret
 
-    def evaluate(self):
+    def fetch(self):
         if not self.get_input(self.condition):
             return
         dat = self.get_input(self.data)

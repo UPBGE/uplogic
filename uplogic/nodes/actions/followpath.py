@@ -51,7 +51,7 @@ class ULFollowPath(ULActionNode):
         return self._done
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             if not self.get_input(self.path_continue):
                 self._motion_path = None
             return

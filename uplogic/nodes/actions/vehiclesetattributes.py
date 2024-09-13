@@ -36,7 +36,7 @@ class ULVehicleSetAttributes(ULActionNode):
             vehicle.set_wheel_friction(wheel, values[3])
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         game_object = self.get_input(self.vehicle)
         value_type = self.get_input(self.value_type)

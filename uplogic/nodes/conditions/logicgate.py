@@ -26,42 +26,42 @@ class ULLogicGate(ULConditionNode):
 
     @gate.setter
     def gate(self, val):
-        self.OUT.get_value = self.getters[val]
+        self.OUT._value_getter = self.getters[val]
 
     def get_and(self):
-        ca = self.get_input(self.ca)
-        return ca and self.get_input(self.cb)
+        ca = self.get_condition(self.ca)
+        return ca and self.get_condition(self.cb)
 
     def get_or(self):
-        ca = self.get_input(self.ca)
-        cb = self.get_input(self.cb)
+        ca = self.get_condition(self.ca)
+        cb = self.get_condition(self.cb)
         return ca or cb
 
     def get_xor(self):
-        ca = self.get_input(self.ca)
-        cb = self.get_input(self.cb)
+        ca = self.get_condition(self.ca)
+        cb = self.get_condition(self.cb)
         return (ca or cb) and not (ca and cb)
 
     def get_not(self):
-        condition = self.get_input(self.ca)
+        condition = self.get_condition(self.ca)
         return not condition
 
     def get_nand(self):
-        ca = self.get_input(self.ca)
-        cb = self.get_input(self.cb)
+        ca = self.get_condition(self.ca)
+        cb = self.get_condition(self.cb)
         return not (ca and cb)
 
     def get_nor(self):
-        ca = self.get_input(self.ca)
-        cb = self.get_input(self.cb)
+        ca = self.get_condition(self.ca)
+        cb = self.get_condition(self.cb)
         return not (ca or cb)
 
     def get_xnor(self):
-        ca = self.get_input(self.ca)
-        cb = self.get_input(self.cb)
+        ca = self.get_condition(self.ca)
+        cb = self.get_condition(self.cb)
         return not (ca or cb) or (ca and cb)
 
     def get_and_not(self):
-        ca = self.get_input(self.ca)
-        cb = self.get_input(self.cb)
+        ca = self.get_condition(self.ca)
+        cb = self.get_condition(self.cb)
         return ca and not cb

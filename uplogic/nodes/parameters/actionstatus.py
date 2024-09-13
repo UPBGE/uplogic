@@ -17,6 +17,11 @@ class ULActionStatus(ULParameterNode):
         self.ACTION_NAME = self.add_output(self.get_action_name)
         self.ACTION_FRAME = self.add_output(self.get_action_frame)
 
+    def fetch(self):
+        game_object = self.get_input(self.game_object)
+        action_layer = self.get_input(self.action_layer)
+        self.action = self.act_system.get_layer(game_object, action_layer)
+
     def get_out(self):
         return bool(self.action and self.action.is_playing)
 
@@ -31,9 +36,4 @@ class ULActionStatus(ULParameterNode):
         return self.action.name if self.action else None
 
     def get_action_frame(self):
-        return self.action.frame if self.action else None
-
-    def evaluate(self):
-        game_object = self.get_input(self.game_object)
-        action_layer = self.get_input(self.action_layer)
-        self.action = self.act_system.get_layer(game_object, action_layer)
+        return self.action.frame if self.action else -1

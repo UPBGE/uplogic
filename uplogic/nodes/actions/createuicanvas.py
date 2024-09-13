@@ -18,7 +18,7 @@ class ULCreateUICanvas(ULActionNode):
         return self._canvas
 
     def evaluate(self):
-        if self.get_input(self.condition) or self.on_init:
+        if self.get_condition() or self.on_init:
             self._canvas = Canvas()
             self.on_init = False
             self._done = True

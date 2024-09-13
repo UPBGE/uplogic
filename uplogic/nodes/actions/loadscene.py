@@ -36,7 +36,7 @@ class ULLoadScene(ULActionNode):
         return self.updated
 
     def evaluate(self):
-        condition: bool = self.get_input(self.condition)
+        condition: bool = self.get_condition()
         scene: Scene = self.get_input(self.scene)
         if condition and self.loader is None:
             self.loader = SceneLoader(scene)

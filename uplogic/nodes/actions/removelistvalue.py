@@ -19,7 +19,7 @@ class ULRemoveListValue(ULActionNode):
         return self.new_list
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         list_d = self.get_input(self.items)
         val = self.get_input(self.val)

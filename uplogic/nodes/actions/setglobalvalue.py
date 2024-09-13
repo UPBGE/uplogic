@@ -16,7 +16,7 @@ class ULSetGlobalValue(ULActionNode):
         return self._done
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         data_id = self.get_input(self.data_id)
         persistent = self.get_input(self.persistent)

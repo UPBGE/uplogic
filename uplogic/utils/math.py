@@ -99,6 +99,9 @@ def _asin(value):
 def _atan(value):
     return math.atan(clamp(value))
 
+def _lerp(a, b, fac):
+    return lerp(a, b, fac)
+
 
 def clamp(value: float, lower: float = 0, upper: float = 1) -> float:
     """Clamp a value in between two other values.
@@ -223,6 +226,9 @@ def get_raw_angle(a: Vector, b: Vector) -> float:
     return deg
 
 
+def angle_signed(a: Vector, b: Vector, up: Vector) -> float:
+    return math.atan2(a.cross(b).dot(up), a.dot(b))
+
 def get_direction(a, b, local=False) -> Vector:
     """Get the direction from one vector to another.
 
@@ -281,47 +287,6 @@ def map_range_vector(value: float, in_min: float, in_max: float, out_min: float,
             result = out_max[i]
         outvec[i] = result
     return outvec
-
-
-def world_to_screen(position: Vector = Vector((0, 0, 0)), inv_y: bool = True) -> Vector:
-    pos = Vector(logic.getCurrentScene().active_camera.getScreenPosition(position))
-    if inv_y:
-        pos[1] = 1 - pos[1]
-    return pos
-
-
-def screen_to_world(x:float = None, y: float = None, distance: float = 10) -> Vector:
-    """Get the world coordinates of a point on the screen in a given distance.
-    
-    :param `x`: X position on the screen. Leave at `None` to use mouse position.
-    :param `y`: Y position on the screen. Leave at `None` to use mouse position.
-    :param `distance`: The distance from the camera at which to get the position.
-    
-    :returns: Position as `Vector`
-    """
-
-    camera = logic.getCurrentScene().active_camera
-    mouse = logic.mouse
-    x = x if x is not None else mouse.position[0]
-    y = y if y is not None else mouse.position[1]
-    direction = camera.getScreenVect(x, y)
-    origin = camera.worldPosition
-    aim = direction * -distance
-    return origin + (aim)
-
-
-def mouse_over(game_object: GameObject) -> bool:
-    scene = game_object.scene
-    camera = scene.active_camera
-    distance = 2.0 * camera.getDistanceTo(game_object)
-    mouse = logic.mouse
-    mouse_position = mouse.position
-    target = camera.getScreenRay(
-        mouse_position[0],
-        mouse_position[1],
-        distance
-    )
-    return target is game_object
 
 
 def get_local(obj, target) -> Vector:

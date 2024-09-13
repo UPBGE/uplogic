@@ -1,8 +1,8 @@
 from .widget import Widget
 import gpu
-import bge, bpy
+import bpy
 from math import ceil
-from uplogic.utils.math import rotate2d
+from .widget import rotate2d
 from gpu_extras.batch import batch_for_shader
 from mathutils import Vector
 from os.path import isfile
@@ -42,7 +42,7 @@ class Image(Widget):
         self.use_aspect_ratio = use_aspect_ratio
         self._opacity = 1
         super().__init__(pos, size, relative=relative, halign=halign, valign=valign, angle=angle)
-        if texture not in bpy.data.images and isfile(texture):
+        if texture is not None and texture not in bpy.data.images and isfile(texture):
             bpy.data.images.load(texture)
         self.texture = texture
         self.start()
@@ -83,6 +83,18 @@ class Image(Widget):
         self._image = texture
         self.size = self.size
         self._texture = gpu.texture.from_image(texture)
+
+    @property
+    def pivot(self):
+        """Rotation point for this widget."""
+        if self.parent is None:
+            return (0, 0)
+        v = self._vertices
+        x0 = Vector(v[1])
+        x1 = Vector(v[0])
+        y1 = Vector(v[2])
+        y0 = Vector(v[3])
+        return self._get_pivot(x0, x1, y0, y1)
 
     def _build_shader(self):
         pos = self._draw_pos
@@ -130,6 +142,32 @@ class Image(Widget):
 
 
 class Sprite(Image):
+
+    tex_vert_shader = """
+    in vec2 texCoord;
+    in vec2 pos;
+    out vec2 uv;
+
+    uniform mat4 ModelViewProjectionMatrix;
+
+    void main() {
+        uv = texCoord;
+        gl_Position = ModelViewProjectionMatrix * vec4(pos.xy, 0.0, 1.0);
+    }
+    """
+
+    tex_frag_shader = """
+    in vec2 uv;
+    out vec4 fragColor;
+
+    uniform sampler2D image;
+    uniform float alpha = 1.0;
+
+    void main() {
+        vec4 color = mix(vec4(0.0), texture(image, uv), alpha);
+        fragColor = pow(color, vec4(.5));
+    }
+    """
 
     def __init__(self, pos=[0, 0], size=(100, 100), relative={}, texture=None, idx=0, rows=1, cols=1, halign='left', valign='bottom', use_aspect_ratio=True):
         self._idx = idx
@@ -195,33 +233,7 @@ class Sprite(Image):
             y1,
             y0
         )
-
-        tex_vert_shader = """
-        in vec2 texCoord;
-        in vec2 pos;
-        out vec2 uv;
-
-        uniform mat4 ModelViewProjectionMatrix;
-
-        void main() {
-            uv = texCoord;
-            gl_Position = ModelViewProjectionMatrix * vec4(pos.xy, 0.0, 1.0);
-        }
-        """
-
-        tex_frag_shader = """
-        in vec2 uv;
-        out vec4 fragColor;
-
-        uniform sampler2D image;
-        uniform float alpha = 1.0;
-
-        void main() {
-            vec4 color = mix(vec4(0.0), texture(image, uv), alpha);
-            fragColor = pow(color, vec4(.5));
-        }
-        """
-        self._shader = gpu.types.GPUShader(tex_vert_shader, tex_frag_shader)
+        self._shader = gpu.types.GPUShader(self.tex_vert_shader, self.tex_frag_shader)
         self._shader.uniform_float("alpha", self.opacity)
 
         idx = self.idx

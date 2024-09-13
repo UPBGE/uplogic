@@ -22,6 +22,7 @@ from .math import _max
 from .math import _asin
 from .math import _acos
 from .math import _atan
+from .math import _lerp
 import bpy
 
 
@@ -100,7 +101,8 @@ MATH_OPERATORS = [
     math.cosh,  # 39
     math.tanh,  # 40
     math.radians,  # 41
-    math.degrees  # 42
+    math.degrees,  # 42
+    _lerp  # 43
 ]
 
 

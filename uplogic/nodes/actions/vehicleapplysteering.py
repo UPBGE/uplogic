@@ -18,7 +18,7 @@ class ULVehicleApplySteering(ULActionNode):
         return self._done
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         game_object = self.get_input(self.vehicle)
         vehicle = game_object.get(VEHICLE, None)

@@ -13,7 +13,7 @@ class ULAddUIWidget(ULActionNode):
         return self._done
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         self.get_input(self.parent_widget).add_widget(self.get_input(self.child_widget))
         self._done = True

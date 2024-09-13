@@ -50,7 +50,7 @@ class ULCreateUISlider(ULActionNode):
 
     def evaluate(self):
         self._done = False
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         ipt = self.get_input
 

@@ -15,7 +15,7 @@ class ULStartSound(ULActionNode):
         self.device = None
         self.on_finish = False
         self._handle = None
-        self._done = self.add_output(self.get_done)
+        self.DONE = self.add_output(self.get_done)
         self.ON_FINISH = self.add_output(self.get_on_finish)
         self.HANDLE = self.add_output(self.get_handle)
 
@@ -44,7 +44,7 @@ class ULStartSound(ULActionNode):
         if self._handle:
             self._handle.pitch = pitch
             self._handle.volume = volume
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         file: Sound = self.get_input(self.sound)
         loop_count = self.get_input(self.loop_count)

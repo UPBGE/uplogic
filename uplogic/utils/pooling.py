@@ -39,7 +39,6 @@ class Spawn:
         object = self._object
         if not object:
             return
-        # object.worldPosition = (0, 0, 0)
         object.worldScale = (1, 1, 1)
         object.worldLinearVelocity = (0, 0, 0)
         object.worldAngularVelocity = (0, 0, 0)

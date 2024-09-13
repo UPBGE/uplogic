@@ -15,7 +15,7 @@ class ULCopyProperty(ULActionNode):
         return self._done
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         from_object = self.get_input(self.from_object)
         to_object = self.get_input(self.to_object)

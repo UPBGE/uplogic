@@ -82,7 +82,7 @@ class DrawNode(ULActionNode):
         )
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         self.modes[self.mode]()
         self._done = True

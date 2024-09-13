@@ -20,7 +20,7 @@ class ULAppendListItem(ULActionNode):
 
     def evaluate(self):
         self._done: bool = False
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         list_d: list = self.get_input(self.items)
         val = self.get_input(self.val)

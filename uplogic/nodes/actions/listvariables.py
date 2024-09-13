@@ -42,7 +42,7 @@ class ULListVariables(ULActionNode):
         f.close()
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         print_list = self.get_input(self.print_list)
         path = self.get_input(self.path)

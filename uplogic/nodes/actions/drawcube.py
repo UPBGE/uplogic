@@ -17,7 +17,7 @@ class ULDrawCube(ULActionNode):
         return self._done
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         origin = self.get_input(self.origin)
         width = self.get_input(self.width)

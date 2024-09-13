@@ -54,9 +54,8 @@ from .math import get_direction
 from .math import get_local
 from .math import get_raw_angle
 from .math import map_range
-from .math import mouse_over
-from .math import screen_to_world
-from .math import world_to_screen
+from .scene import screen_to_world
+from .scene import world_to_screen
 from .math import rotate2d
 from .math import rotate3d
 from .math import rotate_by_axis

@@ -15,6 +15,6 @@ class ULSetEeveeSMAA(ULActionNode):
         return self._done
 
     def evaluate(self):
-        if self.get_input(self.condition):
+        if self.get_condition():
             print("SMAA has been removed from UPBGE. Delete 'Set SMAA' node to avoid issues.")
             self._done = True

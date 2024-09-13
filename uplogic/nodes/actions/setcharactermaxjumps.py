@@ -14,7 +14,7 @@ class ULSetCharacterMaxJumps(ULActionNode):
         return self._done
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         game_object = self.get_input(self.game_object)
         max_jumps = self.get_input(self.max_jumps)

@@ -5,21 +5,17 @@ from uplogic.nodes import ULParameterNode
 class ULVectorSplitXYZ(ULParameterNode):
     def __init__(self):
         ULParameterNode.__init__(self)
-        self.input_v = None
-        self.output_v = Vector()
+        self.input_v = Vector()
         self.OUTX = self.add_output(self.get_out_x)
         self.OUTY = self.add_output(self.get_out_y)
         self.OUTZ = self.add_output(self.get_out_z)
 
     def get_out_x(self):
-        return self.output_v.x
+        return self.get_input(self.input_v).x
 
     def get_out_y(self):
-        return self.output_v.y
+        return self.get_input(self.input_v).y
 
     def get_out_z(self):
-        return self.output_v.z
+        return self.get_input(self.input_v).z
 
-    def evaluate(self):
-        vec = self.get_input(self.input_v)
-        self.output_v = vec

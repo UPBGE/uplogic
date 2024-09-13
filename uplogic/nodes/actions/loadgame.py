@@ -25,7 +25,7 @@ class ULLoadGame(ULActionNode):
         return path
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         slot = self.get_input(self.slot)
         cust_path = self.get_custom_path(self.path)

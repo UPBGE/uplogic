@@ -73,7 +73,7 @@ class ULPlayAction(ULActionNode):
         return super().reset()
 
     def evaluate(self):
-        condition = self.get_input(self.condition)
+        condition = self.get_condition()
         intensity = clamp(self.get_input(self.layer_weight))
         speed = self.get_input(self.speed)
         layer = self.get_input(self.layer)

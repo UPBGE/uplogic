@@ -13,7 +13,7 @@ class ULToggleFilter(ULActionNode):
         return self._done
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         pass_idx = self.get_input(self.pass_idx)
         toggle_filter(pass_idx)

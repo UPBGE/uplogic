@@ -2,7 +2,7 @@ from bge import render
 from bge.types import KX_GameObject as GameObject
 from uplogic.nodes import ULActionNode
 from uplogic.utils.objects import rotate_to
-from uplogic.utils.objects import move_to
+from uplogic.utils.objects import _move_to
 
 
 class ULMoveToWithNavmesh(ULActionNode):
@@ -58,7 +58,7 @@ class ULMoveToWithNavmesh(ULActionNode):
         return self._motion_path.next_point()
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         moving_object: GameObject = self.get_input(self.moving_object)
         rotating_object: GameObject = self.get_input(self.rotating_object)
@@ -106,7 +106,7 @@ class ULMoveToWithNavmesh(ULActionNode):
                     rot_speed
                 )
             ths = reach_threshold  # if next_point == self._motion_path.destination else .1  # noqa
-            reached = move_to(
+            reached = _move_to(
                 moving_object,
                 next_point,
                 linear_speed,

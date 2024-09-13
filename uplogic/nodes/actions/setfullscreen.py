@@ -13,7 +13,7 @@ class ULSetFullscreen(ULActionNode):
         return self._done
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         use_fullscreen = self.get_input(self.use_fullscreen)
         render.setFullScreen(use_fullscreen)

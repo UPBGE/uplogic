@@ -34,7 +34,7 @@ class ULPaySequence(ULActionNode):
     def evaluate(self):
         self.on_finish = False
         self.on_start = False
-        condition = self.get_input(self.condition)
+        condition = self.get_condition()
         play_continue = self.get_input(self.play_continue)
         if self.sequence:
             if self.sequence.on_finish:

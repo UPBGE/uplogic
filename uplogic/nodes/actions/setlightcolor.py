@@ -15,7 +15,7 @@ class ULSetLightColor(ULActionNode):
         return self._done
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         light: KX_GameObject = self.get_input(self.lamp)
         color = self.get_input(self.color)

@@ -34,7 +34,7 @@ class ULCameraRayCast(ULActionNode):
         return self._data.normal
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             self._data = RayCastCameraData((None, None, None))
             return
         self._data = raycast_camera(

@@ -21,7 +21,7 @@ class ULRemoveParent(ULActionNode):
         self._parent = None
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         child_object = self.get_input(self.child_object)
         self._parent = child_object.parent

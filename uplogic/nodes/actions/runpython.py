@@ -26,7 +26,7 @@ class ULRunPython(ULActionNode):
         return self.val
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         text = self.get_input(self.module_name)
         mfun = self.get_input(self.module_func)

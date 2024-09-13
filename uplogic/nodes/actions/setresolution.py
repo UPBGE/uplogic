@@ -14,7 +14,7 @@ class ULSetResolution(ULActionNode):
         return self._done
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         x_res = self.get_input(self.x_res)
         y_res = self.get_input(self.y_res)

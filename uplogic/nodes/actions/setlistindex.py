@@ -19,7 +19,7 @@ class ULSetListIndex(ULActionNode):
         return self.new_list
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         list_d: list = self.get_input(self.items)
         index: int = self.get_input(self.index)

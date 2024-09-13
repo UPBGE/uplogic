@@ -11,6 +11,3 @@ class GetObjectByNameNode(ULParameterNode):
     def get_object(self):
         object_name: str = self.get_input(self.object_name)
         return getCurrentScene().objects.get(object_name, None)
-
-    def evaluate(self):
-        pass

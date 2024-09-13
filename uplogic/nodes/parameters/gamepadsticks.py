@@ -20,28 +20,30 @@ class ULGamepadSticks(ULParameterNode):
         self.Y = self.add_output(self.get_y_axis)
 
     def get_vec(self):
+        self.fetched = True
         inverted = self.get_input(self.inverted)
         x = self.get_x_axis()
         y = self.get_y_axis()
         return Vector((
             -x if inverted[0] else x,
-            -y if inverted[1] else y,
-            0
+            -y if inverted[1] else y
         ))
 
     def get_x_axis(self):
+        self.fetched = True
         x = self.raw_values[0]
         if -self.threshold < x < self.threshold:
             x = 0
         return x * self._sensitivity
 
     def get_y_axis(self):
+        self.fetched = True
         y = -self.raw_values[1]
         if -self.threshold < y < self.threshold:
             y = 0
         return y * self._sensitivity
 
-    def evaluate(self):
+    def fetch(self):
         index = self.get_input(self.index)
 
         if logic.joysticks[index]:

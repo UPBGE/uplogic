@@ -1,8 +1,8 @@
-from uplogic.events import receive, ULEvent
+from uplogic.events import receive, Event
 from uplogic.console import warning
 from uplogic.utils.errors import TypeMismatchError
 from bge.types import KX_PythonComponent, KX_GameObject
-from uplogic import CustomLoop
+from uplogic.loop import CustomLoop
 from bge import logic
 import bpy
 
@@ -23,7 +23,7 @@ def listener(original_class: KX_PythonComponent) -> KX_PythonComponent:
         logic.getCurrentScene().post_draw.append(self._detect_object)
 
     def _detect_object(self):
-        evt: ULEvent = receive(self.object)
+        evt: Event = receive(self.object)
         if evt:
             self.on_object(evt)
 

@@ -13,13 +13,13 @@ class SetRigBoneAttributeNode(ULActionNode):
         self.attribute = 'inherit_rotation'
         self.scale_mode = 'FULL'
         self._rig: Rig = None
-        self._done = self.add_output(self.get_done)
+        self.DONE = self.add_output(self.get_done)
 
     def get_done(self):
         return self._done
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         armature = self.get_input(self.armature)
         if self._rig is None or self._rig.game_object is not armature:

@@ -1,12 +1,12 @@
-from uplogic.nodes import ULParameterNode
+from uplogic.nodes import ULConditionNode
 from uplogic.utils.math import clamp
 from uplogic.utils.math import interpolate
 from mathutils import Vector
 
 
-class TweenValueNode(ULParameterNode):
+class TweenValueNode(ULConditionNode):
     def __init__(self):
-        ULParameterNode.__init__(self)
+        ULConditionNode.__init__(self)
         self.forward = False
         self.back = False
         self.from_float = 0.0
@@ -21,6 +21,7 @@ class TweenValueNode(ULParameterNode):
         self.active = False
 
         self.on_demand = True
+        self.instant_reset = False
         self.value_type = 0  # 0 -> float, 1 -> Vector
 
         self._result = 0.0
@@ -29,7 +30,7 @@ class TweenValueNode(ULParameterNode):
 
         self._direction = 1
 
-        self._done = self.add_output(self.get_done)
+        self.DONE = self.add_output(self.get_done)
         self.REACHED = self.add_output(self.get_reached)
         self.RESULT_FLOAT = self.add_output(self.get_float)
         self.RESULT_VEC = self.add_output(self.get_vec)
@@ -60,11 +61,17 @@ class TweenValueNode(ULParameterNode):
         self._result = interpolate(self.get_input(self.from_float), self.get_input(self.to_float), self._eval)
         return self._result
 
+    def reset(self):
+        self.active = False
+        return super().reset()
+
     def evaluate(self):
-        forward = self.get_input(self.forward)
-        back = self.get_input(self.back)
-        if forward or back:
-            self.active = True
+        forward = self.get_condition(self.forward)
+        
+        back = self.get_condition(self.back)
+        if not forward and not back:
+            return
+        self.active = True
         if not self.active and not self.on_demand:
             return
         duration = self.get_input(self.duration)
@@ -74,23 +81,26 @@ class TweenValueNode(ULParameterNode):
             if duration > 0:
                 self._time = clamp(self._time + self.network.time_per_frame, 0, duration)
                 self._factor = self._time / duration
-                self._eval = clamp(mapping.evaluate(
-                    mapping.curves[0],
-                    self._factor
-                ))
             else:
                 self._factor = 1
+            self._eval = clamp(mapping.evaluate(
+                mapping.curves[0],
+                self._factor
+            ))
         elif back:
             self._direction = 0
+            if self.on_demand and self.instant_reset:
+                duration = 0
+                self._time = 0.0
             if duration > 0:
                 self._time = clamp(self._time - self.network.time_per_frame, 0, duration)
                 self._factor = self._time / duration
-                self._eval = clamp(mapping.evaluate(
-                    mapping.curves[0],
-                    self._factor
-                ))
             else:
                 self._factor = 0
+            self._eval = clamp(mapping.evaluate(
+                mapping.curves[0],
+                self._factor
+            ))
         self.active = False
         if self.on_demand:
             self.forward = False

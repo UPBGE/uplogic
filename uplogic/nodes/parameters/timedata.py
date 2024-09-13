@@ -7,9 +7,7 @@ class ULTimeData(ULParameterNode):
     def __init__(self):
         ULParameterNode.__init__(self)
         self.network: ULLogicTree = None
-        self.TIME_PER_FRAME = self.add_output(
-            self.get_time_per_frame
-        )
+        self.TIME_PER_FRAME = self.add_output(self.get_time_per_frame)
         self.FPS = self.add_output(self.get_fps)
         self.TIMELINE = self.add_output(self.get_timeline)
 
@@ -26,6 +24,3 @@ class ULTimeData(ULParameterNode):
 
     def setup(self, network):
         self.network = network
-
-    def evaluate(self):
-        pass

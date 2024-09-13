@@ -17,7 +17,7 @@ class ULReplaceMesh(ULActionNode):
         return self._done
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         target: KX_GameObject = self.get_input(self.target_game_object)
         mesh: Mesh = self.get_input(self.new_mesh_name)

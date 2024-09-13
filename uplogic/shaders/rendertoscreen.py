@@ -10,7 +10,7 @@ class RenderToScreen:
 
     def __init__(self, camera: KX_GameObject, resolution=(1920, 1080), pos=(0, 0)) -> None:
         self.offscreen = gpu.types.GPUOffScreen(resolution[0], resolution[1])
-        self.resolution = resolution#[int(resolution[0] * .1), int(resolution[1] * 0.1)]
+        self.resolution = resolution  # [int(resolution[0] * .1), int(resolution[1] * 0.1)]
         self.pos = pos
 
         context = bpy.context

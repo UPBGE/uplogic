@@ -1,6 +1,7 @@
 import sys, os
 from uplogic.console import error
 from uplogic.console import success
+from uplogic.console import warning
 from uplogic.console import debug
 from uplogic.utils.math import get_local
 from uplogic.utils.raycasting import raycast
@@ -12,6 +13,7 @@ from sys import platform
 import bge, bpy
 from bge.types import KX_GameObject
 from mathutils import Vector, Matrix
+
 
 pypath = sys.executable
 if platform == "linux" or platform == "linux2":
@@ -31,7 +33,7 @@ elif platform == "win32":
             error(f'Missing "{fmodstudioL}"')
         if not exists_fmodL:
             error(f'Missing "{fmodL}"')
-        error('One or more FMod Libraries not found, go to "https://www.fmod.com/download" and install FMOD Engine, then from ".../api/core/lib/x64" copy "fmodL.dll" and "fmodstudioL.dll" to your local python installation.')
+        error('One or more FMod Libraries not found, go to "https://www.fmod.com/download" and install FMOD Engine, then from ".../api/core/lib/x64" copy "fmodL.dll" and from ".../api/studio/lib/x64" copy "fmodstudioL.dll" to your local "python/dlls" installation.')
         sys.exit(0)
     else:
         os.environ["PYFMODEX_STUDIO_DLL_PATH"] = fmodstudioL
@@ -52,7 +54,7 @@ from pyfmodex import flags
 
 version = pyfmodex.__version__.split('.')
 if int(version[1]) <= 7 and int(version[2]) <= 2:
-    error('"pyfmodex" module version not supported, please update!')
+    error(f'"pyfmodex" module version {version} not supported, please update!')
     sys.exit(0)
 
 
@@ -71,6 +73,30 @@ class Sound:
     @position.setter
     def position(self, val):
         self._position = Vector(val)
+
+    @property
+    def velocity(self):
+        return self._velocity
+
+    @velocity.setter
+    def velocity(self, val):
+        self._velocity = Vector(val)
+    
+    @property
+    def is_valid(self):
+        return False
+
+    @property
+    def is_virtual(self):
+        return False
+
+    @property
+    def paused(self):
+        return True
+
+    @property
+    def occluded(self):
+        return False
 
     def visualize(self, color=(1, 1, 1, 1), size=.2):
         raise NotImplementedError
@@ -116,10 +142,27 @@ class Event(Sound):
         self.evt = FMod.studio.get_event(name).create_instance()
         self.occlusion_mask = self.channel.occlusion_mask
         self.evt.start()
+        self.velocity = Vector((0, 0, 0))
         FMod.studio.update()
         self._position = position
         self.channel.sounds.append(self)
         self._caster = bge.logic.getCurrentScene().active_camera
+
+    @property
+    def is_valid(self):
+        return self.evt.is_valid
+
+    @property
+    def is_virtual(self):
+        return self.evt.is_virtual
+
+    @property
+    def channel_group(self):
+        return self.evt.channel_group
+
+    @property
+    def channel_group(self):
+        return self.evt.channel_group
 
     @property
     def volume(self):
@@ -128,6 +171,14 @@ class Event(Sound):
     @volume.setter
     def volume(self, vol):
         self.evt.set_volume(vol)
+
+    @property
+    def pitch(self):
+        return self.evt.get_pitch()
+
+    @pitch.setter
+    def pitch(self, vol):
+        self.evt.set_pitch(vol)
 
     @property
     def orientation(self):
@@ -156,25 +207,46 @@ class Event(Sound):
             mask=self.occlusion_mask
         ).obj is not None
 
+    @property
+    def paused(self):
+        return self.evt.paused
+
+    @paused.setter
+    def paused(self, val):
+        self.evt.paused = val
+
+    @property
+    def playback_state(self):
+        return self.evt.playback_state
+
+    @property
+    def timeline_position(self):
+        return self.evt.timeline_position
+
     def update(self):
         if self.evt.playback_state is enums.PLAYBACK_STATE.STOPPED:
             self.evt.release()
             self.stop()
             return
         cam = bge.logic.getCurrentScene().active_camera
-        self.evt.set_3d_attributes(get_local(cam, self.position), Vector((0, 0, 0)), self.forward)
+        self.evt.set_3d_attributes(get_local(cam, self.position), self.velocity, self.forward)
 
     def visualize(self, color=(1, 1, 1, 1), size=.2):
         draw_arrow(self.position, self.position + Vector(self.evt.forward) * size, color)
         # draw_cube(self.position, size * .5, centered=True)
 
-    def set_parameter(self, parameter, value):
-        self.evt.set_parameter_by_name(parameter, value)
+    def set_parameter(self, parameter, value, ignore_seek_speed=False):
+        self.evt.set_parameter_by_name(parameter, value, ignore_seek_speed)
+
+    def get_parameter(self, parameter, actual=False):
+        param = self.evt.get_parameter_by_name(parameter) 
+        return param[1] if actual else param[0]
 
     def stop(self):
         self.evt.stop()
         if self in self.channel.sounds:
             self.channel.sounds.remove(self)
+        self.evt.release()
 
 
 class EventSpeaker(Event):
@@ -183,6 +255,14 @@ class EventSpeaker(Event):
         self.speaker = speaker
         super().__init__(name, speaker.worldPosition, channel)
         self._caster = speaker
+
+    @property
+    def velocity(self):
+        return self.speaker.worldLinearVelocity * self._velocity
+
+    @velocity.setter
+    def velocity(self, val):
+        self._velocity = Vector(val)
 
     @property
     def position(self):
@@ -269,15 +349,17 @@ class FMod:
             try:
                 cls.studio.load_bank_file(path)
             except FmodError:
-                error(f"Bank '{path}' already loaded!")
+                warning(f"Bank '{path}' already loaded!")
                 return
         success(f"Bank '{path}' successfully loaded.")
 
     @classmethod
     def update(cls):
         studio = cls.studio
-        # scene = bge.logic.getCurrentScene()
         cam = cls.listener
+        if cam is None:
+            scene = bge.logic.getCurrentScene()
+            cam = cls.listener = scene.active_camera
         studio.core_system.listener().position = cam.worldPosition
         studio.core_system.listener().set_orientation(
             list(cam.getAxisVect((0, 0, 1))),

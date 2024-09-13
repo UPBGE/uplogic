@@ -17,7 +17,7 @@ class ULSetMaterial(ULActionNode):
         return self._done
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         game_object: KX_GameObject = self.get_input(self.game_object)
         slot: int = self.get_input(self.slot)

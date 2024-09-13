@@ -13,7 +13,7 @@ class ULSetCursorVisibility(ULActionNode):
         return self._done
 
     def evaluate(self):
-        if not self.get_input(self.condition):
+        if not self.get_condition():
             return
         visibility_status = self.get_input(self.visibility_status)
         logic.mouse.visible = visibility_status
