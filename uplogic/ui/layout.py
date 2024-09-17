@@ -219,7 +219,7 @@ class BoxLayout(ArrangedLayout):
         yalign = self.children_align[1]
         if self.orientation == 'horizontal':
             offset = 0
-            for widget in self.children:
+            for widget in filter(lambda widget: widget.show is True, self.children):
                 widget.halign = xalign
                 widget.valign = yalign
                 widget.relative['pos'] = False
@@ -227,7 +227,7 @@ class BoxLayout(ArrangedLayout):
                 offset += widget._draw_size[0] + self.spacing
         if self.orientation == 'vertical':
             offset = dsize[1]
-            for widget in self.children:
+            for widget in filter(lambda widget: widget.show is True, self.children):
                 widget.halign = xalign
                 widget.valign = yalign
                 offset -= widget._draw_size[1]
@@ -301,7 +301,8 @@ class GridLayout(BoxLayout):
         if self.orientation == 'horizontal':
             row = 0
             offset = 0
-            for widget in self.children:
+            # filter(lambda widget: widget.show is True)
+            for widget in filter(lambda widget: widget.show is True, self.children):
                 offset_y = _offset_y + (self.spacing if row else 0)
                 widget.relative['pos'] = False
                 wsize = widget._draw_size
@@ -318,7 +319,7 @@ class GridLayout(BoxLayout):
         if self.orientation == 'vertical':
             col = 0
             offset = dsize[1]
-            for widget in self.children:
+            for widget in filter(lambda widget: widget.show is True, self.children):
                 offset_x = (self._draw_size[0] / (self.cols) + self.spacing) * col
                 offset -= widget._draw_size[0]
                 widget.relative['pos'] = False
@@ -394,7 +395,7 @@ class PolarLayout(ArrangedLayout):
         step = 360 / len(self.children)
         _angle = self.starting_angle
         pos = Vector((self.radius, 0))
-        for widget in self.children:
+        for widget in filter(lambda widget: widget.show is True, self.children):
             widget.relative['pos'] = False
             widget.pos = rotate2d(pos, (0, 0), _angle)
             _angle += step

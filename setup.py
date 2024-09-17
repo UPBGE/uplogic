@@ -8,7 +8,7 @@ def read_file(name):
         return f.read()
 
 
-version = '4.0b1'
+version = '4.0b2'
 shortdesc = "Uplogic utility for UPBGE."
 longdesc = '\n\n'.join([read_file(name) for name in [
     'README.md',
@@ -35,22 +35,25 @@ setup(
     license='GPLv2',
     packages=[
         'uplogic',
+        'uplogic.ai',
         'uplogic.animation',
+        'uplogic.console',
         'uplogic.audio',
         'uplogic.data',
         'uplogic.decorators',
         'uplogic.events',
         'uplogic.input',
-        'uplogic.console',
         'uplogic.network',
         'uplogic.nodes',
         'uplogic.nodes.actions',
         'uplogic.nodes.conditions',
+        'uplogic.nodes.fmod',
         'uplogic.nodes.parameters',
         'uplogic.physics',
         'uplogic.serialize',
         'uplogic.shaders',
         'uplogic.ui',
+        'uplogic.ui.preview',
         'uplogic.utils'
     ],
     # ext_modules=cythonize([
