@@ -568,3 +568,16 @@ class FontSizeCommand(Command):
     def execute(cls, args):
         size = args[0]
         get_console().font_size = int(size)
+
+
+@console_command
+class FontSizeCommand(Command):
+    command = 'setres'
+    arg_count = 2
+    usage = 'RES_X RES_Y'
+    description = 'Set the app resolution'
+
+    @classmethod
+    def execute(cls, args):
+        rx, ry = args
+        render.setWindowSize(int(rx), int(ry))
