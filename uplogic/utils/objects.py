@@ -523,7 +523,7 @@ class Curve(GameObject):
 
     @property
     def length(self):
-        '''Length of the curve.'''
+        '''Length of the curve (read-only).'''
         depsgraph = bpy.context.evaluated_depsgraph_get()
         return sum(s.calc_length() for s in self.blenderObject.evaluated_get(depsgraph).data.splines)
 
@@ -533,7 +533,7 @@ class Curve(GameObject):
 
     @property
     def path_duration(self):
-        '''The number of frames that are needed to traverse the path, defining the maximum value for the "Evaluation Time" setting'''
+        '''The number of frames that are needed to traverse the path, defining the maximum value for the "Evaluation Time" setting.'''
         return self.blenderObject.data.path_duration
 
     @path_duration.setter
@@ -541,6 +541,7 @@ class Curve(GameObject):
         self.game_object.blenderObject.data.path_duration = val
 
     def evaluate(self, factor):
+        '''Get the world space coordinates on the curve at a given progress.'''
         eval_obj = bpy.data.objects.new(f'{self.name}_eval_obj', object_data=None)
         bpy.context.collection.objects.link(eval_obj)
         const = eval_obj.constraints.new('FOLLOW_PATH')
