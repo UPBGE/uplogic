@@ -371,8 +371,8 @@ class Widget():
         inherit_pos = self.parent._draw_pos if self.parent else [0, 0]
         pdsize = self.parent._draw_size
         pos = [
-            self.pos[0] * pdsize[0],
-            self.pos[1] * pdsize[1]
+            math.floor(self.pos[0] * pdsize[0]),
+            math.floor(self.pos[1] * pdsize[1])
         ] if self.relative.get('pos') else self.pos
         if self.parent and self.parent._draw_angle and self._vertices is not None:
             pos = rotate2d(pos, self.parent.pivot - Vector(inherit_pos), self.parent._draw_angle)

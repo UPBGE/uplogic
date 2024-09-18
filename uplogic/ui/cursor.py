@@ -4,7 +4,7 @@ import gpu
 import bge, bpy
 from gpu_extras.batch import batch_for_shader
 from bge import logic, render
-from math import ceil
+from math import ceil, floor
 from mathutils import Vector
 
 
@@ -113,8 +113,8 @@ class Cursor(Widget):
     @property
     def _draw_pos(self):
         return Vector((
-            self.pos[0] * render.getWindowWidth(),
-            (1 - self.pos[1]) * render.getWindowHeight()
+            floor(self.pos[0] * render.getWindowWidth()),
+            floor((1 - self.pos[1]) * render.getWindowHeight())
         ))
 
     def _draw_custom_cursor(self):

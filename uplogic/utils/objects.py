@@ -540,6 +540,19 @@ class Curve(GameObject):
     def path_duration(self, val):
         self.game_object.blenderObject.data.path_duration = val
 
+    def evaluate(self, factor):
+        eval_obj = bpy.data.objects.new(f'{self.name}_eval_obj', object_data=None)
+        bpy.context.collection.objects.link(eval_obj)
+        const = eval_obj.constraints.new('FOLLOW_PATH')
+        const.target = self.blenderObject
+        time = self.blenderObject.data.eval_time
+        self.blenderObject.data.eval_time = self.path_duration * factor
+        bpy.context.view_layer.update()
+        matrix = eval_obj.matrix_local
+        bpy.data.objects.remove(eval_obj)
+        self.blenderObject.data.eval_time = time
+        return Vector((matrix[0][3], matrix[1][3], matrix[2][3]))
+
 
 class ULCurve(Curve):
     _deprecated = True

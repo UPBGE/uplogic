@@ -49,7 +49,6 @@ class ULCreateUISlider(ULActionNode):
         return Vector(self._widget.knob.pos_abs) if self._widget else Vector((0, 0))
 
     def evaluate(self):
-        self._done = False
         if not self.get_condition():
             return
         ipt = self.get_input
@@ -111,4 +110,5 @@ class ULCreateUISlider(ULActionNode):
             )
         if parent:
             parent.add_widget(self._widget)
+        self._done = True
         
