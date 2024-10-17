@@ -8,6 +8,7 @@ class ULDispatchEvent(ULActionNode):
         self.condition = None
         self.subject = None
         self.body = None
+        self.messenger = None
         self.target = None
         self.old_subject = None
         self.OUT = self.add_output(self.get_done)
@@ -18,8 +19,10 @@ class ULDispatchEvent(ULActionNode):
     def evaluate(self):
         if not self.get_condition():
             return
-        subject = self.get_input(self.subject)
-        body = self.get_input(self.body)
-        target = self.get_input(self.target)
-        send(subject, body, target)
+        send(
+            self.get_input(self.subject),
+            self.get_input(self.body),
+            self.get_input(self.messenger),
+            self.get_input(self.target)
+        )
         self._done = True

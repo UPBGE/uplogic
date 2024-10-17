@@ -74,6 +74,11 @@ COLORS = {
     'SUCCESS': [.3, 1, .3, 1]
 }
 
+
+class CommandLabel(Label):
+    pass
+
+
 class ConsoleLayout(Canvas):
     opacity = 1
     padding = [5, 10]
@@ -92,9 +97,12 @@ class ConsoleLayout(Canvas):
         self.input = TextInput(text='', shadow=True, valign='center')
         self.input.on_enter = self.on_enter
         self.input.edit = True
-        self.layout = RelativeLayout(relative={'size': True, 'pos': True}, pos=[0, 0], size=(1, .4), bg_color=[0, 0, 0, .4])
+        self.console = RelativeLayout(relative={'size': True, 'pos': True}, pos=[0, 0], size=(1, .4))
+        self._layout = self.console
+        self.layout = RelativeLayout(relative={'size': True}, size=(1, 1), bg_color=[0, 0, 0, .4])
         self.layout.use_clipping = True
-        self.add_widget(self.layout)
+        self.add_widget(self.console)
+        self.console.add_widget(self.layout)
         self.layout.add_widget(self.input)
         self.fade_event = None
         self._toggle_key = False
@@ -110,40 +118,50 @@ class ConsoleLayout(Canvas):
         self.position = 'bottom'
 
     @property
+    def layout(self):
+        return self._layout
+
+    @layout.setter
+    def layout(self, val):
+        for w in self._layout.children:
+            val.add_widget(w)
+        self._layout = val
+
+    @property
     def position(self):
         return self._position
 
     @position.setter
     def position(self, val):
         if val == 'center':
-            self.layout.valign = val
-            self.layout.halign = val
-            self.layout.pos = (.5, .5)
-            self.layout.size = (.4, .4)
+            self.console.valign = val
+            self.console.halign = val
+            self.console.pos = (.5, .5)
+            self.console.size = (.4, .4)
             self._position = val
         elif val == 'left':
-            self.layout.valign = 'bottom'
-            self.layout.halign = val
-            self.layout.size = (.4, 1)
-            self.layout.pos = (0, 0)
+            self.console.valign = 'bottom'
+            self.console.halign = val
+            self.console.size = (.4, 1)
+            self.console.pos = (0, 0)
             self._position = val
         elif val == 'right':
-            self.layout.valign = 'bottom'
-            self.layout.halign = val
-            self.layout.pos = (1, 0)
-            self.layout.size = (.4, 1)
+            self.console.valign = 'bottom'
+            self.console.halign = val
+            self.console.pos = (1, 0)
+            self.console.size = (.4, 1)
             self._position = val
         elif val == 'top':
-            self.layout.valign = 'top'
-            self.layout.halign = 'left'
-            self.layout.pos = (0, 1)
-            self.layout.size = (1, .4)
+            self.console.valign = 'top'
+            self.console.halign = 'left'
+            self.console.pos = (0, 1)
+            self.console.size = (1, .4)
             self._position = val
         elif val == 'bottom':
-            self.layout.valign = 'bottom'
-            self.layout.halign = 'left'
-            self.layout.pos = (0, 0)
-            self.layout.size = (1, .4)
+            self.console.valign = 'bottom'
+            self.console.halign = 'left'
+            self.console.pos = (0, 0)
+            self.console.size = (1, .4)
             self._position = val
         else:
             error(f'"{val}" not recognized.')
@@ -226,14 +244,15 @@ class ConsoleLayout(Canvas):
         if self.toggle in scene.pre_draw:
             scene.pre_draw.remove(self.toggle)
 
-    def add_message(self, msg, type='INFO', time=True):
+    def add_message(self, msg, type='INFO', time=True, command=False):
         if (msg == ' ' or self._prev_msg == ' ') and len(self.layout.children):
             self.layout.children[-1].text += msg
             self._prev_msg = msg
             return
         now = datetime.now()
         current_time = f'[{now.strftime("%H:%M:%S")}]' if time else "\t\t\t\t  ".replace('\t', '    ')
-        self.layout.add_widget(Label(text=f'{current_time}  {msg}', pos=[5, 10], font_color=COLORS[type], shadow=True, font_size=self.font_size))
+        label_class = CommandLabel if command else Label
+        self.layout.add_widget(label_class(text=f'{current_time}  {msg}', pos=[5, 10], font_color=COLORS[type], shadow=True, font_size=self.font_size))
         self._prev_msg = msg
         self.arrange()
 
@@ -571,7 +590,7 @@ class FontSizeCommand(Command):
 
 
 @console_command
-class FontSizeCommand(Command):
+class SetResolutionCommand(Command):
     command = 'setres'
     arg_count = 2
     usage = 'RES_X RES_Y'

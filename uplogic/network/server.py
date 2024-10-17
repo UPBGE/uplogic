@@ -27,7 +27,7 @@ class Server:
             print('Server already running.')
             return
         try:
-            print('Starting server...')
+            print(f'Starting Server: IP={self.ip} Port={self.port}')
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             bge.logic.getCurrentScene().onRemove.append(self.shutdown)
             self.socket.setblocking(False)
@@ -46,13 +46,13 @@ class Server:
             self.shutdown()
             return
         self.socket.listen()
-        success('[SUCCESS]')
+        success('[SERVER RUNNING]')
 
     def shutdown(self):
         if not self.running:
-            print("Server offline.")
+            print(f"{self.ip}:{self.port} offline.")
             return
-        print('Stopping server...')
+        print(f'Stopping Server: IP={self.ip} Port={self.port}')
         scene = bge.logic.getCurrentScene()
         if self.shutdown in scene.onRemove:
             scene.onRemove.remove(self.shutdown)
@@ -64,7 +64,7 @@ class Server:
                 self.socket.shutdown(socket.SHUT_WR)
             self.clients = []
             self.socket.close()
-            success('[SUCCESS]')
+            success('[SERVER STOPPED]')
         except Exception as e:
             self.running = False
             self.clients = []
@@ -124,7 +124,7 @@ class Server:
                 print(f"Connected to: {add}")
                 thread = threading.Thread(target=self.threaded_client, args=(conn, add))
                 thread.start()
-                debug(f'[ACTIVE CONNECTIONS] {len(self.clients)}') # {threading.active_count() - 2}')
+                debug(f'[ACTIVE CONNECTIONS] {len(self.clients)}')
             except BlockingIOError:
                 pass
             except socket.timeout:

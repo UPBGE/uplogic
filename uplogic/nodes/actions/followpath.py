@@ -89,10 +89,7 @@ class ULFollowPath(ULActionNode):
             reached = move_to(
                 moving_object,
                 next_point,
-                linear_speed,
-                tpf,
-                move_dynamic,
-                reach_threshold
+                linear_speed
             )
             if reached:
                 has_more = self._motion_path.advance()

@@ -119,9 +119,10 @@ class EventManager():
         Event(id, content, messenger, target)
 
     @classmethod
-    def receive(cls, id):
+    def receive(cls, id, target=None):
         get_event_manager()
-        return cls.events.get(id, None)
+        evt = cls.events.get(id, None)
+        return evt if evt and target is evt.target else None
 
     @classmethod
     def consume(cls, id):
@@ -165,14 +166,14 @@ def send(id: int, content=None, messenger=None, target=None) -> None:
     EventManager.send(id, content, messenger, target)
 
 
-def receive(id) -> Event:
+def receive(id, target=None) -> Event:
     '''Check if an event has occured.
 
     :param `id`: Identifier of the event; can be anything, not just `str`.
 
     :returns: `Event` with `id`, `content` and `messenger` as attributes.
     '''
-    return EventManager.receive(id)
+    return EventManager.receive(id, target)
 
 
 def consume(id: int):
@@ -182,7 +183,7 @@ def consume(id: int):
 
     :returns: `Event` with `id`, `content` and `messenger` as attributes.
     '''
-    return EventManager.consume(id, None)
+    return EventManager.consume(id)
 
 
 def bind(id: int, callback) -> None:

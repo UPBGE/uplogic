@@ -132,7 +132,7 @@ class Layer(Widget):
     @parent.setter
     def parent(self, val):
         if not isinstance(val, Canvas):
-            raise TypeError('ui.Layout can only be added to ui.Canvas type!')
+            raise TypeError('ui.Layer can only be added to ui.Canvas type!')
         if self.parent is not val and self.parent:
             self.parent.remove_widget(self)
         if self.use_clipping is None:

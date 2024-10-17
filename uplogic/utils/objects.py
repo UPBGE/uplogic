@@ -74,7 +74,14 @@ def rotate_to(
     front_axis: int = 1,
     factor:float = 1
 ):
-    """Rotate an object around a local axis towards a point"""
+    """Rotate an object around a local axis towards a point
+    
+    :param `object`:
+    :param `target`:
+    :param `rotation_axis`:
+    :param `front_axis`:
+    :param `factor`:
+    """
     front = front_axis
     if front > 2:
         front -= 3
@@ -442,6 +449,21 @@ def get_curve_length(curve: KX_GameObject):
     return sum(s.calc_length() for s in curve.blenderObject.evaluated_get(depsgraph).data.splines)
 
 
+def evaluate_curve(curve: KX_GameObject, factor: float = .5):
+    eval_obj = bpy.data.objects.new(f'{curve.name}_eval_obj', object_data=None)
+    bpy.context.collection.objects.link(eval_obj)
+    bobj = curve.blenderObject
+    const = eval_obj.constraints.new('FOLLOW_PATH')
+    const.target = bobj
+    time = bobj.data.eval_time
+    bobj.data.eval_time = bobj.data.path_duration * factor
+    bpy.context.view_layer.update()
+    matrix = eval_obj.matrix_local
+    bpy.data.objects.remove(eval_obj)
+    bobj.data.eval_time = time
+    return Vector((matrix[0][3], matrix[1][3], matrix[2][3]))
+
+
 class Curve(GameObject):
     """Wrapper class for creating and handling curves more easily.
 
@@ -465,12 +487,14 @@ class Curve(GameObject):
         material: str or Material =None,
         collection: str = None,
         loop: bool = False,
-        type: str = 'POLY'
+        type: str = 'POLY',
+        use_evaluate = False
     ) -> None:
         if self._deprecated:
             print('[UPLOGIC] ULCurve class will be renamed to "Curve" in future releases!')
         self.type = type
         self._loop = loop
+        self.use_evaluate = use_evaluate
         if isinstance(name, KX_GameObject):
             self.game_object = name
             return
@@ -481,6 +505,16 @@ class Curve(GameObject):
             material=material,
             collection=collection
         )
+
+    @property
+    def eval_obj(self):
+        eval_obj = bpy.data.objects.get(f'{self.name}_eval_obj', None)
+        if eval_obj is None:
+            eval_obj = bpy.data.objects.new(f'{self.name}_eval_obj', object_data=None)
+            bpy.context.collection.objects.link(eval_obj)
+            const = eval_obj.constraints.new('FOLLOW_PATH')
+            const.target = self.blenderObject
+        return eval_obj
 
     @property
     def name(self):
@@ -540,17 +574,23 @@ class Curve(GameObject):
     def path_duration(self, val):
         self.game_object.blenderObject.data.path_duration = val
 
+    @property
+    def time(self):
+        return self.game_object.blenderObject.data.eval_time
+
+    @time.setter
+    def time(self, val):
+        self.game_object.blenderObject.data.eval_time = val
+
     def evaluate(self, factor):
         '''Get the world space coordinates on the curve at a given progress.'''
-        eval_obj = bpy.data.objects.new(f'{self.name}_eval_obj', object_data=None)
-        bpy.context.collection.objects.link(eval_obj)
-        const = eval_obj.constraints.new('FOLLOW_PATH')
-        const.target = self.blenderObject
         time = self.blenderObject.data.eval_time
+        eval_obj = self.eval_obj
         self.blenderObject.data.eval_time = self.path_duration * factor
         bpy.context.view_layer.update()
         matrix = eval_obj.matrix_local
-        bpy.data.objects.remove(eval_obj)
+        if not self.use_evaluate:
+            bpy.data.objects.remove(eval_obj)
         self.blenderObject.data.eval_time = time
         return Vector((matrix[0][3], matrix[1][3], matrix[2][3]))
 

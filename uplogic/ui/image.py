@@ -94,7 +94,7 @@ class Image(Widget):
         x1 = Vector(v[0])
         y1 = Vector(v[2])
         y0 = Vector(v[3])
-        return self._get_pivot(x0, x1, y0, y1)
+        return Vector(self._get_pivot(x0, x1, y0, y1))
 
     def _build_shader(self):
         pos = self._draw_pos

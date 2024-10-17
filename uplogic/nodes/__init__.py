@@ -44,7 +44,7 @@ class LoopList(list):
 
 
 class ULLogicBase(object):
-    def get_value(self, to_node=None):
+    def get_value(self):
         pass
 
 
@@ -57,7 +57,7 @@ class ULLogicContainer(ULLogicBase):
         self._done = False
         self.network = None
 
-    def get_value(self, to_node=None):
+    def get_value(self):
         return self._value
 
     def _set_value(self, value):
@@ -127,7 +127,7 @@ class Output(ULLogicBase):
     def _value_getter(self):
         pass
 
-    def get_value(self, to_node=None):
+    def get_value(self):
         self.node.fetched = True
         result = self.result
         if result is None:
@@ -214,7 +214,7 @@ class ULLogicNode(ULLogicContainer):
 
     def _get_input(self, param):
         if isinstance(param, ULLogicBase):
-            return param.get_value(self)
+            return param.get_value()
         return param
 
     def _get_input_loop(self, param):
@@ -222,7 +222,7 @@ class ULLogicNode(ULLogicContainer):
             param.node.loop_mode = True
             param.node.loop_size = self.loop_size
             param.node.loop_idx = self.loop_idx
-            param = param.get_value(self)
+            param = param.get_value()
         if isinstance(param, LoopList):
             return param[self.loop_idx]
         return param
@@ -277,7 +277,7 @@ class ULActionNode(ULLogicNode):
     def _get_condition(self, socket=None):
         condition = socket if socket else self.condition
         if isinstance(condition, ULLogicBase):
-            condition = condition.get_value(self)
+            condition = condition.get_value()
         if isinstance(condition, LoopList):
             if not self.loop_mode:
                 self.loop_mode = True
@@ -290,7 +290,7 @@ class ULActionNode(ULLogicNode):
     def _get_condition_loop(self, socket=None):
         condition = socket if socket else self.condition
         if isinstance(condition, ULLogicBase):
-            return condition.get_value(self)[self.loop_idx]
+            return condition.get_value()[self.loop_idx]
         return socket
     
     def evaluate_loop(self, loop):    
@@ -313,7 +313,7 @@ class ULConditionNode(ULLogicNode):
     def _get_condition(self, socket=None):
         condition = socket if socket else self.condition
         if isinstance(condition, ULLogicBase):
-            condition = condition.get_value(self)
+            condition = condition.get_value()
         if isinstance(condition, LoopList):
             if not self.loop_mode:
                 self.loop_mode = True
@@ -324,7 +324,7 @@ class ULConditionNode(ULLogicNode):
     def _get_condition_loop(self, socket=None):
         condition = socket if socket else self.condition
         if isinstance(condition, ULLogicBase):
-            return condition.get_value(self)[self.loop_idx]
+            return condition.get_value()[self.loop_idx]
         return socket
 
     def reset(self):

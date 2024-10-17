@@ -8,6 +8,7 @@ class ULHandleEvent(ULConditionNode):
         ULConditionNode.__init__(self)
         self.subject = None
         self.event = None
+        self.target = None
         self.OUT = self.add_output(self.get_received)
         self.BODY = self.add_output(self.get_body)
         self.TARGET = self.add_output(self.get_target)
@@ -22,5 +23,4 @@ class ULHandleEvent(ULConditionNode):
         return self.event.messenger if self.event else None
 
     def evaluate(self):
-        subject = self.get_input(self.subject)
-        self.event = receive(subject)
+        self.event = receive(self.get_input(self.subject), self.get_input(self.target))

@@ -25,6 +25,7 @@ class ULCreateUISlider(ULActionNode):
         self.knob_color = None
         self.knob_hover_color = None
         self.steps = None
+        self.initial_value = 0
         self.allow_bar_click = None
         self._widget = None
         self.halign_type = 'left'
@@ -108,6 +109,7 @@ class ULCreateUISlider(ULActionNode):
                 allow_bar_click=ipt(self.allow_bar_click),
                 angle=degrees(ipt(self.angle))
             )
+        self._widget.value = self.get_input(self.initial_value)
         if parent:
             parent.add_widget(self._widget)
         self._done = True
