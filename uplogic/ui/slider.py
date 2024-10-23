@@ -139,9 +139,12 @@ class Slider(RelativeLayout):
     @value.setter
     def value(self, value):
         newval = value
+        print('############################')
+        print(newval)
         if self.steps > 0:
             newval -= newval % (1 / self.steps)
         newval = clamp(newval)
+        print(newval)
         if newval != self._value:
             self._value = newval
             self.on_value(self)

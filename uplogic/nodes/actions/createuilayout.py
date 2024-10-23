@@ -44,6 +44,7 @@ class ULCreateUILayout(ULActionNode):
         self.border_width = 0
         self.border_color = (0, 0, 0, 0)
         self.spacing = 0
+        self.inverted = False
         self.cols = 1
         self.rows = 1
         self.starting_angle = 0

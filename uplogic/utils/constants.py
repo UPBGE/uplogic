@@ -130,8 +130,7 @@ FRAMETIME_COMPARE = 1 / bpy.data.scenes[logic.getCurrentScene().name].render.fps
 
 def FPS_FACTOR() -> float:
     avg = logic.getAverageFrameRate()
-    return (60 / avg) if 0 < avg < 10000 else 1
-
+    return (bpy.data.scenes[logic.getCurrentScene().name].game_settings.fps / avg) if 0 < avg < 10000 else 1
 
 def DELTA_TIME() -> float:
     avg = logic.getAverageFrameRate()

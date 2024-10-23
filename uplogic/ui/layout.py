@@ -34,6 +34,7 @@ class Layout(Widget):
     ):
         self.border_width = border_width
         self.border_color = border_color
+        self._inverted = False
         super().__init__(pos, size, bg_color, relative, halign=halign, valign=valign, angle=angle)
         self.start()
 
@@ -115,6 +116,15 @@ class FloatLayout(Layout):
 
 class ArrangedLayout(Layout):
     """Metaclass"""
+
+    @property
+    def inverted(self):
+        return self._inverted
+
+    @inverted.setter
+    def inverted(self, val):
+        self._inverted = val
+        self.arrange()
     
     @property
     def arrange_event(self) -> ScheduledEvent:
@@ -185,19 +195,20 @@ class BoxLayout(ArrangedLayout):
     :param `angle`: Rotation in degrees of this widget around the pivot defined by the alignment.
     '''
     def __init__(
-            self,
-            orientation: str = 'horizontal',
-            pos: list = [0, 0],
-            size: list = [100, 100],
-            bg_color: list = (0, 0, 0, 0),
-            relative: dict = {},
-            border_width: int = 1,
-            border_color: list = (0, 0, 0, 0),
-            spacing: int = 0,
-            halign: str = 'left',
-            valign: str = 'bottom',
-            angle=0
-        ):
+        self,
+        orientation: str = 'horizontal',
+        pos: list = [0, 0],
+        size: list = [100, 100],
+        bg_color: list = (0, 0, 0, 0),
+        relative: dict = {},
+        border_width: int = 1,
+        border_color: list = (0, 0, 0, 0),
+        inverted: bool = False,
+        spacing: int = 0,
+        halign: str = 'left',
+        valign: str = 'bottom',
+        angle=0
+    ):
         self.orientation = orientation
         self.spacing = spacing
         self.children_align = ['left', 'bottom']
@@ -207,6 +218,8 @@ class BoxLayout(ArrangedLayout):
 
     def arrange(self):
         '''Arrange the widgets according to the specified orientation.'''
+        inverted = self.inverted
+        self.children_align = ['right', 'bottom'] if inverted else ['left', 'top']
         dsize = self._draw_size
         arrange_factor = {
             'left': 0,
@@ -218,22 +231,27 @@ class BoxLayout(ArrangedLayout):
         xalign = self.children_align[0]
         yalign = self.children_align[1]
         if self.orientation == 'horizontal':
-            offset = 0
+            offset = dsize[0] if inverted else 0
             for widget in filter(lambda widget: widget.show is True, self.children):
                 widget.halign = xalign
                 widget.valign = yalign
                 widget.relative['pos'] = False
                 widget.pos = [offset, dsize[1] - (widget._draw_size[1] * arrange_factor[yalign])]
-                offset += widget._draw_size[0] + self.spacing
+                if inverted:
+                    offset -= widget._draw_size[0] + self.spacing
+                else:
+                    offset += widget._draw_size[0] + self.spacing
         if self.orientation == 'vertical':
-            offset = dsize[1]
+            offset = 0 if inverted else dsize[1]
             for widget in filter(lambda widget: widget.show is True, self.children):
                 widget.halign = xalign
                 widget.valign = yalign
-                offset -= widget._draw_size[1]
                 widget.relative['pos'] = False
                 widget.pos = [arrange_factor[xalign] * dsize[0], offset]
-                offset -= self.spacing
+                if inverted:
+                    offset += widget._draw_size[1] + self.spacing
+                else:
+                    offset -= widget._draw_size[1] + self.spacing
 
 
 class GridLayout(BoxLayout):
@@ -263,6 +281,7 @@ class GridLayout(BoxLayout):
         relative: dict = {},
         border_width: int = 1,
         border_color: list = [0, 0, 0, 0],
+        inverted: bool = False,
         spacing: int = 0,
         cols: int = 2,
         rows: int = 2,

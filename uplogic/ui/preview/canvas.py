@@ -96,8 +96,6 @@ class Canvas(Widget):
 
     def draw(self):
         area = None
-        import time
-        print(self.children)
         for area in bpy.context.screen.areas:
             if area.type == 'VIEW_3D':
                 self.area = area

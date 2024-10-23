@@ -12,6 +12,7 @@ from uplogic.utils.math import clamp
 from uplogic.input.keyboard import key_down, key_pulse
 from uplogic.input.mouse import mouse_down, mouse_wheel
 import bpy, blf
+import bge
 import sys, os
 from datetime import datetime
 from mathutils import Vector
@@ -388,10 +389,9 @@ if nodeprefs and getattr(bpy.context.scene, 'use_screen_console', True):
     enable(toggle_key='F12')
 
 
-import bpy
-import bge
-
-
+##############################################################
+# Predefined Commands
+##############################################################
 
 
 class Commands:
@@ -400,16 +400,6 @@ class Commands:
     @classmethod
     def add_command(cls, command):
         cls.commands[command.command] = command
-
-
-# Commands.add_command(RemoveObjectCommand)
-# Commands.add_command(DisableCommand)
-# Commands.add_command(EnableCommand)
-# Commands.add_command(ShowInfoCommand)
-# Commands.add_command(QuitCommand)
-# Commands.add_command(RestartCommand)
-# Commands.add_command(PrintCommand)
-# Commands.add_command(PauseCommand)
 
 
 def add_command(command):
@@ -452,7 +442,7 @@ class RemoveObjectCommand(Command):
     @classmethod
     def execute(cls, args):
         object_name = args[0]
-        scene = bge.logic.getCurrentScene()
+        scene = logic.getCurrentScene()
         scene.getGameObjectFromObject(
             bpy.data.objects[object_name]
         ).endObject()
@@ -468,7 +458,7 @@ class DisableCommand(Command):
     @classmethod
     def execute(cls, args):
         object_name = args[0]
-        scene = bge.logic.getCurrentScene()
+        scene = logic.getCurrentScene()
         scene.getGameObjectFromObject(
             bpy.data.objects[object_name]
         ).setVisible(False)
@@ -484,7 +474,7 @@ class EnableCommand(Command):
     @classmethod
     def execute(cls, args):
         object_name = args[0]
-        scene = bge.logic.getCurrentScene()
+        scene = logic.getCurrentScene()
         scene.getGameObjectFromObject(
             bpy.data.objects[object_name]
         ).setVisible(True)

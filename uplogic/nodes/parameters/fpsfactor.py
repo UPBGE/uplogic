@@ -6,6 +6,7 @@ from bge import logic
 class ULFPSFactor(ULParameterNode):
 
     def __init__(self):
+        self.fps = 60
         ULParameterNode.__init__(self)
         self.TIMEFACTOR = self.add_output(self.get_out)
 

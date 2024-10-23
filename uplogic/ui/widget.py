@@ -405,6 +405,15 @@ class Widget():
             size[0] = size[1]
         return size
 
+    @property
+    def dimensions(self):
+        pos = self._draw_pos
+        size = self._draw_size
+        return [
+            pos,
+            Vector((pos[0] + size[0], pos[1] + size[1]))
+        ]
+
     def start(self):
         """Put your custom startup logic here.
         """

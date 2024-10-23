@@ -24,7 +24,7 @@ class Canvas(Widget):
         self.start()
     
     def register(self):
-        bge.logic.getCurrentScene().post_draw.append(self.draw)
+        bge.logic.getCurrentScene().post_draw.insert(0, self.draw)
 
     def unregister(self):
         while self.draw in bge.logic.getCurrentScene().post_draw:

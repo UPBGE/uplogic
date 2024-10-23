@@ -103,7 +103,7 @@ def _lerp(a, b, fac):
     return lerp(a, b, fac)
 
 
-def clamp(value: float, lower: float = 0, upper: float = 1) -> float:
+def clamp(value: float, lower: float = 0.0, upper: float = 1.0) -> float:
     """Clamp a value in between two other values.
 
     :param `value`: input value
