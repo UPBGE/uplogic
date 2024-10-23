@@ -189,6 +189,7 @@ class BoxLayout(ArrangedLayout):
     :param `relative`: Whether to use pixels or factor for size or pos; example: `{'pos': True, 'size': True}`.
     :param `border_width`: Width (in pixels) of the border drawn around the area of the widget.
     :param `border_color`: Color to use for drawing the border.
+    :param `inverted`: Invert the direction in which the child widgets are arranged.
     :param `spacing`: Pixels in between child widgets.
     :param `halign`: Horizontal alignment of the widget, can be (`left`, `center`, `right`).
     :param `valign`: Vertical alignment of the widget, can be (`bottom`, `center`, `top`).
@@ -213,6 +214,7 @@ class BoxLayout(ArrangedLayout):
         self.spacing = spacing
         self.children_align = ['left', 'bottom']
         super().__init__(pos, size, bg_color, relative, border_width, border_color, halign=halign, valign=valign, angle=angle)
+        self.inverted = inverted
         self.use_clipping = False
         self.start()
 
