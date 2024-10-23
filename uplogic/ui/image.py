@@ -36,12 +36,23 @@ class Image(Widget):
     }
     """
 
-    def __init__(self, pos=[0, 0], size=(100, 100), relative={}, texture=None, halign='left', valign='bottom', use_aspect_ratio: bool = True, angle=0):
+    def __init__(
+        self,
+        pos=[0, 0],
+        size=(100, 100),
+        relative={},
+        texture=None,
+        halign='left',
+        valign='bottom',
+        use_aspect_ratio: bool = True,
+        angle=0,
+        show=True
+    ):
         self._texture = None
         self._image = None
         self.use_aspect_ratio = use_aspect_ratio
         self._opacity = 1
-        super().__init__(pos, size, relative=relative, halign=halign, valign=valign, angle=angle)
+        super().__init__(pos, size, relative=relative, halign=halign, valign=valign, angle=angle, show=show)
         if texture is not None and texture not in bpy.data.images and isfile(texture):
             bpy.data.images.load(texture)
         self.texture = texture
@@ -169,11 +180,24 @@ class Sprite(Image):
     }
     """
 
-    def __init__(self, pos=[0, 0], size=(100, 100), relative={}, texture=None, idx=0, rows=1, cols=1, halign='left', valign='bottom', use_aspect_ratio=True):
+    def __init__(
+        self,
+        pos=[0, 0],
+        size=(100, 100),
+        relative={},
+        texture=None,
+        idx=0,
+        rows=1,
+        cols=1,
+        halign='left',
+        valign='bottom',
+        use_aspect_ratio=True,
+        show=True
+    ):
         self._idx = idx
         self.rows = rows
         self.cols = cols
-        super().__init__(pos, size, relative, texture, halign=halign, valign=valign, use_aspect_ratio=use_aspect_ratio)
+        super().__init__(pos, size, relative, texture, halign=halign, valign=valign, use_aspect_ratio=use_aspect_ratio, show=show)
 
     @property
     def idx(self):

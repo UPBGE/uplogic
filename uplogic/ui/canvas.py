@@ -12,8 +12,8 @@ class Canvas(Widget):
     A canvas cannot be attached to another widget and has its own update cycle.
     """
 
-    def __init__(self):
-        super().__init__((0, 0), (0, 0))
+    def __init__(self, show=True):
+        super().__init__((0, 0), (0, 0), show=show)
         self._hover_consumed = False
         self._click_consumed = False
         self._old_width = bge.render.getWindowWidth()

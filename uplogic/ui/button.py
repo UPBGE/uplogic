@@ -23,9 +23,10 @@ class Button(Widget, HoverBehavior):
         halign='left',
         valign='bottom',
         on_press=None,
-        angle=0
+        angle=0,
+        show=True
     ):
-        super().__init__(pos, size, bg_color, relative, halign=halign, valign=valign, angle=angle)
+        super().__init__(pos, size, bg_color, relative, halign=halign, valign=valign, angle=angle, show=show)
         self.hover_color = hover_color
         self.border_width = border_width
         self.border_color = border_color
@@ -159,7 +160,8 @@ class LabelButton(Button, HoverBehavior):
         halign_text='center',
         valign_text='center',
         on_press=None,
-        angle=0
+        angle=0,
+        show=True
     ):
         text_rel = relative.get('font_size', False)
         self.label = Label(
@@ -185,7 +187,8 @@ class LabelButton(Button, HoverBehavior):
             halign=halign,
             valign=valign,
             angle=angle,
-            on_press=on_press
+            on_press=on_press,
+            show=show
         )
         self.add_widget(self.label)
         self._in_focus = False
@@ -273,9 +276,10 @@ class ImageButton(Button, HoverBehavior):
         texture=None,
         hover_texture=None,
         click_texture=None,
-        angle=0
+        angle=0,
+        show=True
     ):
-        super().__init__(pos, size, bg_color, relative, halign=halign, valign=valign, angle=angle, on_press=on_press, hover_color=hover_color, border_color=border_color, click_color=click_color)
+        super().__init__(pos, size, bg_color, relative, halign=halign, valign=valign, angle=angle, on_press=on_press, hover_color=hover_color, border_color=border_color, click_color=click_color, show=show)
         self.image = Image(relative={'size': True}, size=(1, 1), texture=texture)
         self._texture_name = texture
         self.idle_texture = texture
@@ -325,9 +329,10 @@ class SpriteButton(Button, HoverBehavior):
         rows=1,
         cols=1,
         on_press=None,
-        angle=0
+        angle=0,
+        show=True
     ):
-        super().__init__(pos, size, bg_color, relative, halign=halign, valign=valign, angle=angle, on_press=on_press, hover_color=hover_color, border_color=border_color)
+        super().__init__(pos, size, bg_color, relative, halign=halign, valign=valign, angle=angle, on_press=on_press, hover_color=hover_color, border_color=border_color, show=show)
         self.image = Sprite(relative={'size': True}, size=(1, 1), texture=texture, rows=rows, cols=cols, idx=idx)
         self._texture_name = texture
 

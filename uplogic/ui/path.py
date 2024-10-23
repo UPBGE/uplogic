@@ -23,9 +23,10 @@ class Path(Widget):
         relative={},
         line_width=1,
         line_color=(1.0, 1.0, 1.0, 1.0),
-        angle=0
+        angle=0,
+        show=True
     ):
-        Widget.__init__(self, pos, (0, 0), (0, 0, 0, 0), relative=relative, angle=angle)
+        Widget.__init__(self, pos, (0, 0), (0, 0, 0, 0), relative=relative, angle=angle, show=show)
         self.points = points
         self.line_color = line_color
         self.line_width = line_width

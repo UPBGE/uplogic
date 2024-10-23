@@ -30,12 +30,13 @@ class Layout(Widget):
         border_color: list = [0, 0, 0, 0],
         halign: str = 'left',
         valign: str = 'bottom',
-        angle=0
+        angle=0,
+        show=True
     ):
         self.border_width = border_width
         self.border_color = border_color
         self._inverted = False
-        super().__init__(pos, size, bg_color, relative, halign=halign, valign=valign, angle=angle)
+        super().__init__(pos, size, bg_color, relative, halign=halign, valign=valign, angle=angle, show=show)
         self.start()
 
     @property
@@ -208,12 +209,13 @@ class BoxLayout(ArrangedLayout):
         spacing: int = 0,
         halign: str = 'left',
         valign: str = 'bottom',
-        angle=0
+        angle=0,
+        show=True
     ):
         self.orientation = orientation
         self.spacing = spacing
         self.children_align = ['left', 'bottom']
-        super().__init__(pos, size, bg_color, relative, border_width, border_color, halign=halign, valign=valign, angle=angle)
+        super().__init__(pos, size, bg_color, relative, border_width, border_color, halign=halign, valign=valign, angle=angle, show=show)
         self.inverted = inverted
         self.use_clipping = False
         self.start()
@@ -289,20 +291,23 @@ class GridLayout(BoxLayout):
         rows: int = 2,
         halign: str = 'left',
         valign: str = 'bottom',
-        angle=0
+        angle=0,
+        show=True
     ):
         super().__init__(
-            orientation,
-            pos,
-            size,
-            bg_color,
-            relative,
-            border_width,
-            border_color,
-            spacing,
-            halign,
-            valign,
-            angle=angle
+            orientation=orientation,
+            pos=pos,
+            size=size,
+            bg_color=bg_color,
+            relative=relative,
+            border_width=border_width,
+            border_color=border_color,
+            inverted=inverted,
+            spacing=spacing,
+            halign=halign,
+            valign=valign,
+            angle=angle,
+            show=show
         )
         self.rows = rows
         self.cols = cols
@@ -368,7 +373,8 @@ class PolarLayout(ArrangedLayout):
             relative: dict = {},
             starting_angle: str = 0,
             radius: int = 100,
-            angle: float = 0
+            angle: float = 0,
+            show: bool = True
         ):
         self._starting_angle = starting_angle
         self._radius = radius
@@ -381,7 +387,8 @@ class PolarLayout(ArrangedLayout):
             (0, 0, 0, 0),
             'center',
             'center',
-            angle
+            angle,
+            show=show
         )
         self.starting_angle = starting_angle
         self.radius = radius

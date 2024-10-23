@@ -39,7 +39,8 @@ class Label(Widget):
         halign='left',
         valign='bottom',
         wrap=False,
-        angle=0
+        angle=0,
+        show=True
     ):
         self._parent = None
         self._children = None
@@ -54,7 +55,7 @@ class Label(Widget):
         self.font = font
         self.wrap = wrap
         self.lines = []
-        Widget.__init__(self, pos, (0, 0), (0, 0, 0, 0), relative, angle=angle)
+        Widget.__init__(self, pos, (0, 0), (0, 0, 0, 0), relative, angle=angle, show=show)
         self.text_halign = halign
         self.text_valign = valign
         self.start()

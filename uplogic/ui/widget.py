@@ -53,11 +53,11 @@ class Widget():
     }
     '''
 
-    def __init__(self, pos=(0, 0), size=(0, 0), bg_color=(0, 0, 0, 0), relative={}, halign='left', valign='bottom', angle=0):
+    def __init__(self, pos=(0, 0), size=(0, 0), bg_color=(0, 0, 0, 0), relative={}, halign='left', valign='bottom', angle=0, show=True):
         self.halign = halign
         self.valign = valign
         self._parent = None
-        self._show = True
+        self._show = show
         self._pos = [0, 0]
         self._children: list[Widget] = []
         self.relative = relative
