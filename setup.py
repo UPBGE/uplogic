@@ -52,6 +52,7 @@ setup(
         'uplogic.physics',
         'uplogic.serialize',
         'uplogic.shaders',
+        'uplogic.sprites',
         'uplogic.ui',
         'uplogic.ui.preview',
         'uplogic.utils'
