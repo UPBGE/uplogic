@@ -163,3 +163,4 @@ from .setrigboneattribute import SetRigBoneAttributeNode
 from .createuipath import CreateUIPathNode
 from .setportal import SetPortalNode
 from .storevalue import ULStoreValue
+from .distributecurvepoints import DistributeCurvePointsNode

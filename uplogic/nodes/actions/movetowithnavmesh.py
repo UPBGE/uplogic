@@ -112,7 +112,8 @@ class ULMoveToWithNavmesh(ULActionNode):
                 linear_speed,
                 tpf,
                 move_dynamic,
-                ths
+                ths,
+                snap=False
             )
             if reached:
                 has_more = self._motion_path.advance()

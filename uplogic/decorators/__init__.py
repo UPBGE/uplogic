@@ -7,6 +7,10 @@ from bge import logic
 import bpy
 
 
+class Unset:
+    pass
+
+
 def listener(original_class: KX_PythonComponent) -> KX_PythonComponent:
     """`KX_PythonComponent` Class Decorator
 
@@ -139,14 +143,20 @@ def game_property(*prop_names) -> KX_PythonComponent:
         for game_prop in prop_names:
 
             def getPropComponent(self, attr_name=game_prop):
-                return self.object.get(attr_name)
+                prop = self.object.get(attr_name, Unset)
+                if prop is Unset:
+                    self.object[attr_name] = 0.0
+                return prop
 
             def setPropComponent(self, value, attr_name=game_prop):
                 getattr(self, f'on_{game_prop}')(value)
                 self.object[attr_name] = value
 
             def getPropObject(self, attr_name=game_prop):
-                return self.get(attr_name)
+                self.get(attr_name)
+                if prop is None:
+                    self[attr_name] = 0.0
+                return prop
 
             def setPropObject(self, value, attr_name=game_prop):
                 getattr(self, f'on_{game_prop}')(value)
@@ -232,14 +242,22 @@ def instance_property(*prop_names) -> KX_PythonComponent:
             raise TypeMismatchError('Decorator only viable for KX_PythonComponent subclasses!')
         if not (isinstance(prop_names, list) or isinstance(prop_names, tuple)):
             raise TypeMismatchError('Expected property names as a list or tuple!')
+
         for game_prop in prop_names:
 
             def getPropComponent(self, attr_name=game_prop):
-                return self.object.groupObject.get(attr_name)
+                obj = self.object.groupObject
+                if obj:
+                    return self.object.groupObject.get(attr_name, self.object.get(attr_name, None))
+                return self.object.get(attr_name)
 
             def setPropComponent(self, value, attr_name=game_prop):
                 getattr(self, f'on_{game_prop}')(value)
-                self.object.groupObject[attr_name] = value
+                obj = self.object.groupObject
+                if obj:
+                    obj[attr_name] = value
+                    return
+                self.object[attr_name] = value
 
             def getPropObject(self, attr_name=game_prop):
                 return self.groupObject.get(attr_name)

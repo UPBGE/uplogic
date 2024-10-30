@@ -66,11 +66,11 @@ class RigBone():
 
     @property
     def inherit_scale(self):
-        return self._armature.bones[self.bone.name].use_inherit_scale
+        return self._armature.bones[self.bone.name].inherit_scale
 
     @inherit_scale.setter
     def inherit_scale(self, value):
-        self._armature.bones[self.bone.name].use_inherit_scale = value
+        self._armature.bones[self.bone.name].inherit_scale = value
 
     @property
     def connected(self):

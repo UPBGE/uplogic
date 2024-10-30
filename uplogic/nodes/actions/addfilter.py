@@ -35,23 +35,23 @@ class ULAddFilter(ULActionNode):
         if not condition or self.filter:
             if self.filter:
                 if ftype in [3, 'VIGNETTE']:
-                    self.filter.settings['power'] = self.get_input(self.power)
-                    self.filter.settings['color'] = self.get_input(self.color)
+                    self.filter.uniforms['power'] = self.get_input(self.power)
+                    self.filter.uniforms['color'] = self.get_input(self.color)
                 elif ftype in [4, 'BRIGHTNESS']:
-                    self.filter.settings['brightness'] = self.get_input(self.brightness)
+                    self.filter.uniforms['brightness'] = self.get_input(self.brightness)
                 elif ftype in [5, 'CHROMAB']:
-                    self.filter.settings['power'] = self.get_input(self.power)
+                    self.filter.uniforms['power'] = self.get_input(self.power)
                 elif ftype in [6, 'GRAYSCALE']:
-                    self.filter.settings['power'] = self.get_input(self.power)
+                    self.filter.uniforms['power'] = self.get_input(self.power)
                 elif ftype in [7, 'LEVELS']:
-                    self.filter.settings['color'] = self.get_input(self.color)
+                    self.filter.uniforms['color'] = self.get_input(self.color)
                 elif ftype in [8, 'MIST']:
-                    self.filter.settings['power'] = self.get_input(self.power)
-                    self.filter.settings['color'] = self.get_input(self.color)
-                    self.filter.settings['start'] = self.get_input(self.start)
-                    self.filter.settings['density'] = self.get_input(self.density)
+                    self.filter.uniforms['power'] = self.get_input(self.power)
+                    self.filter.uniforms['color'] = self.get_input(self.color)
+                    self.filter.uniforms['start'] = self.get_input(self.start)
+                    self.filter.uniforms['density'] = self.get_input(self.density)
                 elif ftype in [1, 2, 'HBAO', 'SSAO']:
-                    self.filter.settings['power'] = self.get_input(self.power)
+                    self.filter.uniforms['power'] = self.get_input(self.power)
             return
 
         if ftype in [0, 'FXAA']:

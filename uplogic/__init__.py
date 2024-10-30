@@ -1,4 +1,4 @@
-__version__ = '4.0b2'
+__version__ = '4.0b3'
 
 try:
     from . import animation
@@ -17,6 +17,7 @@ import bpy
 
 
 def check_version(version: str):
+    version = str(version)
     nums = version.split('.')
     vnums = __version__.split('.')
     
@@ -24,7 +25,7 @@ def check_version(version: str):
         vnums.append(0)
     
     for i, num in enumerate(nums):
-        if int(num) < int(vnums[i]):
+        if int(num) != int(vnums[i]):
             return False
 
     return True

@@ -65,8 +65,8 @@ def raycast(
     xray: bool = False,
     local: bool = False,
     mask: int = 65535,
-    visualize: bool = False,
-    face_data: bool = False
+    face_data: bool = False,
+    visualize: bool = False
 ) -> RayCastData[GameObject, Vector, Vector, Vector, KX_PolyProxy, Vector]:
     """Raycast from any point to any target
 
@@ -81,7 +81,8 @@ def raycast(
     :param `xray`: look for objects behind others.
     :param `local`: add the target vector to the origin.
     :param `mask`: Collision Mask for this ray.
-    :param `visualize`: show the raycast.
+    :param `face_data`: Return additional information about the target polygon.
+    :param `visualize`: Show the raycast.
 
     :returns: (`obj`, `point`, `normal`, `direction`, `face`, `uv`)
     """
@@ -157,6 +158,11 @@ def raycast(
                 origin,
                 point,
                 [0, 1, 0, 1]
+            )
+            render.drawLine(
+                point,
+                line_dest,
+                [1, 0, 0, 1]
             )
     return RayCastDataPoly(ret_dat)
 

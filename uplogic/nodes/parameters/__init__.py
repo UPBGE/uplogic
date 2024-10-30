@@ -113,3 +113,5 @@ from .randomvalue import ULRandomValue  # noqa
 from .getportal import GetPortalNode  # noqa
 from .dictgetkeys import DictGetKeysNode  # noqa
 from .vector import VectorNode  # noqa
+from .getrigboneattribute import GetRigBoneAttributeNode
+from .evaluatecurve import EvaluateCurveNode

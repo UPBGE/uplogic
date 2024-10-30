@@ -94,7 +94,7 @@ def gamepad_button(
         tap_cond = not _active_buttons.get(button, False)
         _active_buttons[button] = state
         return state and tap_cond
-    _active_buttons[button] = state
+    # _active_buttons[button] = state
     return state
 
 

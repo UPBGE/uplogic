@@ -8,15 +8,6 @@ class Collision():
     """Collision Handler.
 
     Not intended for manual use."""
-    target = None
-    point = None
-    normal = None
-    tap = False
-    consumed = False
-    active = False
-    _objects = []
-    _old_objs = []
-    done_objs = []
 
     _deprecated = False
 
@@ -32,12 +23,20 @@ class Collision():
         if self._deprecated:
             from uplogic.console import warning
             warning('Warning: ULCollision class will be renamed to "Collision" in future releases!')
+        self.target = None
+        self.point = None
+        self.normal = None
+        self.consumed = False
+        self.active = False
+        self._objects = []
+        self._old_objs = []
         self.callback: Callable = callback
         self.prop: str = prop
         self.mat: str = mat
         self.tap: bool = tap
         self.post_call = post_call
         self.game_object: GameObject = game_object
+        self._done_objs = []
         self.register()
 
     def collision(self, obj, point, normal):

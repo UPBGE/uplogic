@@ -129,8 +129,8 @@ class Slider(RelativeLayout):
         if self.bar and self.knob:
             self.bar._build_shader()
             self.knob._build_shader()
-        if self.parent:
-            self.value = self.value
+        # if self.parent:
+        #     self.value = self.value
 
     @property
     def value(self):
@@ -139,12 +139,10 @@ class Slider(RelativeLayout):
     @value.setter
     def value(self, value):
         newval = value
-        print('############################')
-        print(newval)
         if self.steps > 0:
             newval -= newval % (1 / self.steps)
         newval = clamp(newval)
-        print(newval)
+        # print(newval)
         if newval != self._value:
             self._value = newval
             self.on_value(self)

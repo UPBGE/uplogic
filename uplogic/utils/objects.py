@@ -125,7 +125,8 @@ def _move_to(
     speed,
     time_per_frame,
     dynamic,
-    distance
+    distance,
+    snap=True
 ):
     if dynamic:
         direction = (
@@ -133,7 +134,8 @@ def _move_to(
             moving_object.worldPosition)
         dst = direction.length
         if(dst <= distance):
-            moving_object.worldPosition = destination_point
+            if snap:
+                moving_object.worldPosition = destination_point
             return True
         direction.z = 0
         direction.normalize()
@@ -148,7 +150,8 @@ def _move_to(
             )
         dst = direction.length
         if(dst <= distance):
-            moving_object.worldPosition = destination_point
+            if snap:
+                moving_object.worldPosition = destination_point
             return True
         direction.normalize()
         displacement = speed * time_per_frame
@@ -320,6 +323,7 @@ class GameObject:
 
     def __init__(self, game_object: KX_GameObject) -> None:
         self.game_object: KX_GameObject = game_object
+        self.data = self.game_object.blenderObject.data
 
     @property
     def blenderObject(self) -> Object:
@@ -497,19 +501,21 @@ class Curve(GameObject):
         self.use_evaluate = use_evaluate
         if isinstance(name, KX_GameObject):
             self.game_object = name
-            return
-        self.game_object = create_curve(
-            name=name,
-            bevel_depth=bevel_depth,
-            dimensions=dimensions,
-            material=material,
-            collection=collection
-        )
+        else:
+            self.game_object = create_curve(
+                name=name,
+                bevel_depth=bevel_depth,
+                dimensions=dimensions,
+                material=material,
+                collection=collection
+            )
+        self.data = self.game_object.blenderObject.data
 
     @property
     def eval_obj(self):
         eval_obj = bpy.data.objects.get(f'{self.name}_eval_obj', None)
         if eval_obj is None:
+            print('CREATING EVAL')
             eval_obj = bpy.data.objects.new(f'{self.name}_eval_obj', object_data=None)
             bpy.context.collection.objects.link(eval_obj)
             const = eval_obj.constraints.new('FOLLOW_PATH')
@@ -538,8 +544,12 @@ class Curve(GameObject):
     @property
     def points(self):
         """Points of the curve in global space."""
-        splines = self.game_object.blenderObject.data.splines
-        return splines[0].points if len(splines) > 0 else []
+        splines = self.data.splines
+        return (
+            splines[0].bezier_points if len(splines) > 0 else []
+            if splines[0].type == 'BEZIER' else
+            splines[0].points if len(splines) > 0 else []
+        )
 
     @points.setter
     def points(self, val: list):
@@ -549,11 +559,11 @@ class Curve(GameObject):
     @property
     def bevel_depth(self):
         """Thickness of the curve geometry as diameter."""
-        return self.game_object.blenderObject.data.bevel_depth
+        return self.data.bevel_depth
 
     @bevel_depth.setter
     def bevel_depth(self, val):
-        self.game_object.blenderObject.data.bevel_depth = val
+        self.data.bevel_depth = val
 
     @property
     def length(self):
@@ -572,15 +582,23 @@ class Curve(GameObject):
 
     @path_duration.setter
     def path_duration(self, val):
-        self.game_object.blenderObject.data.path_duration = val
+        self.data.path_duration = val
+
+    @property
+    def resolution(self):
+        return self.data.resolution_u
+
+    @resolution.setter
+    def resolution(self, val):
+        self.data.resolution_u = int(val)
 
     @property
     def time(self):
-        return self.game_object.blenderObject.data.eval_time
+        return self.data.eval_time
 
     @time.setter
     def time(self, val):
-        self.game_object.blenderObject.data.eval_time = val
+        self.data.eval_time = val
 
     def evaluate(self, factor):
         '''Get the world space coordinates on the curve at a given progress.'''

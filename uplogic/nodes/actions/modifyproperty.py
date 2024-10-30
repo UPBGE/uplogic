@@ -36,4 +36,6 @@ class ULModifyProperty(ULActionNode):
                 self.get_input(self.max_value)
             )
         obj[property_name] = result
+        if self.mode:
+            obj.color = obj.color
         self._done = True

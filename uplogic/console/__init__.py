@@ -93,8 +93,6 @@ class ConsoleLayout(Canvas):
         self._mouse_down = False
         self._goback_index = -1
         super().__init__()
-        if not getattr(bpy.context.scene, 'screen_console_open', False) and not visible:
-            self.show = False
         self.input = TextInput(text='', shadow=True, valign='center')
         self.input.on_enter = self.on_enter
         self.input.edit = True
@@ -116,7 +114,12 @@ class ConsoleLayout(Canvas):
         self.nameplate.update = self.update_nameplate
         self.canvas.add_widget(self.nameplate)
         self.font_size = 14
+        # self.info_mode = False
         self.position = 'bottom'
+        self.info_mode = getattr(bpy.context.scene, 'screen_console_open', False)
+        self.active = False
+        # if not getattr(bpy.context.scene, 'screen_console_open', False) and not visible:
+        #     self.active = False
 
     @property
     def layout(self):
@@ -127,6 +130,30 @@ class ConsoleLayout(Canvas):
         for w in self._layout.children:
             val.add_widget(w)
         self._layout = val
+
+    @property
+    def info_mode(self):
+        return self._info_mode
+
+    @info_mode.setter
+    def info_mode(self, val):
+        self._info_mode = val
+        self.active = self.active
+
+    @property
+    def active(self):
+        return self._active
+
+    @active.setter
+    def active(self, val):
+        if self.info_mode:
+            self.show = True
+            self.layout.bg_color = (0, 0, 0, .4) if val else (0, 0, 0, 0)
+            self.input.show = val
+            self.nameplate.show = val
+        else:
+            self.show = val
+        self._active = val
 
     @property
     def position(self):
@@ -182,7 +209,8 @@ class ConsoleLayout(Canvas):
         self.arrange()
 
     def on_enter(self):
-        self.issued_commands.append(self.input.text)
+        if self.input.text:
+            self.issued_commands.append(self.input.text)
         sys.__stdout__.write(f'{self.input.text}\n')
         self.add_message(self.input.text)
         command_name = self.input.text.split(' ')[0]
@@ -210,17 +238,20 @@ class ConsoleLayout(Canvas):
             self.nameplate.text = ''
         self._mouse_down = mdown
 
+    def toggle(self):
+        if not self.show:
+            self._mouse_visible = logic.mouse.visible
+        if not self._toggle_key:
+            self.active = not self.active
+            self.opacity = 1
+            self._toggle_key = True
+
     def update(self):
         if self.input.edit != self.show:
             self.input.edit = self.show
         move_goback = key_pulse('UPARROW') - key_pulse('DOWNARROW')
         if key_down(self.toggle_key):
-            if not self.show:
-                self._mouse_visible = logic.mouse.visible
-            if not self._toggle_key:
-                self.show = not self.show
-                self.opacity = 1
-            self._toggle_key = True
+            self.toggle()
         elif not self.show:
             self._toggle_key = False
             return
@@ -237,7 +268,7 @@ class ConsoleLayout(Canvas):
             self._toggle_key = True
         else:
             self._toggle_key = False
-        logic.mouse.visible = self.show or self._mouse_visible
+        logic.mouse.visible = self.active or self._mouse_visible
 
     def stop(self):
         self.clear()
@@ -316,12 +347,12 @@ def log(msg, type='INFO'):
         print(msg)
         return
     show_time = True
+    sys.__stdout__.write(f'{msg}')
     for msg in str(msg).split('\n'):
         if msg:
             msg = msg.replace('  ', '    ')
             console.add_message(f'{msg}', type, time=show_time)
             show_time = False
-            sys.__stdout__.write(f'{msg}\n')
 
 
 def warning(msg):
@@ -331,12 +362,12 @@ def warning(msg):
         print(sysmsg)
         return
     show_time = True
+    sys.__stdout__.write(f'{sysmsg}')
     for msg in str(msg).split('\n'):
         if msg:
             msg.replace('  ', '    ')
             console.add_message(f'{msg}', 'WARNING', time=show_time)
             show_time = False
-            sys.__stdout__.write(f'{sysmsg}\n')
 
 
 def error(msg):
@@ -347,11 +378,11 @@ def error(msg):
         # print(msg)
         return
     show_time = True
+    sys.__stdout__.write(f'{sysmsg}')
     for msg in str(msg).split('\n'):
         if msg:
             msg.replace('  ', '    ')
             console.add_message(f'{msg}', 'ERROR', time=show_time)
-            sys.__stdout__.write(f'{sysmsg}\n')
             show_time = False
 
 
@@ -362,11 +393,11 @@ def success(msg):
         print(sysmsg)
         return
     show_time = True
+    sys.__stdout__.write(f'{sysmsg}')
     for msg in str(msg).split('\n'):
         if msg:
             msg.replace('  ', '    ')
             console.add_message(f'{msg}', 'SUCCESS', time=show_time)
-            sys.__stdout__.write(f'{sysmsg}\n')
             show_time = False
 
 
@@ -377,11 +408,11 @@ def debug(msg):
         print(sysmsg)
         return
     show_time = True
+    sys.__stdout__.write(f'{sysmsg}')
     for msg in str(msg).split('\n'):
         if msg:
             msg.replace('  ', '    ')
             console.add_message(f'{msg}', 'DEBUG', time=show_time)
-            sys.__stdout__.write(f'{sysmsg}\n')
             show_time = False
 
 nodeprefs = bpy.context.preferences.addons.get('bge_netlogic', None)
@@ -459,9 +490,12 @@ class DisableCommand(Command):
     def execute(cls, args):
         object_name = args[0]
         scene = logic.getCurrentScene()
-        scene.getGameObjectFromObject(
+        obj = scene.getGameObjectFromObject(
             bpy.data.objects[object_name]
-        ).setVisible(False)
+        )
+        obj.setVisible(False)
+        obj.suspendPhysics()
+        obj.suspendDynamics()
 
 
 @console_command
@@ -475,9 +509,12 @@ class EnableCommand(Command):
     def execute(cls, args):
         object_name = args[0]
         scene = logic.getCurrentScene()
-        scene.getGameObjectFromObject(
+        obj = scene.getGameObjectFromObject(
             bpy.data.objects[object_name]
-        ).setVisible(True)
+        )
+        obj.setVisible(True)
+        obj.restorePhysics()
+        obj.restoreDynamics()
 
 
 @console_command
@@ -590,3 +627,16 @@ class SetResolutionCommand(Command):
     def execute(cls, args):
         rx, ry = args
         render.setWindowSize(int(rx), int(ry))
+
+
+@console_command
+class ToggleDebugCommand(Command):
+    command = 'debug'
+    arg_count = 0
+    description = 'Toggle Debug Mode'
+
+    @classmethod
+    def execute(cls, args):
+        console = get_console()
+        console.info_mode = not console.info_mode
+        debug(f'Console Debug Mode is now {"ON" if console.info_mode else "OFF"}.')

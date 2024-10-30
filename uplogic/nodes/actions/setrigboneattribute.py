@@ -28,9 +28,9 @@ class SetRigBoneAttributeNode(ULActionNode):
         bone: RigBone = self._rig.bones[self.get_input(self.bone)]
 
         value = self.get_input(self.value)
-        print(self.attribute, value, bone.name)
+        # print(self.attribute, value, bone.name)
         setattr(bone, self.attribute, value if value is not None else self.scale_mode)
-        for bone in self._rig.bones.values():
-            print(bone.name, bone.inherit_rotation)
-        # self._rig.blenderObject.update_tag()
+        # for bone in self._rig.bones.values():
+            # print(bone.name, bone.inherit_rotation)
+        self._rig.blenderObject.update_tag()
         self._done = True
