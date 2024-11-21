@@ -5,9 +5,14 @@ from ..console import error
 
 
 class Collision():
-    """Collision Handler.
+    """Callback handler for game object collisions.
 
-    Not intended for manual use."""
+    :param `obj`: Object whose collision detection will be monitored.
+    :param `callback`: Callback to be called when collision occurs. Must have arguments `(obj, point, normal)`.
+    :param `prop`: Only look for objects that have this property.
+    :param `material`: Only look for objects that have this material applied.
+    :param `tap`: Only validate the first frame of the collision.
+    """
 
     _deprecated = False
 
@@ -23,11 +28,12 @@ class Collision():
         if self._deprecated:
             from uplogic.console import warning
             warning('Warning: ULCollision class will be renamed to "Collision" in future releases!')
-        self.target = None
         self.point = None
         self.normal = None
+        self.target = None
         self.consumed = False
         self.active = False
+        self._active = False
         self._objects = []
         self._old_objs = []
         self.callback: Callable = callback
@@ -38,6 +44,10 @@ class Collision():
         self.game_object: GameObject = game_object
         self._done_objs = []
         self.register()
+
+    # @property
+    # def target(self):
+    #     return self._objects[-1] if self._objects else None
 
     def collision(self, obj, point, normal):
         self._objects.append(obj)
@@ -56,7 +66,9 @@ class Collision():
                 return
             # self.active = True
 
-        self.active = True
+        self._active = True
+        self.active = not self.consumed if self.tap else True
+        # print(self.tap, self.consumed)
         # if self.tap and self.consumed:
         #     return
         if obj not in self._done_objs:
@@ -75,11 +87,12 @@ class Collision():
                     self.callback(None, None, None)
         self._old_objs = self._done_objs
         self._done_objs = []
-        if not self.consumed and self.active:
+        # self._objects = []
+        if not self.consumed and self._active:
             self.consumed = True
-        elif self.consumed and not self.active:
+        elif self.consumed and not self._active:
             self.consumed = False
-        self.active = False
+        self._active = False
 
     def register(self):
         if self.collision not in self.game_object.collisionCallbacks:

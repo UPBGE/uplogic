@@ -347,7 +347,7 @@ def log(msg, type='INFO'):
         print(msg)
         return
     show_time = True
-    sys.__stdout__.write(f'{msg}')
+    sys.__stdout__.write(f'{msg}\n')
     for msg in str(msg).split('\n'):
         if msg:
             msg = msg.replace('  ', '    ')
@@ -362,7 +362,7 @@ def warning(msg):
         print(sysmsg)
         return
     show_time = True
-    sys.__stdout__.write(f'{sysmsg}')
+    sys.__stdout__.write(f'{sysmsg}\n')
     for msg in str(msg).split('\n'):
         if msg:
             msg.replace('  ', '    ')
@@ -378,7 +378,7 @@ def error(msg):
         # print(msg)
         return
     show_time = True
-    sys.__stdout__.write(f'{sysmsg}')
+    sys.__stdout__.write(f'{sysmsg}\n')
     for msg in str(msg).split('\n'):
         if msg:
             msg.replace('  ', '    ')
@@ -393,7 +393,7 @@ def success(msg):
         print(sysmsg)
         return
     show_time = True
-    sys.__stdout__.write(f'{sysmsg}')
+    sys.__stdout__.write(f'{sysmsg}\n')
     for msg in str(msg).split('\n'):
         if msg:
             msg.replace('  ', '    ')
@@ -408,7 +408,7 @@ def debug(msg):
         print(sysmsg)
         return
     show_time = True
-    sys.__stdout__.write(f'{sysmsg}')
+    sys.__stdout__.write(f'{sysmsg}\n')
     for msg in str(msg).split('\n'):
         if msg:
             msg.replace('  ', '    ')

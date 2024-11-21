@@ -35,7 +35,6 @@ def batch_for_shader(shader, type, content, *, indices=None):
             return 'F32'
         if attr_type in {'UINT', 'UVEC2', 'UVEC3', 'UVEC4'}:
             return 'U32'
-        # `attr_type` in {'INT', 'IVEC2', 'IVEC3', 'IVEC4', 'BOOL'}.
         return 'I32'
 
     def recommended_attr_len(attr_name):

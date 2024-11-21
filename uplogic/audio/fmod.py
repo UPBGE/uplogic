@@ -146,7 +146,16 @@ class Event(Sound):
         FMod.studio.update()
         self._position = position
         self.channel.sounds.append(self)
+        self.occlusion_near_clipping = 0.0
         self._caster = bge.logic.getCurrentScene().active_camera
+
+    @property
+    def ray_caster(self):
+        return self._caster
+
+    @ray_caster.setter
+    def ray_caster(self, val):
+        self._caster = val
 
     @property
     def is_valid(self):
@@ -200,12 +209,24 @@ class Event(Sound):
 
     @property
     def occluded(self):
-        return raycast(
+        direction = (FMod.listener.worldPosition - self.position).normalized()
+        ray = raycast(
             self._caster,
-            self.position,
+            self.position + direction * self.occlusion_near_clipping,
             FMod.listener.worldPosition,
-            mask=self.occlusion_mask
-        ).obj is not None
+            mask=self.occlusion_mask,
+            visualize=True
+        )
+        while ray.obj and not ray.obj.blenderObject.get('sound_occluder', True):
+            ray = raycast(
+                ray.obj,
+                ray.point,
+                FMod.listener.worldPosition,
+                mask=self.occlusion_mask,
+                visualize=True
+            )
+        return ray.obj is not None
+            
 
     @property
     def paused(self):
@@ -355,11 +376,14 @@ class FMod:
 
     @classmethod
     def update(cls):
+        
+        scene = bge.logic.getCurrentScene()
+        cls.listener = VR_HEADSET if VR_STATE else scene.active_camera
         studio = cls.studio
         cam = cls.listener
-        if cam is None:
-            scene = bge.logic.getCurrentScene()
-            cam = cls.listener = scene.active_camera
+        # if cam is None:
+        #     scene = bge.logic.getCurrentScene()
+        #     cam = cls.listener = scene.active_camera
         studio.core_system.listener().position = cam.worldPosition
         studio.core_system.listener().set_orientation(
             list(cam.getAxisVect((0, 0, 1))),
@@ -407,9 +431,9 @@ class FMod:
         if _channel is None:
             _channel = cls.channels[channel] = Channel(channel)
         if isinstance(source, KX_GameObject):
-            evt = EventSpeaker(event, source, channel)
+            evt = EventSpeaker(f'event:/{event}', source, channel)
         else:
-            evt = Event(event, Vector(source), channel)
+            evt = Event(f'event:/{event}', Vector(source), channel)
         return evt
 
     @classmethod
@@ -423,3 +447,27 @@ class FMod:
 
 
 FMod.initialize()
+
+
+def load_bank(path):
+    FMod.load_bank(path)
+
+
+def start_event(event, source=Vector((0, 0, 0)), channel='default'):
+    return FMod.event(event, source, channel)
+
+
+def set_occlusion_mask(mask):
+    FMod.set_occlusion_mask(mask)
+
+
+def set_channel_occlusion_mask(mask):
+    FMod.set_channel_occlusion_mask(mask)
+
+
+def set_channel_parameter(parameter, value, channel='default'):
+    FMod.set_channel_parameter(parameter, value, channel)
+
+
+def add_channel(name):
+    FMod.add_channel(name)

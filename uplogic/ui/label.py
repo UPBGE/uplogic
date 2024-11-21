@@ -177,8 +177,9 @@ class Label(Widget):
         else:
             blf.disable(font, blf.CLIPPING)
         if self.wrap and self.parent:
+            offset = parsize[0] * self.pos[0] if self.relative.get('pos') else self.pos[0]
             blf.enable(font, blf.WORD_WRAP)
-            blf.word_wrap(font, int(parsize[0]))
+            blf.word_wrap(font, int(parsize[0] - offset))
         if self.shadow:
             col = self.shadow_color
             blf.enable(font, blf.SHADOW)

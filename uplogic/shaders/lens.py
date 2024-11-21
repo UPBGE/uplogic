@@ -1,4 +1,4 @@
-from .shader import Filter2D
+from uplogic.shaders.shader import Filter2D
 
 glsl = """
 uniform sampler2D bgl_RenderedTexture;

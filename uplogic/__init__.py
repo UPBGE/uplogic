@@ -1,4 +1,4 @@
-__version__ = '4.0b3'
+__version__ = '4.0b4'
 
 try:
     from . import animation

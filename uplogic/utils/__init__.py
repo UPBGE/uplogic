@@ -84,6 +84,7 @@ from bge.types import KX_GameObject as GameObject
 from mathutils import Matrix
 from mathutils import Vector
 import time as t
+from os import path, pardir
 
 import bpy
 import json
@@ -250,3 +251,14 @@ def check_vr_session_status() -> bool:
     """
     session = bpy.context.window_manager.xr_session_state
     return session is not None
+
+
+def get_master_folder(name):
+    parent_dir = path.join(bpy.path.abspath('//'))[:-1]
+    while not parent_dir.endswith(name):
+        pdir = path.abspath(path.join(parent_dir, pardir))
+        if pdir == parent_dir:
+            print("Can't go beyond drive's root!")
+            return ''
+        parent_dir = pdir
+    return parent_dir

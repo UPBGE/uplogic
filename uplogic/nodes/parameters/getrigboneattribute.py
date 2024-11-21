@@ -7,6 +7,7 @@ class GetRigBoneAttributeNode(ULParameterNode):
         ULParameterNode.__init__(self)
         self.armature = None
         self.bone = None
+        self.world_space = False
         self.VALUE = self.add_output(self.get_val)
         self.attribute = 'inherit_rotation'
         self._rig: Rig = None
@@ -17,5 +18,6 @@ class GetRigBoneAttributeNode(ULParameterNode):
             self._rig = Rig(armature)
 
         bone: RigBone = self._rig.bones[self.get_input(self.bone)]
-
+        self._rig.visualize()
+        bone.world_space = self.world_space
         return getattr(bone, self.attribute)
