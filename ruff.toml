@@ -1,0 +1,4 @@
+target-version = "py310"
+
+[format]
+quote-style = "single"
