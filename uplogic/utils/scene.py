@@ -1,5 +1,8 @@
 from bge import logic
 from mathutils import Vector
+from uplogic.events import schedule
+from uplogic.utils.math import lerp
+# from uplogic.console import error
 import bpy
 
 
@@ -41,7 +44,9 @@ def screen_to_world(x:float = None, y: float = None, distance: float = 10) -> Ve
 class FileLoader():
     '''Load the content of the currently open .blend file'''
 
-    def __init__(self, start=False):
+    def __init__(self, start=False, lerp_factor=0.2):
+        self.lerp_factor = lerp_factor
+        self._status = 0.0
         self.status = 0.0
         self.item = ''
         self.data = 'textures'
@@ -55,15 +60,15 @@ class FileLoader():
 
     @property
     def progress(self):
-        return self.status
+        return self._status
 
     @property
     def value(self):
-        return self.status
+        return self._status
 
     def start(self):
         self.create_object()
-        logic.getCurrentScene().pre_draw.append(self.load_next)
+        schedule(self.load_next)
 
     def create_object(self):
         self.bmesh = bmesh = bpy.data.meshes.new('ContentLoader')
@@ -78,31 +83,37 @@ class FileLoader():
         self.object = logic.getCurrentScene().convertBlenderObject(bobj)
         self.object.worldScale = (0.000001, 0.000001, 0.0000001)
 
+    def scale_loading_bar(self):
+        self.status = lerp(self.status, self._status, self.lerp_factor)
+        schedule(self.load_next if self.status == self._status else self.scale_loading_bar)
+
     def load_next(self):
         cam = logic.getCurrentScene().active_camera
         self.object.worldPosition = cam.worldPosition - cam.getAxisVect((0, 0, 1)) * 100
         if self.images:
             self.tex_image.image = self.images.pop()
-            self.status += 1 / self.datasize
+            self._status += 1 / self.datasize
             self.item = self.tex_image.image.name
-            self.on_progress(self.status)
+            schedule(self.scale_loading_bar)
+            self.on_progress(self._status)
             return
         if self.materials:
             mat = self.materials.pop()
             self.object.blenderObject.material_slots[0].material = mat
-            self.status += 1 / self.datasize
+            self._status += 1 / self.datasize
             self.data = 'shaders'
             self.item = mat.name
-            self.on_progress(self.status)
+            schedule(self.scale_loading_bar)
+            self.on_progress(self._status)
             return
         if self.meshes:
             self.bobj.data = self.meshes.pop()
-            self.status += 1 / self.datasize
-            self.data = 'objects'
+            self._status += 1 / self.datasize
+            self.data = 'meshes'
             self.item = self.bobj.data.name
-            self.on_progress(self.status)
+            schedule(self.scale_loading_bar)
+            self.on_progress(self._status)
             return
-        logic.getCurrentScene().pre_draw.remove(self.load_next)
         # XXX: Remove when crashing!
         self.object.endObject()
         bpy.data.materials.remove(self.temp_map)
@@ -120,15 +131,18 @@ class FileLoader():
 
 class SceneLoader():
 
-    def __init__(self, scene: str, start=True):
+    def __init__(self, scene: str, start=True, lerp_factor=0.2):
         if isinstance(scene, str):
             scene = bpy.data.scenes.get(scene)
         if not isinstance(scene, bpy.types.Scene):
-            print(f'SceneLoader: Scene {scene} not found!')
+            from uplogic.console import error
+            error(f'SceneLoader: Scene {scene} not found!')
             return
 
         self.scene = scene
+        self._status = 0.0
         self.status = 0.0
+        self.lerp_factor = lerp_factor
         self.item = ''
         self.data = 'textures'
         self.meshes = []
@@ -150,7 +164,7 @@ class SceneLoader():
 
     def start(self):
         self.create_object()
-        logic.getCurrentScene().pre_draw.append(self.load_next)
+        schedule(self.load_next)
 
     def create_object(self):
         self.bmesh = bmesh = bpy.data.meshes.new('ContentLoader')
@@ -165,31 +179,38 @@ class SceneLoader():
         self.object = logic.getCurrentScene().convertBlenderObject(bobj)
         self.object.worldScale = (0.000001, 0.000001, 0.0000001)
 
+    def scale_loading_bar(self):
+        self.status = lerp(self.status, self._status, self.lerp_factor)
+        schedule(self.load_next if self.status == self._status else self.scale_loading_bar)
+
     def load_next(self):
         cam = logic.getCurrentScene().active_camera
         self.object.worldPosition = cam.worldPosition - cam.getAxisVect((0, 0, 1)) * 100
         if self.images:
             self.tex_image.image = self.images.pop()
-            self.status += 1 / self.datasize
+            self._status += 1 / self.datasize
             self.item = self.tex_image.image.name
-            self.on_progress(self.status)
+            schedule(self.scale_loading_bar)
+            self.on_progress(self._status)
             return
         if self.materials:
             mat = self.materials.pop()
             self.object.blenderObject.material_slots[0].material = mat
-            self.status += 1 / self.datasize
+            self._status += 1 / self.datasize
             self.data = 'shaders'
             self.item = mat.name
-            self.on_progress(self.status)
+            schedule(self.scale_loading_bar)
+            self.on_progress(self._status)
             return
         if self.meshes:
             self.bobj.data = self.meshes.pop()
-            self.status += 1 / self.datasize
-            self.data = 'objects'
+            self._status += 1 / self.datasize
+            self.data = 'meshes'
             self.item = self.bobj.data.name
-            self.on_progress(self.status)
+            schedule(self.scale_loading_bar)
+            self.on_progress(self._status)
             return
-        logic.getCurrentScene().pre_draw.remove(self.load_next)
+        # logic.getCurrentScene().pre_draw.remove(self.load_next)
         self.object.endObject()
         bpy.data.materials.remove(self.temp_map)
         bpy.data.objects.remove(self.bobj)

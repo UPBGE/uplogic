@@ -14,6 +14,7 @@ class Client:
         self.socket = None
         self.port = port
         self.connected = False
+        self.disconnect_on_scene_end = True
         if connect:
             self.connect()
 
@@ -24,8 +25,9 @@ class Client:
         print(f'Connecting to {self.server}...')
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
-            if self.disconnect not in self.scene.onRemove:
-                self.scene.onRemove.append(self.disconnect)
+            if self.disconnect_on_scene_end:
+                if self.disconnect not in self.scene.onRemove:
+                    self.scene.onRemove.append(self.disconnect)
             self.socket.connect((self.server, self.port))
             self.connected = True
             thread = threading.Thread(target=self.update)

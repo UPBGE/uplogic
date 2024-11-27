@@ -19,6 +19,7 @@ class Server:
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.scene = bge.logic.getCurrentScene()
         self.running = False
+        self.shutdown_on_scene_end = True
         if start:
             self.start()
 
@@ -29,8 +30,8 @@ class Server:
         try:
             print(f'Starting Server: IP={self.ip} Port={self.port}')
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            bge.logic.getCurrentScene().onRemove.append(self.shutdown)
-            self.socket.setblocking(False)
+            if self.shutdown_on_scene_end:
+                bge.logic.getCurrentScene().onRemove.append(self.shutdown)
             self.socket.settimeout(.0001)
             self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             self.socket.bind((self.ip, self.port))
@@ -128,6 +129,7 @@ class Server:
             except BlockingIOError:
                 pass
             except socket.timeout:
+                # debug(f"Operation Timeout")
                 pass
             except TimeoutError:
                 pass
@@ -138,4 +140,3 @@ class Server:
                 print(e, 'Exception')
                 self.running = False
                 self.shutdown()
-        print('Server Shut Down')
