@@ -33,15 +33,19 @@ class ULLogicTree(ULLogicContainer):
         self.time_per_frame = 0.0
         self._do_remove = False
         self.aud_system_owner = False
-        self.init_glob_cats()
+        # self.init_glob_cats()
         self.audio_system = self.get_aud_system()
         self.sub_networks = []  # a list of networks updated by this network
         self.capslock_pressed = False
         self.evaluated_cells = 0
-        scene = self.scene = logic.getCurrentScene()
+        # scene = self.scene = logic.getCurrentScene()
         mainloop = logic.globalDict.get('loop')
         if mainloop:
             mainloop.logic_tree = self
+
+    @property
+    def owner(self):
+        return self._owner
 
     def get_aud_system(self):
         aud_sys = GlobalDB.retrieve('uplogic.audio').get('default')
@@ -50,37 +54,37 @@ class ULLogicTree(ULLogicContainer):
             return AudioSystem('default')
         return aud_sys
 
-    def init_glob_cats(self):
-        if not hasattr(bpy.types.Scene, 'nl_globals_initialized'):
-            scene = logic.getCurrentScene()
-            cats = getattr(
-                bpy.data.scenes[scene.name],
-                'nl_global_categories',
-                None
-            )
-            if not cats:
-                return
+    # def init_glob_cats(self):
+    #     if not hasattr(bpy.types.Scene, 'nl_globals_initialized'):
+    #         scene = logic.getCurrentScene()
+    #         cats = getattr(
+    #             bpy.data.scenes[scene.name],
+    #             'nl_global_categories',
+    #             None
+    #         )
+    #         if not cats:
+    #             return
 
-            msg = ''
+    #         msg = ''
 
-            dat = {
-                'STRING': 'string_val',
-                'FLOAT': 'float_val',
-                'INTEULR': 'int_val',
-                'BOOLEAN': 'bool_val',
-                'FILE_PATH': 'filepath_val'
-            }
+    #         dat = {
+    #             'STRING': 'string_val',
+    #             'FLOAT': 'float_val',
+    #             'INTEULR': 'int_val',
+    #             'BOOLEAN': 'bool_val',
+    #             'FILE_PATH': 'filepath_val'
+    #         }
 
-            for c in cats:
-                db = GlobalDB.retrieve(c.name)
-                msg += f' {c.name},'
-                for v in c.content:
-                    val = getattr(v, dat.get(v.value_type, 'FLOAT'), 0)
-                    db.put(v.name, val, v.persistent)
+    #         for c in cats:
+    #             db = GlobalDB.retrieve(c.name)
+    #             msg += f' {c.name},'
+    #             for v in c.content:
+    #                 val = getattr(v, dat.get(v.value_type, 'FLOAT'), 0)
+    #                 db.put(v.name, val, v.persistent)
 
-            if msg:
-                print(f'Globals Initialized:{msg[:-1]}')
-            bpy.types.Scene.nl_globals_initialized = True
+    #         if msg:
+    #             print(f'Globals Initialized:{msg[:-1]}')
+    #         bpy.types.Scene.nl_globals_initialized = True
 
     def set_mouse_position(self, screen_x, screen_y):
         self.mouse.position = (screen_x, screen_y)

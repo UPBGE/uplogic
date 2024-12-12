@@ -3,10 +3,10 @@ from gpu_extras.batch import batch_for_shader
 
 import math
 from mathutils import Vector
+import bpy
 
 try:
     from uplogic.utils.math import rotate2d
-
 except Exception:
     print('Not in game mode!')
     def rotate2d(origin, pivot, angle):
@@ -483,8 +483,10 @@ class Widget():
         indices = (
             (0, 1, 2), (2, 3, 0)
         )
-        # self._shader = gpu.shader.from_builtin('2D_UNIFORM_COLOR')
-        self._shader = gpu.types.GPUShader(self.vertex_shader, self.fragment_shader)
+        if bpy.app.version[0] < 4:
+            self._shader = gpu.shader.from_builtin('2D_UNIFORM_COLOR')
+        else:
+            self._shader = gpu.types.GPUShader(self.vertex_shader, self.fragment_shader)
         self._batch = batch_for_shader(self._shader, 'TRIS', {"pos": vertices}, indices=indices)
         self._batch_line = batch_for_shader(self._shader, 'LINE_STRIP', {"pos": vertices})
         self._batch_points = batch_for_shader(self._shader, 'POINTS', {"pos": vertices})

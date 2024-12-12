@@ -122,7 +122,13 @@ class EventManager():
     def receive(cls, id, target=None):
         get_event_manager()
         evt = cls.events.get(id, None)
-        return evt if evt and target is evt.target else None
+        if evt:
+            if evt.target is None:
+                return evt
+            elif evt.target is not None and evt.target is target:
+                return evt
+        return None
+        # return evt if evt and target is evt.target else None
 
     @classmethod
     def consume(cls, id):

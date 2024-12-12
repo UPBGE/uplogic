@@ -33,6 +33,7 @@ class Collision():
         self.target = None
         self.consumed = False
         self.active = False
+        self._old_target = None
         self._active = False
         self._objects = []
         self._old_objs = []
@@ -45,12 +46,9 @@ class Collision():
         self._done_objs = []
         self.register()
 
-    # @property
-    # def target(self):
-    #     return self._objects[-1] if self._objects else None
-
     def collision(self, obj, point, normal):
-        self._objects.append(obj)
+        if obj in self._objects:
+            return
         material = self.mat
         prop = self.prop
         bo = obj.blenderObject
@@ -64,40 +62,40 @@ class Collision():
         if prop:
             if prop not in obj.getPropertyNames():
                 return
-            # self.active = True
 
+        self._objects.append(obj)
         self._active = True
+        if obj not in self._old_objs:
+            self.consumed = False
+            self.target = obj
         self.active = not self.consumed if self.tap else True
-        # print(self.tap, self.consumed)
-        # if self.tap and self.consumed:
-        #     return
-        if obj not in self._done_objs:
+        if self.active and obj not in self._done_objs:
             if (
                 self.game_object.collisionGroup & obj.collisionMask and
-                self.game_object.collisionMask & obj.collisionGroup and
-                not (self.tap and self.consumed)
+                self.game_object.collisionMask & obj.collisionGroup
             ):
                 self.callback(obj, point, normal)
-            self._done_objs.append(obj)
+        self._done_objs.append(obj)
 
     def reset(self):
         if self.post_call:
             for obj in self._old_objs:
                 if obj not in self._done_objs:
                     self.callback(None, None, None)
+
+        self.consumed = self._active
+        self._active = False
+
         self._old_objs = self._done_objs
         self._done_objs = []
-        # self._objects = []
-        if not self.consumed and self._active:
-            self.consumed = True
-        elif self.consumed and not self._active:
-            self.consumed = False
-        self._active = False
+        self._objects = []
+        self.target = None
 
     def register(self):
         if self.collision not in self.game_object.collisionCallbacks:
             self.game_object.collisionCallbacks.append(self.collision)
-        logic.getCurrentScene().pre_draw.append(self.reset)
+        if self.reset not in logic.getCurrentScene().pre_draw:
+            logic.getCurrentScene().pre_draw.append(self.reset)
 
     def remove(self):
         self.game_object.collisionCallbacks.remove(self.collision)

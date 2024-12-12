@@ -125,7 +125,10 @@ class Image(Widget):
             x1, x0, y1, y0
         )
 
-        self._shader = gpu.types.GPUShader(self.vertex_shader, self.fragment_shader)
+        if bpy.app.version[0] < 4:
+            self._shader = gpu.shader.from_builtin('2D_IMAGE')
+        else:
+            self._shader = gpu.types.GPUShader(self.vertex_shader, self.fragment_shader)
         self._batch = batch_for_shader(
             self._shader, 'TRI_STRIP',
             {
@@ -257,7 +260,11 @@ class Sprite(Image):
             y1,
             y0
         )
-        self._shader = gpu.types.GPUShader(self.tex_vert_shader, self.tex_frag_shader)
+
+        if bpy.app.version[0] < 4:
+            self._shader = gpu.shader.from_builtin('2D_IMAGE')
+        else:
+            self._shader = gpu.types.GPUShader(self.tex_vert_shader, self.tex_frag_shader)
         self._shader.uniform_float("alpha", self.opacity)
 
         idx = self.idx

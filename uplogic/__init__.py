@@ -1,11 +1,12 @@
 __version__ = '4.0b4'
 
 try:
+    from . import console
     from . import animation
     from . import audio
+    from . import data
     from . import events
     from . import input
-    from . import console
     from . import network
     from . import physics
     from . import shaders

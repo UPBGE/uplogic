@@ -253,12 +253,12 @@ def check_vr_session_status() -> bool:
     return session is not None
 
 
-def get_master_folder(name):
-    parent_dir = path.join(bpy.path.abspath('//'))[:-1]
-    while not parent_dir.endswith(name):
-        pdir = path.abspath(path.join(parent_dir, pardir))
-        if pdir == parent_dir:
+def get_project_folder(folder_name, *structure):
+    directory = path.join(bpy.path.abspath('//'))[:-1]
+    while not directory.endswith(folder_name):
+        pdir = path.abspath(path.join(directory, pardir))
+        if pdir == directory:
             print("Can't go beyond drive's root!")
             return ''
-        parent_dir = pdir
-    return parent_dir
+        directory = pdir
+    return path.join(directory, *structure)

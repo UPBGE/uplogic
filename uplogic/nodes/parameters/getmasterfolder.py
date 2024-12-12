@@ -1,5 +1,5 @@
 from uplogic.nodes import ULParameterNode
-from uplogic.utils import get_master_folder
+from uplogic.utils import get_project_folder
 import bpy
 
 
@@ -12,4 +12,4 @@ class GetMasterFolderNode(ULParameterNode):
     def _get_path(self):
         name = self.get_input(self.name)
 
-        return get_master_folder(name)
+        return get_project_folder(name)

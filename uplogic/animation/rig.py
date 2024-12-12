@@ -1,7 +1,7 @@
 from bge.types import BL_ArmatureChannel, BL_ArmatureObject
 from bge.logic import ROT_MODE_XYZ
 from uplogic.utils.objects import GameObject
-from mathutils import Vector, Quaternion, Matrix
+from mathutils import Vector, Quaternion, Matrix, Euler
 from uplogic.utils.visualize import draw_line
 
 
@@ -46,6 +46,26 @@ class RigBone():
     @location.setter
     def location(self, val):
         self._pose.bones[self.bone.name].location = val
+
+    @property
+    def pose_rotation_euler(self):
+        bone = self._pose.bones[self.bone.name]
+        _mode = bone.rotation_mode
+        # bone.rotation_mode = ROT_MODE_XYZ
+        bone.rotation_mode = 'XYZ'
+        res = bone.rotation_euler
+        bone.rotation_mode = _mode
+        return res
+
+    @pose_rotation_euler.setter
+    def pose_rotation_euler(self, euler: Euler):
+        bone = self._pose.bones[self.bone.name]
+        _mode = bone.rotation_mode
+        # bone.rotation_mode = ROT_MODE_XYZ
+        bone.rotation_mode = 'XYZ'
+        bone.rotation_euler = Euler(euler)
+        self.armature.blenderObject.update_tag()
+        bone.rotation_mode = _mode
 
     @property
     def head(self) -> Vector:
@@ -200,7 +220,11 @@ class RigBone():
 
     @property
     def worldOrientation(self):
-        return self.bone.location @ self.bone.pose_matrix.inverted()
+        _mode = self.bone.rotation_mode
+        self.bone.rotation_mode = ROT_MODE_XYZ
+        res = self.bone.rotation_euler
+        self.bone.rotation_mode = _mode
+        return res
 
     @worldOrientation.setter
     def worldOrientation(self, val: Matrix):

@@ -99,10 +99,12 @@ class Server:
                 msg = pickle.loads(bmsg)
                 if not bmsg or msg == DISCONNECT_MSG:
                     print('Client disconnected.')
-                    self.clients.remove(conn)
                     connected = False
                 else:
                     self.on_receive(msg)
+            except ConnectionResetError:
+                error(f'{e.__class__.__name__}: {e}')
+                connected = False
             except socket.error as e:
                 error(f'{e.__class__.__name__}: {e}')
                 connected = False
@@ -112,6 +114,7 @@ class Server:
                 error(f'{e.__class__.__name__}: {e}')
                 error('Threaded Client Error')
                 connected = False
+        self.clients.remove(conn)
         conn.send(pickle.dumps(DISCONNECT_MSG))
         print('Closing Connection...')
         conn.close()
@@ -122,7 +125,7 @@ class Server:
         while self.running:
             try:
                 conn, add = self.socket.accept()
-                print(f"Connected to: {add}")
+                print(f"Established connection to: {add}")
                 thread = threading.Thread(target=self.threaded_client, args=(conn, add))
                 thread.start()
                 debug(f'[ACTIVE CONNECTIONS] {len(self.clients)}')

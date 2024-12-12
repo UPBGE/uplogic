@@ -91,7 +91,7 @@ def write_file(filepath, data) -> None:
     """Write data in form of `dict` back into a file.\n
     Supports `.ini`, `.json` and `.toml` file formats.
 
-    :param `filepath`: Full path to the file.
+    :param `filepath`: Full path to the file, including file ending.
     :param `data`: `dict` to save back into the file.
     """
     file = FileWrapper(filepath)

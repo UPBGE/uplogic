@@ -23,4 +23,5 @@ class ULHandleEvent(ULConditionNode):
         return self.event.messenger if self.event else None
 
     def evaluate(self):
-        self.event = receive(self.get_input(self.subject), self.get_input(self.target))
+        target = self.get_input(self.target)
+        self.event = receive(self.get_input(self.subject), target if target else self.network.owner)

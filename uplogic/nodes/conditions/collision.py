@@ -70,6 +70,7 @@ class ULCollision(ULConditionNode):
                 not self.get_input(self.pulse),
                 True
             )
+        # self._collision.reset()
         
         
     # def _collision_callback(self, obj: KX_GameObject, point: Vector, normal: Vector):

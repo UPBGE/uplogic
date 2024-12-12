@@ -113,7 +113,7 @@ class ConsoleLayout(Canvas):
         self.nameplate = Label(text='', shadow=True, relative={'pos': True}, halign='center', font_size=13)
         self.nameplate.update = self.update_nameplate
         self.canvas.add_widget(self.nameplate)
-        self.font_size = 14
+        self.font_size = 12
         # self.info_mode = False
         self.position = 'bottom'
         self.info_mode = getattr(bpy.context.scene, 'screen_console_open', False)
@@ -284,7 +284,7 @@ class ConsoleLayout(Canvas):
         now = datetime.now()
         current_time = f'[{now.strftime("%H:%M:%S")}]' if time else "\t\t\t\t  ".replace('\t', '    ')
         label_class = CommandLabel if command else Label
-        # self.layout.add_widget(label_class(text=f'{current_time}  {msg}', pos=[5, 10], font_color=COLORS[type], shadow=True, font_size=self.font_size))
+        self.layout.add_widget(label_class(text=f'{current_time}  {msg}', pos=[5, 10], font_color=COLORS[type], shadow=True, font_size=self.font_size))
         self._prev_msg = msg
         self.arrange()
 
@@ -300,7 +300,7 @@ class ConsoleLayout(Canvas):
             if child is self.input:
                 continue
             child.pos[1] = y
-            y += cheight * 1.5
+            y += cheight * 1.8
             if child.pos[1] > lheight - cheight:
                 self.layout.remove_widget(child)
             child.opacity = 1 - (i * (1/amount))

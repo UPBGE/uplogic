@@ -52,3 +52,69 @@ class GameProperty():
             return
         setattr(inst.__class__, name, prop)
 
+
+import bpy
+from bge import logic
+
+
+def init_glob_cats():
+    # if not hasattr(bpy.types.Scene, 'nl_globals_initialized'):
+    scene = logic.getCurrentScene()
+    cats = getattr(
+        bpy.data.scenes[scene.name],
+        'nl_global_categories',
+        None
+    )
+    print(cats)
+    if not cats:
+        print('No global categories found in', bpy.data.scenes[scene.name], bpy.data.scenes)
+        return
+    print(bpy.data.scenes[scene.name], bpy.data.scenes)
+
+    msg = ''
+
+    dat = {
+        '0': 'float_val',
+        '1': 'string_val',
+        '2': 'int_val',
+        '3': 'bool_val',
+        '17': 'filepath_val',
+        '4': 'vec_val',
+        '5': 'color_val',
+        '6': 'color_alpha_val',
+        '7': 'obj_val',
+        '8': 'collection_val',
+        '9': 'material_val',
+        '10': 'mesh_val',
+        '11': 'node_tree_val',
+        '12': 'action_val',
+        '13': 'text_val',
+        '14': 'sound_val',
+        '15': 'image_val',
+        '16': 'font_val'
+    }
+
+    for c in cats:
+        db = GlobalDB.retrieve(c.name)
+        msg += f' {c.name},'
+        for v in c.content:
+            val = getattr(v, dat.get(v.value_type, '0'), 0)
+            if isinstance(val, bpy.types.Object):
+                val = logic.getCurrentScene().getGameObjectFromObject(val)
+            elif int(v.value_type) in [4, 5, 6]:
+                val = Vector(val)
+            db.put(v.name, val, v.persistent)
+
+    if msg:
+        print(f'Globals Initialized:{msg[:-1]}')
+    bpy.types.Scene.nl_globals_initialized = True
+
+
+print(bpy.data.filepath)
+# print(bpy.context.scene.nl_global_categories)
+print(bpy.context.scene.objects['Cube'].logic_trees)
+print('AAAAAAAAAAAAAAAAAAAA', hasattr(bpy.types.Scene, 'nl_globals_initialized'))
+init_glob_cats()
+
+# if init_glob_cats not in bpy.app.handlers.load_post:
+#     bpy.app.handlers.load_post.append(init_glob_cats)
