@@ -110,11 +110,5 @@ def init_glob_cats():
     bpy.types.Scene.nl_globals_initialized = True
 
 
-print(bpy.data.filepath)
-# print(bpy.context.scene.nl_global_categories)
-print(bpy.context.scene.objects['Cube'].logic_trees)
-print('AAAAAAAAAAAAAAAAAAAA', hasattr(bpy.types.Scene, 'nl_globals_initialized'))
-init_glob_cats()
-
 # if init_glob_cats not in bpy.app.handlers.load_post:
 #     bpy.app.handlers.load_post.append(init_glob_cats)
