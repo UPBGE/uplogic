@@ -16,6 +16,7 @@ from .blur import Blur
 from .dof import DoF
 from .lens import Lens
 from .texture import Texture
+from .texture import Mask
 from .chromaticaberration import ChromaticAberration
 from .sharpen import Sharpen
 from .splitscreen import SplitScreen

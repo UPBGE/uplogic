@@ -46,7 +46,7 @@ void main()
 """
 
     def __init__(self, texture: bpy.types.Image = None, opacity: float = 1.0, pos=Vector((0, 0)), size=Vector((1, 1)), idx: int = None) -> None:
-        texture = bpy.data.images.get(texture, texture)
+        texture = bpy.data.images.get(str(texture), texture)
         if not isinstance(texture, bpy.types.Image):
             error("'Texture': first argument requires an object of type 'bpy.types.Image'!")
             return
