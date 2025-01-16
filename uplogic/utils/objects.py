@@ -515,7 +515,6 @@ class Curve(GameObject):
     def eval_obj(self):
         eval_obj = bpy.data.objects.get(f'{self.name}_eval_obj', None)
         if eval_obj is None:
-            print('CREATING EVAL')
             eval_obj = bpy.data.objects.new(f'{self.name}_eval_obj', object_data=None)
             bpy.context.collection.objects.link(eval_obj)
             const = eval_obj.constraints.new('FOLLOW_PATH')
