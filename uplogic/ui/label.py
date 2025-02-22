@@ -134,9 +134,12 @@ class Label(Widget):
 
     @property
     def dimensions(self):
-        dim = blf.dimensions(self.font, self.text)
+        text = self.text
+        if len(self.lines):
+            text = max(self.lines, key=len)
+        dim = blf.dimensions(self.font, text)
         lines = len(self.lines) or 1
-        return (dim[0], blf.dimensions(self.font, 'Aj')[1] * lines)
+        return (dim[0], blf.dimensions(self.font, 'Aj')[1] * lines * self.line_height)
 
     @property
     def _draw_size(self):

@@ -68,8 +68,8 @@ STICKS = {
 }
 
 
-_active_buttons = {}
-_active_axis = {}
+_active_buttons = [{} for x in logic.joysticks]
+_active_axis = [{} for x in logic.joysticks]
 
 
 def gamepad_button(
@@ -88,13 +88,12 @@ def gamepad_button(
     state = button in gamepad.activeButtons
     if tap or released:
         if released:
-            tap_cond = _active_buttons.get(button, False)
+            tap_cond = _active_buttons[idx].get(button, False)
             _active_buttons[button] = state
             return not state and tap_cond
-        tap_cond = not _active_buttons.get(button, False)
-        _active_buttons[button] = state
+        tap_cond = not _active_buttons[idx].get(button, False)
+        _active_buttons[idx][button] = state
         return state and tap_cond
-    # _active_buttons[button] = state
     return state
 
 

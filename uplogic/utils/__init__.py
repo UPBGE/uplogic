@@ -254,6 +254,19 @@ def check_vr_session_status() -> bool:
 
 
 def get_project_folder(folder_name, *structure):
+    from uplogic.console import warning
+    warning("'get_project_folder' is deprecated, please use 'get_project_path' instead.")
+    directory = path.join(bpy.path.abspath('//'))[:-1]
+    while not directory.endswith(folder_name):
+        pdir = path.abspath(path.join(directory, pardir))
+        if pdir == directory:
+            print("Can't go beyond drive's root!")
+            return ''
+        directory = pdir
+    return path.join(directory, *structure)
+
+
+def get_project_path(folder_name, *structure):
     directory = path.join(bpy.path.abspath('//'))[:-1]
     while not directory.endswith(folder_name):
         pdir = path.abspath(path.join(directory, pardir))

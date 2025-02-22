@@ -10,4 +10,5 @@ from .sound import Sample3D  # noqa
 from .sound import ULSound3D, Sound3D  # noqa
 from .sound import ULSpeaker2D, Speaker2D  # noqa
 from .sound import ULSpeaker3D, Speaker3D  # noqa
+from .sound import play_sound_2d, play_sound_3d  # noqa
 from .music import ULMusic, Music  # noqa

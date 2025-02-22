@@ -428,3 +428,35 @@ class ULAction(Action):
     finished. This is useful for setting animation frames regardless of the
     action state.'''
     _deprecated = True
+
+
+def start_action(
+        game_object: GameObject,
+        action_name: str,
+        start_frame: int = 0,
+        end_frame: int = 250,
+        layer: int = -1,
+        priority: int = 0,
+        blendin: float = 0,
+        play_mode: str = 'play',
+        speed: float = 1,
+        intensity: float = 1,
+        blend_mode: str = 'blend',
+        keep: bool = False,
+        on_start = None
+    ):
+        return Action(
+            game_object=game_object,
+            action_name=action_name,
+            start_frame=start_frame,
+            end_frame=end_frame,
+            layer=layer,
+            priority=priority,
+            blendin=blendin,
+            play_mode=play_mode,
+            speed=speed,
+            intensity=intensity,
+            blend_mode=blend_mode,
+            keep=keep,
+            on_start=on_start
+        )

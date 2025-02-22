@@ -149,8 +149,11 @@ class Image(Widget):
             super().draw()
             return
         self._shader.bind()
-        self._shader.uniform_float("alpha", self.opacity)
-        self._shader.uniform_sampler("image", self.texture)
+        if bpy.app.version[0] >= 4:
+            self._shader.uniform_float("alpha", self.opacity)
+            self._shader.uniform_sampler("image", self.texture)
+        else:
+            self._shader.uniform_sampler("image", self.texture)
         self._batch.draw(self._shader)
         super().draw()
 
@@ -265,7 +268,10 @@ class Sprite(Image):
             self._shader = gpu.shader.from_builtin('2D_IMAGE')
         else:
             self._shader = gpu.types.GPUShader(self.tex_vert_shader, self.tex_frag_shader)
-        self._shader.uniform_float("alpha", self.opacity)
+        if bpy.app.version[0] >= 4:
+            self._shader.uniform_float("alpha", self.opacity)
+        else:
+            self._shader.uniform_sampler("image", self.texture)
 
         idx = self.idx
         col = idx % self.cols

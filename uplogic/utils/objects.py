@@ -610,6 +610,7 @@ class Curve(GameObject):
             bpy.data.objects.remove(eval_obj)
         self.blenderObject.data.eval_time = time
         return Vector((matrix[0][3], matrix[1][3], matrix[2][3]))
+        return Vector()
 
 
 class ULCurve(Curve):

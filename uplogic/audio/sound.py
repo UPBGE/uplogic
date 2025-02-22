@@ -778,3 +778,59 @@ class Speaker3D(Sound3D):
 
 class ULSpeaker3D(Speaker3D):
     _deprecated = True
+
+
+def play_sound_2d(
+        file: str = '',
+        volume: float = 1,
+        pitch: float = 1,
+        loop_count: int = 0,
+        lowpass = False,
+        ignore_timescale = True,
+        aud_sys: str = 'default'
+    ):
+        return Sound2D(
+            file=file,
+            volume=volume,
+            pitch=pitch,
+            loop_count=loop_count,
+            lowpass=lowpass,
+            ignore_timescale=ignore_timescale,
+            aud_sys=aud_sys
+        )
+
+
+def play_sound_3d(
+        speaker: GameObject or Vector = None,
+        file: str = '',
+        occlusion: bool = False,
+        transition_speed: float = .1,
+        cutoff_frequency: float = .1,
+        loop_count: int = 0,
+        pitch: float = 1,
+        volume: float = 1,
+        reverb=False,
+        attenuation: float = 1,
+        distance_ref: float = 1,
+        cone_angle: list[float] = [360, 360],
+        cone_outer_volume: float = 0,
+        ignore_timescale: bool = False,
+        aud_sys: str = 'default'
+    ):
+        return Sound3D(
+            speaker=speaker,
+            file=file,
+            occlusion=occlusion,
+            transition_speed=transition_speed,
+            cutoff_frequency=cutoff_frequency,
+            loop_count=loop_count,
+            pitch=pitch,
+            volume=volume,
+            reverb=reverb,
+            attenuation=attenuation,
+            distance_ref=distance_ref,
+            cone_angle=cone_angle,
+            cone_outer_volume=cone_outer_volume,
+            ignore_timescale=ignore_timescale,
+            aud_sys=aud_sys
+        )
