@@ -24,9 +24,9 @@ def world_to_screen(position: Vector = Vector((0, 0, 0)), inv_y: bool = True) ->
 def screen_to_world(x:float = None, y: float = None, distance: float = 10) -> Vector:
     """Get the world coordinates of a point on the screen in a given distance.
     
-    :param `x`: X position on the screen. Leave at `None` to use mouse position.
-    :param `y`: Y position on the screen. Leave at `None` to use mouse position.
-    :param `distance`: The distance from the camera at which to get the position.
+    :param x: X position on the screen. Leave at `None` to use mouse position.
+    :param y: Y position on the screen. Leave at `None` to use mouse position.
+    :param distance: The distance from the camera at which to get the position.
     
     :returns: Position as `Vector`
     """

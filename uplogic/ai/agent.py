@@ -11,13 +11,13 @@ from mathutils import Vector
 class Agent(NavContainer):
     """Simple AI Agent implementation that uses a Navigation Mesh.
 
-    :param `game_object`: The game object acting as the agent.
-    :param `speed`: The speed this agent will move at towards the target.
-    :param `threshold`: Reach threshold for Navigation Path points. If none is set, `speed` will be used as theshold.
-    :param `bevel`: Bevel distance at corners. This will cut corners outside of the navmesh.
-    :param `dynamic`: Whether to move the agent using forces or pure vectors.
-    :param `obstacle_mask`: Objects in this collision group will be recognized as obstacles. Set to `65535` for all objects.
-    :param `height`: Z-Offset for the path calculation.
+    :param game_object: The game object acting as the agent.
+    :param speed: The speed this agent will move at towards the target.
+    :param threshold: Reach threshold for Navigation Path points. If none is set, `speed` will be used as theshold.
+    :param bevel: Bevel distance at corners. This will cut corners outside of the navmesh.
+    :param dynamic: Whether to move the agent using forces or pure vectors.
+    :param obstacle_mask: Objects in this collision group will be recognized as obstacles. Set to `65535` for all objects.
+    :param height: Z-Offset for the path calculation.
     """
     def __init__(
             self,

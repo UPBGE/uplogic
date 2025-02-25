@@ -49,21 +49,21 @@ class Action():
     Wrapper class for animated actions that provides additional parameters
     and quick access properties.
 
-    :param `game_object`: The `KX_GameObject` on which to play the action.
-    :param `action_name`: The name of the action  of `bpy.data.actions`.
-    :param `start_frame`: The first frame of the action.
-    :param `end_frame`: The last frame of the action.
-    :param `layer`: The layer on which to play the action. Leave at -1 for
+    :param game_object: The `KX_GameObject` on which to play the action.
+    :param action_name: The name of the action  of `bpy.data.actions`.
+    :param start_frame: The first frame of the action.
+    :param end_frame: The last frame of the action.
+    :param layer: The layer on which to play the action. Leave at -1 for
     auto-selection.
-    :param `priority`: [Disabled] | The priority with which to play the action (only relevant
+    :param priority: [Disabled] | The priority with which to play the action (only relevant
     for actions on the same layer).
-    :param `blendin`: Use this many frames to "blend into" the animation.
-    :param `play_mode`: Playback mode of [`'play'`, `'loop'`, `'pingpong'`].
-    :param `speed`: Playback speed.
-    :param `intensity`: "Intensity" of the action; Use this to blend
+    :param blendin: Use this many frames to "blend into" the animation.
+    :param play_mode: Playback mode of [`'play'`, `'loop'`, `'pingpong'`].
+    :param speed: Playback speed.
+    :param intensity: "Intensity" of the action; Use this to blend
     animations on different layers together.
-    :param `blend_mode`: Mode of blending of [`'blend'`, `'add'`]
-    :param `keep`: Whether to keep the animation cached after playback has
+    :param blend_mode: Mode of blending of [`'blend'`, `'add'`]
+    :param keep: Whether to keep the animation cached after playback has
     finished. This is useful for setting animation frames regardless of the
     action state.
     '''
@@ -379,8 +379,8 @@ class Action():
     def randomize_frame(self, min: float = -1, max: float = -1):
         '''Randomize the frame of this animation.
 
-        :param `min`: Min range of randomization.
-        :param `max`: Max range of randomization.
+        :param min: Min range of randomization.
+        :param max: Max range of randomization.
         '''
         if min == -1:
             min = self.start_frame
@@ -392,8 +392,8 @@ class Action():
     def randomize_speed(self, min: float = .9, max: float = 1.1):
         '''Randomize the speed of this animation.
 
-        :param `min`: Min range of randomization.
-        :param `max`: Max range of randomization.
+        :param min: Min range of randomization.
+        :param max: Max range of randomization.
         '''
         delta = max - min
         self.speed = min + (delta * random())
@@ -410,21 +410,21 @@ class ULAction(Action):
     Wrapper class for animated actions that provides additional parameters
     and quick access properties.
 
-    :param `game_object`: The `KX_GameObject` on which to play the action.
-    :param `action_name`: The name of the action  of `bpy.data.actions`.
-    :param `start_frame`: The first frame of the action.
-    :param `end_frame`: The last frame of the action.
-    :param `layer`: The layer on which to play the action. Leave at -1 for
+    :param game_object: The `KX_GameObject` on which to play the action.
+    :param action_name: The name of the action  of `bpy.data.actions`.
+    :param start_frame: The first frame of the action.
+    :param end_frame: The last frame of the action.
+    :param layer: The layer on which to play the action. Leave at -1 for
     auto-selection.
-    :param `priority`: The priority with which to play the action (only relevant
+    :param priority: The priority with which to play the action (only relevant
     for actions on the same layer).
-    :param `blendin`: Use this many frames to "blend into" the animation.
-    :param `play_mode`: Playback mode of [`'play'`, `'loop'`, `'pingpong'`].
-    :param `speed`: Playback speed.
-    :param `intensity`: "Intensity" of the action; Use this to blend
+    :param blendin: Use this many frames to "blend into" the animation.
+    :param play_mode: Playback mode of [`'play'`, `'loop'`, `'pingpong'`].
+    :param speed: Playback speed.
+    :param intensity: "Intensity" of the action; Use this to blend
     animations on different layers together.
-    :param `blend_mode`: Mode of blending of [`'blend'`, `'add'`]
-    :param `keep`: Whether to keep the animation cached after playback has
+    :param blend_mode: Mode of blending of [`'blend'`, `'add'`]
+    :param keep: Whether to keep the animation cached after playback has
     finished. This is useful for setting animation frames regardless of the
     action state.'''
     _deprecated = True

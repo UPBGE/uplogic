@@ -11,13 +11,13 @@ class Sequence():
     '''
     Play an image animation through a material node.
 
-    :param `material`: Name of the material to play the animation on.
+    :param material: Name of the material to play the animation on.
     Each Object with this material applied will play the animation.
-    :param `node`: Name of the node the image animation is loaded on.
-    :param `start_frame`: Starting frame of the animation.
-    :param `end_frame`: End frame of the animation.
-    :param `fps`: Frames per second.
-    :param `mode`: Animation mode, `str` of [`play`, `loop`, `pingpong`]
+    :param node: Name of the node the image animation is loaded on.
+    :param start_frame: Starting frame of the animation.
+    :param end_frame: End frame of the animation.
+    :param fps: Frames per second.
+    :param mode: Animation mode, `str` of [`play`, `loop`, `pingpong`]
     '''
 
     _deprecated = False
@@ -189,12 +189,12 @@ class ULSequence(Sequence):
 
     Play an image animation through a material node.
 
-    :param `material`: Name of the material to play the animation on.
+    :param material: Name of the material to play the animation on.
     Each Object with this material applied will play the animation.
-    :param `node`: Name of the node the image animation is loaded on.
-    :param `start_frame`: Starting frame of the animation.
-    :param `end_frame`: End frame of the animation.
-    :param `fps`: Frames per second.
-    :param `mode`: Animation mode, `str` of [`play`, `loop`, `pingpong`]
+    :param node: Name of the node the image animation is loaded on.
+    :param start_frame: Starting frame of the animation.
+    :param end_frame: End frame of the animation.
+    :param fps: Frames per second.
+    :param mode: Animation mode, `str` of [`play`, `loop`, `pingpong`]
     '''
     _deprecated = True

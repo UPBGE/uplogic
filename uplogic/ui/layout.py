@@ -57,6 +57,15 @@ class Layout(Widget):
             val = 1
         self._border_width = int(val)
 
+    def check_inside(self, x, y):
+        y = render.getWindowHeight() - y  # XXX: Change for 4.2
+        dpos = self._draw_pos
+        dsize = self._draw_size
+        return (
+            dpos[0] < x < dpos[0] + dsize[0] and
+            dpos[1] < y < dpos[1] + dsize[1]
+        )
+
     def draw(self):
         super()._setup_draw()
         gpu.state.line_width_set(self.border_width)

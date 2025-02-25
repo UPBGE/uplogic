@@ -408,3 +408,4 @@ def rotate_by_euler(origin: Vector, pivot: Vector, angles: Euler):
     transmat = angles.to_matrix()
 
     return pivot + origin @ transmat
+
