@@ -192,8 +192,10 @@ def consume(id: int):
     return EventManager.consume(id)
 
 
-def bind(id: int, callback) -> None:
+def bind(id: int, callback):
     '''Bind a callback to an event.
+
+    Required signature: `def cb(evt)`
 
     :param `id`: Name of the event; can be anything, not just `str`.
     :param `callback`: This callback will be called every time the event is
