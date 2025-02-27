@@ -39,7 +39,7 @@ class ActionSystem():
 
     @classmethod
     def find_free_layer(cls, action):
-        """Incrementally find the next free layer for a `Action`.
+        """Incrementally find the next free layer for an `Action`.
 
         :param action: The `Action` for which to find a free layer.
         """

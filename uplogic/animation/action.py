@@ -122,9 +122,6 @@ class Action():
         '''Blending Mode of the animation.'''
         if layer == -1:
             ActionSystem.find_free_layer(self)
-        # elif ActionSystem.check_layer(self):
-            # self.finished = True
-            # return
         layer = self.layer
         layer_action_name = game_object.getActionName(layer)
         same_action = layer_action_name == action_name
@@ -162,6 +159,13 @@ class Action():
         schedule(self, 0, ACTION_FINISHED)
 
     def frame_trigger(self, frame, callback, *args):
+        '''Bind a callback to a specific frame of the animation. The callback will be invoked once the
+        current frame has passed the given frame (both forward and reverse).
+
+        :param frame: Invoke the callback when action has passed this frame.
+        :param callback: Valid signatures: `def cb(evt)`.
+        :param *args: Arguments to be passed to the callback.
+        '''
         self._callbacks.append(ActionCallback(self, callback, frame, *args))
 
     @property

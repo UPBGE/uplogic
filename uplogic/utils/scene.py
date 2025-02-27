@@ -1,4 +1,5 @@
 from bge import logic
+from bge import render
 from mathutils import Vector
 from uplogic.events import schedule
 from uplogic.utils.math import lerp
@@ -41,8 +42,22 @@ def screen_to_world(x:float = None, y: float = None, distance: float = 10) -> Ve
     return origin + (aim)
 
 
+def screen_to_pixels(pos: Vector):
+    """Transform a Vector from 0-1 to pixel position on screen.
+    
+    :param pos: Iterable with 2 items, `[x, y]`"""
+    return Vector((
+        pos[0] * render.getWindowWidth(),
+        pos[1] * render.getWindowHeight()
+    ))
+
+
 class FileLoader():
-    '''Load the content of the currently open .blend file'''
+    '''Load the content of the currently open `.blend` file.
+
+    :param start: Start loading as soon as an instance is created.
+    :param lerp_factor: Smooth the progress before loading the next item.
+    '''
 
     def __init__(self, start=False, lerp_factor=0.2):
         self.lerp_factor = lerp_factor
@@ -130,6 +145,12 @@ class FileLoader():
 
 
 class SceneLoader():
+    '''Load the content of a scene in the currently open `.blend` file.
+
+    :param scene: Name of the scene to load.
+    :param start: Start loading as soon as an instance is created.
+    :param lerp_factor: Smooth the progress before loading the next item.
+    '''
 
     def __init__(self, scene: str, start=True, lerp_factor=0.2):
         if isinstance(scene, str):

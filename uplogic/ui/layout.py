@@ -1,6 +1,7 @@
 from .widget import Widget
 import gpu
 from bge import render
+import bpy
 from mathutils import Vector
 from ..utils.math import rotate2d
 from ..events import schedule, ScheduledEvent
@@ -58,7 +59,8 @@ class Layout(Widget):
         self._border_width = int(val)
 
     def check_inside(self, x, y):
-        y = render.getWindowHeight() - y  # XXX: Change for 4.2
+        if bpy.app.version[0] < 4:
+            y = render.getWindowHeight() - y
         dpos = self._draw_pos
         dsize = self._draw_size
         return (

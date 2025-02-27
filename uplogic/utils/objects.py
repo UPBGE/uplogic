@@ -516,10 +516,11 @@ class Curve(GameObject):
         eval_obj = bpy.data.objects.get(f'{self.name}_eval_obj', None)
         if eval_obj is None:
             eval_obj = bpy.data.objects.new(f'{self.name}_eval_obj', object_data=None)
-            bpy.context.collection.objects.link(eval_obj)
+            bpy.context.scene.collection.objects.link(eval_obj)
+            # bpy.context.collection.objects.link(eval_obj)
             const = eval_obj.constraints.new('FOLLOW_PATH')
             const.target = self.blenderObject
-        return eval_obj
+        return None
 
     @property
     def name(self):
@@ -610,7 +611,7 @@ class Curve(GameObject):
             bpy.data.objects.remove(eval_obj)
         self.blenderObject.data.eval_time = time
         return Vector((matrix[0][3], matrix[1][3], matrix[2][3]))
-        return Vector()
+        # return Vector()
 
 
 class ULCurve(Curve):
