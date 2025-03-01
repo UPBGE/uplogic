@@ -14,11 +14,11 @@ class OSC_Client:
 
         self.client = udp_client.DispatchClient(args.ip, args.port)
         self.map('/icom', self._print_debug)
-        print('OSC Client Connected')
-    
+        print(f'OSC Client Connected to {server}')
+
     def _print_debug(self, address, args):
         print(address, args)
-        
+
     def map(self, address: str, callback, *args: list, needs_reply_address: bool = False):
         """Map a callback to an address.
         Valid callback signatures:
@@ -35,5 +35,8 @@ class OSC_Client:
         """
         return self.client.dispatcher.map(address, callback, *args, needs_reply_address=needs_reply_address)
 
-    def send(self, address, content):
-        self.client.send_message(address=address, value=content)
+    def send(self, address, content=[0]):
+        try:
+            self.client.send_message(address=address, value=content)
+        except:
+            print('oops')

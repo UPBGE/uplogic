@@ -192,7 +192,7 @@ def consume(id: int):
     return EventManager.consume(id)
 
 
-def bind(id: int, callback):
+def bind(id: int, callback, *args):
     '''Bind a callback to an event.
 
     Required signature: `def cb(evt)`
@@ -202,15 +202,16 @@ def bind(id: int, callback):
     triggered.
     '''
     class _BoundCallback():
-        def __init__(self, id, cb) -> None:
+        def __init__(self, id, cb, *args) -> None:
             self.id = id
             self.callback = cb
+            self.args = args
             EventManager.bind(self._check_evt)
 
         def _check_evt(self):
             evt = receive(self.id)
             if evt:
-                self.callback(evt)
+                self.callback(evt, *self.args)
 
         def unbind(self):
             EventManager.unbind(self._check_evt)
@@ -218,7 +219,7 @@ def bind(id: int, callback):
         def release(self):
             EventManager.unbind(self._check_evt)
 
-    return _BoundCallback(id, callback)
+    return _BoundCallback(id, callback, *args)
 
 
 class ULEvent(Event):

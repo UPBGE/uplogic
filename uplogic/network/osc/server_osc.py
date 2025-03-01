@@ -19,7 +19,7 @@ class OSC_Server:
 
         self.dispatcher = Dispatcher()
         self.map('/icom', self._print_debug)
-        self.server = osc_server.BlockingOSCUDPServer(
+        self.server = osc_server.ThreadingOSCUDPServer(
             (args.ip, args.port), self.dispatcher)
         self.thread = threading.Thread(target=self.server.serve_forever)
         self.thread.start()
