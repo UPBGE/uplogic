@@ -126,7 +126,7 @@ class FloatLayout(Layout):
         return [0, 0]
 
 
-class ArrangedLayout(Layout):
+class ArrangedLayout(RelativeLayout):
     """Metaclass"""
 
     @property
@@ -338,17 +338,16 @@ class GridLayout(BoxLayout):
         if self.orientation == 'horizontal':
             row = 0
             offset = 0
-            # filter(lambda widget: widget.show is True)
             for widget in filter(lambda widget: widget.show is True, self.children):
                 offset_y = _offset_y + (self.spacing if row else 0)
                 widget.relative['pos'] = False
                 wsize = widget._draw_size
                 widget.pos = [offset, dsize[1] - wsize[1] - offset_y]
-                _widget_sizes.append(widget._draw_pos[1])
+                _widget_sizes.append(widget._draw_size[1])
                 offset += wsize[0] + self.spacing
                 idx += 1
                 if idx >= self.cols:
-                    _offset_y = min(_widget_sizes)
+                    _offset_y = max(_widget_sizes)
                     _widget_sizes = []
                     idx = 0
                     row += 1

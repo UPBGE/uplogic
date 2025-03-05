@@ -44,6 +44,7 @@ setup(
         'uplogic.events',
         'uplogic.input',
         'uplogic.network',
+        'uplogic.network.osc',
         'uplogic.nodes',
         'uplogic.nodes.actions',
         'uplogic.nodes.conditions',

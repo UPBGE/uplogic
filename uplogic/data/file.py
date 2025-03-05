@@ -1,5 +1,5 @@
 import json
-import toml
+# import toml
 import configparser
 import os
 import bpy
@@ -7,7 +7,7 @@ import bpy
 
 class FileWrapper(dict):
     """Wrapper to allow easy access to files. The wrapper can be saved as a variable to modify and save back the file.\n
-    Supports `.ini`, `.json` and `.toml` file formats.
+    Supports `.ini` and `.json` file formats.
 
     :param `filepath`: Full path to the file.
     """
@@ -15,8 +15,8 @@ class FileWrapper(dict):
     def __init__(self, filepath):
         self.formats = {
             'json': {'read': self._read_json, 'write': self._write_json},
-            'ini': {'read': self._read_ini, 'write': self._write_ini},
-            'toml': {'read': self._read_toml, 'write': self._write_toml}
+            'ini': {'read': self._read_ini, 'write': self._write_ini}
+            # 'toml': {'read': self._read_toml, 'write': self._write_toml}
         }
         self.filepath = bpy.path.abspath(filepath)
         self.read()
@@ -44,9 +44,9 @@ class FileWrapper(dict):
         with open(self.filepath, 'r') as f:
             self.data = json.load(f)
 
-    def _read_toml(self):
-        with open(self.filepath, 'r') as f:
-            self.data = toml.load(f)
+    # def _read_toml(self):
+    #     with open(self.filepath, 'r') as f:
+    #         self.data = toml.load(f)
 
     def _read_ini(self):
         config = configparser.ConfigParser()
@@ -62,11 +62,11 @@ class FileWrapper(dict):
             with open(path, 'w') as f:
                 json.dump(self, f, indent=2)
 
-    def _write_toml(self):
-        path = self.filepath
-        if os.path.isfile(path):
-            with open(path, 'w') as f:
-                toml.dump(self.data, f)
+    # def _write_toml(self):
+    #     path = self.filepath
+    #     if os.path.isfile(path):
+    #         with open(path, 'w') as f:
+    #             toml.dump(self.data, f)
 
     def _write_ini(self):
         config = configparser.ConfigParser()
@@ -77,7 +77,7 @@ class FileWrapper(dict):
 
 def load_file(filepath) -> FileWrapper:
     """Read a file and keep it stored for later use.\n
-    Supports `.ini`, `.json` and `.toml` file formats.
+    Supports `.ini` and `.json` file formats.
 
     :param `filepath`: Full path to the file.
     """
@@ -89,7 +89,7 @@ def load_file(filepath) -> FileWrapper:
 
 def write_file(filepath, data) -> None:
     """Write data in form of `dict` back into a file.\n
-    Supports `.ini`, `.json` and `.toml` file formats.
+    Supports `.ini` and `.json` file formats.
 
     :param `filepath`: Full path to the file, including file ending.
     :param `data`: `dict` to save back into the file.
@@ -101,7 +101,7 @@ def write_file(filepath, data) -> None:
 
 def read_file(filepath) -> dict:
     """Read data in form of `dict` from a file.\n
-    Supports `.ini`, `.json` and `.toml` file formats.
+    Supports `.ini` and `.json` file formats.
 
     :param `filepath`: Full path to the file.
     """
