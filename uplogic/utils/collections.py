@@ -20,6 +20,8 @@ class Collection:
         if isinstance(collection, str):
             collection = bpy.data.collections.get(collection)
         self.collection = collection
+        if collection is None:
+            return
         self._collection_state = {
             'objects': []
         }
@@ -30,6 +32,12 @@ class Collection:
             obj.setVisible(state, True)
             obj.restorePhysics() if state else obj.suspendPhysics()
             obj.restoreDynamics() if state else obj.suspendDynamics()
+
+    def enable(self):
+        self.set_visible(True)
+
+    def disable(self):
+        self.set_visible(False)
 
     def get_game_vec(self, data):
         return Euler((data['x'], data['y'], data['z']))
@@ -50,13 +58,15 @@ class Collection:
             wOri = self.get_game_vec(data['data']['worldOrientation'])
             wSca = self.get_game_vec(data['data']['worldScale'])
 
-            game_obj.localPosition = lPos
-            game_obj.localOrientation = lOri.to_matrix()
-            game_obj.localScale = lSca
             
             game_obj.worldPosition = wPos
             game_obj.worldOrientation = wOri.to_matrix()
             game_obj.worldScale = wSca
+
+            if game_obj.parent:
+                game_obj.localPosition = lPos
+                game_obj.localOrientation = lOri.to_matrix()
+                game_obj.localScale = lSca
 
             if data['type'] == 'rigid_body':
                 linVel = self.get_game_vec(

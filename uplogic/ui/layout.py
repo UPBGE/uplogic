@@ -334,8 +334,8 @@ class GridLayout(BoxLayout):
         dsize = self._draw_size
         idx = 0
         _widget_sizes = []
-        _offset_y = 0
         if self.orientation == 'horizontal':
+            _offset_y = 0
             row = 0
             offset = 0
             for widget in filter(lambda widget: widget.show is True, self.children):
@@ -347,25 +347,29 @@ class GridLayout(BoxLayout):
                 offset += wsize[0] + self.spacing
                 idx += 1
                 if idx >= self.cols:
-                    _offset_y = max(_widget_sizes)
-                    _widget_sizes = []
                     idx = 0
                     row += 1
+                    _offset_y = max(_widget_sizes)
+                    _widget_sizes = []
                     offset = 0
         if self.orientation == 'vertical':
+            _offset_x = 0
             col = 0
-            offset = dsize[1]
+            offset = 0
             for widget in filter(lambda widget: widget.show is True, self.children):
-                offset_x = (self._draw_size[0] / (self.cols) + self.spacing) * col
-                offset -= widget._draw_size[0]
+                offset_x = _offset_x + (self.spacing if col else 0)
                 widget.relative['pos'] = False
-                widget.pos = [offset_x, offset]
-                offset -= self.spacing
+                wsize = widget._draw_size
+                widget.pos = [offset_x, dsize[1] - wsize[1] - offset]
+                _widget_sizes.append(widget._draw_size[0])
+                offset += wsize[1] + self.spacing
                 idx += 1
                 if idx >= self.rows:
                     idx = 0
                     col += 1
-                    offset = dsize[1]
+                    _offset_x = max(_widget_sizes)
+                    _widget_sizes = []
+                    offset = 0
 
 
 class PolarLayout(ArrangedLayout):

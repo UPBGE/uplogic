@@ -218,7 +218,7 @@ class Action():
         #     return
         self._intensity = clamp(value, 0, 1)
         self._restart_action()
-        self._act_system._get_uppermost_layer(self.game_object)
+        # self._act_system._get_uppermost_layer(self.game_object)
 
     @property
     def speed(self) -> float:
