@@ -5,6 +5,10 @@ import time
 from bpy.types import ShaderNodeSpritesAnimation
 from bpy.types import ShaderNodeTexImage
 from bpy.types import Material
+import gpu
+from os.path import isfile
+from uplogic.utils import clamp
+
 
 
 class Sequence():

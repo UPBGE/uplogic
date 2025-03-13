@@ -133,6 +133,10 @@ class ULSound():
         if self.sound:
             self.sound.position = val
 
+    def play(self):
+        '''Start playback of this sound.'''
+        self.sound.resume()
+
     def stop(self):
         '''Stop and remove this sound.'''
         self.on_finish = dummy
@@ -145,7 +149,15 @@ class ULSound():
     def resume(self):
         '''Restart playback of this sound from the position it was paused at.'''
         self.sound.resume()
+
+    @property
+    def keep(self):
+        return self.sound.keep
     
+    @keep.setter
+    def keep(self, val):
+        self.sound.keep = val
+
     def on_finish(self):
         '''Standart callback to be called when the sound finishes or is stopped.'''
         pass
@@ -196,6 +208,7 @@ class Sound2D(ULSound):
             sound = self.soundfile = sound.lowpass(lowpass, .5)
         device = self.aud_system.device
         self.sound = handle = device.play(sound)
+        self.sound.pause()
         handle.volume = 0
 
         handle.relative = True
@@ -789,7 +802,7 @@ def play_sound_2d(
         ignore_timescale = True,
         aud_sys: str = 'default'
     ):
-        return Sound2D(
+        sound = Sound2D(
             file=file,
             volume=volume,
             pitch=pitch,
@@ -798,6 +811,8 @@ def play_sound_2d(
             ignore_timescale=ignore_timescale,
             aud_sys=aud_sys
         )
+        sound.play()
+        return sound
 
 
 def play_sound_3d(

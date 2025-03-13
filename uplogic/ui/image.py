@@ -1,11 +1,14 @@
 from .widget import Widget
 import gpu
 import bpy
+from bge import logic
 from math import ceil
+from uplogic.utils import clamp
 from .widget import rotate2d
 from gpu_extras.batch import batch_for_shader
 from mathutils import Vector
 from os.path import isfile
+from uplogic.utils.handlers import ImageHandler
 
 
 class Image(Widget):
@@ -35,7 +38,6 @@ class Image(Widget):
         fragColor = pow(color, vec4(.5));
     }
     """
-
     def __init__(
         self,
         pos=[0, 0],
@@ -53,14 +55,19 @@ class Image(Widget):
         self.use_aspect_ratio = use_aspect_ratio
         self._opacity = 1
         super().__init__(pos, size, relative=relative, halign=halign, valign=valign, angle=angle, show=show)
-        if texture is not None and texture not in bpy.data.images and isfile(texture):
-            bpy.data.images.load(texture)
-        self.texture = texture
+        self._load_image(texture)
+
+    def _load_image(self, texture):
+        self.image_handler = ImageHandler(texture)
         self.start()
 
     @property
+    def filepath(self):
+        return self.image_handler.filepath
+
+    @property
     def texture(self):
-        return self._texture
+        return self.image_handler._texture
 
     @property
     def aspect_ratio(self):
@@ -86,14 +93,23 @@ class Image(Widget):
 
     @texture.setter
     def texture(self, val):
-        if val is None:
-            return
-        texture = bpy.data.images.get(val, None)
-        if not texture:
-            texture = bpy.data.images.load(val)
-        self._image = texture
+        self.image_handler.texture = val
         self.size = self.size
-        self._texture = gpu.texture.from_image(texture)
+
+    def free(self):
+        self.image_handler.free()
+
+    @property
+    def frame(self):
+        return self.image_handler.frame
+
+    @frame.setter
+    def frame(self, val):
+        self.image_handler.frame = val
+
+    @property
+    def max_frame(self):
+        return self.image_handler.max_frame
 
     @property
     def pivot(self):
@@ -151,9 +167,7 @@ class Image(Widget):
         self._shader.bind()
         if bpy.app.version[0] >= 4:
             self._shader.uniform_float("alpha", self.opacity)
-            self._shader.uniform_sampler("image", self.texture)
-        else:
-            self._shader.uniform_sampler("image", self.texture)
+        self._shader.uniform_sampler("image", self.texture)
         self._batch.draw(self._shader)
         super().draw()
 
@@ -291,3 +305,43 @@ class Sprite(Image):
                 "texCoord": texcoord
             },
         )
+
+
+class Video(Image):
+
+    def __init__(self, pos=[0, 0], size=(100, 100), relative={}, texture=None, halign='left', valign='bottom', use_aspect_ratio = True, fps=60, min_frame=0, max_frame=None, load_audio=True, angle=0, show=True):
+        self._load_audio = load_audio
+        super().__init__(pos, size, relative, texture, halign, valign, use_aspect_ratio, angle, show)
+        self.image_handler.fps = fps
+        self.image_handler._min_frame = min_frame
+        if max_frame is not None:
+            self.image_handler._max_frame = max_frame
+
+    def _load_image(self, texture):
+        self.image_handler = ImageHandler(texture, load_audio=self._load_audio)
+
+    @property
+    def fps(self):
+        return self.image_handler.fps
+
+    @fps.setter
+    def fps(self, val):
+        self.image_handler.fps = val
+
+    @property
+    def playback_position(self):
+        return self.image_handler.playback_position
+
+    @property
+    def is_playing(self):
+        return self.image_handler.is_playing
+
+    @is_playing.setter
+    def is_playing(self, val):
+        self.image_handler.is_playing = val
+
+    def play(self):
+        self.image_handler.play()
+
+    def seek(self, position):
+        self.image_handler.seek(position)

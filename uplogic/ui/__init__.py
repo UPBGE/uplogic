@@ -1,7 +1,7 @@
 try:
     from .button import Button, LabelButton, SpriteButton, ImageButton
     from .cursor import Cursor, remove_custom_cursor
-    from .image import Image, Sprite
+    from .image import Image, Sprite, Video
     from .label import Label
     from .layout import FloatLayout
     from .layout import Layout
