@@ -53,6 +53,10 @@ class ImageHandler:
     def playback_position(self):
         return self.frame / self.fps
 
+    @playback_position.setter
+    def playback_position(self, val):
+        self.seek(val)
+
     @property
     def is_playing(self):
         return self._is_playing

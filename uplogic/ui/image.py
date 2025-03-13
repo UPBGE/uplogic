@@ -332,6 +332,10 @@ class Video(Image):
     def playback_position(self):
         return self.image_handler.playback_position
 
+    @playback_position.setter
+    def playback_position(self, val):
+        self.image_handler.playback_position = val
+
     @property
     def is_playing(self):
         return self.image_handler.is_playing
