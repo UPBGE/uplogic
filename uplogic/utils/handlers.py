@@ -1,6 +1,7 @@
 from bge import logic
 import bpy
 import gpu
+from math import floor
 from uplogic.utils import clamp
 from os.path import isfile
 
@@ -8,6 +9,7 @@ from os.path import isfile
 class ImageHandler:
 
     def __init__(self, texture, fps=60, min_frame=0, max_frame=None, load_audio=False):
+        self.play_mode = 'play'
         self._texture = None
         self._image = None
         self._opacity = 1
@@ -57,10 +59,11 @@ class ImageHandler:
 
     @is_playing.setter
     def is_playing(self, val):
-        if not self.is_playing and val and self.sound is not None:
-            self.time = logic.getRealTime() - self.playback_position
-            self.sound.play()
-            self.sound.position = self.playback_position
+        if not self.is_playing and val:
+            self._ref_time = logic.getRealTime() - self.playback_position
+            if self.sound is not None:
+                self.sound.play()
+                self.sound.position = self.playback_position
         elif not val:
             self.sound.pause()
         self._is_playing = val
@@ -98,10 +101,11 @@ class ImageHandler:
     def seek(self, position):
         self._ref_time = logic.getRealTime() - position
         self.time = logic.getRealTime() - self._ref_time
-        self.frame = int(self.time * self._fps)
+        self.frame = floor(self.time * self._fps)
         if self.sound is not None:
             self.sound.position = self.playback_position
-            self.sound.play()
+            if self.is_playing:
+                self.sound.play()
 
     def flush(self):
         if not self._flushed:
@@ -116,6 +120,16 @@ class ImageHandler:
         if self.is_playing:
             self.time = logic.getRealTime() - self._ref_time
             self.frame = int(self.time * self._fps)
+            if self.frame >= self.max_frame:
+                self._finish()
+
+    def _finish(self):
+        if self.play_mode == 'loop':
+            self.seek(0)
+        self.on_finish()
+
+    def on_finish(self):
+        ...
 
     def free(self):
         self.image.gl_free()

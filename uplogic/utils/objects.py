@@ -516,11 +516,10 @@ class Curve(GameObject):
         eval_obj = bpy.data.objects.get(f'{self.name}_eval_obj', None)
         if eval_obj is None:
             eval_obj = bpy.data.objects.new(f'{self.name}_eval_obj', object_data=None)
-            bpy.context.scene.collection.objects.link(eval_obj)
-            # bpy.context.collection.objects.link(eval_obj)
+            bpy.context.collection.objects.link(eval_obj)
             const = eval_obj.constraints.new('FOLLOW_PATH')
             const.target = self.blenderObject
-        return None
+        return eval_obj
 
     @property
     def name(self):
