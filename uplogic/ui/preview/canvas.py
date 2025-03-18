@@ -11,6 +11,8 @@ class Canvas(Widget):
     A canvas cannot be attached to another widget and has its own update cycle.
     """
 
+    _is_canvas = True
+
     def __init__(self):
         super().__init__((0, 0), (0, 0))
         self._hover_consumed = False

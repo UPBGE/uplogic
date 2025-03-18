@@ -78,7 +78,7 @@ class Path(Widget):
         self._batch_line = batch_for_shader(self._shader, 'LINE_STRIP', {"pos": vertices})
 
     def draw(self):
-        super()._setup_draw()
+        self._setup_draw()
         gpu.state.line_width_set(self.line_width)
         col = self.line_color.copy()
         col[3] *= self.opacity

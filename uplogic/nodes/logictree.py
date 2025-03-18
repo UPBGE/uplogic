@@ -6,6 +6,7 @@ from uplogic.data import GlobalDB
 from uplogic.nodes import ULLogicContainer
 from uplogic.utils import load_user_module
 from uplogic.utils import make_valid_name
+from uplogic.data import init_glob_cats
 import bpy
 # from uplogic import get_mainloop
 from bge.types import SCA_PythonKeyboard as Keyboard
@@ -33,7 +34,7 @@ class ULLogicTree(ULLogicContainer):
         self.time_per_frame = 0.0
         self._do_remove = False
         self.aud_system_owner = False
-        # self.init_glob_cats()
+        init_glob_cats()
         self.audio_system = self.get_aud_system()
         self.sub_networks = []  # a list of networks updated by this network
         self.capslock_pressed = False

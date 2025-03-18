@@ -375,7 +375,6 @@ def error(msg):
     sysmsg = f'{ansicol.RED}Error{ansicol.END}: {msg}'
     if console is None:
         print(sysmsg)
-        # print(msg)
         return
     show_time = True
     sys.__stdout__.write(f'{sysmsg}\n')

@@ -185,7 +185,6 @@ class Action():
 
     @property
     def finished(self):
-        # print(self.end_frame - self.frame, self.speed * FRAMETIME_COMPARE)
         return self.end_frame - self.frame < 1
 
     @property
@@ -284,7 +283,6 @@ class Action():
     def update(self):
         '''This is called each frame.
         '''
-        # print(self.name, self.is_playing)
         self._locked = False
         game_object = self.game_object
         if game_object.invalid:

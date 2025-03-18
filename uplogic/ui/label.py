@@ -156,7 +156,7 @@ class Label(Widget):
         return self
 
     def draw(self):
-        super()._setup_draw()
+        self._setup_draw()
         if self.parent is None:
             return
         parsize = self.parent._draw_size
@@ -176,7 +176,7 @@ class Label(Widget):
         if self.parent.use_clipping:
             verts = self.parent._vertices
             blf.enable(font, blf.CLIPPING)
-            blf.clipping(font, verts[0][0], verts[0][1] + charsize[1], verts[2][0], verts[2][1])
+            blf.clipping(font, verts[0][0], verts[0][1], verts[2][0] - charsize[1]*2, verts[2][1] - charsize[1]*2)
         else:
             blf.disable(font, blf.CLIPPING)
         if self.wrap and self.parent:

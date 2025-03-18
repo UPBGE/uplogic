@@ -55,7 +55,7 @@ class Layout(Widget):
         self._border_width = int(val)
 
     def draw(self):
-        super()._setup_draw()
+        self._setup_draw()
         gpu.state.line_width_set(self.border_width)
         gpu.state.point_size_set(self.border_width)
         col = self.bg_color.copy()

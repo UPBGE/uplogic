@@ -53,19 +53,22 @@ class Widget():
     }
     '''
 
+    _is_canvas = False
+
     def __init__(self, pos=(0, 0), size=(0, 0), bg_color=(0, 0, 0, 0), relative={}, halign='left', valign='bottom', angle=0, show=True):
+        self._vertices = None  # (Vector((0, 0)), Vector((0, 0)), Vector((0, 0)), Vector((0, 0)))
         self.halign = halign
         self.valign = valign
         self._parent = None
         self._show = show
         self._pos = [0, 0]
+        self._size = [0, 0]
         self._children: list[Widget] = []
         self.relative = relative
         self._rebuild = True
         self.size = size
         self.pos = pos
         self.bg_color = bg_color
-        self._vertices = None  # (Vector((0, 0)), Vector((0, 0)), Vector((0, 0)), Vector((0, 0)))
         self.angle = angle
         self._build_shader()
         self._clipped = [0, 0]
@@ -141,16 +144,16 @@ class Widget():
         pa = self
         while pa.parent is not None:
             pa = pa.parent
-        return pa
+        return pa if pa._is_canvas else None
 
     @property
     def pivot(self):
         """Rotation point for this widget."""
         if self.parent is None:
-            return (0, 0)
+            return Vector((0, 0))
         v = self._vertices
         if v is None:
-            return (0, 0)
+            return Vector((0, 0))
         x0 = Vector(v[0])
         x1 = Vector(v[1])
         y1 = Vector(v[2])
@@ -224,18 +227,24 @@ class Widget():
         self.size = self.size
         for c in self.children:
             c.parent = c.parent
+        self.on_parent()
         self._build_shader()
 
     @property
-    def pos_abs(self):
+    def pos_pixel(self):
         """The absolute position of this widget from the bottom left corner of the screen in pixels."""
         if self._vertices is None:
             return [0, 0]
         pos = self._vertices[0]
         return [
-            pos[0] - self._clipped[0],
-            pos[1] - self._clipped[1]
+            pos[0],# - self._clipped[0],
+            pos[1] #- self._clipped[1]
         ]
+
+    @property
+    def pos_abs(self):
+        """The absolute position of this widget from the bottom left corner of the screen in pixels."""
+        return self.pos_pixel
 
     @property
     def pos(self):
@@ -244,6 +253,8 @@ class Widget():
 
     @pos.setter
     def pos(self, val):
+        if self._pos == val:
+            return
         self._pos = list(val)
         if not self.show:
             return
@@ -260,12 +271,12 @@ class Widget():
     @x.setter
     def x(self, val):
         self._pos = [val, self.pos[1]]
-        if not self.show:
-            return
-        if self.parent and self.show:
-            self._rebuild = True
-        for child in self.children:
-            child.pos = child.pos
+        # if not self.show:
+        #     return
+        # if self.parent and self.show:
+        #     self._rebuild = True
+        # for child in self.children:
+        #     child.pos = child.pos
 
     @property
     def y(self):
@@ -275,12 +286,12 @@ class Widget():
     @y.setter
     def y(self, val):
         self._pos = [self._pos[0], val]
-        if not self.show:
-            return
-        if self.parent and self.show:
-            self._rebuild = True
-        for child in self.children:
-            child.pos = child.pos
+        # if not self.show:
+        #     return
+        # if self.parent and self.show:
+        #     self._rebuild = True
+        # for child in self.children:
+        #     child.pos = child.pos
 
     @property
     def size(self):
@@ -289,6 +300,8 @@ class Widget():
 
     @size.setter
     def size(self, val):
+        if self._size == val:
+            return
         self._size = list(val)
         if not self.show:
             return
@@ -297,11 +310,53 @@ class Widget():
         for child in self.children:
             child.pos = child.pos
             child.size = child.size
+        self.on_size()
+
+    def on_size(self):
+        ...
+
+    @property
+    def width(self):
+        """Horizontal size of this widget in either pixels or factor relative to its parent."""
+        return self.size[0]
+
+    @width.setter
+    def width(self, val):
+        self.size = [val, self.size[1]]
+        # if self.parent and self.show:
+        #     self._rebuild = True
+
+    @property
+    def height(self):
+        """Vertical size of this widget in either pixels or factor relative to its parent."""
+        return self.size[1]
+
+    @height.setter
+    def height(self, val):
+        self.size = [self.size[0], val]
+        # if self.parent and self.show:
+        #     self._rebuild = True
+
+    @property
+    def size_pixel(self):
+        if self._vertices is None:
+            return [0, 0]
+        bottom_left = self._vertices[0]
+        top_right = self._vertices[2]
+        return [top_right[0] - bottom_left[0], top_right[1] - bottom_left[1]]
+
+    @property
+    def width_pixel(self):
+        return self.size_pixel[0]
+
+    @property
+    def height_pixel(self):
+        return self.size_pixel[1]
 
     @property
     def use_clipping(self):
         """Whether to draw outside of the parent's bounds."""
-        return self._use_clipping
+        return True if self.parent and self.parent.use_clipping else self._use_clipping
 
     @use_clipping.setter
     def use_clipping(self, val):
@@ -312,34 +367,11 @@ class Widget():
             self._rebuild = True
 
     @property
-    def width(self):
-        """Horizontal size of this widget in either pixels or factor relative to its parent."""
-        return self.size[0]
-
-    @width.setter
-    def width(self, val):
-        self.size[0] = val
-        if self.parent and self.show:
-            self._rebuild = True
-
-    @property
-    def height(self):
-        """Vertical size of this widget in either pixels or factor relative to its parent."""
-        return self.size[1]
-
-    @height.setter
-    def height(self, val):
-        self.size[1] = val
-        if self.parent and self.show:
-            self._rebuild = True
-
-    @property
     def opacity(self):
         """Opacity for this widget, but not its children."""
         op = self._opacity
         if self.parent:
             op *= self.parent.opacity
-        self._rebuild = True
         return op
 
     @opacity.setter
@@ -355,8 +387,8 @@ class Widget():
     @property
     def clipping(self):
         """Clipping boundaries. If clipping is enabled, don't draw outside of these boundaries."""
-        pdpos = self.parent._draw_pos
-        pdsize = self.parent._draw_size
+        pdpos = self.parent.pos_pixel
+        pdsize = self.parent.size_pixel
         return [
             pdpos[0],
             pdpos[0] + pdsize[0],
@@ -414,6 +446,17 @@ class Widget():
             Vector((pos[0] + size[0], pos[1] + size[1]))
         ]
 
+    def check_inside(self, x, y):
+        # if bpy.app.version[0] < 4:
+        from bge import render
+        y = render.getWindowHeight() - y
+        dpos = self.pos_pixel
+        dsize = self.size_pixel
+        return (
+            dpos[0] < x < dpos[0] + dsize[0] and
+            dpos[1] < y < dpos[1] + dsize[1]
+        )
+
     def start(self):
         """Put your custom startup logic here.
         """
@@ -423,7 +466,7 @@ class Widget():
         halign = self.halign
         valign = self.valign
         if self.parent is None:
-            return (0, 0)
+            return Vector((0, 0))
         if halign == 'center' and valign == 'center':
             return x0.lerp(y1, .5)
         elif halign == 'center' and valign == 'top':
@@ -453,8 +496,8 @@ class Widget():
         x1 = Vector([pos[0] + size[0], pos[1]])
         y0 = Vector([pos[0], pos[1] + size[1]])
         y1 = Vector([pos[0] + size[0], pos[1] + size[1]])
-        pivot = self._get_pivot(x0, x1, y0, y1)
         if self._draw_angle and self._vertices is not None:
+            pivot = self._get_pivot(x0, x1, y0, y1)
             x0 = rotate2d(x0, pivot, self._draw_angle)
             x1 = rotate2d(x1, pivot, self._draw_angle)
             y0 = rotate2d(y0, pivot, self._draw_angle)
@@ -492,14 +535,18 @@ class Widget():
         self._batch_points = batch_for_shader(self._shader, 'POINTS', {"pos": vertices})
 
     def _setup_draw(self):
-        if self._rebuild is True:
+        if self._rebuild:
             self._build_shader()
-            self._rebuild = False
+        self._rebuild = False
 
     def _rebuild_tree(self):
         self._build_shader()
         for c in self.children:
             c._rebuild_tree()
+
+    @property
+    def _render_needed(self):
+        return self.show and (self.height_pixel > 0 or self.width_pixel > 0)
 
     def draw(self):
         """This is called each frame if the widget is part of a canvas. It can be called manually,
@@ -527,9 +574,13 @@ class Widget():
         if widget not in self.children:
             widget.parent = self
             self.children.append(widget)
-            self.canvas._set_z(-1)
+            if self.canvas is not None:
+                self.canvas._set_z(-1)
         self.children = sorted(self.children, key=lambda widget: widget.z, reverse=False)
         return widget
+
+    def on_parent(self):
+        ...
 
     def _set_z(self, z):
         z += 1

@@ -75,6 +75,8 @@ class Collision():
                 self.game_object.collisionMask & obj.collisionGroup
             ):
                 self.callback(obj, point, normal)
+                self.point = point
+                self.normal = normal
         self._done_objs.append(obj)
 
     def reset(self):
@@ -89,6 +91,8 @@ class Collision():
         self._old_objs = self._done_objs
         self._done_objs = []
         self._objects = []
+        self.point = None
+        self.normal = None
         self.target = None
 
     def register(self):

@@ -126,7 +126,6 @@ class MainLoop:
         self._dispatch('tick')
         self.time_per_tick = now - self._last_tick
         self._last_tick = now
-        # print(now + self.time_per_tick, self.time_per_tick)
         if (now - self._last_frame + self.time_per_tick) > self._frame_delay:
             self._last_frame = now
             self._dispatch('update')

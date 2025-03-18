@@ -51,11 +51,15 @@ class Image(Widget):
         show=True
     ):
         self._texture = None
-        self._image = None
+        # self._image = None
         self.use_aspect_ratio = use_aspect_ratio
         self._opacity = 1
         super().__init__(pos, size, relative=relative, halign=halign, valign=valign, angle=angle, show=show)
         self._load_image(texture)
+
+    @property
+    def image(self):
+        return self.image_handler.image
 
     def _load_image(self, texture):
         self.image_handler = ImageHandler(texture)
@@ -71,9 +75,9 @@ class Image(Widget):
 
     @property
     def aspect_ratio(self):
-        if self._image is None:
+        if self.image is None:
             return 1
-        return self._image.size[1] / self._image.size[0]
+        return self.image.size[1] / self.image.size[0]
 
     @property
     def _draw_size(self):
@@ -81,7 +85,7 @@ class Image(Widget):
         use_aspect_ratio = self.use_aspect_ratio
         if self.parent is None:
             return size
-        if use_aspect_ratio and self._image:
+        if use_aspect_ratio and self.image:
             size[1] = size[0] * self.aspect_ratio
         if self.relative.get('size'):
             pdsize = self.parent._draw_size
@@ -160,7 +164,7 @@ class Image(Widget):
     
     def draw(self):
         gpu.state.blend_set("ALPHA")
-        super()._setup_draw()
+        self._setup_draw()
         if self.texture is None:
             super().draw()
             return
@@ -230,9 +234,9 @@ class Sprite(Image):
 
     @property
     def aspect_ratio(self):
-        if self._image is None:
+        if self.image is None:
             return 1
-        return (self._image.size[1] / self.rows) / (self._image.size[0] / self.cols)
+        return (self.image.size[1] / self.rows) / (self.image.size[0] / self.cols)
 
     @property
     def rows(self):
@@ -319,6 +323,14 @@ class Video(Image):
 
     def _load_image(self, texture):
         self.image_handler = ImageHandler(texture, load_audio=self._load_audio)
+
+    @property
+    def play_mode(self):
+        return self.image_handler.play_mode
+
+    @play_mode.setter
+    def play_mode(self, val):
+        self.image_handler.play_mode = val
 
     @property
     def fps(self):

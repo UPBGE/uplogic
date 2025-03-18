@@ -12,6 +12,8 @@ class Canvas(Widget):
     A canvas cannot be attached to another widget and has its own update cycle.
     """
 
+    _is_canvas = True
+
     def __init__(self, show=True):
         super().__init__((0, 0), (0, 0), show=show)
         self._hover_consumed = False
@@ -38,6 +40,21 @@ class Canvas(Widget):
             c.size = c.size
             c.pos = c.pos
             c.parent = c.parent
+
+    @property
+    def size_pixel(self):
+        return [
+            render.getWindowWidth(),
+            render.getWindowHeight()
+        ]
+
+    @property
+    def width_pixel(self):
+        return render.getWindowWidth()
+
+    @property
+    def height_pixel(self):
+        return render.getWindowHeight()
 
     @property
     def _draw_pos(self):
@@ -85,9 +102,12 @@ class Canvas(Widget):
         self._hover_consumed = False
         self._click_consumed = False
         for w in self._to_evaluate.__reversed__():
-            w.evaluate()
+            if w.parent:
+                w.evaluate()
         while self._to_evaluate:
-            self._to_evaluate.pop().update()
+            w = self._to_evaluate.pop()
+            if w.parent:
+                w.update()
 
     def update(self):
         pass

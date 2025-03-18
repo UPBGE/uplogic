@@ -39,4 +39,4 @@ class OSC_Client:
         try:
             self.client.send_message(address=address, value=content)
         except:
-            print('oops')
+            print('OSC Client: Message could not be sent.')

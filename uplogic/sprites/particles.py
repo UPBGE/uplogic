@@ -71,7 +71,6 @@ def batch_for_shader(shader, type, content, *, indices=None):
     for id, data in content.items():
         if len(data) != vbo_len:
             raise ValueError("Length mismatch for 'content' values")
-        # print(id, data)
         vbo.attr_fill(id, data)
 
     if indices is None:
@@ -201,10 +200,7 @@ class Particle:
             return
         sys = self.system
         self.pos += self.velocity
-        # self.pos += self.calc_gravity()
-        # print(self.pos)
         point = sys.cam.rayCast(sys.cam.worldPosition, self.pos)[0]
-        # point = utils.raycast(sys.cam, self.pos, sys.cam.worldPosition, visualize=True).point
         if not point:
             self.draw()
     

@@ -40,21 +40,12 @@ class ULLoadGame(ULActionNode):
         try:
             with open(path + 'save' + str(slot) + '.json') as json_file:
                 data = json.load(json_file)
-                # for obj in scene.objects:
-                #     if obj.name not in data['objects']:
-                #         obj.endObject()
                 for obj in data['objects']:
-                    # print(obj)
                     if obj['name'] in scene.objects:
                         game_obj = scene.objects[obj['name']]
                     else:
                         game_obj = scene.convertBlenderObject(bpy.data.objects[obj['name']])
-                        # game_obj = scene.addObject(game_obj)
-                        # print(
-                        #     'Could not load Object {}: Not in active Scene!'
-                        #     .format(obj['name'])
-                        # )
-                        # continue
+
 
                     lPos = self.get_game_vec(obj['data']['localPosition'])
                     lOri = self.get_game_vec(obj['data']['localOrientation'])

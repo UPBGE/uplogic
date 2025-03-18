@@ -4,6 +4,7 @@ from bge import render
 import bpy
 from mathutils import Vector
 from ..utils.math import rotate2d
+from ..utils.math import map_range, clamp, lerp
 from ..events import schedule, ScheduledEvent
 
 
@@ -58,18 +59,8 @@ class Layout(Widget):
             val = 1
         self._border_width = int(val)
 
-    def check_inside(self, x, y):
-        if bpy.app.version[0] < 4:
-            y = render.getWindowHeight() - y
-        dpos = self._draw_pos
-        dsize = self._draw_size
-        return (
-            dpos[0] < x < dpos[0] + dsize[0] and
-            dpos[1] < y < dpos[1] + dsize[1]
-        )
-
     def draw(self):
-        super()._setup_draw()
+        self._setup_draw()
         gpu.state.line_width_set(self.border_width)
         gpu.state.point_size_set(self.border_width)
         col = self.bg_color.copy()
@@ -97,14 +88,7 @@ class RelativeLayout(Layout):
     :param `valign`: Vertical alignment of the widget, can be (`bottom`, `center`, `top`).
     :param `angle`: Rotation in degrees of this widget around the pivot defined by the alignment.
     '''
-    @property
-    def clipping(self):
-        return [
-            0,
-            render.getWindowWidth(),
-            render.getWindowHeight(),
-            0
-        ]
+    ...
 
 
 class FloatLayout(Layout):
@@ -120,6 +104,14 @@ class FloatLayout(Layout):
     :param `valign`: Vertical alignment of the widget, can be (`bottom`, `center`, `top`).
     :param `angle`: Rotation in degrees of this widget around the pivot defined by the alignment.
     '''
+    # @property
+    # def clipping(self):
+    #     return [
+    #         0,
+    #         render.getWindowWidth(),
+    #         render.getWindowHeight(),
+    #         0
+    #     ]
 
     @property
     def pos_abs(self):
@@ -179,6 +171,12 @@ class ArrangedLayout(RelativeLayout):
                     child.pos = child.pos
         self.arrange()
 
+    def _setup_draw(self):
+        if self._rebuild:
+            self._build_shader()
+            self.arrange()
+        self._rebuild = False
+
     def add_widget(self, widget):
         super().add_widget(widget)
         self.arrange()
@@ -223,19 +221,34 @@ class BoxLayout(ArrangedLayout):
         angle=0,
         show=True
     ):
+        self._arrange_offset = 0
+        self._do_arrange = False
         self.orientation = orientation
         self.spacing = spacing
         self.children_align = ['left', 'bottom']
         super().__init__(pos, size, bg_color, relative, border_width, border_color, halign=halign, valign=valign, angle=angle, show=show)
         self.inverted = inverted
         self.use_clipping = False
-        self.start()
+
+    @property
+    def arrange_offset(self):
+        return self._arrange_offset
+
+    @arrange_offset.setter
+    def arrange_offset(self, val):
+        if self._arrange_offset == val:
+            return
+        self._arrange_offset = val
+        self.arrange()
 
     def arrange(self):
         '''Arrange the widgets according to the specified orientation.'''
+        self._do_arrange = True
+
+    def _arrange(self):
         inverted = self.inverted
         self.children_align = ['right', 'bottom'] if inverted else ['left', 'top']
-        dsize = self._draw_size
+        dsize = self.size_pixel
         arrange_factor = {
             'left': 0,
             'center': .5,
@@ -262,11 +275,66 @@ class BoxLayout(ArrangedLayout):
                 widget.halign = xalign
                 widget.valign = yalign
                 widget.relative['pos'] = False
-                widget.pos = [arrange_factor[xalign] * dsize[0], offset]
+                widget.pos = [arrange_factor[xalign] * dsize[0], offset + self._arrange_offset]
                 if inverted:
                     offset += widget._draw_size[1] + self.spacing
                 else:
                     offset -= widget._draw_size[1] + self.spacing
+        self._rebuild_tree()
+
+    def evaluate(self):
+        if self._do_arrange:
+            self._arrange()
+        self._do_arrange = False
+
+
+class ScrollBoxLayout(BoxLayout):
+
+    def __init__(self, orientation: str = 'horizontal', pos: list = [0, 0], size: list = [100, 100], bg_color: list = (0, 0, 0, 0), relative: dict = {}, border_width: int = 1, border_color: list = (0, 0, 0, 0), inverted: bool = False, spacing: int = 5, halign: str = 'left', valign: str = 'bottom', angle=0, show=True):
+        self._c_count = 0
+        super().__init__(orientation, pos, size, bg_color, relative, border_width, border_color, inverted, spacing, halign, valign, angle, show)
+        self._c_height = 0
+        self.seek_speed = .2
+        self.scroll_speed = 30
+        self._height_diff = 0
+        self._arrange_offset_target = 0
+        self.scroll_position = 0
+
+    @property
+    def use_clipping(self):
+        return True
+
+    @use_clipping.setter
+    def use_clipping(self, val):
+        print("'ScrollBoxLayout.use_clipping' is read-only!")
+
+    @property
+    def scroll_position_actual(self):
+        return map_range(self._arrange_offset, 0, self._height_diff, 1, 0) if self._height_diff > 0 else 0
+
+    @property
+    def scroll_position(self):
+        return map_range(self._arrange_offset_target, 0, self._height_diff, 1, 0) if self._height_diff > 0 else 0
+
+    @scroll_position.setter
+    def scroll_position(self, val):
+        self._arrange_offset_target = map_range(clamp(val), 1, 0, 0, self._height_diff) if self._height_diff > 0 else 0
+
+    def scroll(self, difference):
+        self._arrange_offset_target = clamp(self._arrange_offset_target - difference * self.scroll_speed, 0, self._height_diff)
+
+    def _arrange(self):
+        self._count_children()
+        return super()._arrange()
+
+    def _count_children(self):
+        self._c_height = sum([c._draw_size[1] for c in self.children])
+        self._c_count = len(self.children)
+        self._height_diff = self._c_height - self.height_pixel + len(self.children) * self.spacing - self.spacing
+
+    def evaluate(self):
+        super().evaluate()
+        self.arrange_offset = lerp(self._arrange_offset, self._arrange_offset_target, self.seek_speed)
 
 
 class GridLayout(BoxLayout):
@@ -322,7 +390,7 @@ class GridLayout(BoxLayout):
         )
         self.rows = rows
         self.cols = cols
-        self.start()
+        # self.start()
 
     def add_widget(self, widget):
         max = self.rows * self.cols
@@ -331,7 +399,7 @@ class GridLayout(BoxLayout):
             self.arrange()
 
     def arrange(self):
-        dsize = self._draw_size
+        dsize = self.size_pixel
         idx = 0
         _widget_sizes = []
         if self.orientation == 'horizontal':
@@ -406,7 +474,7 @@ class PolarLayout(ArrangedLayout):
         )
         self.starting_angle = starting_angle
         self.radius = radius
-        self.start()
+        # self.start()
 
     @property
     def starting_angle(self):

@@ -11,13 +11,15 @@ class HoverBehavior():
         if not self.active:
             return False
         screen_size = [render.getWindowWidth(), render.getWindowHeight()]
-        mpos = Vector((MOUSE.position.x * screen_size[0], (1 - MOUSE.position.y) * screen_size[1]))
+        mpos = Vector((MOUSE.position.x * screen_size[0], (1-MOUSE.position.y) * screen_size[1]))
         mpos = rotate2d(mpos, self.pivot, -self._draw_angle)
-        dsize = self._draw_size
+        pxsize = self.size_pixel
+        pxpos = self.pos_pixel
+        consumed = self.canvas._hover_consumed if self.canvas is not None else True
         is_hover = (
-            self.pos_abs[0] <= mpos.x <= self.pos_abs[0] + dsize[0] and
-            self.pos_abs[1] <= mpos.y <= self.pos_abs[1] + dsize[1] and
-            not self.canvas._hover_consumed
+            pxpos[0] <= mpos.x <= pxpos[0] + pxsize[0] and
+            pxpos[1] <= mpos.y <= pxpos[1] + pxsize[1] and
+            not consumed
         )
         return is_hover
 

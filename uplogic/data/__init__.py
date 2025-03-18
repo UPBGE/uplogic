@@ -65,11 +65,9 @@ def init_glob_cats():
         'nl_global_categories',
         None
     )
-    print(cats)
     if not cats:
         print('No global categories found in', bpy.data.scenes[scene.name], bpy.data.scenes)
         return
-    print(bpy.data.scenes[scene.name], bpy.data.scenes)
 
     msg = ''
 

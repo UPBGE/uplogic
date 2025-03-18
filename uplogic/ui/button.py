@@ -1,4 +1,5 @@
 from .widget import Widget
+from .layout import RelativeLayout
 from .behaviors import HoverBehavior
 from .label import Label
 from .image import Image
@@ -70,7 +71,7 @@ class Button(Widget, HoverBehavior):
         return self.click_color if self._clicked or self._down else (self.hover_color if self._in_focus else self.bg_color).copy()
 
     def draw(self):
-        super()._setup_draw()
+        self._setup_draw()
         self._released = False
         gpu.state.line_width_set(self.border_width)
         gpu.state.point_size_set(self.border_width)
@@ -116,24 +117,31 @@ class Button(Widget, HoverBehavior):
         self.override_color = None
 
     def on_enter(self, widget):
+        """Override this method to react to this event. Signature `def on_enter(self, widget)`."""
         pass
 
     def on_exit(self, widget):
+        """Override this method to react to this event. Signature `def on_exit(self, widget)`."""
         pass
 
     def on_click(self, widget):
+        """Override this method to react to this event. Signature `def on_click(self, widget)`."""
         pass
 
     def on_press(self, widget):
+        """Override this method to react to this event. Signature `def on_press(self, widget)`."""
         pass
 
     def on_hold(self, widget):
+        """Override this method to react to this event. Signature `def on_hold(self, widget)`."""
         pass
 
     def on_release(self, widget):
+        """Override this method to react to this event. Signature `def on_release(self, widget)`."""
         pass
 
     def on_hover(self, widget):
+        """Override this method to react to this event. Signature `def on_hover(self, widget)`."""
         pass
 
 

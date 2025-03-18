@@ -152,7 +152,7 @@ class Label(Widget):
         return self
 
     def draw(self):
-        super()._setup_draw()
+        self._setup_draw()
         if self.parent is None:
             return
         parsize = self.parent._draw_size
