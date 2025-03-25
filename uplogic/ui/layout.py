@@ -328,13 +328,19 @@ class ScrollBoxLayout(BoxLayout):
         return super()._arrange()
 
     def _count_children(self):
-        self._c_height = sum([c._draw_size[1] for c in self.children])
-        self._c_count = len(self.children)
-        self._height_diff = self._c_height - self.height_pixel + len(self.children) * self.spacing - self.spacing
+        yd_sizes = [c._draw_pos[1] for c in self.children]
+        yd_sizes.extend([c._draw_size[1] + c._draw_pos[1] for c in self.children])
+        if yd_sizes:
+            self._c_height = max(yd_sizes) - min(yd_sizes)
+            # self._c_height = sum([c._draw_size[1] for c in self.children])
+            self._c_count = len(self.children)
+            self._height_diff = self._c_height - self.height_pixel# + len(self.children) * self.spacing - self.spacing
+            self._height_diff
 
     def evaluate(self):
         super().evaluate()
         self.arrange_offset = lerp(self._arrange_offset, self._arrange_offset_target, self.seek_speed)
+        self._rebuild_tree()
 
 
 class GridLayout(BoxLayout):

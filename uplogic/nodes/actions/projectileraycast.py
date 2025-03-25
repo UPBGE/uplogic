@@ -12,6 +12,7 @@ class ULProjectileRayCast(ULActionNode):
     def __init__(self):
         ULActionNode.__init__(self)
         self.condition = None
+        self.caster = None
         self.origin = None
         self.destination = None
         self.local: bool = None
@@ -61,6 +62,7 @@ class ULProjectileRayCast(ULActionNode):
         if not self.get_condition():
             return
         origin = self.get_input(self.origin)
+        caster = self.get_input(self.caster)
         power: float = self.get_input(self.power)
         destination = self.get_input(self.destination)
         resolution: float = 1 - (self.get_input(self.resolution) * .99)
@@ -74,7 +76,7 @@ class ULProjectileRayCast(ULActionNode):
         origin = getattr(origin, 'worldPosition', origin)
 
         self.ray_data = raycast_projectile(
-            caster=logic.getCurrentScene().active_camera,
+            caster=caster,
             origin=Vector(origin),
             aim=Vector(destination),
             local=self.get_input(self.local),

@@ -9,7 +9,8 @@ class ULRaycast(ULActionNode):
 
     def __init__(self):
         ULActionNode.__init__(self)
-        self.condition = None
+        self.condition = False
+        self.caster = None
         self.origin = None
         self.destination = None
         self.local: bool = None
@@ -62,6 +63,7 @@ class ULRaycast(ULActionNode):
             self._data = RayCastData((None, None, None, None, None, None))
             return
         origin = self.get_input(self.origin)
+        caster = self.get_input(self.caster)
         destination = self.get_input(self.destination)
         local: bool = self.get_input(self.local)
         property_name: str = self.get_input(self.property_name)
@@ -71,7 +73,7 @@ class ULRaycast(ULActionNode):
         distance: float = self.get_input(self.distance)
         visualize: bool = self.get_input(self.visualize)
         self._data = raycast(
-            getCurrentScene().active_camera,
+            caster,
             origin,
             destination,
             distance=distance if self.get_input(self.custom_dist) else 0,

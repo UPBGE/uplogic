@@ -104,10 +104,12 @@ class Canvas(Widget):
         for w in self._to_evaluate.__reversed__():
             if w.parent:
                 w.evaluate()
+        self.update()
         while self._to_evaluate:
             w = self._to_evaluate.pop()
             if w.parent:
                 w.update()
+        
 
     def update(self):
         pass

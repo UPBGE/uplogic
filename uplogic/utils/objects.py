@@ -521,6 +521,31 @@ class Curve(GameObject):
             const.target = self.blenderObject
         return eval_obj
 
+    def create_dots(self, radius, spacing):
+        bpy.ops.mesh.primitive_uv_sphere_add(segments=16, ring_count=8, radius=radius)
+        bpy.ops.object.shade_smooth()
+        dot = bpy.data.objects[-1]
+        dot.location = self.worldPosition
+        mod: bpy.types.ArrayModifier = dot.modifiers.new('Array', "ARRAY")
+        mod.fit_type = "FIT_CURVE"
+        mod.curve = self.blenderObject
+        mod.use_relative_offset = True
+        mod.relative_offset_displace.x = spacing
+        cmod: bpy.types.CurveModifier = dot.modifiers.new('Array', "CURVE")
+        cmod.object = self.blenderObject
+
+    # @property
+    # def style(self):
+    #     return self._style
+
+    # @style.setter
+    # def style(self, val):
+    #     if val == self.style:
+    #         return
+    #     if val == "dots":
+    #         self.
+    #     self._style = val
+
     @property
     def name(self):
         """Name of the game object (Read-Only)."""
