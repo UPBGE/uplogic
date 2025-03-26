@@ -663,6 +663,7 @@ class Curve(GameObject):
 
     @bevel_depth.setter
     def bevel_depth(self, val):
+        self._bevel_depth = val
         if self._array_object:
             if self.style == 'dots':
                 self._create_dots()
@@ -670,7 +671,6 @@ class Curve(GameObject):
                 self._create_dashes()
         else:
             self.data.bevel_depth = val
-        self._bevel_depth = val
 
     @property
     def length(self):

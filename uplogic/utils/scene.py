@@ -15,14 +15,16 @@ def get_custom_loop():
     return logic.globalDict.get('loop', None)
 
 
-def world_to_screen(position: Vector = Vector((0, 0, 0)), inv_y: bool = True) -> Vector:
-    pos = Vector(logic.getCurrentScene().active_camera.getScreenPosition(position))
+def world_to_screen(position: Vector = Vector((0, 0, 0)), inv_y: bool = True, camera=None) -> Vector:
+    if camera is None:
+        camera = logic.getCurrentScene().active_camera
+    pos = Vector(camera.getScreenPosition(position))
     if inv_y:
         pos[1] = 1 - pos[1]
     return pos
 
 
-def screen_to_world(x:float = None, y: float = None, distance: float = 10) -> Vector:
+def screen_to_world(x:float = None, y: float = None, distance: float = 10, camera = None) -> Vector:
     """Get the world coordinates of a point on the screen in a given distance.
     
     :param x: X position on the screen. Leave at `None` to use mouse position.
@@ -32,7 +34,8 @@ def screen_to_world(x:float = None, y: float = None, distance: float = 10) -> Ve
     :returns: Position as `Vector`
     """
 
-    camera = logic.getCurrentScene().active_camera
+    if camera is None:
+        camera = logic.getCurrentScene().active_camera
     mouse = logic.mouse
     x = x if x is not None else mouse.position[0]
     y = y if y is not None else mouse.position[1]
