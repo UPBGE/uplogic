@@ -4,6 +4,7 @@ import bpy
 from bpy.types import Material, Object
 from .errors import LogicControllerNotSupportedError
 from .constants import FRONT_AXIS_VECTOR_SIGNED
+import math
 from .math import project_vector3
 from .math import clamp
 from .math import get_local
@@ -488,12 +489,13 @@ class Curve(GameObject):
         name: str,
         bevel_depth: float = 0.0,
         dimensions: int = 3,
-        material: str or Material =None,
+        material: str or Material = None,
         collection: str = None,
         loop: bool = False,
         type: str = 'POLY',
         use_evaluate = False
     ) -> None:
+        self._array_object = None
         if self._deprecated:
             print('[UPLOGIC] ULCurve class will be renamed to "Curve" in future releases!')
         self.type = type
@@ -501,6 +503,13 @@ class Curve(GameObject):
         self.use_evaluate = use_evaluate
         if isinstance(name, KX_GameObject):
             self.game_object = name
+            # bcurve: bpy.types.Curve = self.game_object.blenderObject.data
+            # bcurve.bevel_depth = bevel_depth
+            # bcurve.dimensions = f'{dimensions}D'
+            if isinstance(material, str):
+                self.blenderObject.data.materials.append(bpy.data.materials[material])
+            elif isinstance(material, Material):
+                self.blenderObject.data.materials.append(material)
         else:
             self.game_object = create_curve(
                 name=name,
@@ -510,6 +519,10 @@ class Curve(GameObject):
                 collection=collection
             )
         self.data = self.game_object.blenderObject.data
+        self._style = 'line'
+        self.bevel_depth = bevel_depth
+        self.dash_length = 1
+        self.style_spacing = .5
 
     @property
     def eval_obj(self):
@@ -521,24 +534,87 @@ class Curve(GameObject):
             const.target = self.blenderObject
         return eval_obj
 
-    def create_dots(self, radius, spacing):
-        bpy.ops.mesh.primitive_uv_sphere_add(segments=16, ring_count=8, radius=radius)
+    def _create_dots(self):
+        bpy.ops.mesh.primitive_uv_sphere_add(segments=16, ring_count=8, radius=self.bevel_depth)
         bpy.ops.object.shade_smooth()
-        dot = bpy.data.objects[-1]
+        dot = bpy.context.object
+        dot.location = (self.bevel_depth * .5, 0, 0)
+        bpy.ops.object.transform_apply(location=True, scale=False, properties=False, isolate_users=False)
+        self._make_array()
+
+    def _create_dashes(self):
+        bpy.ops.mesh.primitive_cylinder_add(vertices=8, radius=self.bevel_depth, rotation=(0, math.pi * .5, 0), depth=self.dash_length)
+        bpy.ops.object.shade_smooth()
+        dot = bpy.context.object
+        dot.location = (self.dash_length * .5, 0, 0)
+        bpy.ops.object.transform_apply(location=True, scale=False, properties=False, isolate_users=False)
+        self._make_array()
+
+    def _remove_style(self):
+        if self._array_object is not None:
+            bpy.data.objects.remove(self._array_object)
+        self._array_object = None
+        self.data.bevel_depth = self.bevel_depth
+
+    def _make_array(self):
+        self._remove_style()
+        dot = bpy.context.object
+        if self.material:
+            dot.data.materials.append(self.material)
+        self.data.bevel_depth = 0.
         dot.location = self.worldPosition
         mod: bpy.types.ArrayModifier = dot.modifiers.new('Array', "ARRAY")
         mod.fit_type = "FIT_CURVE"
         mod.curve = self.blenderObject
-        mod.use_relative_offset = True
-        mod.relative_offset_displace.x = spacing
+        mod.use_constant_offset = True
+        mod.constant_offset_displace.x = 1 + self.style_spacing
         cmod: bpy.types.CurveModifier = dot.modifiers.new('Array', "CURVE")
         cmod.object = self.blenderObject
+        self._array_object = dot
 
-    # @property
-    # def style(self):
-    #     return self._style
+    def _restyle(self):
+        if self.style == "dots":
+            self._create_dots()
+        if self.style == "dashes":
+            self._create_dashes()
+        if self.style == 'line':
+            self._remove_style()
 
-    # @style.setter
+    @property
+    def style_spacing(self):
+        return self._style_spacing
+
+    @style_spacing.setter
+    def style_spacing(self, val):
+        self._style_spacing = val
+        self._restyle()
+
+    @property
+    def style(self):
+        return self._style
+
+    @style.setter
+    def style(self, val):
+        if val == self.style:
+            return
+        self._style = val
+        self._restyle()
+
+    @property
+    def dash_length(self):
+        return self._dash_length
+
+    @dash_length.setter
+    def dash_length(self, val):
+        self._dash_length = val
+        self._restyle()
+
+    @property
+    def material(self):
+        if len(self.blenderObject.data.materials):
+            return self.blenderObject.data.materials[0]
+
+    # @material.setter
     # def style(self, val):
     #     if val == self.style:
     #         return
@@ -583,11 +659,18 @@ class Curve(GameObject):
     @property
     def bevel_depth(self):
         """Thickness of the curve geometry as diameter."""
-        return self.data.bevel_depth
+        return self._bevel_depth
 
     @bevel_depth.setter
     def bevel_depth(self, val):
-        self.data.bevel_depth = val
+        if self._array_object:
+            if self.style == 'dots':
+                self._create_dots()
+            if self.style == 'dashes':
+                self._create_dashes()
+        else:
+            self.data.bevel_depth = val
+        self._bevel_depth = val
 
     @property
     def length(self):
