@@ -446,6 +446,9 @@ class Widget():
             Vector((pos[0] + size[0], pos[1] + size[1]))
         ]
 
+    def refresh(self):
+        self._build_shader()
+
     def check_inside(self, x, y):
         # if bpy.app.version[0] < 4:
         from bge import render

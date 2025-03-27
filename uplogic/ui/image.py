@@ -1,7 +1,6 @@
 from .widget import Widget
 import gpu
 import bpy
-from bge import logic
 from math import ceil
 from uplogic.utils import clamp
 from .widget import rotate2d
@@ -9,6 +8,87 @@ from gpu_extras.batch import batch_for_shader
 from mathutils import Vector
 from os.path import isfile
 from uplogic.utils.handlers import ImageHandler
+
+
+
+class _UV_Point(list):
+
+    @property
+    def lower(self):
+        return self[0]
+
+    @lower.setter
+    def lower(self, val):
+        self[0] = val
+
+    @property
+    def upper(self):
+        return self[1]
+
+    @upper.setter
+    def upper(self, val):
+        self[1] = val
+
+
+class _UV(list):
+
+    @property
+    def owner(self) -> Widget:
+        return self[2]
+
+    @property
+    def x(self) -> _UV_Point:
+        return self[0]
+
+    @x.setter
+    def x(self, val):
+        self[0] = _UV_Point(val)
+        self.owner._build_shader()
+
+    @property
+    def x_min(self) -> _UV_Point:
+        return self.x.lower
+
+    @x_min.setter
+    def x_min(self, val):
+        self.x.lower = val
+        self.owner._build_shader()
+
+    @property
+    def x_max(self) -> _UV_Point:
+        return self.x.upper
+
+    @x_max.setter
+    def x_max(self, val):
+        self.x.upper = val
+        self.owner._build_shader()
+
+    @property
+    def y(self) -> _UV_Point:
+        return self[1]
+
+    @y.setter
+    def y(self, val):
+        self[1] = _UV_Point(val)
+        self.owner._build_shader()
+
+    @property
+    def y_min(self) -> _UV_Point:
+        return self.y.lower
+
+    @y_min.setter
+    def y_min(self, val):
+        self.y.lower = val
+        self.owner._build_shader()
+
+    @property
+    def y_max(self) -> _UV_Point:
+        return self.y.upper
+
+    @y_max.setter
+    def y_max(self, val):
+        self.y.upper = val
+        self.owner._build_shader()
 
 
 class Image(Widget):
@@ -53,9 +133,19 @@ class Image(Widget):
         self._texture = None
         # self._image = None
         self.use_aspect_ratio = use_aspect_ratio
+        self._uv: _UV[_UV_Point] = _UV((_UV_Point((0, 1)), _UV_Point((0, 1)), self))
         self._opacity = 1
         super().__init__(pos, size, relative=relative, halign=halign, valign=valign, angle=angle, show=show)
         self._load_image(texture)
+
+    @property
+    def uv(self):
+        return self._uv
+
+    @uv.setter
+    def uv(self, val):
+        self._uv = val
+        self._build_shader()
 
     @property
     def image(self):
@@ -149,15 +239,16 @@ class Image(Widget):
             self._shader = gpu.shader.from_builtin('2D_IMAGE')
         else:
             self._shader = gpu.types.GPUShader(self.vertex_shader, self.fragment_shader)
+        uvs = self.uv
         self._batch = batch_for_shader(
             self._shader, 'TRI_STRIP',
             {
                 "pos": vertices,
                 "texCoord": (
-                    (.9999, .0001),
-                    (0.0001, 0.0001),
-                    (.9999, .9999),
-                    (.0001, .9999)
+                    (uvs.x_max, uvs.y_min),
+                    (uvs.x_min, uvs.y_min),
+                    (uvs.x_max, uvs.y_max),
+                    (uvs.x_min, uvs.y_max)
                 ),
             },
         )
