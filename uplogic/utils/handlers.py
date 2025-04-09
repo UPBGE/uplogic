@@ -130,6 +130,8 @@ class ImageHandler:
     def _finish(self):
         if self.play_mode == 'loop':
             self.seek(0)
+        else:
+            self.is_playing = False
         self.on_finish()
 
     def on_finish(self):
