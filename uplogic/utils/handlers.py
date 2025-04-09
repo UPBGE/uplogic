@@ -114,7 +114,7 @@ class ImageHandler:
     def flush(self):
         if not self._flushed:
             self.image.gl_free()
-            self.image.buffers_free()
+            # self.image.buffers_free()
             self.image.gl_load(frame=self.frame)
 
             self._texture = gpu.texture.from_image(self.image)
