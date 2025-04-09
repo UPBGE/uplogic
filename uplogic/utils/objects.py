@@ -535,19 +535,26 @@ class Curve(GameObject):
         return eval_obj
 
     def _create_dots(self):
+        bpy.context.scene.cursor.location = (0, 0, 0)
+        self.data.twist_mode = 'Z_UP'
         bpy.ops.mesh.primitive_uv_sphere_add(segments=16, ring_count=8, radius=self.bevel_depth)
         bpy.ops.object.shade_smooth()
         dot = bpy.context.object
         dot.location = (self.bevel_depth * .5, 0, 0)
         bpy.ops.object.transform_apply(location=True, scale=False, properties=False, isolate_users=False)
+        # dot.location = self.game_object.worldPosition
+        dot.parent = self.blenderObject
         self._make_array()
 
     def _create_dashes(self):
+        bpy.context.scene.cursor.location = (0, 0, 0)
+        self.data.twist_mode = 'Z_UP'
         bpy.ops.mesh.primitive_cylinder_add(vertices=8, radius=self.bevel_depth, rotation=(0, math.pi * .5, 0), depth=self.dash_length)
         bpy.ops.object.shade_smooth()
         dot = bpy.context.object
         dot.location = (self.dash_length * .5, 0, 0)
         bpy.ops.object.transform_apply(location=True, scale=False, properties=False, isolate_users=False)
+        dot.parent = self.blenderObject
         self._make_array()
 
     def _remove_style(self):
