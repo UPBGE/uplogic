@@ -573,7 +573,7 @@ class Curve(GameObject):
         mod.fit_type = "FIT_CURVE"
         mod.curve = self.blenderObject
         mod.use_constant_offset = True
-        mod.use_relative_offset = False
+        # mod.use_relative_offset = False
         mod.constant_offset_displace.x = 1 + self.style_spacing
         cmod: bpy.types.CurveModifier = dot.modifiers.new('Array', "CURVE")
         cmod.object = self.blenderObject
