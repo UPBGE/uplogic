@@ -542,7 +542,6 @@ class Curve(GameObject):
         dot = bpy.context.object
         dot.location = (self.bevel_depth * .5, 0, 0)
         bpy.ops.object.transform_apply(location=True, scale=False, properties=False, isolate_users=False)
-        # dot.location = self.game_object.worldPosition
         dot.parent = self.blenderObject
         self._make_array()
 
@@ -574,6 +573,7 @@ class Curve(GameObject):
         mod.fit_type = "FIT_CURVE"
         mod.curve = self.blenderObject
         mod.use_constant_offset = True
+        mod.use_relative_offset = False
         mod.constant_offset_displace.x = 1 + self.style_spacing
         cmod: bpy.types.CurveModifier = dot.modifiers.new('Array', "CURVE")
         cmod.object = self.blenderObject
