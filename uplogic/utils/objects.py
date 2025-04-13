@@ -535,19 +535,25 @@ class Curve(GameObject):
         return eval_obj
 
     def _create_dots(self):
+        bpy.context.scene.cursor.location = (0, 0, 0)
+        self.data.twist_mode = 'Z_UP'
         bpy.ops.mesh.primitive_uv_sphere_add(segments=16, ring_count=8, radius=self.bevel_depth)
         bpy.ops.object.shade_smooth()
         dot = bpy.context.object
         dot.location = (self.bevel_depth * .5, 0, 0)
         bpy.ops.object.transform_apply(location=True, scale=False, properties=False, isolate_users=False)
+        dot.parent = self.blenderObject
         self._make_array()
 
     def _create_dashes(self):
+        bpy.context.scene.cursor.location = (0, 0, 0)
+        self.data.twist_mode = 'Z_UP'
         bpy.ops.mesh.primitive_cylinder_add(vertices=8, radius=self.bevel_depth, rotation=(0, math.pi * .5, 0), depth=self.dash_length)
         bpy.ops.object.shade_smooth()
         dot = bpy.context.object
         dot.location = (self.dash_length * .5, 0, 0)
         bpy.ops.object.transform_apply(location=True, scale=False, properties=False, isolate_users=False)
+        dot.parent = self.blenderObject
         self._make_array()
 
     def _remove_style(self):
@@ -567,6 +573,7 @@ class Curve(GameObject):
         mod.fit_type = "FIT_CURVE"
         mod.curve = self.blenderObject
         mod.use_constant_offset = True
+        # mod.use_relative_offset = False
         mod.constant_offset_displace.x = 1 + self.style_spacing
         cmod: bpy.types.CurveModifier = dot.modifiers.new('Array', "CURVE")
         cmod.object = self.blenderObject
