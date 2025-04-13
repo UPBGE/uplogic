@@ -1,6 +1,6 @@
 from bge import logic
 from bge import constraints
-from bpy.types import Collection
+from bpy.types import Collection as BColl
 import bpy
 from mathutils import Vector, Euler
 
@@ -13,10 +13,23 @@ class Collection:
         return [scene.getGameObjectFromObject(bobj) for bobj in self.collection.objects]
 
     @property
+    def all_game_objects(self):
+        scene = logic.getCurrentScene()
+        objs = [scene.getGameObjectFromObject(bobj) for bobj in self.collection.all_objects]
+        for o in objs:
+            if o.groupMembers is not None:
+                objs.extend(o.groupMembers)
+        return objs
+
+    @property
     def objects(self):
         return self.collection.objects
 
-    def __init__(self, collection: Collection) -> None:
+    @property
+    def all_objects(self):
+        return self.collection.all_objects
+
+    def __init__(self, collection: BColl) -> None:
         if isinstance(collection, str):
             collection = bpy.data.collections.get(collection)
         self.collection = collection
@@ -28,7 +41,7 @@ class Collection:
         self.save()
 
     def set_visible(self, state=True):
-        for obj in self.game_objects:
+        for obj in self.all_game_objects:
             obj.setVisible(state, True)
             obj.restorePhysics() if state else obj.suspendPhysics()
             obj.restoreDynamics() if state else obj.suspendDynamics()
@@ -44,7 +57,7 @@ class Collection:
 
     def load(self):
         scene = logic.getCurrentScene()
-        for obj in self.objects:
+        for obj in self.all_game_objects:
             data = self._collection_state['objects'].get(obj.name, None)
             if data is None:
                 continue
@@ -99,7 +112,7 @@ class Collection:
         }
         objs = self._collection_state['objects']
 
-        for obj in self.game_objects:
+        for obj in self.all_game_objects:
             if obj.name == '__default__cam__':
                 continue
             props = obj.getPropertyNames()

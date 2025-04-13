@@ -757,6 +757,7 @@ def add_object(name: str | KX_GameObject, ref: str | KX_GameObject = None, time 
         game_object.worldTransform = ref_obj.worldTransform
     if time > 0:
         schedule(game_object.endObject, time)
+    # game_object.name = name
     return game_object
 
 
