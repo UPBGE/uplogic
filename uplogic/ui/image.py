@@ -133,7 +133,7 @@ class Image(Widget):
         self._texture = None
         # self._image = None
         self.use_aspect_ratio = use_aspect_ratio
-        self._uv: _UV[_UV_Point] = _UV((_UV_Point((0, 1)), _UV_Point((0, 1)), self))
+        self._uv: _UV[_UV_Point] = _UV((_UV_Point((0.001, .999)), _UV_Point((0.001, .999)), self))
         self._opacity = 1
         super().__init__(pos, size, relative=relative, halign=halign, valign=valign, angle=angle, show=show)
         self._load_image(texture)

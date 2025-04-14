@@ -17,7 +17,7 @@ class Collection:
         scene = logic.getCurrentScene()
         objs = [scene.getGameObjectFromObject(bobj) for bobj in self.collection.all_objects]
         for o in objs:
-            if o.groupMembers is not None:
+            if o.groupMembers is not None and o.groupObject is None:
                 objs.extend(o.groupMembers)
         return objs
 
@@ -42,9 +42,12 @@ class Collection:
 
     def set_visible(self, state=True):
         for obj in self.all_game_objects:
-            obj.setVisible(state, True)
-            obj.restorePhysics() if state else obj.suspendPhysics()
-            obj.restoreDynamics() if state else obj.suspendDynamics()
+            if obj.groupMembers is not None and obj.groupObject is None:
+                obj.setVisible(False, False)
+            else:
+                obj.setVisible(state, True)
+                obj.restorePhysics() if state else obj.suspendPhysics()
+                obj.restoreDynamics() if state else obj.suspendDynamics()
 
     def enable(self):
         self.set_visible(True)

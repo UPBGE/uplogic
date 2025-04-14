@@ -102,7 +102,8 @@ class ActionSystem():
 
         :param action: `Action` which to remove.
         '''
-        action._stop()
+        if not action.game_object.invalid:
+            action._stop()
         if action in self.actions:
             self.actions.remove(action)
         ActionSystem.free_layer(action)
