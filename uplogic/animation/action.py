@@ -102,10 +102,10 @@ class Action():
         '''The game object the animation is playing on.'''
         self.name = action_name
         '''Name of this action.'''
-        self.start_frame = start_frame
-        '''Starting Frame of the animation.'''
-        self.end_frame = end_frame
         '''End Frame of the animation.'''
+        self._start_frame = start_frame
+        '''Starting Frame of the animation.'''
+        self._end_frame = end_frame
         self.priority = priority
         '''Priority of this animation; This is only relevant if multiple
         animations are playing on the same layer.'''
@@ -133,8 +133,8 @@ class Action():
         if not (self.is_playing or same_action):
             game_object.playAction(
                 action_name,
-                start_frame,
-                end_frame,
+                self.start_frame,
+                self.end_frame,
                 play_mode=play_mode,
                 speed=speed,
                 layer=layer,
@@ -167,6 +167,30 @@ class Action():
         :param *args: Arguments to be passed to the callback.
         '''
         self._callbacks.append(ActionCallback(self, callback, frame, *args))
+
+    @property
+    def start_frame(self):
+        return self._start_frame
+
+    @start_frame.setter
+    def start_frame(self, val):
+        r = val != self._start_frame
+        self._start_frame = val
+        if r:
+            self._restart_action()
+
+    @property
+    def end_frame(self):
+        return self._end_frame
+
+    @end_frame.setter
+    def end_frame(self, val):
+        if val < self.start_frame:
+            self._start_frame = val
+        r = val != self._end_frame
+        self._end_frame = val
+        if r:
+            self._restart_action()
 
     @property
     def is_playing(self) -> bool:
@@ -253,6 +277,7 @@ class Action():
         speed = self.speed * self._fps_factor * logic.getTimeScale()
         blend_mode = self.blend_mode
         frame = self.frame
+        # print(start_frame, end_frame)
         reset_frame = (
             start_frame if
             play_mode == logic.KX_ACTION_MODE_LOOP else

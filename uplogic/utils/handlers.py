@@ -11,7 +11,7 @@ class ImageHandler:
     def __init__(self, texture, fps=60, min_frame=0, max_frame=None, load_audio=False):
         self.play_mode = 'play'
         self._texture = None
-        self._image = None
+        self.image = None
         self._opacity = 1
         if texture is not None and texture not in bpy.data.images and isfile(texture):
             self.image = bpy.data.images.load(texture)
@@ -19,9 +19,8 @@ class ImageHandler:
         self._frame = 1
 
         self._min_frame = min_frame
-        self._max_frame = self.image.frame_duration
-        if max_frame is not None:
-            self._max_frame = max_frame
+        # self._max_frame = self.image.frame_duration
+        self._max_frame = max_frame if max_frame is not None else (self.image.frame_duration if self.image is not None else 0)
         self.sound = None
         if load_audio:
             try:

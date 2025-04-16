@@ -156,6 +156,14 @@ class Image(Widget):
         self.start()
 
     @property
+    def size_pixel(self):
+        if self._vertices is None:
+            return [0, 0]
+        bottom_left = self._vertices[1]
+        top_right = self._vertices[2]
+        return [top_right[0] - bottom_left[0], top_right[1] - bottom_left[1]]
+
+    @property
     def filepath(self):
         return self.image_handler.filepath
 
