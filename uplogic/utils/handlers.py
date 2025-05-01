@@ -67,7 +67,7 @@ class ImageHandler:
             if self.sound is not None:
                 self.sound.play()
                 self.sound.position = self.playback_position
-        elif not val:
+        elif not val and self.sound is not None:
             self.sound.pause()
         self._is_playing = val
 

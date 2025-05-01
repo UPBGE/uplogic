@@ -29,16 +29,20 @@ class Sequence():
     @property
     def frame(self):
         if self._node_type:
-            return self._player.frame_offset
-        return round(self._player.inputs[0].default_value)
+            return self.player.frame_offset
+        return round(self.player.inputs[0].default_value)
 
     @frame.setter
     def frame(self, frame):
         if self._node_type:
-            self._player.frame_offset = round(frame)
+            self.player.frame_offset = round(frame)
         else:
-            self._player.inputs[0].default_value = frame
+            self.player.inputs[0].default_value = frame
         self.material.update_tag()
+
+    @property
+    def player(self):
+        self._node.image_user
 
     def __init__(
         self,
@@ -85,7 +89,7 @@ class Sequence():
             .node_tree
             .nodes[node]
         )
-        self._player = node
+        self._node = node
 
 
         if isinstance(node, ShaderNodeSpritesAnimation):
