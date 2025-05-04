@@ -1,5 +1,7 @@
 import argparse
 from pythonosc import udp_client
+import pickle
+from uplogic.console import warning
 
 
 class OSC_Client:
@@ -13,11 +15,7 @@ class OSC_Client:
         args = parser.parse_args()
 
         self.client = udp_client.DispatchClient(args.ip, args.port)
-        self.map('/icom', self._print_debug)
         print(f'OSC Client Connected to {server}')
-
-    def _print_debug(self, address, args):
-        print(address, args)
 
     def map(self, address: str, callback, *args: list, needs_reply_address: bool = False):
         """Map a callback to an address.
@@ -38,5 +36,5 @@ class OSC_Client:
     def send(self, address, content=[0]):
         try:
             self.client.send_message(address=address, value=content)
-        except:
-            print('OSC Client: Message could not be sent.')
+        except Exception as e:
+            warning(f'OSC Client: Message could not be sent. Reason:\n\t{e}')

@@ -40,4 +40,6 @@ class OSC_Server:
         return self.dispatcher.map(address, callback, *args, needs_reply_address=needs_reply_address)
 
     def shutdown(self) -> None:
-       self.server.shutdown()
+        print(f'Shutting down OSC Server on {self.server.server_address[0]}:{self.server.server_address[1]}')
+        self.server.shutdown()
+        self.server.socket.close()
