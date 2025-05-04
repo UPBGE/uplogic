@@ -60,7 +60,7 @@ class Collection:
 
     def load(self):
         scene = logic.getCurrentScene()
-        for obj in self.all_game_objects:
+        for obj in self.all_objects:
             data = self._collection_state['objects'].get(obj.name, None)
             if data is None:
                 continue
