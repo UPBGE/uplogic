@@ -245,6 +245,10 @@ class ScheduledEvent():
         self._consumed = False
         EventManager.schedule(self._send_scheduled)
 
+    @property
+    def time_left(self):
+        return self.delay - time.time()
+
     def _send_scheduled(self):
         if time.time() >= self.delay:
             self.consume()
@@ -255,6 +259,7 @@ class ScheduledEvent():
     def consume(self):
         if self._consumed:
             return
+        self.delay = time.time()
         self._consumed = True
         EventManager.cancel(self._send_scheduled)
         Event(self.id, self.content, self.messenger)
@@ -297,6 +302,10 @@ class ScheduledCallback():
         self._consumed = False
         EventManager.schedule(self._call_scheduled)
 
+    @property
+    def time_left(self):
+        return self.delay - time.time()
+
     def _call_scheduled(self):
         if time.time() >= self.delay:
             self.consume()
@@ -304,6 +313,7 @@ class ScheduledCallback():
     def consume(self):
         if self._consumed:
             return
+        self.delay = time.time()
         self._consumed = True
         EventManager.cancel(self._call_scheduled)
         if self.arg is not None:
