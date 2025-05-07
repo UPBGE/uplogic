@@ -6,6 +6,24 @@ from pathlib import Path
 import bpy, bge
 
 
+def uniforms(*uniforms):
+    def deco(cls):
+        for uniform in uniforms:
+
+            def getProp(self, attr_name=uniform):
+                return self.uniforms.get(attr_name)
+
+            def setProp(self, value, attr_name=uniform):
+                self.uniforms[attr_name] = value
+
+            prop = property(getProp, setProp)
+
+            setattr(cls, uniform, prop)
+        return cls
+
+    return deco
+
+
 def load_glsl(filepath: str):
     return Path(filepath).read_text()
 
