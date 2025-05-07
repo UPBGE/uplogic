@@ -89,14 +89,14 @@ class Canvas(Widget):
         self._parent = None
 
     def draw(self):
+        if not self.show:
+            return
         width = bge.render.getWindowWidth()
         height = bge.render.getWindowHeight()
         if width != self._old_width or height != self._old_height:
             self.fetch_size()
         self._old_width = width
         self._old_height = height
-        if not self.show:
-            return
         gpu.state.blend_set('ALPHA')
         super().draw()
         self._hover_consumed = False
@@ -109,7 +109,6 @@ class Canvas(Widget):
             w = self._to_evaluate.pop()
             if w.parent:
                 w.update()
-        
 
     def update(self):
         pass

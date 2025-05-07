@@ -582,6 +582,10 @@ class Widget():
         self.children = sorted(self.children, key=lambda widget: widget.z, reverse=False)
         return widget
 
+    def add_widgets(self, *widgets):
+        for w in widgets:
+            self.add_widget(w)
+
     def on_parent(self):
         ...
 
