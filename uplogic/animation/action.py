@@ -7,7 +7,7 @@ from random import randint
 from random import random
 from uplogic.animation import ActionSystem
 from uplogic.animation.actionsystem import get_action_system
-from uplogic.events import schedule
+# from uplogic.events import schedule
 from uplogic.console import warning
 from uplogic.utils.constants import FRAMETIME_COMPARE
 import bpy
@@ -151,12 +151,14 @@ class Action():
     def on_start(self):
         '''Handler for animation playback start.
         '''
-        schedule(self, 0, ACTION_STARTED)
+        # schedule(self, 0, ACTION_STARTED)
+        ...
 
     def on_finish(self):
         '''Handler for animation playback finish.
         '''
-        schedule(self, 0, ACTION_FINISHED)
+        # schedule(self, 0, ACTION_FINISHED)
+        ...
 
     def frame_trigger(self, frame, callback, *args):
         '''Bind a callback to a specific frame of the animation. The callback will be invoked once the
