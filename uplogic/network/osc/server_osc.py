@@ -31,6 +31,7 @@ class OSC_Server:
         print(address, args)
 
     def map(self, address: str, callback, *args: list, needs_reply_address: bool = False):
+        print(f'Mapping {address} to {callback}.')
         """Map a callback to an address. Callback receives (`address`, `args`, `volume`)
         
         :param `address`: address identifier (example: `"/update"`).
