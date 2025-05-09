@@ -585,6 +585,7 @@ class Curve(GameObject):
         if self.style == "dashes":
             self._create_dashes()
         if self.style == 'line':
+            # XXX: Investigate bevel_depth set to 0 if setting style attributes after setting radius
             self._remove_style()
 
     @property
