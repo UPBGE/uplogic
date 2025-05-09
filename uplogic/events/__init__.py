@@ -96,7 +96,8 @@ class EventManager():
     @classmethod
     def unbind(cls, cb):
         get_event_manager()
-        cls.cancel(cb)
+        if cb in cls.bindings:
+            cls.bindings.remove(cb)
 
     @classmethod
     def release(cls, cb):

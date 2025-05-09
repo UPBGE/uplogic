@@ -19,7 +19,6 @@ class ImageHandler:
         self._frame = 1
 
         self._min_frame = min_frame
-        # self._max_frame = self.image.frame_duration
         self._max_frame = max_frame if max_frame is not None else (self.image.frame_duration if self.image is not None else 0)
         self.sound = None
         if load_audio:
@@ -28,7 +27,7 @@ class ImageHandler:
                 self.sound = Sound2D(self.filepath)
                 self.sound.keep = True
             except Exception:
-                print("Couldn't read audio from movie file.")
+                print("Couldn't read audio of movie file.")
         self.fps = fps
         self._is_playing = False
         self._ref_time = 0
