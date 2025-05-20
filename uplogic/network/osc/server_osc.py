@@ -40,7 +40,7 @@ class OSC_Server:
         :param `needs_reply_address`: Whether the IP address from which the message originated from shall be passed as
         an argument to the handler callback identifier.
         """
-        
+
         def _deferred_cb(*a):
             events.schedule(callback, content=a)
 
