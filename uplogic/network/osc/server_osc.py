@@ -4,6 +4,7 @@ from pythonosc.dispatcher import Dispatcher
 from pythonosc import osc_server
 import threading
 import time
+from uplogic import events
 from uplogic.console import debug
 
 
@@ -39,7 +40,11 @@ class OSC_Server:
         :param `needs_reply_address`: Whether the IP address from which the message originated from shall be passed as
         an argument to the handler callback identifier.
         """
-        return self.dispatcher.map(address, callback, *args, needs_reply_address=needs_reply_address)
+        
+        def _deferred_cb(*a):
+            events.schedule(callback, content=a)
+
+        return self.dispatcher.map(address, _deferred_cb, *args, needs_reply_address=needs_reply_address)
 
     def shutdown(self) -> None:
         print(f'Shutting down OSC Server on {self.server.server_address[0]}:{self.server.server_address[1]}')
