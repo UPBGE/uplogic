@@ -188,7 +188,7 @@ class Action():
     @end_frame.setter
     def end_frame(self, val):
         if val < self.start_frame:
-            self._start_frame = val
+            self._start_frame = val - 1
         r = val != self._end_frame
         self._end_frame = val
         if r:
@@ -279,7 +279,6 @@ class Action():
         speed = self.speed * self._fps_factor * logic.getTimeScale()
         blend_mode = self.blend_mode
         frame = self.frame
-        # print(start_frame, end_frame)
         reset_frame = (
             start_frame if
             play_mode == logic.KX_ACTION_MODE_LOOP else

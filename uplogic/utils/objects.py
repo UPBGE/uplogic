@@ -15,6 +15,7 @@ from ..events import schedule
 from mathutils import Vector, Matrix, Euler
 from math import degrees
 from math import radians
+from .collections import assign
 
 
 def xrot_to(

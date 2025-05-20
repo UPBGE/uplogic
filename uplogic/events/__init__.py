@@ -14,6 +14,22 @@ def on_post_draw(callback):
     EventManager.update_on.append(callback)
 
 
+class _DeferredCallback:
+
+
+    def callback(self):
+        ...
+
+    def __init__(self, callback) -> None:
+        self.callback = callback
+        logic.getCurrentScene().post_draw.append(self._call)
+
+    def _call(self):
+        self.callback()
+        if self._call in logic.getCurrentScene().post_draw:
+            logic.getCurrentScene().post_draw.remove(self._call)
+
+
 def later(callback):
     class _DeferredCallback():
 
@@ -40,7 +56,7 @@ def set_update_loop(loop):
     EventManager.set_update_on(loop)
 
 
-class EventManager():
+class EventManager:
     '''Manager for `Event` objects, not inteded for manual use.
     '''
     events = {}

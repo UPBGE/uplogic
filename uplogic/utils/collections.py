@@ -1,8 +1,24 @@
 from bge import logic
 from bge import constraints
 from bpy.types import Collection as BColl
-import bpy
+import bpy, bge
 from mathutils import Vector, Euler
+
+
+def assign(game_object: bge.types.KX_GameObject, collection: BColl, exclusive=True):
+    """Link an object into a specified collection.
+
+    :param game_object: Target Object.
+    :param collection: Target Collection.
+    :param exclusive: Remove the object from all other collections.
+    """
+    if exclusive:
+        for coll in game_object.blenderObject.users_collection:
+            coll.objects.unlink(game_object.blenderObject)
+    if isinstance(collection, str):
+        collection = bpy.data.collections.get(collection)
+    collection.objects.link(game_object.blenderObject)
+    game_object.blenderObject.update_tag()
 
 
 class Collection:
@@ -43,11 +59,22 @@ class Collection:
     def set_visible(self, state=True):
         for obj in self.all_game_objects:
             if obj.groupMembers is not None and obj.groupObject is None:
-                obj.setVisible(False, False)
+                # Is groupInstance
+                obj.setVisible(False, True)
+                # for gobj in obj.groupMembers:
+                #     gobj.setVisible(state, True)
+                #     gobj.restorePhysics() if state else obj.suspendPhysics()
+                #      gobj.restoreDynamics() if state else obj.suspendDynamics()
+                # ...
             else:
-                obj.setVisible(state, True)
+                if not state:
+                    print(f'Disabeling {obj}')
+                obj.setVisible(state, False)
+                # obj.visible = False
                 obj.restorePhysics() if state else obj.suspendPhysics()
                 obj.restoreDynamics() if state else obj.suspendDynamics()
+            obj.blenderObject.update_tag()
+        bpy.context.scene.update_tag()
 
     def enable(self):
         self.set_visible(True)
@@ -73,7 +100,6 @@ class Collection:
             wPos = self.get_game_vec(data['data']['worldPosition'])
             wOri = self.get_game_vec(data['data']['worldOrientation'])
             wSca = self.get_game_vec(data['data']['worldScale'])
-
             
             game_obj.worldPosition = wPos
             game_obj.worldOrientation = wOri.to_matrix()
