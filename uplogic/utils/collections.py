@@ -266,7 +266,6 @@ class Collection:
                         }
                     }
             else:
-                print(obj)
                 objs[obj.blenderObject.name] = {
                         'name': obj.name,
                         'type': 'static',
