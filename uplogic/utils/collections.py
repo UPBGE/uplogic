@@ -61,16 +61,8 @@ class Collection:
             if obj.groupMembers is not None and obj.groupObject is None:
                 # Is groupInstance
                 obj.setVisible(False, True)
-                # for gobj in obj.groupMembers:
-                #     gobj.setVisible(state, True)
-                #     gobj.restorePhysics() if state else obj.suspendPhysics()
-                #      gobj.restoreDynamics() if state else obj.suspendDynamics()
-                # ...
             else:
-                if not state:
-                    print(f'Disabeling {obj}')
                 obj.setVisible(state, False)
-                # obj.visible = False
                 obj.restorePhysics() if state else obj.suspendPhysics()
                 obj.restoreDynamics() if state else obj.suspendDynamics()
             obj.blenderObject.update_tag()
