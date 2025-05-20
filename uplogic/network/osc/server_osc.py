@@ -31,7 +31,6 @@ class OSC_Server:
         print(address, args)
 
     def map(self, address: str, callback, *args: list, needs_reply_address: bool = False):
-        print(f'Mapping {address} to {callback}.')
         """Map a callback to an address. Callback receives (`address`, `args`, `volume`)
         
         :param `address`: address identifier (example: `"/update"`).
@@ -40,7 +39,6 @@ class OSC_Server:
         :param `needs_reply_address`: Whether the IP address from which the message originated from shall be passed as
         an argument to the handler callback identifier.
         """
-        debug(f'Mapping {address} to {callback}')
         return self.dispatcher.map(address, callback, *args, needs_reply_address=needs_reply_address)
 
     def shutdown(self) -> None:

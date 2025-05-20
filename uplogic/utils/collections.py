@@ -56,15 +56,22 @@ class Collection:
         }
         self.save()
 
-    def set_visible(self, state=True):
+    def set_frozen(self, state):
+        for obj in self.all_game_objects:
+            if not (obj.groupMembers is not None and obj.groupObject is None):
+                obj.suspendPhysics() if state else obj.restorePhysics()
+                obj.suspendDynamics() if state else obj.restoreDynamics()
+
+    def set_visible(self, state=True, physics=True):
         for obj in self.all_game_objects:
             if obj.groupMembers is not None and obj.groupObject is None:
                 # Is groupInstance
                 obj.setVisible(False, True)
             else:
                 obj.setVisible(state, False)
-                obj.restorePhysics() if state else obj.suspendPhysics()
-                obj.restoreDynamics() if state else obj.suspendDynamics()
+                if physics:
+                    obj.restorePhysics() if state else obj.suspendPhysics()
+                    obj.restoreDynamics() if state else obj.suspendDynamics()
             obj.blenderObject.update_tag()
         bpy.context.scene.update_tag()
 
@@ -158,7 +165,7 @@ class Collection:
             rot = obj.worldOrientation.to_euler()
             sca = obj.worldScale
 
-            if obj.mass:
+            if obj.blenderObject.game.physics_type == 'RIGID_BODY':
                 lin_vel = obj.worldLinearVelocity
                 ang_vel = obj.worldAngularVelocity
                 loclin_vel = obj.localLinearVelocity
@@ -217,7 +224,7 @@ class Collection:
                             'props': prop_list
                         }
                     }
-            if cha:
+            elif cha:
                 wDir = cha.walkDirection
 
                 objs[obj.blenderObject.name] = {
@@ -259,6 +266,7 @@ class Collection:
                         }
                     }
             else:
+                print(obj)
                 objs[obj.blenderObject.name] = {
                         'name': obj.name,
                         'type': 'static',
