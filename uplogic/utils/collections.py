@@ -3,6 +3,7 @@ from bge import constraints
 from bpy.types import Collection as BColl
 import bpy, bge
 from mathutils import Vector, Euler
+from uplogic import events
 
 
 def assign(game_object: bge.types.KX_GameObject, collection: BColl, exclusive=True):
@@ -72,7 +73,6 @@ class Collection:
                 if physics:
                     obj.restorePhysics() if state else obj.suspendPhysics()
                     obj.restoreDynamics() if state else obj.suspendDynamics()
-            obj.blenderObject.update_tag()
         bpy.context.scene.update_tag()
 
     def enable(self):
