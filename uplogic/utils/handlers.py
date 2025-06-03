@@ -138,3 +138,8 @@ class ImageHandler:
     def free(self):
         self.image.gl_free()
         self.image.buffers_free()
+
+    def stop(self):
+        self.free()
+        self.sound.stop()
+        self.is_playing = False

@@ -460,3 +460,10 @@ class Video(Image):
 
     def seek(self, position):
         self.image_handler.seek(position)
+
+    def stop(self):
+        self.image_handler.stop()
+
+    def remove(self):
+        self.free()
+        return super().remove()

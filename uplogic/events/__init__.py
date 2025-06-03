@@ -178,6 +178,10 @@ class Event():
         EventManager.cancel(self.remove)
 
 
+def clear_schedule():
+    EventManager.clear_schedule()
+
+
 def send(id: int, content=None, messenger=None, target=None) -> None:
     '''Send an event that can be reacted to.
 
