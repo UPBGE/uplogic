@@ -153,10 +153,10 @@ void main()
     }
     mask /= blur_quality * blur_samples - 15.0;
 
-    mask *= vec4(1 - threshold);
+    mask *= vec4(1 + threshold);
     mask -= vec4(threshold);
 
-    fragColor = texture(bgl_RenderedTexture, texcoord) * mask;
+    fragColor = texture(bgl_RenderedTexture, texcoord) * clamp(mask, 0.0, 1.0);
 }
 """
 
