@@ -113,7 +113,7 @@ uniform vec2 size;
 uniform float threshold;
 uniform int blur_samples;
 uniform int blur_quality;
-uniform float blur_radius;
+uniform int blur_radius;
 
 in vec4 bgl_TexCoord;
 
@@ -181,7 +181,7 @@ void main()
         super().__init__(texture=texture, opacity=opacity, pos=pos, size=size, idx=idx)
         self.uniforms.update({
             'blur_samples': int(blur_samples),
-            'blur_radius': float(blur_radius),
+            'blur_radius': int(blur_radius),
             'threshold': float(threshold)
         })
         self._uniforms.update({
@@ -197,7 +197,7 @@ void main()
 
     @blur_radius.setter
     def blur_radius(self, val):
-        self.uniforms['blur_radius'] = float(val)
+        self.uniforms['blur_radius'] = int(val)
 
     @property
     def blur_samples(self):
