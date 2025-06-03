@@ -143,15 +143,16 @@ void main()
 
     vec4 mask = mix(vec4(1.0), texture(tex, texMap), opa);
 
+    vec2 radius = blur_radius / resolution.xy;
 
     for (float d = 0.0; d < Pi; d += Pi / 15)
     {
-		for(float i = 1.0 / blur_quality; i <= 1.0; i += 1.0 / blur_quality)
+		for(float i = 1.0; i <= 1.0; i += 1.0)
         {
-			mask += texture(tex, texcoord + vec2(cos(d), sin(d)) * blur_radius * i);
+			mask += texture(tex, texcoord - vec2(cos(d), sin(d)) * radius * i);
         }
     }
-    mask /= blur_quality * blur_samples - 15.0;
+    mask /= blur_samples;
 
     mask *= vec4(1 + threshold);
     mask -= vec4(threshold);
@@ -169,7 +170,6 @@ void main()
         threshold=0.0,
         blur_samples=15,
         blur_radius=0.003,
-        blur_quality=3,
         idx: int = None
     ) -> None:
         texture = bpy.data.images.get(str(texture), texture)
@@ -182,8 +182,7 @@ void main()
         self.uniforms.update({
             'blur_samples': int(blur_samples),
             'blur_radius': float(blur_radius),
-            'threshold': float(threshold),
-            'blur_quality': int(blur_quality)
+            'threshold': float(threshold)
         })
         self._uniforms.update({
             'blur_samples': self.uniforms,
@@ -199,14 +198,6 @@ void main()
     @blur_radius.setter
     def blur_radius(self, val):
         self.uniforms['blur_radius'] = float(val)
-
-    @property
-    def blur_quality(self):
-        return self.uniforms['blur_quality']
-
-    @blur_quality.setter
-    def blur_quality(self, val):
-        self.uniforms['blur_quality'] = int(val)
 
     @property
     def blur_samples(self):
