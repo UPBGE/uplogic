@@ -143,8 +143,6 @@ void main()
 
     vec4 mask = mix(vec4(1.0), texture(tex, texMap), opa);
 
-    mask *= vec4(1 - threshold);
-    mask -= vec4(threshold);
 
     for (float d = 0.0; d < Pi; d += Pi / 15)
     {
@@ -154,6 +152,9 @@ void main()
         }
     }
     mask /= blur_quality * blur_samples - 15.0;
+
+    mask *= vec4(1 - threshold);
+    mask -= vec4(threshold);
 
     fragColor = texture(bgl_RenderedTexture, texcoord) * mask;
 }
