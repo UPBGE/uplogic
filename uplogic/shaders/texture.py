@@ -110,6 +110,7 @@ uniform sampler2D tex;
 uniform float opacity;
 uniform vec2 pos;
 uniform vec2 size;
+uniform float threshold;
 uniform int blur_samples;
 uniform int blur_quality;
 uniform float blur_radius;
@@ -143,6 +144,9 @@ void main()
     //vec4 mask_frag = mix(vec4(1.0), texture(tex, texMap), opa);
     vec4 mask = texture(tex, texMap);
 
+    mask -= vec4(threshold);
+    mask *= vec4(1 + threshold);
+
     for (float d = 0.0; d < Pi; d += Pi / 15)
     {
 		for(float i = 1.0 / blur_quality; i <= 1.0; i += 1.0 / blur_quality)
@@ -162,6 +166,7 @@ void main()
         opacity: float = 1.0,
         pos=Vector((0, 0)),
         size=Vector((1, 1)),
+        threshold=0.0,
         blur_samples=15,
         blur_radius=0.003,
         blur_quality=3,
@@ -177,11 +182,13 @@ void main()
         self.uniforms.update({
             'blur_samples': int(blur_samples),
             'blur_radius': float(blur_radius),
+            'threshold': float(threshold),
             'blur_quality': int(blur_quality)
         })
         self._uniforms.update({
             'blur_samples': self.uniforms,
             'blur_radius': self.uniforms,
+            'threshold': self.uniforms,
             'blur_quality': self.uniforms
         })
 
@@ -208,3 +215,11 @@ void main()
     @blur_samples.setter
     def blur_samples(self, val):
         self.uniforms['blur_samples'] = int(val)
+
+    @property
+    def threshold(self):
+        return self.uniforms['threshold']
+
+    @threshold.setter
+    def threshold(self, val):
+        self.uniforms['threshold'] = float(val)
