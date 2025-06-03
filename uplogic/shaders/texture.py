@@ -141,10 +141,10 @@ void main()
         map_range(texcoord.y, pos.y, pos.y + size.y, 0, 1)
     );
 
-    vec4 mask_frag = mix(vec4(1.0), texture(tex, texMap), opa);
+    vec4 mask = mix(vec4(1.0), texture(tex, texMap), opa);
 
+    mask *= vec4(1 - threshold);
     mask -= vec4(threshold);
-    mask *= vec4(1 + threshold);
 
     for (float d = 0.0; d < Pi; d += Pi / 15)
     {
