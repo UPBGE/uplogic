@@ -242,6 +242,37 @@ def bind(id: int, callback, *args):
     return _BoundCallback(id, callback, *args)
 
 
+def bind_once(id: int, callback, *args):
+    '''Bind a callback to an event and automatically unbind when received.
+
+    Required signature: `def cb(evt)`
+
+    :param `id`: Name of the event; can be anything, not just `str`.
+    :param `callback`: This callback will be called every time the event is
+    triggered.
+    '''
+    class _BoundCallback():
+        def __init__(self, id, cb, *args) -> None:
+            self.id = id
+            self.callback = cb
+            self.args = args
+            EventManager.bind(self._check_evt)
+
+        def _check_evt(self):
+            evt = receive(self.id)
+            if evt:
+                self.callback(evt, *self.args)
+                self.unbind()
+
+        def unbind(self):
+            EventManager.unbind(self._check_evt)
+
+        def release(self):
+            EventManager.unbind(self._check_evt)
+
+    return _BoundCallback(id, callback, *args)
+
+
 class ULEvent(Event):
     # XXX: Remove legacy support
     pass

@@ -373,15 +373,15 @@ def raycast_projectile(
 
 class RayCastCameraData(tuple):
     @property
-    def obj(self):
+    def obj(self) -> GameObject:
         return self[0]
 
     @property
-    def point(self):
+    def point(self) -> Vector:
         return self[1]
 
     @property
-    def normal(self):
+    def normal(self) -> Vector:
         return self[2]
 
 
