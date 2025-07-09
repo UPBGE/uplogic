@@ -5,7 +5,7 @@ from uplogic.ui.layout import RelativeLayout
 from uplogic.ui.label import Label
 from uplogic.ui.textinput import TextInput
 from uplogic.data import GlobalDB
-from uplogic.utils.raycasting import raycast_mouse
+from uplogic.utils.raycasting import raycast_screen
 from uplogic.utils.scene import world_to_screen
 from uplogic.utils.math import cycle
 from uplogic.utils.math import clamp
@@ -227,7 +227,7 @@ class ConsoleLayout(Canvas):
         self.input.edit = True
 
     def update_nameplate(self):
-        ray = raycast_mouse()
+        ray = raycast_screen()
         mdown = mouse_down()
         if ray.obj:
             self.nameplate.pos = world_to_screen(ray.point) + Vector((0, .01))

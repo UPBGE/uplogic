@@ -470,6 +470,27 @@ class Sound3D(ULSound):
         self.aud_system.add(self)
         self.update(True)
 
+    def play(self):
+        '''Start playback of this sound.'''
+        for sound in self.sounds:
+            sound.resume()
+
+    def stop(self):
+        '''Stop and remove this sound.'''
+        self.on_finish = dummy
+        for sound in self.sounds:
+            sound.stop()
+
+    def pause(self):
+        '''Stop playback of this sound but keep it.'''
+        for sound in self.sounds:
+            sound.pause()
+
+    def resume(self):
+        '''Restart playback of this sound from the position it was paused at.'''
+        for sound in self.sounds:
+            sound.resume()
+
     def update(self, init=False):
         '''This function is called each frame and updates the attributes of the sound according to the scene.'''
         aud_system = self.aud_system

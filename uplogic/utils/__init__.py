@@ -21,6 +21,7 @@ from .objects import controller_brick  # noqa
 from .objects import create_curve  # noqa
 from .objects import set_curve_points  # noqa
 from .raycasting import raycast  # noqa
+from .raycasting import raycast_screen  # noqa
 from .raycasting import raycast_camera  # noqa
 from .raycasting import raycast_face  # noqa
 from .raycasting import raycast_projectile  # noqa

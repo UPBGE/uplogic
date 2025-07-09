@@ -29,10 +29,8 @@ class ULMouseLook(ULActionNode):
         self.OUT = self.add_output(self.get_done)
         self.mouselook = None
 
-    def get_done(self):
-        return self._done
-
     def reset(self):
+        super().reset()
         if self.mouselook:
             self.mouselook.get_data()
 
@@ -69,6 +67,7 @@ class ULMouseLook(ULActionNode):
                     front=self.get_input(self.axis),
                     active=False
                 )
+            self._done = True
         if self.mouselook is not None and condition:
             self.mouselook.update()
-        self._done = True
+            self._done = True

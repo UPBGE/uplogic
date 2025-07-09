@@ -1,6 +1,7 @@
 from uplogic.audio import Sound3D, Sound2D, Sample3D, Sample2D
 from uplogic.nodes import ULActionNode
 from mathutils import Vector
+import bpy
 
 
 class StartSoundNode(ULActionNode):
@@ -43,6 +44,12 @@ class StartSoundNode(ULActionNode):
             self.start_3D_sample
         ]
 
+    @property
+    def soundfile(self):
+        sound = self.get_input(self.sound)
+        print(sound)
+        return sound if isinstance(sound, bpy.types.Sound) else sound
+
     def get_handle(self):
         return self._handle
 
@@ -76,8 +83,9 @@ class StartSoundNode(ULActionNode):
         self._done = True
 
     def start_2D(self, volume, pitch):
+        print(self.soundfile)
         self._handle = Sound2D(
-            file=self.get_input(self.sound).filepath,
+            file=self.soundfile,
             volume=volume,
             pitch=pitch,
             loop_count=self.get_input(self.loop_count),
@@ -85,12 +93,13 @@ class StartSoundNode(ULActionNode):
             ignore_timescale=self.get_input(self.ignore_timescale),
             aud_sys='ln_audio_system'
         )
+        self._handle.play()
 
     def start_2D_sample(self, volume, pitch):
         start = self.get_input(self.start_time)
         end = self.get_input(self.end_time)
         self._handle = Sample2D(
-            file=self.get_input(self.sound).filepath,
+            file=self.soundfile,
             sample=(start, end),
             volume=volume,
             pitch=pitch,
@@ -99,11 +108,12 @@ class StartSoundNode(ULActionNode):
             ignore_timescale=self.get_input(self.ignore_timescale),
             aud_sys='ln_audio_system'
         )
+        self._handle.play()
 
     def start_3D(self, volume, pitch):
         self._handle = Sound3D(
             speaker=self.get_input(self.speaker),
-            file=self.get_input(self.sound).filepath,
+            file=self.soundfile,
             occlusion=self.get_input(self.occlusion),
             transition_speed=self.get_input(self.transition),
             cutoff_frequency=self.get_input(self.cutoff),
@@ -118,13 +128,14 @@ class StartSoundNode(ULActionNode):
             ignore_timescale=self.get_input(self.ignore_timescale),
             aud_sys='ln_audio_system'
         )
+        self._handle.play()
 
     def start_3D_sample(self, volume, pitch):
         start = self.get_input(self.start_time)
         end = self.get_input(self.end_time)
         self._handle = Sample3D(
             speaker=self.get_input(self.speaker),
-            file=self.get_input(self.sound).filepath,
+            file=self.soundfile,
             sample=(start, end),
             occlusion=self.get_input(self.occlusion),
             transition_speed=self.get_input(self.transition),
@@ -140,3 +151,4 @@ class StartSoundNode(ULActionNode):
             ignore_timescale=self.get_input(self.ignore_timescale),
             aud_sys='ln_audio_system'
         )
+        self._handle.play()

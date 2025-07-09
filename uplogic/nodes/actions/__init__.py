@@ -45,6 +45,7 @@ from .setvisibility import ULSetVisibility  # noqa
 from .setvisibility import ULSetCollectionVisibility  # noqa
 from .setcurvepoints import ULSetCurvePoints  # noqa
 from .raycast import ULRaycast  # noqa
+from .raycast import RaycastNode  # noqa
 from .projectileraycast import ULProjectileRayCast  # noqa
 from .mouseraycast import ULMouseRayCast  # noqa
 from .cameraraycast import ULCameraRayCast  # noqa
