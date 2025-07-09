@@ -5,6 +5,7 @@ from bge import logic
 from bge.types import KX_GameObject as GameObject
 from random import randint
 from random import random
+from random import uniform
 from uplogic.animation import ActionSystem
 from uplogic.animation.actionsystem import get_action_system
 # from uplogic.events import schedule
@@ -414,7 +415,7 @@ class Action():
             min = self.start_frame
         if max == -1:
             max = self.end_frame
-        frame = randint(min, max)
+        frame = uniform(min, max)
         self.frame = frame
 
     def randomize_speed(self, min: float = .9, max: float = 1.1):

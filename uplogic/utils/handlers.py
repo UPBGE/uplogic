@@ -165,5 +165,6 @@ class ImageHandler:
 
     def stop(self):
         self.free()
-        self.sound.stop()
+        if self.sound is not None:
+            self.sound.stop()
         self.is_playing = False
