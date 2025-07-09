@@ -6,28 +6,27 @@ from uplogic.utils import clamp
 from os.path import isfile
 
 
+
+
+
 class ImageHandler:
 
     def __init__(self, texture, fps=60, min_frame=0, max_frame=None, load_audio=False):
         self.play_mode = 'play'
+        self.sound = None
         self._texture = None
-        self.image = None
+        self._image = None
         self._opacity = 1
+        self.load_audio = load_audio
         if texture is not None and texture not in bpy.data.images and isfile(texture):
             self.image = bpy.data.images.load(texture)
         self.texture = texture
         self._frame = 1
 
         self._min_frame = min_frame
-        self._max_frame = max_frame if max_frame is not None else (self.image.frame_duration if self.image is not None else 0)
-        self.sound = None
-        if load_audio:
-            try:
-                from uplogic.audio import Sound2D
-                self.sound = Sound2D(self.filepath)
-                self.sound.keep = True
-            except Exception:
-                print("Couldn't read audio of movie file.")
+        self._max_frame = self.image.frame_duration
+        if max_frame is not None:
+            self._max_frame = max_frame
         self.fps = fps
         self._is_playing = False
         self._ref_time = 0
@@ -69,6 +68,31 @@ class ImageHandler:
         elif not val and self.sound is not None:
             self.sound.pause()
         self._is_playing = val
+
+    @property
+    def texture(self):
+        return self._texture
+
+    @texture.setter
+    def texture(self, val):
+        if val is None:
+            return
+        texture = bpy.data.images.get(val, None)
+        if not texture:
+            texture = bpy.data.images.load(val)
+        self.image = texture
+        self._texture = gpu.texture.from_image(texture)
+        self._max_frame = self.image.frame_duration
+        if self.load_audio:
+            if self.sound is not None:
+                self.sound.stop()
+            try:
+                from uplogic.audio import Sound2D
+                self.sound = Sound2D(self.filepath)
+                self.sound.keep = True
+            except Exception:
+                self.sound = None
+                print("Couldn't read audio from movie file.")
 
     @property
     def texture(self):

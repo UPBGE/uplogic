@@ -412,8 +412,9 @@ class Sprite(Image):
 
 class Video(Image):
 
-    def __init__(self, pos=[0, 0], size=(100, 100), relative={}, texture=None, halign='left', valign='bottom', use_aspect_ratio = True, fps=60, min_frame=0, max_frame=None, load_audio=True, angle=0, show=True):
+    def __init__(self, pos=[0, 0], size=(100, 100), relative={}, texture=None, halign='left', valign='bottom', use_aspect_ratio = True, fps=60, min_frame=0, max_frame=None, load_audio=True, play_mode='play', angle=0, show=True):
         self._load_audio = load_audio
+        # self.play_mode = play_mode
         super().__init__(pos, size, relative, texture, halign, valign, use_aspect_ratio, angle, show)
         self.image_handler.fps = fps
         self.image_handler._min_frame = min_frame
@@ -430,6 +431,14 @@ class Video(Image):
     @play_mode.setter
     def play_mode(self, val):
         self.image_handler.play_mode = val
+
+    @property
+    def texture(self):
+        return self.image_handler.texture
+
+    @texture.setter
+    def texture(self, val):
+        self.image_handler.texture = val
 
     @property
     def fps(self):
