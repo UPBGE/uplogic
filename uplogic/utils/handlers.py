@@ -16,22 +16,27 @@ class ImageHandler:
         self.sound = None
         self._texture = None
         self._image = None
+        self.image = None
         self._opacity = 1
         self.load_audio = load_audio
-        if texture is not None and texture not in bpy.data.images and isfile(texture):
-            self.image = bpy.data.images.load(texture)
-        self.texture = texture
-        self._frame = 1
-
-        self._min_frame = min_frame
-        self._max_frame = self.image.frame_duration
-        if max_frame is not None:
-            self._max_frame = max_frame
+        min_frame=0
         self.fps = fps
         self._is_playing = False
         self._ref_time = 0
         self.time = 0
         self._flushed = False
+        self._frame = 1
+        if texture is None:
+            max_frame=1000
+            return
+        if texture is not None and texture not in bpy.data.images and isfile(texture):
+            self.image = bpy.data.images.load(texture)
+        self.texture = texture
+
+        self.min_frame = min_frame
+        self.max_frame = self.image.frame_duration
+        if max_frame is not None:
+            self.max_frame = max_frame
         logic.getCurrentScene().pre_draw.append(self.update)
 
     @property
@@ -82,7 +87,7 @@ class ImageHandler:
             texture = bpy.data.images.load(val)
         self.image = texture
         self._texture = gpu.texture.from_image(texture)
-        self._max_frame = self.image.frame_duration
+        self.max_frame = self.image.frame_duration
         if self.load_audio:
             if self.sound is not None:
                 self.sound.stop()
@@ -95,31 +100,13 @@ class ImageHandler:
                 print("Couldn't read audio from movie file.")
 
     @property
-    def texture(self):
-        return self._texture
-
-    @texture.setter
-    def texture(self, val):
-        if val is None:
-            return
-        texture = bpy.data.images.get(val, None)
-        if not texture:
-            texture = bpy.data.images.load(val)
-        self.image = texture
-        self._texture = gpu.texture.from_image(texture)
-
-    @property
     def frame(self):
         return self._frame
 
     @frame.setter
     def frame(self, val):
-        self._frame = clamp(val, self._min_frame, self._max_frame)
+        self._frame = clamp(val, self.min_frame, self.max_frame)
         self.flush()
-
-    @property
-    def max_frame(self):
-        return self._max_frame
 
     def play(self):
         self.is_playing = True
@@ -136,7 +123,6 @@ class ImageHandler:
     def flush(self):
         if not self._flushed:
             self.image.gl_free()
-            # self.image.buffers_free()
             self.image.gl_load(frame=self.frame)
 
             self._texture = gpu.texture.from_image(self.image)
