@@ -36,7 +36,7 @@ def _get_globals():
     GLOBALS['uplogic'] = uplogic
     GLOBALS['logic'] = logic
     GLOBALS['render'] = render
-    GLOBALS['console'] = get_console()
+    GLOBALS['console'] = get_console(True)
     for obj in scene.objects:
         GLOBALS[obj.blenderObject.name] = obj
     return GLOBALS
@@ -50,7 +50,7 @@ def enable(toggle_key='F12', visible=False):
 def disable():
     sys.stdout = sys.__stdout__
     sys.stderr = sys.__stderr__
-    console = get_console()
+    console = get_console(True)
     if console:
         console.stop()
     consoles = GlobalDB.retrieve('uplogic.consoles')
@@ -341,7 +341,7 @@ def write(msg, type):
 
 
 def log(msg, type='INFO'):
-    console = get_console()
+    console = get_console(True)
 
     if console is None:
         print(msg)
@@ -356,7 +356,7 @@ def log(msg, type='INFO'):
 
 
 def warning(msg):
-    console = get_console()
+    console = get_console(True)
     sysmsg = f'{ansicol.YELLOW}Warning{ansicol.END}: {msg}'
     if console is None:
         print(sysmsg)
@@ -371,7 +371,7 @@ def warning(msg):
 
 
 def error(msg):
-    console = get_console()
+    console = get_console(True)
     sysmsg = f'{ansicol.RED}Error{ansicol.END}: {msg}'
     if console is None:
         print(sysmsg)
@@ -386,7 +386,7 @@ def error(msg):
 
 
 def success(msg):
-    console = get_console()
+    console = get_console(True)
     sysmsg = f'{ansicol.GREEN}Success{ansicol.END}: {msg}'
     if console is None:
         print(sysmsg)
@@ -401,7 +401,7 @@ def success(msg):
 
 
 def debug(msg):
-    console = get_console()
+    console = get_console(True)
     sysmsg = f'{ansicol.BYELLOW}Debug{ansicol.END}: {msg}'
     if console is None:
         print(sysmsg)
@@ -612,7 +612,7 @@ class FontSizeCommand(Command):
     @classmethod
     def execute(cls, args):
         size = args[0]
-        get_console().font_size = int(size)
+        get_console(True).font_size = int(size)
 
 
 @console_command
@@ -636,6 +636,6 @@ class ToggleDebugCommand(Command):
 
     @classmethod
     def execute(cls, args):
-        console = get_console()
+        console = get_console(True)
         console.info_mode = not console.info_mode
         debug(f'Console Debug Mode is now {"ON" if console.info_mode else "OFF"}.')

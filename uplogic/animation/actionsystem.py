@@ -12,6 +12,7 @@ class ActionSystem():
 
     def __init__(self, name: str):
         self.actions: list = []
+        self.name = name
         self.scene = scene = logic.getCurrentScene()
         GlobalDB.retrieve('uplogic.animation').put(name, self)
         scene.pre_draw.append(self.update)
@@ -114,7 +115,7 @@ class ActionSystem():
         self.scene.pre_draw.remove(self.update)
         for action in self.actions.copy():
             self.remove(action)
-        GlobalDB.retrieve('uplogic.animation').remove(self)
+        GlobalDB.retrieve('uplogic.animation').remove(self.name)
 
 
 def get_action_system(system_name: str = 'default') -> ActionSystem:

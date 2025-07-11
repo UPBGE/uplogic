@@ -1,29 +1,20 @@
-import argparse
 import socket
 from pythonosc.dispatcher import Dispatcher
 from pythonosc import osc_server
 import threading
-import time
 from uplogic import events
-from uplogic.console import debug
 
 
 class OSC_Server:
 
     def __init__(self, ip=None, port=8304):
-        parser = argparse.ArgumentParser()
         if ip is None:
             ip = socket.gethostbyname(socket.gethostname())
-        parser.add_argument("--ip",
-            default=ip, help="The ip to listen on")
-        parser.add_argument("--port",
-            type=int, default=port, help="The port to listen on")
-        args = parser.parse_args()
 
         self.dispatcher = Dispatcher()
         self.map('/icom', self._print_debug)
         self.server = osc_server.ThreadingOSCUDPServer(
-            (args.ip, args.port), self.dispatcher)
+            (ip, port), self.dispatcher)
         self.thread = threading.Thread(target=self.server.serve_forever)
         self.thread.start()
         print("Serving on {}".format(self.server.server_address))

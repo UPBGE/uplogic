@@ -322,6 +322,7 @@ class Action():
         end_frame = self.end_frame
         playing_action = game_object.getActionName(layer)
         playing_frame = game_object.getActionFrame(layer)
+        # print(playing_frame, end_frame)
         for action_callback in self._callbacks:
             cond = (
                 playing_frame > action_callback.frame

@@ -22,6 +22,7 @@ class Canvas(Widget):
         self._old_height = bge.render.getWindowHeight()
         self.use_clipping = False
         self._to_evaluate: list[Widget] = []
+        bge.logic.getCurrentScene().onRemove.append(self.unregister)
         self.register()
         self.start()
     

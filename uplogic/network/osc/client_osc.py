@@ -1,20 +1,11 @@
-import argparse
 from pythonosc import udp_client
-import pickle
 from uplogic.console import warning
 
 
 class OSC_Client:
 
     def __init__(self, server, port=8304):
-        parser = argparse.ArgumentParser()
-        parser.add_argument("--ip", default=server,
-            help="The ip of the OSC server")
-        parser.add_argument("--port", type=int, default=port,
-            help="The port the OSC server is listening on")
-        args = parser.parse_args()
-
-        self.client = udp_client.DispatchClient(args.ip, args.port)
+        self.client = udp_client.DispatchClient(server, port)
         print(f'OSC Client Connected to {server}')
 
     def map(self, address: str, callback, *args: list, needs_reply_address: bool = False):
