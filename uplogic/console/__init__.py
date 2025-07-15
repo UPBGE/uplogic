@@ -328,7 +328,7 @@ class ansicol:
     END = '\033[0m'
 
 
-def write(*msg, type):
+def write(*msg, type='INFO'):
     msg = ' '.join([m.__repr__() if not isinstance(m, str) else m for m in msg])
     _f = {
         'INFO': log,
@@ -343,6 +343,7 @@ def write(*msg, type):
 
 def log(*msg, type='INFO'):
     msg = ' '.join([m.__repr__() if not isinstance(m, str) else m for m in msg])
+    msg += '\n'
     console = get_console(True)
 
     if console is None:
@@ -375,6 +376,7 @@ def warning(*msg):
 
 def error(*msg):
     msg = ' '.join([m.__repr__() if not isinstance(m, str) else m for m in msg])
+    msg += '\n'
     console = get_console(True)
     sysmsg = f'{ansicol.RED}Error{ansicol.END}: {msg}'
     if console is None:
@@ -391,6 +393,7 @@ def error(*msg):
 
 def success(*msg):
     msg = ' '.join([m.__repr__() if not isinstance(m, str) else m for m in msg])
+    msg += '\n'
     console = get_console(True)
     sysmsg = f'{ansicol.GREEN}Success{ansicol.END}: {msg}'
     if console is None:
@@ -407,6 +410,7 @@ def success(*msg):
 
 def debug(*msg):
     msg = ' '.join([m.__repr__() if not isinstance(m, str) else m for m in msg])
+    msg += '\n'
     console = get_console(True)
     sysmsg = f'{ansicol.BYELLOW}Debug{ansicol.END}: {msg}'
     if console is None:
