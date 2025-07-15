@@ -55,6 +55,7 @@ class GameProperty():
 
 import bpy
 from bge import logic
+from uplogic import console
 
 
 def init_glob_cats():
@@ -66,7 +67,7 @@ def init_glob_cats():
         None
     )
     if not cats:
-        print('No global categories found in', bpy.data.scenes[scene.name], bpy.data.scenes)
+        console.debug('No global categories found in', bpy.data.scenes[scene.name], bpy.data.scenes)
         return
 
     msg = ''
@@ -104,7 +105,7 @@ def init_glob_cats():
             db.put(v.name, val, v.persistent)
 
     if msg:
-        print(f'Globals Initialized:{msg[:-1]}')
+        console.success(f'Globals Initialized:{msg[:-1]}')
     bpy.types.Scene.nl_globals_initialized = True
 
 

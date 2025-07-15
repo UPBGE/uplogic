@@ -3,6 +3,7 @@ from mathutils import Euler
 from uplogic.nodes import ULActionNode
 import bpy
 import json
+from uplogic import console
 
 
 class ULLoadGame(ULActionNode):
@@ -88,7 +89,7 @@ class ULLoadGame(ULActionNode):
                     for prop in obj['data']['props']:
                         game_obj[prop['name']] = prop['value']
         except Exception as e:
-            print(
+            console.error(
                 f'Load Game Node: Could not load saved game on slot {slot}!\n{e}'
             )
 

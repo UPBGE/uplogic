@@ -47,7 +47,6 @@ class StartSoundNode(ULActionNode):
     @property
     def soundfile(self):
         sound = self.get_input(self.sound)
-        print(sound)
         return sound if isinstance(sound, bpy.types.Sound) else sound
 
     def get_handle(self):
@@ -83,7 +82,6 @@ class StartSoundNode(ULActionNode):
         self._done = True
 
     def start_2D(self, volume, pitch):
-        print(self.soundfile)
         self._handle = Sound2D(
             file=self.soundfile,
             volume=volume,

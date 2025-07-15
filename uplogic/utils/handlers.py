@@ -4,9 +4,7 @@ import gpu
 from math import floor
 from uplogic.utils import clamp
 from os.path import isfile
-
-
-
+from uplogic import console
 
 
 class ImageHandler:
@@ -97,7 +95,7 @@ class ImageHandler:
                 self.sound.keep = True
             except Exception:
                 self.sound = None
-                print("Couldn't read audio from movie file.")
+                console.warning("Couldn't read audio from movie file.")
 
     @property
     def frame(self):

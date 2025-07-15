@@ -9,7 +9,7 @@ from random import uniform
 from uplogic.animation import ActionSystem
 from uplogic.animation.actionsystem import get_action_system
 # from uplogic.events import schedule
-from uplogic.console import warning
+from uplogic import console
 from uplogic.utils.constants import FRAMETIME_COMPARE
 import bpy
 from uplogic.utils.math import clamp
@@ -88,7 +88,7 @@ class Action():
         on_start = None
     ):
         if self._deprecated:
-            warning('Warning: ULAction class will be renamed to "Action" in future releases!')
+            console.warning('Warning: ULAction class will be renamed to "Action" in future releases!')
         self._fps_factor = bpy.context.scene.render.fps / 60
         self._locked = False
         self._speed = speed
@@ -204,7 +204,7 @@ class Action():
 
     @is_playing.setter
     def is_playing(self):
-        print('ULAction.is_playing is read-only!')
+        console.debug('ULAction.is_playing is read-only!')
 
     @property
     def started(self):
@@ -322,7 +322,6 @@ class Action():
         end_frame = self.end_frame
         playing_action = game_object.getActionName(layer)
         playing_frame = game_object.getActionFrame(layer)
-        # print(playing_frame, end_frame)
         for action_callback in self._callbacks:
             cond = (
                 playing_frame > action_callback.frame

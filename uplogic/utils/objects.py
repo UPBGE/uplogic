@@ -16,6 +16,7 @@ from mathutils import Vector, Matrix, Euler
 from math import degrees
 from math import radians
 from .collections import assign
+from uplogic import console
 
 
 def xrot_to(
@@ -498,7 +499,7 @@ class Curve(GameObject):
     ) -> None:
         self._array_object = None
         if self._deprecated:
-            print('[UPLOGIC] ULCurve class will be renamed to "Curve" in future releases!')
+            console.warning('[UPLOGIC] ULCurve class will be renamed to "Curve" in future releases!')
         self.type = type
         self._loop = loop
         self.use_evaluate = use_evaluate
@@ -638,7 +639,7 @@ class Curve(GameObject):
 
     @name.setter
     def name(self, val: str):
-        print('Curve.name is Read-Only!')
+        console.debug('Curve.name is Read-Only!')
 
     @property
     def loop(self):
@@ -689,7 +690,7 @@ class Curve(GameObject):
 
     @length.setter
     def length(self, val):
-        print('Curve.length is read-only!')
+        console.debug('Curve.length is read-only!')
 
     @property
     def path_duration(self):

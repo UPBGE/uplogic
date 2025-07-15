@@ -7,6 +7,7 @@ from mathutils import Vector
 from uplogic.utils.math import interpolate
 from uplogic.utils.math import clamp
 from uplogic.events import schedule_callback
+from uplogic import console
 
 
 MOUSE_EVENTS = logic.mouse.inputs
@@ -214,7 +215,7 @@ class Mouse():
 
     @moved.setter
     def moved(self, val):
-        print('ULMouse.moved is read-only!')
+        console.debug('ULMouse.moved is read-only!')
 
     @property
     def wheel(self):
@@ -225,7 +226,7 @@ class Mouse():
 
     @wheel.setter
     def wheel(self, val):
-        print('ULMouse.wheel is read-only!')
+        console.debug('ULMouse.wheel is read-only!')
 
     def update(self) -> None:
         """This is executed each frame if component is active."""

@@ -3,6 +3,7 @@ from pythonosc.dispatcher import Dispatcher
 from pythonosc import osc_server
 import threading
 from uplogic import events
+from uplogic import console
 
 
 class OSC_Server:
@@ -17,10 +18,10 @@ class OSC_Server:
             (ip, port), self.dispatcher)
         self.thread = threading.Thread(target=self.server.serve_forever)
         self.thread.start()
-        print("Serving on {}".format(self.server.server_address))
+        console.debug("Serving on {}".format(self.server.server_address))
 
     def _print_debug(self, address, args):
-        print(address, args)
+        console.debug(address, args)
 
     def map(self, address: str, callback, *args: list, needs_reply_address: bool = False):
         """Map a callback to an address. Callback receives (`address`, `args`, `volume`)
@@ -38,6 +39,6 @@ class OSC_Server:
         return self.dispatcher.map(address, _deferred_cb, *args, needs_reply_address=needs_reply_address)
 
     def shutdown(self) -> None:
-        print(f'Shutting down OSC Server on {self.server.server_address[0]}:{self.server.server_address[1]}')
+        console.debug(f'Shutting down OSC Server on {self.server.server_address[0]}:{self.server.server_address[1]}')
         self.server.shutdown()
         self.server.socket.close()

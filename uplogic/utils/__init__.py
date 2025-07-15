@@ -153,15 +153,15 @@ def compute_distance(parama, paramb) -> float:
     return (va - vb).length
 
 
-def debug(message: str):
-    if not hasattr(bpy.types.Scene, 'logic_node_settings'):
-        return
-    if not bpy.context or not bpy.context.scene:
-        return
-    if not bpy.context.scene.logic_node_settings.use_node_debug:
-        return
-    else:
-        print('[UPLOGIC] ' + message)
+# def debug(message: str):
+#     if not hasattr(bpy.types.Scene, 'logic_node_settings'):
+#         return
+#     if not bpy.context or not bpy.context.scene:
+#         return
+#     if not bpy.context.scene.logic_node_settings.use_node_debug:
+#         return
+#     else:
+#         print('[UPLOGIC] ' + message)
 
 
 def is_invalid(*a) -> bool:
@@ -261,11 +261,12 @@ def get_project_folder(folder_name, *structure):
 
 
 def get_project_path(folder_name, *structure):
+    from uplogic.console import error
     directory = path.join(bpy.path.abspath('//'))[:-1]
     while not directory.endswith(folder_name):
         pdir = path.abspath(path.join(directory, pardir))
         if pdir == directory:
-            print("Can't go beyond drive's root!")
+            error("Can't go beyond drive's root!")
             return ''
         directory = pdir
     return path.join(directory, *structure)

@@ -4,6 +4,7 @@ from bge.types import KX_GameObject as GameObject
 from bge.types import KX_PolyProxy
 from mathutils import Vector
 from .math import clamp
+from uplogic import console
 
 
 def ray_data(
@@ -206,7 +207,7 @@ def raycast_face(
 
     :returns: (`obj`, `point`, `normal`, `direction`, `face`, `uv`)
     """
-    print("WARNING: 'uplogic.utils.raycasting.raycast_face()' is deprecated, use '...raycasting.raycast(face_data=True)' instead")
+    console.warning("'uplogic.utils.raycasting.raycast_face()' is deprecated, use '...raycasting.raycast(face_data=True)' instead")
     return RayCastFaceData((None, None, None, None, None, None))
 
 

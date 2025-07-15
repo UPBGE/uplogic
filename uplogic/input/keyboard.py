@@ -1,5 +1,6 @@
 from bge import logic
 from bge import events
+from uplogic import console
 from bge.types import SCA_InputEvent
 
 
@@ -26,7 +27,7 @@ def key_event(key: str) -> SCA_InputEvent:
     if key:
         return key
     else:
-        print(f"""
+        console.error(f"""
         Key {key} not in [`'A'`, `'B'`, `'C'`, `'D'`, `'E'`, `'F'`, `'G'`, `'H'`, `'I'`, `'J'`, `'K'`, `'L'`, `'M'`, `'N'`, `'O'`, `'P'`, `'Q'`,
         `'R'`, `'S'`, `'T'`, `'U'`, `'V'`, `'W'`, `'X'`, `'Y'`, `'Z'`, `'ZERO'`, `'ONE'`, `'TWO'`, `'THREE'`, `'FOUR'`, `'FIVE'`,
         `'SIX'`, `'SEVEN'`, `'EIGHT'`, `'NINE'`, `'CAPSLOCK'`, `'LEFTCTRL'`, `'LEFTSHIFT'` `'LEFTARROW'`, `'DOWNARROW'`, `'RIGHTARROW'`,
@@ -48,7 +49,7 @@ def pad_event(key: str) -> bool:
     if key:
         return key
     else:
-        print(f"""
+        console.error(f"""
         Key {key} not in [`'A'`, `'B'`, `'C'`, `'D'`, `'E'`, `'F'`, `'G'`, `'H'`, `'I'`, `'J'`, `'K'`, `'L'`, `'M'`, `'N'`, `'O'`, `'P'`, `'Q'`,
         `'R'`, `'S'`, `'T'`, `'U'`, `'V'`, `'W'`, `'X'`, `'Y'`, `'Z'`, `'ZERO'`, `'ONE'`, `'TWO'`, `'THREE'`, `'FOUR'`, `'FIVE'`,
         `'SIX'`, `'SEVEN'`, `'EIGHT'`, `'NINE'`, `'CAPSLOCK'`, `'LEFTCTRL'`, `'LEFTSHIFT'` `'LEFTARROW'`, `'DOWNARROW'`, `'RIGHTARROW'`,

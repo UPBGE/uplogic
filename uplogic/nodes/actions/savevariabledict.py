@@ -1,5 +1,5 @@
 from uplogic.nodes import ULActionNode
-from uplogic.utils import debug
+from uplogic import console
 import bpy
 import json
 import os
@@ -24,7 +24,7 @@ class ULSaveVariableDict(ULActionNode):
             f = open(path, 'w')
             json.dump(val, f, indent=2)
         else:
-            debug('file does not exist - creating...')
+            console.debug('file does not exist - creating...')
             f = open(path, 'w')
             json.dump(val, f, indent=2)
         f.close()

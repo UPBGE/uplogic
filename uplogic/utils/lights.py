@@ -4,6 +4,7 @@ from bpy.types import Object
 import bpy
 from mathutils import Vector, Matrix, Color
 from .objects import GameObject
+from uplogic import console
 
 
 def make_unique_light(light: KX_GameObject) -> KX_GameObject:
@@ -36,7 +37,7 @@ class Light(GameObject):
         light: KX_GameObject = None
     ) -> None:
         if self._deprecated:
-            print('[UPLOGIC] ULLight class will be renamed to "Light" in future releases!')
+            console.warning('[UPLOGIC] ULLight class will be renamed to "Light" in future releases!')
         if light:
             self.game_object = make_unique_light(light)
             """The wrapped `KX_LightObject`."""

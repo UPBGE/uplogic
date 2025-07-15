@@ -1,5 +1,6 @@
 from uplogic.data import GlobalDB
 from uplogic.nodes import ULActionNode
+from uplogic import console
 
 
 class ULListGlobalValues(ULActionNode):
@@ -25,9 +26,9 @@ class ULListGlobalValues(ULActionNode):
         print_d = self.get_input(self.print_d)
         db = GlobalDB.retrieve(data_id)
         if print_d:
-            print(f'[Logic Nodes] Global category "{data_id}":')
+            console.log(f'[Logic Nodes] Global category "{data_id}":')
             for e in db.data:
-                print('{}\t->\t{}'.format(e, db.data[e]))
-            print('END ------------------------------------')
+                console.log('{}\t->\t{}'.format(e, db.data[e]))
+            console.log('END ------------------------------------')
         self._done = True
         self.gv_dict = db.data

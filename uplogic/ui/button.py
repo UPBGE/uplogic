@@ -6,7 +6,7 @@ from .image import Image
 from .image import Sprite
 import gpu
 from uplogic.input.mouse import MOUSE_EVENTS, LMB, RMB
-from uplogic.utils import debug
+from uplogic import console
 
 
 class Button(Widget, HoverBehavior):

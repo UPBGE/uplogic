@@ -1,4 +1,8 @@
 from uplogic.nodes import ULActionNode
+from uplogic import console
+
+
+# XXX REMOVE FOR 5.0
 
 
 class ULTranslate(ULActionNode):
@@ -17,4 +21,4 @@ class ULTranslate(ULActionNode):
         return self._done
 
     def evaluate(self):
-        print('"Translate" node is deprecated!')
+        console.error('"Translate" node is deprecated!')

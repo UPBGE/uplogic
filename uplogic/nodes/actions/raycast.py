@@ -74,7 +74,7 @@ class ULRaycast(ULActionNode):  # XXX: Deprecated!
         local: bool = self.get_input(self.local)
         property_name: str = self.get_input(self.property_name)
         material: Material = self.get_input(self.material)
-        exclude: str = self.get_input(self.exclude)
+        # exclude: str = self.get_input(self.exclude)
         xray: bool = self.get_input(self.xray)
         distance: float = self.get_input(self.distance)
         visualize: bool = self.get_input(self.visualize)
@@ -85,7 +85,7 @@ class ULRaycast(ULActionNode):  # XXX: Deprecated!
             distance=distance if self.get_input(self.custom_dist) else 0,
             prop=property_name,
             material=material.name if material else '',
-            exclude=exclude,
+            # exclude=exclude,
             xray=xray,
             local=local,
             mask=self.get_input(self.mask),

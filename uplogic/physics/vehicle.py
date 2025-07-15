@@ -2,6 +2,7 @@ from bge import logic
 from bge.types import KX_GameObject
 from bge.constraints import createVehicle
 from uplogic.utils.visualize import draw_cube, draw_mesh
+from uplogic import console
 from mathutils import Euler
 from mathutils import Vector
 from uplogic.utils.constants import VEHICLE
@@ -253,7 +254,7 @@ class Vehicle():
 
     @speed.setter
     def speed(self, value):
-        print('Vehicle.speed is read-only!')
+        console.debug('Vehicle.speed is read-only!')
 
     @property
     def damping(self):

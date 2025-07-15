@@ -9,7 +9,7 @@ from uplogic.audio import AudioSystem
 from uplogic.audio import get_audio_system
 from uplogic.events import schedule_callback
 from uplogic.utils.math import interpolate
-from uplogic.console import warning
+from uplogic import console
 from uplogic.utils import DELTA_TIME
 import bpy
 import aud
@@ -190,7 +190,7 @@ class Sound2D(ULSound):
         aud_sys: str = 'default'
     ):
         if self._deprecated:
-            warning('Warning: ULSound2D class will be renamed to "Sound2D" in future releases!')
+            console.warning('Warning: ULSound2D class will be renamed to "Sound2D" in future releases!')
         self.file = file
         self._volume = 1
         self.finished = False
@@ -200,7 +200,7 @@ class Sound2D(ULSound):
         soundfile = logic.expandPath(file)
         self.ignore_timescale = ignore_timescale
         if not isfile(soundfile):
-            print(f'Soundfile {soundfile} could not be loaded!')
+            console.warning(f'Soundfile {soundfile} could not be loaded!')
             return
         sound = self.soundfile = aud.Sound(soundfile)
         lowpass = self.aud_system.lowpass or lowpass
@@ -329,7 +329,7 @@ class Sample2D(Sound2D):
         soundfile = logic.expandPath(file)
         self.ignore_timescale = ignore_timescale
         if not isfile(soundfile):
-            print(f'Soundfile {soundfile} could not be loaded!')
+            console.warning(f'Soundfile {soundfile} could not be loaded!')
             return
         sound = self.soundfile = aud.Sound(soundfile)
         if sample[1]:
@@ -428,7 +428,7 @@ class Sound3D(ULSound):
         else:
             soundfile = logic.expandPath(file)
         if not isfile(soundfile):
-            print(f'Soundfile {soundfile} could not be loaded!')
+            console.warning(f'Soundfile {soundfile} could not be loaded!')
             return
         sound = self.soundpath = aud.Sound(soundfile).rechannel(1)
         device = self.aud_system.device
@@ -678,7 +678,7 @@ class Sample3D(Sound3D):
         self.ignore_timescale = ignore_timescale
         soundfile = logic.expandPath(file)
         if not isfile(soundfile):
-            print(f'Soundfile {soundfile} could not be loaded!')
+            console.warning(f'Soundfile {soundfile} could not be loaded!')
             return
         sound = self.soundpath = aud.Sound(soundfile).rechannel(1)
         device = self.aud_system.device

@@ -1,5 +1,5 @@
 from uplogic.nodes import ULActionNode
-from uplogic.utils import debug
+from uplogic import console
 
 class ULRemoveListIndex(ULActionNode):
     def __init__(self):
@@ -25,7 +25,7 @@ class ULRemoveListIndex(ULActionNode):
         if len(list_d) > idx:
             del list_d[idx]
         else:
-            debug("List Index exceeds length!")
+            console.debug("List Index exceeds length!")
             return
         self.new_list = list_d
         self._done = True

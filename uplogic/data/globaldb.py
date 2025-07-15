@@ -5,6 +5,7 @@ from bge import logic
 import bpy
 import os
 from uplogic.utils import unload_nodes
+from uplogic import console
 
 
 class GlobalDB(object):
@@ -160,7 +161,7 @@ class GlobalDB(object):
 
         log_size = GlobalDB.read(self.fname, self.content)
         if log_size > (5 * len(self.content)):
-            print("Compressing sld {}".format(file_name))
+            console.debug("Compressing sld {}".format(file_name))
             GlobalDB.compress(self.fname, self.content)
 
     def lock(self, item, event):
@@ -211,7 +212,7 @@ class GlobalDB(object):
     def log(self):
         '''TODO: Documentation
         '''
-        print(self.content)
+        console.log(self.content)
 
 
 def store(key, value, category='uplogic.default_globals', persist=False):
@@ -259,5 +260,5 @@ def initialize():
                 db.put(v.name, val, v.persistent)
 
         if msg:
-            print(f'Globals Initialized:{msg[:-1]}')
+            console.success(f'Globals Initialized:{msg[:-1]}')
         GlobalDB.initialized = True

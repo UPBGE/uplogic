@@ -9,6 +9,7 @@ from uplogic.utils.objects import set_curve_points
 from uplogic.utils.objects import xrot_to
 from uplogic.utils.objects import yrot_to
 from uplogic.utils.objects import zrot_to
+from uplogic import console
 
 
 CONSTRAINT_TYPES = {
@@ -78,7 +79,7 @@ class TrackTo():
         factor: float = 1
     ) -> None:
         if self._deprecated:
-            print('ULTrackTo class will be renamed to "TrackTo" in future releases!')
+            console.warning('ULTrackTo class will be renamed to "TrackTo" in future releases!')
         self._axis = None
         self._target = None
         self.game_object = game_object
@@ -98,7 +99,7 @@ class TrackTo():
         elif isinstance(val, Vector):
             self._target = val
         else:
-            print('Could not set TrackTo target!')
+            console.error('Could not set TrackTo target!')
 
     @property
     def axis(self):
@@ -165,7 +166,7 @@ class Spring():
         visualize: bool = False
     ) -> None:
         if self._deprecated:
-            print('ULSpring class will be renamed to "Spring" in future releases!')
+            console.warning('ULSpring class will be renamed to "Spring" in future releases!')
         self.force = 0
         if isinstance(origin, tuple) or isinstance(origin, list):
             origin = Vector((origin))
@@ -194,7 +195,7 @@ class Spring():
     
     @points.setter
     def points(self, val):
-        print("Attribute 'points' is read-only")
+        console.debug("Attribute 'points' is read-only")
 
     @property
     def active(self):
@@ -202,7 +203,7 @@ class Spring():
 
     @active.setter
     def active(self, val):
-        print("Attribute 'active' is read-only")
+        console.debug("Attribute 'active' is read-only")
 
     def remove(self):
         pre_draw = logic.getCurrentScene().pre_draw

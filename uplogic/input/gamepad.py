@@ -4,6 +4,7 @@ from math import pi
 from mathutils import Vector
 from uplogic.utils.math import interpolate
 from uplogic.events import schedule_callback
+from uplogic import console
 
 
 XBOX = {
@@ -251,7 +252,7 @@ def gamepad_vibrate(idx: int = 0, strength: tuple = (.5, .5), time: float = 1.0)
     """
     joystick = logic.joysticks[idx]
     if not joystick or not joystick.hasVibration:
-        print(f'Joystick at index {idx} has no vibration!')
+        console.debug(f'Joystick at index {idx} has no vibration!')
     joystick.strengthLeft = strength[0]
     joystick.strengthRight = strength[1]
     joystick.duration = int(round(time * 1000))
@@ -277,12 +278,11 @@ class Gamepad():
         layout: dict = XBOX
     ) -> None:
         if self._deprecated:
-            from uplogic.console import warning
-            warning('Warning: ULGamePad class will be renamed to "Gamepad" in future releases!')
+            console.warning('Warning: ULGamePad class will be renamed to "Gamepad" in future releases!')
         self.idx = idx
         self.layout = layout
         if not logic.joysticks[idx]:
-            print(f'No Joystick found at index: {idx}')
+            console.error(f'No Joystick found at index: {idx}')
         self.device = logic.joysticks[idx]
 
     def button_down(self, button: str):
@@ -299,7 +299,7 @@ class Gamepad():
     
     def rumble(self, strength: tuple = (.5, .5), time: float = 1.0):
         if not self.device.hasVibration:
-            print('Joystick at index {} has no vibration!'.format(self.idx))
+            console.debug('Joystick at index {} has no vibration!'.format(self.idx))
             return
         self.device.strengthLeft = strength[0]
         self.device.strengthRight = strength[1]

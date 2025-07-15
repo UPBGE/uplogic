@@ -6,6 +6,7 @@ from mathutils import Vector
 from ..utils.math import rotate2d
 from ..utils.math import map_range, clamp, lerp
 from ..events import schedule, ScheduledEvent
+from uplogic import console
 
 
 class Layout(Widget):
@@ -306,7 +307,7 @@ class ScrollBoxLayout(BoxLayout):
 
     @use_clipping.setter
     def use_clipping(self, val):
-        print("'ScrollBoxLayout.use_clipping' is read-only!")
+        console.debug("'ScrollBoxLayout.use_clipping' is read-only!")
 
     @property
     def scroll_position_actual(self):

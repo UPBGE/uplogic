@@ -1,6 +1,7 @@
 from uplogic.audio.audiosystem import get_audio_system
 from .sound import Sound2D
 from uuid import uuid4
+from uplogic import console
 from uplogic.utils.math import interpolate
 from uplogic.events import schedule_callback
 
@@ -135,7 +136,7 @@ class Music(ULMusicEffect):
                 if t.name == track:
                     t.remove()
                     return
-            print(f'Track "{track}" not found!')
+            console.warning(f'Track "{track}" not found!')
         else:
             self.tracks[track].remove()
 

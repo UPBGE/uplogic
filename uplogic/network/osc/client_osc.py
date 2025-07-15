@@ -1,12 +1,12 @@
 from pythonosc import udp_client
-from uplogic.console import warning
+from uplogic import console
 
 
 class OSC_Client:
 
     def __init__(self, server, port=8304):
         self.client = udp_client.DispatchClient(server, port)
-        print(f'OSC Client Connected to {server}')
+        console.debug(f'OSC Client Connected to {server}')
 
     def map(self, address: str, callback, *args: list, needs_reply_address: bool = False):
         """Map a callback to an address.
@@ -28,4 +28,4 @@ class OSC_Client:
         try:
             self.client.send_message(address=address, value=content)
         except Exception as e:
-            warning(f'OSC Client: Message could not be sent. Reason:\n\t{e}')
+            console.warning(f'OSC Client: Message could not be sent. Reason:\n\t{e}')

@@ -1,5 +1,5 @@
 from uplogic.nodes import ULActionNode
-from uplogic.utils import debug
+from uplogic import console
 
 
 class ULRemoveListValue(ULActionNode):
@@ -26,7 +26,7 @@ class ULRemoveListValue(ULActionNode):
         if val in list_d:
             list_d.remove(val)
         else:
-            debug("List Remove Value Node: Item '{}' not in List!".format(val))
+            console.debug("List Remove Value Node: Item '{}' not in List!".format(val))
             return
         self.new_list = list_d
         self._done = True

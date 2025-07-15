@@ -1,5 +1,5 @@
 from uplogic.nodes import ULParameterNode
-from uplogic.utils import debug
+from uplogic import console
 import bpy
 import json
 import os
@@ -24,7 +24,7 @@ class ULLoadVariableDict(ULParameterNode):
         if not path.endswith('.json'):
             path = os.path.join(path, f'{self.get_input(self.file_name)}.json')
         if not os.path.isfile(path):
-            debug('No Saved Variables!')
+            console.debug('No Saved Variables!')
             return
         f = open(path, 'r')
         data = json.load(f)

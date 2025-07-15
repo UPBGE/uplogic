@@ -328,7 +328,8 @@ class ansicol:
     END = '\033[0m'
 
 
-def write(msg, type):
+def write(*msg, type):
+    msg = ' '.join([m.__repr__() if not isinstance(m, str) else m for m in msg])
     _f = {
         'INFO': log,
         'DEBUG': debug,
@@ -340,14 +341,15 @@ def write(msg, type):
     _f[type](msg)
 
 
-def log(msg, type='INFO'):
+def log(*msg, type='INFO'):
+    msg = ' '.join([m.__repr__() if not isinstance(m, str) else m for m in msg])
     console = get_console(True)
 
     if console is None:
         print(msg)
         return
     show_time = True
-    sys.__stdout__.write(f'{msg}\n')
+    sys.__stdout__.write(f'{msg}')
     for msg in str(msg).split('\n'):
         if msg:
             msg = msg.replace('  ', '    ')
@@ -355,14 +357,15 @@ def log(msg, type='INFO'):
             show_time = False
 
 
-def warning(msg):
+def warning(*msg):
+    msg = ' '.join([m.__repr__() if not isinstance(m, str) else m for m in msg])
     console = get_console(True)
     sysmsg = f'{ansicol.YELLOW}Warning{ansicol.END}: {msg}'
     if console is None:
         print(sysmsg)
         return
     show_time = True
-    sys.__stdout__.write(f'{sysmsg}\n')
+    sys.__stdout__.write(f'{sysmsg}')
     for msg in str(msg).split('\n'):
         if msg:
             msg.replace('  ', '    ')
@@ -370,14 +373,15 @@ def warning(msg):
             show_time = False
 
 
-def error(msg):
+def error(*msg):
+    msg = ' '.join([m.__repr__() if not isinstance(m, str) else m for m in msg])
     console = get_console(True)
     sysmsg = f'{ansicol.RED}Error{ansicol.END}: {msg}'
     if console is None:
         print(sysmsg)
         return
     show_time = True
-    sys.__stdout__.write(f'{sysmsg}\n')
+    sys.__stdout__.write(f'{sysmsg}')
     for msg in str(msg).split('\n'):
         if msg:
             msg.replace('  ', '    ')
@@ -385,14 +389,15 @@ def error(msg):
             show_time = False
 
 
-def success(msg):
+def success(*msg):
+    msg = ' '.join([m.__repr__() if not isinstance(m, str) else m for m in msg])
     console = get_console(True)
     sysmsg = f'{ansicol.GREEN}Success{ansicol.END}: {msg}'
     if console is None:
         print(sysmsg)
         return
     show_time = True
-    sys.__stdout__.write(f'{sysmsg}\n')
+    sys.__stdout__.write(f'{sysmsg}')
     for msg in str(msg).split('\n'):
         if msg:
             msg.replace('  ', '    ')
@@ -400,14 +405,15 @@ def success(msg):
             show_time = False
 
 
-def debug(msg):
+def debug(*msg):
+    msg = ' '.join([m.__repr__() if not isinstance(m, str) else m for m in msg])
     console = get_console(True)
     sysmsg = f'{ansicol.BYELLOW}Debug{ansicol.END}: {msg}'
     if console is None:
         print(sysmsg)
         return
     show_time = True
-    sys.__stdout__.write(f'{sysmsg}\n')
+    sys.__stdout__.write(f'{sysmsg}')
     for msg in str(msg).split('\n'):
         if msg:
             msg.replace('  ', '    ')
