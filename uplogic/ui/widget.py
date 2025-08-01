@@ -271,6 +271,7 @@ class Widget():
     @x.setter
     def x(self, val):
         self._pos = [val, self.pos[1]]
+        self._rebuild = True
         # if not self.show:
         #     return
         # if self.parent and self.show:
@@ -286,6 +287,7 @@ class Widget():
     @y.setter
     def y(self, val):
         self._pos = [self._pos[0], val]
+        self._rebuild = True
         # if not self.show:
         #     return
         # if self.parent and self.show:
