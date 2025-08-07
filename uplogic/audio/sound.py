@@ -430,7 +430,7 @@ class Sound3D(ULSound):
         if not isfile(soundfile):
             console.warning(f'Soundfile {soundfile} could not be loaded!')
             return
-        sound = self.soundpath = aud.Sound(soundfile).rechannel(1)
+        sound = self.soundpath = self.sound = aud.Sound(soundfile).rechannel(1)
         device = self.aud_system.device
         handle = device.play(sound)
         handle.volume = 0
@@ -744,7 +744,7 @@ class Speaker2D(Sound2D):
         aud_sys: str = 'default'
     ):
         if self._deprecated:
-            warning('Warning: ULSpeaker2D class will be renamed to "Speaker2D" in future releases!')
+            console.warning('Warning: ULSpeaker2D class will be renamed to "Speaker2D" in future releases!')
         speaker_data = speaker.blenderObject.data
         # ULSound2D()
         super().__init__(
