@@ -401,7 +401,7 @@ class Sound3D(ULSound):
         aud_sys: str = 'default'
     ):
         if self._deprecated:
-            warning('Warning: ULSound3D class will be renamed to "Sound3D" in future releases!')
+            console.warning('Warning: ULSound3D class will be renamed to "Sound3D" in future releases!')
         self._is_vector = isinstance(speaker, Vector)
         self.file = file
         self.finished = False
@@ -789,7 +789,7 @@ class Speaker3D(Sound3D):
         aud_sys: str = 'default'
     ):
         if self._deprecated:
-            warning('Warning: ULSpeaker3D class will be renamed to "Speaker3D" in future releases!')
+            console.warning('Warning: ULSpeaker3D class will be renamed to "Speaker3D" in future releases!')
         speaker_data = speaker.blenderObject.data
         super().__init__(
             speaker,
@@ -832,7 +832,8 @@ def play_sound_2d(
             ignore_timescale=ignore_timescale,
             aud_sys=aud_sys
         )
-        sound.play()
+        if sound.sound:
+            sound.play()
         return sound
 
 
@@ -853,7 +854,7 @@ def play_sound_3d(
         ignore_timescale: bool = False,
         aud_sys: str = 'default'
     ):
-        return Sound3D(
+        sound = Sound3D(
             speaker=speaker,
             file=file,
             occlusion=occlusion,
@@ -870,3 +871,6 @@ def play_sound_3d(
             ignore_timescale=ignore_timescale,
             aud_sys=aud_sys
         )
+        if sound.sound:
+            sound.play()
+        return sound
