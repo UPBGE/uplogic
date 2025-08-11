@@ -360,6 +360,7 @@ def log(*msg, type='INFO'):
 
 def warning(*msg):
     msg = ' '.join([m.__repr__() if not isinstance(m, str) else m for m in msg])
+    msg += '\n'
     console = get_console(True)
     sysmsg = f'{ansicol.YELLOW}Warning{ansicol.END}: {msg}'
     if console is None:

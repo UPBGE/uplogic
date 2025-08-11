@@ -9,6 +9,8 @@ from uplogic import console
 class OSC_Server:
 
     def __init__(self, ip=None, port=8304):
+        self._mapped_callbacks = {}
+
         if ip is None:
             ip = socket.gethostbyname(socket.gethostname())
 
@@ -32,11 +34,22 @@ class OSC_Server:
         :param `needs_reply_address`: Whether the IP address from which the message originated from shall be passed as
         an argument to the handler callback identifier.
         """
-
         def _deferred_cb(*a):
             events.schedule(callback, content=a)
 
-        return self.dispatcher.map(address, _deferred_cb, *args, needs_reply_address=needs_reply_address)
+        handler = self.dispatcher.map(address, _deferred_cb, *args, needs_reply_address=needs_reply_address)
+        handlers = self._mapped_callbacks.get(address, [])
+        handlers.append(handler)
+        self._mapped_callbacks[address] = handlers
+        return handler
+
+    def unmap(self, address, handler):
+        self.dispatcher.unmap(address, handler)
+
+    def unmap_all(self):
+        for address in self._mapped_callbacks.keys():
+            for handler in self._mapped_callbacks.get(address, []).copy():
+                self.dispatcher.unmap(address, handler)
 
     def shutdown(self) -> None:
         console.debug(f'Shutting down OSC Server on {self.server.server_address[0]}:{self.server.server_address[1]}')

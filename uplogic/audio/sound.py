@@ -6,6 +6,7 @@ from bge import logic
 from bge.types import KX_GameObject as GameObject
 from mathutils import Vector
 from uplogic.audio import AudioSystem
+from uplogic.audio.audiosystem import AudioCache
 from uplogic.audio import get_audio_system
 from uplogic.events import schedule_callback
 from uplogic.utils.math import interpolate
@@ -209,7 +210,7 @@ class Sound2D(ULSound):
         if not isfile(soundfile):
             console.warning(f'Soundfile {soundfile} could not be loaded!')
             return
-        sound = self.soundfile = self.aud_system._cached_sounds.get(self.file, aud.Sound(soundfile))
+        sound = self.soundfile = AudioCache.get(self.file, aud.Sound(soundfile))
         lowpass = self.aud_system.lowpass or lowpass
         if lowpass:
             sound = self.soundfile = sound.lowpass(lowpass, .5)
@@ -339,7 +340,7 @@ class Sample2D(Sound2D):
         if not isfile(soundfile):
             console.warning(f'Soundfile {soundfile} could not be loaded!')
             return
-        sound = self.soundfile = self.aud_system._cached_sounds.get(self.file, aud.Sound(soundfile))
+        sound = self.soundfile = AudioCache.get(self.file, aud.Sound(soundfile))
         if sample[1]:
             sound = sound.limit(sample[0], sample[1])
         lowpass = self.aud_system.lowpass or lowpass
@@ -439,7 +440,7 @@ class Sound3D(ULSound):
         if not isfile(soundfile):
             console.warning(f'Soundfile {soundfile} could not be loaded!')
             return
-        sound = self.soundfile = self.aud_system._cached_sounds.get(self.file, aud.Sound(soundfile).rechannel(1))
+        sound = self.soundfile = AudioCache.get(self.file, aud.Sound(soundfile).rechannel(1))
         device = self.aud_system.device
         handle = self.sound = device.play(sound)
         handle.volume = 0
@@ -690,7 +691,7 @@ class Sample3D(Sound3D):
         if not isfile(soundfile):
             console.warning(f'Soundfile {soundfile} could not be loaded!')
             return
-        sound = self.soundfile = self.aud_system._cached_sounds.get(self.file, aud.Sound(soundfile).rechannel(1))
+        sound = self.soundfile = AudioCache.get(self.file, aud.Sound(soundfile).rechannel(1))
         device = self.aud_system.device
         if sample[1]:
             sound = sound.limit(sample[0], sample[1])

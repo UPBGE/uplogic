@@ -11,6 +11,14 @@ import aud
 import bpy
 
 
+class AudioCache:
+    _sounds = {}
+
+    @classmethod
+    def get(cls, key, default=None):
+        return cls._sounds.get(key, default)
+
+
 DISTANCE_MODELS = {
     'EXPONENT': aud.DISTANCE_MODEL_EXPONENT,
     'EXPONENT_CLAMPED': aud.DISTANCE_MODEL_EXPONENT_CLAMPED,
@@ -116,11 +124,11 @@ class AudioSystem(object):
             sound.volume = sound.volume
 
     def cache(self, sound):
-        self._cached_sounds[sound.file] = sound.soundfile
+        AudioCache._sounds[sound.file] = sound.soundfile
 
     def uncache(self, sound):
         if sound.file in self._cached_sounds.keys():
-            del self._cached_sounds[sound.file]
+            del AudioCache._sounds[sound.file]
 
     def pause(self):
         '''Pause all sounds in this system.'''
@@ -218,6 +226,8 @@ class AudioSystem(object):
         '''Stop and remove this audio system. This will stop all sounds playing
         on this system.'''
         self.device.stopAll()
+        # for sound in self._cached_sounds.copy():
+        #     self.uncache(sound)
         self.scene.pre_draw.remove(self.update)
         GlobalDB.retrieve('uplogic.audio').remove(self.name)
 
