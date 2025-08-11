@@ -150,6 +150,12 @@ class ULSound():
         '''Restart playback of this sound from the position it was paused at.'''
         self.sound.resume()
 
+    def cache(self):
+        self.aud_system.cache(self)
+
+    def uncache(self):
+        self.aud_system.uncache(self)
+
     @property
     def keep(self):
         return self.sound.keep
@@ -191,6 +197,7 @@ class Sound2D(ULSound):
     ):
         if self._deprecated:
             console.warning('Warning: ULSound2D class will be renamed to "Sound2D" in future releases!')
+        self.soundfile = None
         self.file = file
         self._volume = 1
         self.finished = False
@@ -202,7 +209,7 @@ class Sound2D(ULSound):
         if not isfile(soundfile):
             console.warning(f'Soundfile {soundfile} could not be loaded!')
             return
-        sound = self.soundfile = aud.Sound(soundfile)
+        sound = self.soundfile = self.aud_system._cached_sounds.get(self.file, aud.Sound(soundfile))
         lowpass = self.aud_system.lowpass or lowpass
         if lowpass:
             sound = self.soundfile = sound.lowpass(lowpass, .5)
@@ -321,6 +328,7 @@ class Sample2D(Sound2D):
         aud_sys: str = 'default'
     ):
         self.file = file
+        self.soundfile = None
         self._volume = 1
         self.finished = False
         if not (file):
@@ -331,7 +339,7 @@ class Sample2D(Sound2D):
         if not isfile(soundfile):
             console.warning(f'Soundfile {soundfile} could not be loaded!')
             return
-        sound = self.soundfile = aud.Sound(soundfile)
+        sound = self.soundfile = self.aud_system._cached_sounds.get(self.file, aud.Sound(soundfile))
         if sample[1]:
             sound = sound.limit(sample[0], sample[1])
         lowpass = self.aud_system.lowpass or lowpass
@@ -404,6 +412,7 @@ class Sound3D(ULSound):
             console.warning('Warning: ULSound3D class will be renamed to "Sound3D" in future releases!')
         self._is_vector = isinstance(speaker, Vector)
         self.file = file
+        self.soundfile = None
         self.finished = False
         if not (file and speaker):
             return
@@ -430,9 +439,9 @@ class Sound3D(ULSound):
         if not isfile(soundfile):
             console.warning(f'Soundfile {soundfile} could not be loaded!')
             return
-        sound = self.soundpath = self.sound = aud.Sound(soundfile).rechannel(1)
+        sound = self.soundfile = self.aud_system._cached_sounds.get(self.file, aud.Sound(soundfile).rechannel(1))
         device = self.aud_system.device
-        handle = device.play(sound)
+        handle = self.sound = device.play(sound)
         handle.volume = 0
         if occlusion:
             soundlow = aud.Sound.lowpass(sound, 4400 * cutoff_frequency, .5).rechannel(1)
@@ -658,6 +667,7 @@ class Sample3D(Sound3D):
     ):
         self._is_vector = isinstance(speaker, Vector)
         self.file = file
+        self.soundfile = None
         self.finished = False
         if not (file and speaker):
             return
@@ -680,7 +690,7 @@ class Sample3D(Sound3D):
         if not isfile(soundfile):
             console.warning(f'Soundfile {soundfile} could not be loaded!')
             return
-        sound = self.soundpath = aud.Sound(soundfile).rechannel(1)
+        sound = self.soundfile = self.aud_system._cached_sounds.get(self.file, aud.Sound(soundfile).rechannel(1))
         device = self.aud_system.device
         if sample[1]:
             sound = sound.limit(sample[0], sample[1])

@@ -71,6 +71,7 @@ class AudioSystem(object):
             warning(f"AudioSystem argument 'mode': '{mode}' not recognized in ['2D', '3D'], defaulting to '3D'.")
             mode = '3D'
         self._active_sounds = []
+        self._cached_sounds = {}
         self.name = name
         self.mode = mode
         self.bounces = 0
@@ -113,6 +114,13 @@ class AudioSystem(object):
         self._volume = val
         for sound in self._active_sounds:
             sound.volume = sound.volume
+
+    def cache(self, sound):
+        self._cached_sounds[sound.file] = sound.soundfile
+
+    def uncache(self, sound):
+        if sound.file in self._cached_sounds.keys():
+            del self._cached_sounds[sound.file]
 
     def pause(self):
         '''Pause all sounds in this system.'''
