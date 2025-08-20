@@ -44,12 +44,15 @@ class OSC_Server:
         return handler
 
     def unmap(self, address, handler):
-        self.dispatcher.unmap(address, handler)
+        try:
+            self.dispatcher.unmap(address, handler)
+        except ValueError as e:
+            console.error(e)
 
     def unmap_all(self):
         for address in self._mapped_callbacks.keys():
             for handler in self._mapped_callbacks.get(address, []).copy():
-                self.dispatcher.unmap(address, handler)
+                self.unmap(address, handler)
 
     def shutdown(self) -> None:
         console.debug(f'Shutting down OSC Server on {self.server.server_address[0]}:{self.server.server_address[1]}')
