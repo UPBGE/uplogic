@@ -410,7 +410,7 @@ class Sound3D(ULSound):
         aud_sys: str = 'default'
     ):
         if self._deprecated:
-            console.warning('Warning: ULSound3D class will be renamed to "Sound3D" in future releases!')
+            console.warning(f'"{self.__class__.__name__}" class will be renamed to "Sound3D" in future releases!')
         self._is_vector = isinstance(speaker, Vector)
         self.file = file
         self.soundfile = None
@@ -438,7 +438,7 @@ class Sound3D(ULSound):
         else:
             soundfile = logic.expandPath(file)
         if not isfile(soundfile):
-            console.warning(f'Soundfile {soundfile} could not be loaded!')
+            console.error(f'Soundfile {soundfile} could not be loaded!')
             return
         sound = self.soundfile = AudioCache.get(self.file, aud.Sound(soundfile).rechannel(1))
         device = self.aud_system.device

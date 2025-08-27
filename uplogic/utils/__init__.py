@@ -262,11 +262,12 @@ def get_project_folder(folder_name, *structure):
 
 def get_project_path(folder_name, *structure):
     from uplogic.console import error
-    directory = path.join(bpy.path.abspath('//'))[:-1]
+    directory = og_path = path.join(bpy.path.abspath('//'))[:-1]
     while not directory.endswith(folder_name):
+        # print(folder_name)
         pdir = path.abspath(path.join(directory, pardir))
         if pdir == directory:
-            error("Can't go beyond drive's root!")
+            error(f"Can't go beyond drive's root from {og_path}!")
             return ''
         directory = pdir
     return path.join(directory, *structure)

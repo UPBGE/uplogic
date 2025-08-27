@@ -87,6 +87,18 @@ def load_file(filepath) -> FileWrapper:
         raise FileNotFoundError(f'File {filepath} could not be opened!')
 
 
+def read_file(filepath) -> FileWrapper:
+    """Read a file and keep it stored for later use.\n
+    Supports `.ini` and `.json` file formats.
+
+    :param `filepath`: Full path to the file.
+    """
+    if filepath:
+        return FileWrapper(filepath)
+    else:
+        raise FileNotFoundError(f'File {filepath} could not be opened!')
+
+
 def write_file(filepath, data) -> None:
     """Write data in form of `dict` back into a file.\n
     Supports `.ini` and `.json` file formats.

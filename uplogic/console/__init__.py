@@ -68,16 +68,34 @@ class ErrorConsole(StringIO):
         error(__s)
 
 COLORS = {
-    'INFO': [1, 1, 1, 1],
+    'LOG': [1, 1, 1, 1],
+    'INFO': [.3, .8, 1, 1],
     'DEBUG': [1, 1, .6, 1],
     'WARNING': [1, .8, .2, 1],
     'ERROR': [1, .3, .3, 1],
+    'CRITICAL': [1, .0, .0, 1],
     'SUCCESS': [.3, 1, .3, 1]
 }
 
 
 class CommandLabel(Label):
     pass
+
+
+def set_log_level(level: int = 2) -> None:
+    """Set the log level for the console. Higher values mean less important messages will be hidden.
+
+    - 0: No Restrictions
+    - 1: Debug
+    - 2: Info (Default)
+    - 3: Warning
+    - 4: Error
+    - 5: Critical
+
+    Args:
+        level (int): Log Level
+    """
+    get_console().log_level = clamp(level, 0, 5)
 
 
 class ConsoleLayout(Canvas):
@@ -87,6 +105,15 @@ class ConsoleLayout(Canvas):
 
     def __init__(self, toggle_key='F12', visible=False):
         scene = logic.getCurrentScene()
+        log_levels = {
+            'NOTSET': 0,
+            'DEBUG': 1,
+            'INFO': 2,
+            'WARNING': 3,
+            'ERROR': 4,
+            'CRITICAL': 5
+        }
+        self.log_level = log_levels.get(bpy.data.scenes[scene.name].game_settings.log_level)
         self.toggle_key = toggle_key
         self._mouse_visible = False
         self.issued_commands = []
@@ -276,7 +303,7 @@ class ConsoleLayout(Canvas):
         if self.toggle in scene.pre_draw:
             scene.pre_draw.remove(self.toggle)
 
-    def add_message(self, msg, type='INFO', time=True, command=False):
+    def add_message(self, msg, type='LOG', time=True, command=False):
         if (msg == ' ' or self._prev_msg == ' ') and len(self.layout.children):
             self.layout.children[-1].text += msg
             self._prev_msg = msg
@@ -328,10 +355,11 @@ class ansicol:
     END = '\033[0m'
 
 
-def write(*msg, type='INFO'):
+def write(*msg, type='LOG'):
     msg = ' '.join([m.__repr__() if not isinstance(m, str) else m for m in msg])
     _f = {
-        'INFO': log,
+        'LOG': log,
+        'INFO': info,
         'DEBUG': debug,
         'WARNING': warning,
         'ERROR': error,
@@ -341,16 +369,18 @@ def write(*msg, type='INFO'):
     _f[type](msg)
 
 
-def log(*msg, type='INFO'):
-    msg = ' '.join([m.__repr__() if not isinstance(m, str) else m for m in msg])
-    msg += '\n'
+def log(*msg, type='LOG'):
     console = get_console(True)
-
     if console is None:
         print(msg)
         return
-    show_time = True
+    if console.log_level > 2:
+        return
+
+    msg = ' '.join([m.__repr__() if not isinstance(m, str) else m for m in msg])
+    msg += '\n'
     sys.__stdout__.write(f'{msg}')
+    show_time = True
     for msg in str(msg).split('\n'):
         if msg:
             msg = msg.replace('  ', '    ')
@@ -358,48 +388,17 @@ def log(*msg, type='INFO'):
             show_time = False
 
 
-def warning(*msg):
-    msg = ' '.join([m.__repr__() if not isinstance(m, str) else m for m in msg])
-    msg += '\n'
-    console = get_console(True)
-    sysmsg = f'{ansicol.YELLOW}Warning{ansicol.END}: {msg}'
-    if console is None:
-        print(sysmsg)
-        return
-    show_time = True
-    sys.__stdout__.write(f'{sysmsg}')
-    for msg in str(msg).split('\n'):
-        if msg:
-            msg.replace('  ', '    ')
-            console.add_message(f'{msg}', 'WARNING', time=show_time)
-            show_time = False
-
-
-def error(*msg):
-    msg = ' '.join([m.__repr__() if not isinstance(m, str) else m for m in msg])
-    msg += '\n'
-    console = get_console(True)
-    sysmsg = f'{ansicol.RED}Error{ansicol.END}: {msg}'
-    if console is None:
-        print(sysmsg)
-        return
-    show_time = True
-    sys.__stdout__.write(f'{sysmsg}')
-    for msg in str(msg).split('\n'):
-        if msg:
-            msg.replace('  ', '    ')
-            console.add_message(f'{msg}', 'ERROR', time=show_time)
-            show_time = False
-
-
 def success(*msg):
-    msg = ' '.join([m.__repr__() if not isinstance(m, str) else m for m in msg])
-    msg += '\n'
     console = get_console(True)
-    sysmsg = f'{ansicol.GREEN}Success{ansicol.END}: {msg}'
     if console is None:
         print(sysmsg)
         return
+    if console.log_level > 0:
+        return
+
+    msg = ' '.join([m.__repr__() if not isinstance(m, str) else m for m in msg])
+    msg += '\n'
+    sysmsg = f'{ansicol.GREEN}Success{ansicol.END}: {msg}'
     show_time = True
     sys.__stdout__.write(f'{sysmsg}')
     for msg in str(msg).split('\n'):
@@ -410,13 +409,16 @@ def success(*msg):
 
 
 def debug(*msg):
-    msg = ' '.join([m.__repr__() if not isinstance(m, str) else m for m in msg])
-    msg += '\n'
     console = get_console(True)
-    sysmsg = f'{ansicol.BYELLOW}Debug{ansicol.END}: {msg}'
     if console is None:
         print(sysmsg)
         return
+    if console.log_level > 1:
+        return
+
+    msg = ' '.join([m.__repr__() if not isinstance(m, str) else m for m in msg])
+    msg += '\n'
+    sysmsg = f'{ansicol.BYELLOW}Debug{ansicol.END}: {msg}'
     show_time = True
     sys.__stdout__.write(f'{sysmsg}')
     for msg in str(msg).split('\n'):
@@ -424,6 +426,85 @@ def debug(*msg):
             msg.replace('  ', '    ')
             console.add_message(f'{msg}', 'DEBUG', time=show_time)
             show_time = False
+
+
+def info(*msg):
+    console = get_console(True)
+    if console is None:
+        print(sysmsg)
+        return
+    if console.log_level > 2:
+        return
+
+    msg = ' '.join([m.__repr__() if not isinstance(m, str) else m for m in msg])
+    msg += '\n'
+    sysmsg = f'{ansicol.BBLUE}Info{ansicol.END}: {msg}'
+    show_time = True
+    sys.__stdout__.write(f'{sysmsg}')
+    for msg in str(msg).split('\n'):
+        if msg:
+            msg.replace('  ', '    ')
+            console.add_message(f'{msg}', 'INFO', time=show_time)
+            show_time = False
+
+
+def warning(*msg):
+    console = get_console(True)
+    if console is None:
+        print(sysmsg)
+        return
+    if console.log_level > 3:
+        return
+
+    msg = ' '.join([m.__repr__() if not isinstance(m, str) else m for m in msg])
+    msg += '\n'
+    sysmsg = f'{ansicol.YELLOW}Warning{ansicol.END}: {msg}'
+    show_time = True
+    sys.__stdout__.write(f'{sysmsg}')
+    for msg in str(msg).split('\n'):
+        if msg:
+            msg.replace('  ', '    ')
+            console.add_message(f'{msg}', 'WARNING', time=show_time)
+            show_time = False
+
+
+def error(*msg):
+    console = get_console(True)
+    if console is None:
+        print(sysmsg)
+        return
+    if console.log_level > 4:
+        return
+
+    msg = ' '.join([m.__repr__() if not isinstance(m, str) else m for m in msg])
+    msg += '\n'
+    sysmsg = f'{ansicol.RED}Error{ansicol.END}: {msg}'
+    show_time = True
+    sys.__stdout__.write(f'{sysmsg}')
+    for msg in str(msg).split('\n'):
+        if msg:
+            msg.replace('  ', '    ')
+            console.add_message(f'{msg}', 'ERROR', time=show_time)
+            show_time = False
+
+
+def critical(*msg):
+    console = get_console(True)
+    if console is None:
+        print(sysmsg)
+        return
+
+    msg = ' '.join([m.__repr__() if not isinstance(m, str) else m for m in msg])
+    msg += '\n'
+    sysmsg = f'{ansicol.RED}CRITICAL{ansicol.END}: {msg}'
+    show_time = True
+    sys.__stdout__.write(f'{sysmsg}')
+    for msg in str(msg).split('\n'):
+        if msg:
+            msg.replace('  ', '    ')
+            console.add_message(f'{msg}', 'CRITICAL', time=show_time)
+            show_time = False
+
 
 nodeprefs = bpy.context.preferences.addons.get('bge_netlogic', None)
 if nodeprefs and getattr(bpy.context.scene, 'use_screen_console', True):
