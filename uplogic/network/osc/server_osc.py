@@ -46,6 +46,7 @@ class OSC_Server:
     def unmap(self, address, handler):
         try:
             self.dispatcher.unmap(address, handler)
+            del self._mapped_callbacks[address]
         except ValueError as e:
             console.error(e)
 
@@ -53,6 +54,7 @@ class OSC_Server:
         for address in self._mapped_callbacks.keys():
             for handler in self._mapped_callbacks.get(address, []).copy():
                 self.unmap(address, handler)
+        self._mapped_callbacks.clear()
 
     def shutdown(self) -> None:
         console.debug(f'Shutting down OSC Server on {self.server.server_address[0]}:{self.server.server_address[1]}')

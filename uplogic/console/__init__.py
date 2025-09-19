@@ -43,7 +43,12 @@ def _get_globals():
 
 
 def enable(toggle_key='F12', visible=False):
-    get_console(True, toggle_key=toggle_key, visible=visible)
+    scene = logic.getCurrentScene()
+    c = get_console(True, toggle_key=toggle_key, visible=visible)
+    if disable not in scene.onRemove:
+        scene.onRemove.append(disable)
+    if c.update not in scene.pre_draw:
+        scene.pre_draw.append(c.update)
     sys.stdout = Console()
 
 

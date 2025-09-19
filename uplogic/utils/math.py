@@ -4,6 +4,7 @@ from mathutils import Matrix
 from bge import logic
 from bge.types import KX_GameObject as GameObject
 import math
+from typing import overload
 
 
 def matmul (a, b):
