@@ -46,7 +46,7 @@ class OSC_Server:
     def unmap(self, address, handler):
         try:
             self.dispatcher.unmap(address, handler)
-            del self._mapped_callbacks[address]
+            self._mapped_callbacks.get(address, []).remove(handler)
         except ValueError as e:
             console.error(e)
 
