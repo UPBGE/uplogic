@@ -45,9 +45,11 @@ def _get_globals():
 def enable(toggle_key='F12', visible=False):
     scene = logic.getCurrentScene()
     c = get_console(True, toggle_key=toggle_key, visible=visible)
+    c.scene = scene
     if disable not in scene.onRemove:
         scene.onRemove.append(disable)
     if c.update not in scene.pre_draw:
+        c.register()
         scene.pre_draw.append(c.update)
     sys.stdout = Console()
 
@@ -243,8 +245,8 @@ class ConsoleLayout(Canvas):
     def on_enter(self):
         if self.input.text:
             self.issued_commands.append(self.input.text)
-        sys.__stdout__.write(f'{self.input.text}\n')
-        self.add_message(self.input.text)
+        sys.__stdout__.write(f'>{self.input.text}\n')
+        self.add_message(f'>{self.input.text}')
         command_name = self.input.text.split(' ')[0]
         command = Commands.commands.get(command_name)
         if command:
@@ -531,12 +533,32 @@ class Commands:
 
 def add_command(command):
     Commands.add_command(command)
+    return command
 
 
 def console_command(command):
     Commands.add_command(command)
+    return command
 
 class Command:
+    """
+    Command to be executed via the On-Screen Console.
+
+    Set the following attributes on subclass:
+    - `command`: id of the command
+    - `usage`: sequence of argument names (for a command "setres 1920 1080", put "RES_X RES_Y")
+    - `arg_count` (default 0): number of possible arguments
+    - `description`: Shown when executing "help -d" command
+
+    Also, override 
+    ```
+    @classmethod
+    def execute(cls, args):
+        ...
+    ```
+
+    If decorated with `@console_command`, this command will be added to the Console when imported.
+    """
     command = ''
     usage = ''
     arg_count = 0
