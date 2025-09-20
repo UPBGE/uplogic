@@ -194,6 +194,7 @@ class Sound2D(ULSound):
         loop_count: int = 0,
         lowpass = False,
         ignore_timescale = True,
+        mono: bool = False,
         aud_sys: str = 'default'
     ):
         if self._deprecated:
@@ -214,11 +215,12 @@ class Sound2D(ULSound):
         lowpass = self.aud_system.lowpass or lowpass
         if lowpass:
             sound = self.soundfile = sound.lowpass(lowpass, .5)
+        if mono:
+            sound = sound.rechannel(1)
         device = self.aud_system.device
         self.sound = handle = device.play(sound)
         self.sound.pause()
         handle.volume = 0
-
         handle.relative = True
         handle.loop_count = loop_count
         self.aud_system.add(self)
@@ -226,6 +228,17 @@ class Sound2D(ULSound):
         self.pitch = pitch
         self._lowpass = False
         self.lowpass = self.aud_system.lowpass
+
+    @property
+    def panning(self):
+        """Pan a mono sound from left (-1) to right (1)"""
+        return self.sound.location[0]
+
+    @panning.setter
+    def panning(self, val):
+        panning = list(self.sound.location)
+        panning[0] = val
+        self.sound.location = panning
 
     @property
     def volume(self):
@@ -326,6 +339,7 @@ class Sample2D(Sound2D):
         loop_count: int = 0,
         lowpass = False,
         ignore_timescale = False,
+        mono=False,
         aud_sys: str = 'default'
     ):
         self.file = file
@@ -343,6 +357,8 @@ class Sample2D(Sound2D):
         sound = self.soundfile = AudioCache.get(self.file, aud.Sound(soundfile))
         if sample[1]:
             sound = sound.limit(sample[0], sample[1])
+        if mono:
+            sound = sound.rechannel(1)
         lowpass = self.aud_system.lowpass or lowpass
         if lowpass:
             sound = self.soundfile = sound.lowpass(lowpass, .5)
@@ -832,6 +848,7 @@ def play_sound_2d(
         loop_count: int = 0,
         lowpass = False,
         ignore_timescale = True,
+        mono: bool = False,
         aud_sys: str = 'default'
     ):
         sound = Sound2D(
@@ -841,6 +858,7 @@ def play_sound_2d(
             loop_count=loop_count,
             lowpass=lowpass,
             ignore_timescale=ignore_timescale,
+            mono=mono,
             aud_sys=aud_sys
         )
         if sound.sound:
