@@ -231,7 +231,9 @@ class Sound2D(ULSound):
 
     @property
     def panning(self):
-        """Pan a mono sound from left (-1) to right (1)"""
+        """Pan a mono sound from left (-1) to right (1).
+
+        Note that this only works for mono sounds."""
         return self.sound.location[0]
 
     @panning.setter
