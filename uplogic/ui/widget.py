@@ -4,6 +4,7 @@ from gpu_extras.batch import batch_for_shader
 import math
 from mathutils import Vector
 import bpy
+from bge import render
 
 try:
     from uplogic.utils.math import rotate2d
@@ -15,6 +16,22 @@ except Exception:
             ((origin[0] - pivot[0]) * math.cos(angle)) - ((origin[1] - pivot[1]) * math.sin(angle)) + pivot[0],
             ((origin[0] - pivot[0]) * math.sin(angle)) + ((origin[1] - pivot[1]) * math.cos(angle)) + pivot[1]
         ))
+
+
+ALIGN_CENTER = 0
+ALIGN_LEFT = 1
+ALIGN_RIGHT = 2
+ALIGN_BOTTOM = 3
+ALIGN_TOP = 4
+
+
+ALIGNMENTS = {
+    'center': ALIGN_CENTER,
+    'left': ALIGN_LEFT,
+    'right': ALIGN_RIGHT,
+    'bottom': ALIGN_BOTTOM,
+    'top': ALIGN_TOP,
+}
 
 
 class Widget():
@@ -107,6 +124,22 @@ class Widget():
         return self
 
     @property
+    def halign(self):
+        return self._halign
+
+    @halign.setter
+    def halign(self, val):
+        self._halign = ALIGNMENTS.get(val, val)
+
+    @property
+    def valign(self):
+        return self._valign
+
+    @valign.setter
+    def valign(self, val):
+        self._valign = ALIGNMENTS.get(val, val)
+
+    @property
     def active(self):
         parent = self
         while parent is not None:
@@ -121,7 +154,7 @@ class Widget():
 
     @property
     def show(self):
-        """If `False`, this widget and all its children will not be rendered."""
+        """If `False`, this widget and its children will not be rendered."""
         pshow = self.parent.show if self.parent is not None else True
         return self._show and pshow
 
@@ -272,12 +305,6 @@ class Widget():
     def x(self, val):
         self._pos = [val, self.pos[1]]
         self._rebuild = True
-        # if not self.show:
-        #     return
-        # if self.parent and self.show:
-        #     self._rebuild = True
-        # for child in self.children:
-        #     child.pos = child.pos
 
     @property
     def y(self):
@@ -288,12 +315,6 @@ class Widget():
     def y(self, val):
         self._pos = [self._pos[0], val]
         self._rebuild = True
-        # if not self.show:
-        #     return
-        # if self.parent and self.show:
-        #     self._rebuild = True
-        # for child in self.children:
-        #     child.pos = child.pos
 
     @property
     def size(self):
@@ -412,13 +433,13 @@ class Widget():
             pos = rotate2d(pos, self.parent.pivot - Vector(inherit_pos), self.parent._draw_angle)
         offset = [0, 0]
         dsize = self._draw_size
-        if self.halign == 'center':
+        if self.halign == ALIGN_CENTER:
             offset[0] += dsize[0] * .5
-        elif self.halign == 'right':
+        elif self.halign == ALIGN_RIGHT:
             offset[0] += dsize[0]
-        if self.valign == 'center':
+        if self.valign == ALIGN_CENTER:
             offset[1] += dsize[1] * .5
-        elif self.valign == 'top':
+        elif self.valign == ALIGN_TOP:
             offset[1] += dsize[1]
         pos = [pos[0] + inherit_pos[0] - offset[0], pos[1] + inherit_pos[1] - offset[1]]
         return pos
@@ -430,9 +451,10 @@ class Widget():
             return self.size
         if self.relative.get('size'):
             pdsize = self.parent._draw_size
-            x_size = self.size[0] * pdsize[0]
-            y_size = self.size[1] * pdsize[1]
-            size = [x_size, y_size]
+            size = [
+                math.floor(self.size[0] * pdsize[0]),
+                math.floor(self.size[1] * pdsize[1])
+            ]
         if self.copy_width:
             size[1] = size[0]
         elif self.copy_height:
@@ -452,8 +474,6 @@ class Widget():
         self._build_shader()
 
     def check_inside(self, x, y):
-        # if bpy.app.version[0] < 4:
-        from bge import render
         y = render.getWindowHeight() - y
         dpos = self.pos_pixel
         dsize = self.size_pixel
@@ -472,23 +492,23 @@ class Widget():
         valign = self.valign
         if self.parent is None:
             return Vector((0, 0))
-        if halign == 'center' and valign == 'center':
+        if halign is valign is ALIGN_CENTER:
             return x0.lerp(y1, .5)
-        elif halign == 'center' and valign == 'top':
+        elif halign is ALIGN_CENTER and valign is ALIGN_TOP:
             return y0.lerp(y1, .5)
-        elif halign == 'center' and valign == 'bottom':
+        elif halign == ALIGN_CENTER and valign == ALIGN_BOTTOM:
             return x0.lerp(x1, .5)
-        elif halign == 'left' and valign == 'bottom':
+        elif halign == ALIGN_LEFT and valign == ALIGN_BOTTOM:
             return x0
-        elif halign == 'left' and valign == 'center':
+        elif halign == ALIGN_LEFT and valign == ALIGN_CENTER:
             return x0.lerp(y0, .5)
-        elif halign == 'left' and valign == 'top':
+        elif halign == ALIGN_LEFT and valign == ALIGN_TOP:
             return y0
-        elif halign == 'right' and valign == 'bottom':
+        elif halign == ALIGN_RIGHT and valign == ALIGN_BOTTOM:
             return x1
-        elif halign == 'right' and valign == 'center':
+        elif halign == ALIGN_RIGHT and valign == ALIGN_CENTER:
             return x1.lerp(y1, .5)
-        elif halign == 'right' and valign == 'top':
+        elif halign == ALIGN_RIGHT and valign == ALIGN_TOP:
             return y1
         return x0
 

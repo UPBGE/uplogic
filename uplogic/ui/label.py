@@ -1,4 +1,10 @@
 from .widget import Widget
+from .widget import ALIGNMENTS
+from .widget import ALIGN_TOP
+from .widget import ALIGN_BOTTOM
+from .widget import ALIGN_CENTER
+from .widget import ALIGN_LEFT
+from .widget import ALIGN_RIGHT
 import blf
 from bpy.types import VectorFont
 from uplogic.utils.math import rotate2d
@@ -68,21 +74,21 @@ class Label(Widget):
     def text(self, val):
         self._text = str(val)
 
-    # @property
-    # def halign(self):
-    #     return self.text_halign
+    @property
+    def text_halign(self):
+        return self._text_halign
 
-    # @halign.setter
-    # def halign(self, val):
-    #     self.text_halign = str(val)
+    @text_halign.setter
+    def text_halign(self, val):
+        self._text_halign = ALIGNMENTS.get(val, val)
 
-    # @property
-    # def valign(self):
-    #     return self.text_valign
+    @property
+    def text_valign(self):
+        return self._text_valign
 
-    # @valign.setter
-    # def valign(self, val):
-    #     self.text_valign = str(val)
+    @text_valign.setter
+    def text_valign(self, val):
+        self._text_valign = ALIGNMENTS.get(val, val)
 
     @property
     def pos_abs(self):
@@ -139,7 +145,7 @@ class Label(Widget):
             text = max(self.lines, key=len)
         dim = blf.dimensions(self.font, text)
         lines = len(self.lines) or 1
-        return (dim[0], blf.dimensions(self.font, 'Aj')[1] * lines * self.line_height)
+        return (dim[0], blf.dimensions(self.font, 'A')[1] * lines * self.line_height - self.line_height)
 
     @property
     def _draw_size(self):
@@ -195,19 +201,19 @@ class Label(Widget):
                 dimensions = blf.dimensions(font, txt)
                 underground = dimensions[1] > charsize[1]
                 lheight = (charsize[1] * self.line_height)
-                if self.text_halign == 'center':
+                if self.text_halign == ALIGN_CENTER:
                     pos[0] -= (dimensions[0] * .5)
-                elif self.text_halign == 'right':
+                elif self.text_halign == ALIGN_RIGHT:
                     pos[0] -= dimensions[0]
-                if self.text_valign == 'top':
+                if self.text_valign == ALIGN_TOP:
                     # if underground:
                     # pos[1] += (diff)
                     pos[1] -= lheight
-                elif self.text_valign == 'center':
+                elif self.text_valign == ALIGN_CENTER:
                     # if underground:
                         # pos[1] += (diff * .5)
                     pos[1] += (.5 * lheight * (len(lines) - 1)) - (.5 * lheight)
-                elif self.text_valign == 'bottom':
+                elif self.text_valign == ALIGN_BOTTOM:
                     pos[1] += (lheight * (len(lines) -2))
                 if self.parent and self.parent._draw_angle:
                     pos = rotate2d(pos, self.pivot, self.parent.angle)
@@ -218,15 +224,15 @@ class Label(Widget):
             pos = self._draw_pos.copy()
             # underground = dimensions[1] > charsize[1]
 
-            if self.text_halign == 'center':
+            if self.text_halign == ALIGN_CENTER:
                 pos[0] -= (dimensions[0] * .5)
-            elif self.text_halign == 'right':
+            elif self.text_halign == ALIGN_RIGHT:
                 pos[0] -= dimensions[0]
-            if self.text_valign == 'top':
+            if self.text_valign == ALIGN_TOP:
                 # if underground:
                     # pos[1] += diff
                 pos[1] -= charsize[1] * self.line_height
-            elif self.text_valign == 'center':
+            elif self.text_valign == ALIGN_CENTER:
                 # if underground:
                     # pos[1] += (diff * .5)
                 pos[1] -= (.5 * charsize[1])
