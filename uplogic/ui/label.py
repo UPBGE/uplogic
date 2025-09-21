@@ -8,6 +8,7 @@ from .widget import ALIGN_RIGHT
 import blf
 from bpy.types import VectorFont
 from uplogic.utils.math import rotate2d
+from mathutils import Vector
 import math
 
 
@@ -145,7 +146,7 @@ class Label(Widget):
             text = max(self.lines, key=len)
         dim = blf.dimensions(self.font, text)
         lines = len(self.lines) or 1
-        return (dim[0], blf.dimensions(self.font, 'A')[1] * lines * self.line_height - self.line_height)
+        return Vector((dim[0], blf.dimensions(self.font, 'A')[1] * lines * self.line_height - self.line_height))
 
     @property
     def _draw_size(self):
@@ -161,6 +162,22 @@ class Label(Widget):
         self.text_valign = valign
         return self
 
+    def _wrap(self, parsize):
+        offset = parsize[0] * self.pos[0] if self.relative.get('pos') else self.pos[0]
+        max_width = int(parsize[0] - offset)
+        text = ''
+        words = self.text.split(' ')
+
+        for i, w in enumerate(words):
+            line = text.split('\n')[-1]
+            blf.size(self.font, self.font_size)
+            dim = blf.dimensions(self.font, line + w)
+            too_long = dim[0] >= max_width
+            if too_long:
+                w = f'\n{w}'
+            text = ' '.join([text, w])
+        return text[1:]
+
     def draw(self):
         self._setup_draw()
         if self.parent is None:
@@ -172,9 +189,6 @@ class Label(Widget):
         col = self.font_color
         blf.color(font, col[0], col[1], col[2], col[3] * self.opacity)
         charsize = blf.dimensions(font, 'A')
-        smallsize = blf.dimensions(font, 'a')[1]
-        lowsize = blf.dimensions(font, 'g')[1]
-        diff = lowsize - smallsize
 
         if self.angle or self.parent._draw_angle:
             blf.enable(font, blf.ROTATION)
@@ -182,59 +196,46 @@ class Label(Widget):
         if self.parent.use_clipping:
             verts = self.parent._vertices
             blf.enable(font, blf.CLIPPING)
-            blf.clipping(font, verts[0][0], verts[0][1], verts[2][0] - charsize[1]*2, verts[2][1] - charsize[1]*2)
+            blf.clipping(font, verts[0][0], verts[0][1], verts[2][0], verts[2][1] - charsize[1]*2)
         else:
             blf.disable(font, blf.CLIPPING)
-        if self.wrap and self.parent:
-            offset = parsize[0] * self.pos[0] if self.relative.get('pos') else self.pos[0]
-            blf.enable(font, blf.WORD_WRAP)
-            blf.word_wrap(font, int(parsize[0] - offset))
         if self.shadow:
             col = self.shadow_color
             blf.enable(font, blf.SHADOW)
             blf.shadow(font, 0, col[0], col[1], col[2], col[3] * self.opacity)
             blf.shadow_offset(font, int(self.shadow_offset[0]), int(self.shadow_offset[1]))
-        lines = [t for t in self.text.split('\n')]
+        txt = self._wrap(parsize) if self.wrap else self.text
+        lines = txt.split('\n')
         if len(lines) > 1:
             for i, txt in enumerate(lines):
                 pos = self._draw_pos.copy()
                 dimensions = blf.dimensions(font, txt)
-                underground = dimensions[1] > charsize[1]
                 lheight = (charsize[1] * self.line_height)
                 if self.text_halign == ALIGN_CENTER:
                     pos[0] -= (dimensions[0] * .5)
                 elif self.text_halign == ALIGN_RIGHT:
                     pos[0] -= dimensions[0]
                 if self.text_valign == ALIGN_TOP:
-                    # if underground:
-                    # pos[1] += (diff)
                     pos[1] -= lheight
                 elif self.text_valign == ALIGN_CENTER:
-                    # if underground:
-                        # pos[1] += (diff * .5)
                     pos[1] += (.5 * lheight * (len(lines) - 1)) - (.5 * lheight)
                 elif self.text_valign == ALIGN_BOTTOM:
                     pos[1] += (lheight * (len(lines) -2))
                 if self.parent and self.parent._draw_angle:
                     pos = rotate2d(pos, self.pivot, self.parent.angle)
-                blf.position(font, pos[0], pos[1] - (charsize[1] * i * self.line_height), 0)
+                blf.position(font, pos[0], pos[1] - (charsize[1] * (i) * self.line_height), 0)
                 blf.draw(font, txt)
         else:
             dimensions = blf.dimensions(font, self.text)
             pos = self._draw_pos.copy()
-            # underground = dimensions[1] > charsize[1]
 
             if self.text_halign == ALIGN_CENTER:
                 pos[0] -= (dimensions[0] * .5)
             elif self.text_halign == ALIGN_RIGHT:
                 pos[0] -= dimensions[0]
             if self.text_valign == ALIGN_TOP:
-                # if underground:
-                    # pos[1] += diff
                 pos[1] -= charsize[1] * self.line_height
             elif self.text_valign == ALIGN_CENTER:
-                # if underground:
-                    # pos[1] += (diff * .5)
                 pos[1] -= (.5 * charsize[1])
             if self.parent and self.parent._draw_angle:
                 pos = rotate2d(pos, self.pivot, self.parent.angle)

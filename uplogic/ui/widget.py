@@ -93,8 +93,34 @@ class Widget():
         self.copy_height = False
         self.copy_width = False
         self.opacity = 1.
-        self.z = 0
+        self._z = 0
         self._active = True
+
+    def move_up(self):
+        if self.parent is not None:
+            children = self.parent.children
+            idx = children.index(self)
+            if idx < len(children)-1:
+                children[idx], children[idx + 1] = children[idx + 1], children[idx]
+
+    def move_down(self):
+        if self.parent is not None:
+            children = self.parent.children
+            idx = children.index(self)
+            if idx > 0:
+                children[idx], children[idx - 1] = children[idx - 1], children[idx]
+
+    def move_to_top(self):
+        if self.parent is not None:
+            children = self.parent.children
+            children.remove(self)
+            children.append(self)
+
+    def move_to_bottom(self):
+        if self.parent is not None:
+            children = self.parent.children
+            children.remove(self)
+            children.insert(0, self)
 
     def register(self):
         pass
@@ -256,10 +282,10 @@ class Widget():
         if self.use_clipping is None:
             self.use_clipping = val.use_clipping
         self._parent = val
-        self.pos = self.pos
-        self.size = self.size
+        self.pos = self.pos  # noqa
+        self.size = self.size  # noqa
         for c in self.children:
-            c.parent = c.parent
+            c.parent = c.parent  # noqa
         self.on_parent()
         self._build_shader()
 
@@ -375,6 +401,14 @@ class Widget():
     @property
     def height_pixel(self):
         return self.size_pixel[1]
+
+    @property
+    def clip(self):
+        return self.use_clipping
+
+    @clip.setter
+    def clip(self, val):
+        self.use_clipping = val
 
     @property
     def use_clipping(self):
@@ -601,7 +635,7 @@ class Widget():
             self.children.append(widget)
             if self.canvas is not None:
                 self.canvas._set_z(-1)
-        self.children = sorted(self.children, key=lambda widget: widget.z, reverse=False)
+        self.children = sorted(self.children, key=lambda widget: widget._z, reverse=False)
         return widget
 
     def add_widgets(self, *widgets):
@@ -611,12 +645,12 @@ class Widget():
     def on_parent(self):
         ...
 
-    def _set_z(self, z):
-        z += 1
-        self.z = z
+    def _set_z(self, _z):
+        _z += 1
+        self._z = _z
         for c in self.children:
-            z = c._set_z(z)
-        return z
+            _z = c._set_z(_z)
+        return _z
 
     def remove_widget(self, widget):
         '''Remove a `Widget` from this widget.
