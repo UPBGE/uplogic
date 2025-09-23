@@ -67,8 +67,8 @@ def stop_all_audio() -> None:
 class AudioSystem(object):
     '''System for managing sounds started using `Sound2D` or `Sound3D`.
     
-    :param `name`: ID of this AudioSystem; must be unique.
-    :param `mode`: Playback mode for sounds of this system, must be one of `['2D', '3D']`
+    :param name: ID of this AudioSystem; must be unique.
+    :param mode: Playback mode for sounds of this system, must be one of `['2D', '3D']`
     '''
     _deprecated = False
 
@@ -266,8 +266,8 @@ class ULAudioSystem(AudioSystem):
 def get_audio_system(system_name: str = 'default', mode: str = '3D') -> AudioSystem:
     '''Get or create a `AudioSystem` with the given name.
 
-    :param `system_name`: Look for this name.
-    :param `mode`: Playback mode of `['2D', '3D']`. Only relevant a new system is created.
+    :param system_name: Look for this name.
+    :param mode: Playback mode of `['2D', '3D']`. Only relevant a new system is created.
 
     :returns: `AudioSystem`, new system is created if none is found.
     '''

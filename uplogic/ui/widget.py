@@ -41,13 +41,13 @@ class Widget():
     This class is intended to be used as a base for inheriting from
     for custom widgets.
 
-    :param `pos`: Initial position of this widget in either pixels or factor.
-    :param `size`: Initial size of this widget in either pixels or factor.
-    :param `bg_color`: Color to draw in the area of the widget.
-    :param `relative`: Whether to use pixels or factor for size or pos; example: `{'pos': True, 'size': True}`.
-    :param `halign`: Horizontal alignment of the widget, can be (`left`, `center`, `right`).
-    :param `valign`: Vertical alignment of the widget, can be (`bottom`, `center`, `top`).
-    :param `angle`: Rotation in degrees of this widget around the pivot defined by the alignment.
+    :param pos: Initial position of this widget in either pixels or factor.
+    :param size: Initial size of this widget in either pixels or factor.
+    :param bg_color: Color to draw in the area of the widget.
+    :param relative: Whether to use pixels or factor for size or pos; example: `{'pos': True, 'size': True}`.
+    :param halign: Horizontal alignment of the widget, can be (`left`, `center`, `right`).
+    :param valign: Vertical alignment of the widget, can be (`bottom`, `center`, `top`).
+    :param angle: Rotation in degrees of this widget around the pivot defined by the alignment.
     '''
 
     vertex_shader = '''
@@ -123,7 +123,7 @@ class Widget():
             children.insert(0, self)
 
     def register(self):
-        pass
+        raise NotImplementedError
 
     def toggle(self, *args):
         """Toggle the widget on/off."""
@@ -138,10 +138,10 @@ class Widget():
     def make_floating(self, pos=True, size=True, halign='center', valign='center'):
         """Quickly set the attributes of this widget to use relative data.
 
-        :param `pos`: Use relative position.
-        :param `size`: Use relative size.
-        :param `halign`: The horizontal alignment.
-        :param `valign`: The vertical alignment.
+        :param pos: Use relative position.
+        :param size: Use relative size.
+        :param halign: The horizontal alignment.
+        :param valign: The vertical alignment.
         """
         self.relative['pos'] = pos
         self.relative['size'] = size
@@ -191,7 +191,7 @@ class Widget():
             if val:
                 self._rebuild = True
                 for child in self.children:
-                    child.pos = child.pos
+                    child.pos = child.pos  # noqa
 
     @property
     def _children_reversed(self):
@@ -244,7 +244,11 @@ class Widget():
         return widgets
 
     @property
-    def childrenRecursive(self) -> list:
+    def childrenRecursive(self) -> list:  # noqa; for bge consistency reasons
+        return self.children_recursive
+
+    @property
+    def children_recursive(self) -> list:
         """All children and children's children of this widget."""
         widgets = []
         for w in self.children:
@@ -320,7 +324,7 @@ class Widget():
         if self.parent and self.show:
             self._rebuild = True
         for child in self.children:
-            child.pos = child.pos
+            child.pos = child.pos  # noqa
 
     @property
     def x(self):
@@ -357,8 +361,8 @@ class Widget():
         if self.parent and self.show:
             self._rebuild = True
         for child in self.children:
-            child.pos = child.pos
-            child.size = child.size
+            child.pos = child.pos  # noqa
+            child.size = child.size  # noqa
         self.on_size()
 
     def on_size(self):
@@ -372,8 +376,8 @@ class Widget():
     @width.setter
     def width(self, val):
         self.size = [val, self.size[1]]
-        # if self.parent and self.show:
-        #     self._rebuild = True
+        if self.parent and self.show:
+            self._rebuild = True
 
     @property
     def height(self):
@@ -383,8 +387,8 @@ class Widget():
     @height.setter
     def height(self, val):
         self.size = [self.size[0], val]
-        # if self.parent and self.show:
-        #     self._rebuild = True
+        if self.parent and self.show:
+            self._rebuild = True
 
     @property
     def size_pixel(self):
@@ -618,17 +622,19 @@ class Widget():
                 widget.draw()
 
     def evaluate(self):
-        pass
+        """Logic evaluation
+        """
+        ...
 
     def update(self):
         """Put your custom update logic here.
         """
-        pass
+        ...
 
     def add_widget(self, widget):
         '''Add a `Widget` to this widget as child.
 
-        :param `widget`: `Widget` to add.
+        :param widget `Widget` to add.
         '''
         if widget not in self.children:
             widget.parent = self
@@ -655,7 +661,7 @@ class Widget():
     def remove_widget(self, widget):
         '''Remove a `Widget` from this widget.
 
-        :param `widget`: `Widget` to remove.
+        :param widget: `Widget` to remove.
         '''
         if widget in self.children:
             self.children.remove(widget)

@@ -241,21 +241,21 @@ class Mouse():
     def button_down(self, button: str = 'LMB'):
         """Check if a button on the mouse is held down.
         
-        :param `button`: The button to check for; `str` of [`'LMB'`, `'MMB'`,
+        :param button: The button to check for; `str` of [`'LMB'`, `'MMB'`,
         `'RMB'`]"""
         return mouse_down(MOUSE_BUTTONS[button])
 
     def button_up(self, button: str = 'LMB'):
         """Check if a button on the mouse is released.
         
-        :param `button`: The button to check for; `str` of [`'LMB'`, `'MMB'`,
+        :param button: The button to check for; `str` of [`'LMB'`, `'MMB'`,
         `'RMB'`]"""
         return mouse_up(MOUSE_BUTTONS[button])
 
     def button_tap(self, button: str = 'LMB'):
         """Check if a button on the mouse is pressed once.
         
-        :param `button`: The button to check for; `str` of [`'LMB'`, `'MMB'`,
+        :param button: The button to check for; `str` of [`'LMB'`, `'MMB'`,
         `'RMB'`]"""
         return mouse_tap(MOUSE_BUTTONS[button])
 
@@ -274,20 +274,20 @@ class MouseLook():
     This component can be activated/deactivated at any time to keep performance
     up.
 
-    :param `obj`: Main object to rotate around the object's Z axis.
-    :param `head`: Head object to rotate around the object's X/Y axis.
-    :param `sensitivity`: Translation factor of mouse movement to rotation.
-    :param `use_cap_x`: Whether to use capping on the mouse X movement (Z axis
+    :param obj: Main object to rotate around the object's Z axis.
+    :param head: Head object to rotate around the object's X/Y axis.
+    :param sensitivity: Translation factor of mouse movement to rotation.
+    :param use_cap_x: Whether to use capping on the mouse X movement (Z axis
     rotation).
-    :param `cap_x`: Minimum and Maximum amount of rotation on the Z axis.
-    :param `use_cap_y`: Whether to use capping on the mouse Y movement (X/Y axis
+    :param cap_x: Minimum and Maximum amount of rotation on the Z axis.
+    :param use_cap_y: Whether to use capping on the mouse Y movement (X/Y axis
     rotation).
-    :param `cap_y`: Minimum and Maximum amount of rotation on the X/Y axis.
-    :param `invert`: Whether to use inverted values for mous X/Y movement.
-    :param `smoothing`: Amount of movement smoothing.
-    :param `local`: Whether to use local transform for the body object.
-    :param `front`: Front axis (traditionally in blender, Y is front).
-    :param `active`: Whether to start this component in active or inactive mode
+    :param cap_y: Minimum and Maximum amount of rotation on the X/Y axis.
+    :param invert: Whether to use inverted values for mous X/Y movement.
+    :param smoothing: Amount of movement smoothing.
+    :param local: Whether to use local transform for the body object.
+    :param front: Front axis (traditionally in blender, Y is front).
+    :param active: Whether to start this component in active or inactive mode
     (can be changed later).
     """
 
@@ -368,7 +368,7 @@ class MouseLook():
     def stop(self, reset: bool = False):
         """Stop this component.
         
-        :param `reset`: Reset the orientation of objects to their original
+        :param reset: Reset the orientation of objects to their original
         state."""
         self.active = False
         if reset:
@@ -387,7 +387,7 @@ class MouseLook():
         """Reset the orientation of the objects in this component to their
         original state.
         
-        :param `factor`: Smoothing factor of the reset. If < 1, component will
+        :param factor: Smoothing factor of the reset. If < 1, component will
         be reset smoothly."""
         if factor < 1:
             self.active = False

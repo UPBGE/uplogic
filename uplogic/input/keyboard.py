@@ -66,7 +66,7 @@ def pad_event(key: str) -> bool:
 def key_tap(key: str) -> bool:
     '''Detect key tapped.
 
-    :param `key`: key as `str` of
+    :param key: key as `str` of
     [`'A'`, `'B'`, `'C'`, `'D'`, `'E'`, `'F'`, `'G'`, `'H'`, `'I'`, `'J'`, `'K'`, `'L'`, `'M'`, `'N'`, `'O'`, `'P'`, `'Q'`,
     `'R'`, `'S'`, `'T'`, `'U'`, `'V'`, `'W'`, `'X'`, `'Y'`, `'Z'`, `'ZERO'`, `'ONE'`, `'TWO'`, `'THREE'`, `'FOUR'`, `'FIVE'`,
     `'SIX'`, `'SEVEN'`, `'EIGHT'`, `'NINE'`, `'CAPSLOCK'`, `'LEFTCTRL'`, `'LEFTSHIFT'` `'LEFTARROW'`, `'DOWNARROW'`, `'RIGHTARROW'`,
@@ -85,7 +85,7 @@ def key_tap(key: str) -> bool:
 def key_down(key: str) -> bool:
     '''Detect key held down.
 
-    :param `key`: key as `str` of
+    :param key: key as `str` of
     [`'A'`, `'B'`, `'C'`, `'D'`, `'E'`, `'F'`, `'G'`, `'H'`, `'I'`, `'J'`, `'K'`, `'L'`, `'M'`, `'N'`, `'O'`, `'P'`, `'Q'`,
     `'R'`, `'S'`, `'T'`, `'U'`, `'V'`, `'W'`, `'X'`, `'Y'`, `'Z'`, `'ZERO'`, `'ONE'`, `'TWO'`, `'THREE'`, `'FOUR'`, `'FIVE'`,
     `'SIX'`, `'SEVEN'`, `'EIGHT'`, `'NINE'`, `'CAPSLOCK'`, `'LEFTCTRL'`, `'LEFTSHIFT'` `'LEFTARROW'`, `'DOWNARROW'`, `'RIGHTARROW'`,
@@ -105,7 +105,7 @@ def key_down(key: str) -> bool:
 def key_press(key: str, down=False):
     '''Detect key tap or held down.
 
-    :param `key`: key as `str` of
+    :param key: key as `str` of
     [`'A'`, `'B'`, `'C'`, `'D'`, `'E'`, `'F'`, `'G'`, `'H'`, `'I'`, `'J'`, `'K'`, `'L'`, `'M'`, `'N'`, `'O'`, `'P'`, `'Q'`,
     `'R'`, `'S'`, `'T'`, `'U'`, `'V'`, `'W'`, `'X'`, `'Y'`, `'Z'`, `'ZERO'`, `'ONE'`, `'TWO'`, `'THREE'`, `'FOUR'`, `'FIVE'`,
     `'SIX'`, `'SEVEN'`, `'EIGHT'`, `'NINE'`, `'CAPSLOCK'`, `'LEFTCTRL'`, `'LEFTSHIFT'` `'LEFTARROW'`, `'DOWNARROW'`, `'RIGHTARROW'`,
@@ -126,7 +126,7 @@ def key_press(key: str, down=False):
 def key_up(key: str) -> bool:
     '''Detect key released.
 
-    :param `key`: key as `str` of
+    :param key: key as `str` of
     [`'A'`, `'B'`, `'C'`, `'D'`, `'E'`, `'F'`, `'G'`, `'H'`, `'I'`, `'J'`, `'K'`, `'L'`, `'M'`, `'N'`, `'O'`, `'P'`, `'Q'`,
     `'R'`, `'S'`, `'T'`, `'U'`, `'V'`, `'W'`, `'X'`, `'Y'`, `'Z'`, `'ZERO'`, `'ONE'`, `'TWO'`, `'THREE'`, `'FOUR'`, `'FIVE'`,
     `'SIX'`, `'SEVEN'`, `'EIGHT'`, `'NINE'`, `'CAPSLOCK'`, `'LEFTCTRL'`, `'LEFTSHIFT'` `'LEFTARROW'`, `'DOWNARROW'`, `'RIGHTARROW'`,
@@ -145,7 +145,7 @@ def key_up(key: str) -> bool:
 def key_pulse(key: str, time: float = .4) -> bool:
     '''Detect key tapped, then held down after `time` has passed.
 
-    :param `key`: key as `str` of
+    :param key: key as `str` of
     [`'A'`, `'B'`, `'C'`, `'D'`, `'E'`, `'F'`, `'G'`, `'H'`, `'I'`, `'J'`, `'K'`, `'L'`, `'M'`, `'N'`, `'O'`, `'P'`, `'Q'`,
     `'R'`, `'S'`, `'T'`, `'U'`, `'V'`, `'W'`, `'X'`, `'Y'`, `'Z'`, `'ZERO'`, `'ONE'`, `'TWO'`, `'THREE'`, `'FOUR'`, `'FIVE'`,
     `'SIX'`, `'SEVEN'`, `'EIGHT'`, `'NINE'`, `'CAPSLOCK'`, `'LEFTCTRL'`, `'LEFTSHIFT'` `'LEFTARROW'`, `'DOWNARROW'`, `'RIGHTARROW'`,
@@ -188,8 +188,8 @@ class RecordedCharacter(tuple):
 def record_keyboard(down=True, all=False) -> list[RecordedCharacter[bool, int, str]]:
     '''Listen to keyboard events.
 
-    :param `down`: Record if key is down.
-    :param `all`: Record non-character keys.
+    :param down: Record if key is down.
+    :param all: Record non-character keys.
 
     :returns: List of tuples of `(pressed, keycode, character)`'''
     left_shift = KEYBOARD_EVENTS[events.LEFTSHIFTKEY].active

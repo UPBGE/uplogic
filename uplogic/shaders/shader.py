@@ -45,9 +45,9 @@ def set_filter_state(pass_idx, state=True):
 class Filter2D():
     '''Wrapper for KX_2DFilter.
 
-    :param `program`: GLSL code as `str`.
-    :param `idx`: Pass Index for this filter.
-    :param `uniforms`: A `dict` of [`str`: `dict`] binding dictionary values to
+    :param program: GLSL code as `str`.
+    :param idx: Pass Index for this filter.
+    :param uniforms: A `dict` of [`str`: `dict`] binding dictionary values to
     the filter in the form "key of dictionary".
     '''
 

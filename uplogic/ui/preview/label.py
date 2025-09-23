@@ -8,20 +8,20 @@ import math
 class Label(Widget):
     '''Widget for displaying text
 
-    :param `pos`: Initial position of this widget in either pixels or factor.
-    :param `relative`: Whether to use pixels or factor for size or pos; example: `{'pos': True, 'size': True}`.
-    :param `text`: Initial text for this label.
-    :param `font`: Font name.
-    :param `font_color`: Color in RGBA.
-    :param `font_size`: Font size in pt or factor.
-    :param `line_height`: Total line height relative to character size (1 is same as character height).
-    :param `shadow`: Draw a shadow behind the text.
-    :param `shadow_offset`: Relative position of the shadow in px.
-    :param `shadow_color`: Shadow color in RGBA.
-    :param `halign`: Horizontal alignment of the widget, can be (`left`, `center`, `right`).
-    :param `valign`: Vertical alignment of the widget, can be (`bottom`, `center`, `top`).
-    :param `wrap`: Split lines that are too long for the containing widget.
-    :param `angle`: Rotation in degrees of this widget around the pivot defined by the alignment.
+    :param pos: Initial position of this widget in either pixels or factor.
+    :param relative: Whether to use pixels or factor for size or pos; example: `{'pos': True, 'size': True}`.
+    :param text: Initial text for this label.
+    :param font: Font name.
+    :param font_color: Color in RGBA.
+    :param font_size: Font size in pt or factor.
+    :param line_height: Total line height relative to character size (1 is same as character height).
+    :param shadow: Draw a shadow behind the text.
+    :param shadow_offset: Relative position of the shadow in px.
+    :param shadow_color: Shadow color in RGBA.
+    :param halign: Horizontal alignment of the widget, can be (`left`, `center`, `right`).
+    :param valign: Vertical alignment of the widget, can be (`bottom`, `center`, `top`).
+    :param wrap: Split lines that are too long for the containing widget.
+    :param angle: Rotation in degrees of this widget around the pivot defined by the alignment.
     '''
 
     def __init__(

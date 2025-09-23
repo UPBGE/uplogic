@@ -233,10 +233,10 @@ def is_water(game_object: GameObject):
 def get_child_by_name(obj: GameObject, child: str, recursive: bool = True, partial: bool = False) -> GameObject:
     """Get a named child object.
 
-    :param `obj`: The parent object.
-    :param `child`: The child's name.
-    :param `recursive`: If True, children's children will be seached too.
-    :param `partial`: If a child object name has the given name in it, it counts as a hit.
+    :param obj: The parent object.
+    :param child: The child's name.
+    :param recursive: If True, children's children will be seached too.
+    :param partial: If a child object name has the given name in it, it counts as a hit.
     """
     children = obj.childrenRecursive if recursive else obj.children
     if partial:

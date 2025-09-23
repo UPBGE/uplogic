@@ -28,10 +28,10 @@ class OSC_Server:
     def map(self, address: str, callback, *args: list, needs_reply_address: bool = False):
         """Map a callback to an address. Callback receives (`address`, `args`, `volume`)
         
-        :param `address`: address identifier (example: `"/update"`).
-        :param `callback`: Callback function that will be called as the handler for the given address.
-        :param `args`: Fixed arguements that will be passed to the callback function.
-        :param `needs_reply_address`: Whether the IP address from which the message originated from shall be passed as
+        :param address: address identifier (example: `"/update"`).
+        :param callback: Callback function that will be called as the handler for the given address.
+        :param args: Fixed arguements that will be passed to the callback function.
+        :param needs_reply_address: Whether the IP address from which the message originated from shall be passed as
         an argument to the handler callback identifier.
         """
         def _deferred_cb(*a):

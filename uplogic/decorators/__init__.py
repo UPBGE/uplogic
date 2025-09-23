@@ -81,7 +81,7 @@ def game_props(*prop_names) -> KX_PythonComponent:
     Automatically adds property handlers for this class to use the `game_object[prop]`
     syntax instead of saving values on the instance itself.
 
-    :param `prop_names`: Names of game properties as a list.
+    :param prop_names: Names of game properties as a list.
     """
 
     def on_attr(self, val):
@@ -129,7 +129,7 @@ def game_property(*prop_names) -> KX_PythonComponent:
     Automatically adds property handlers for this class to use the `game_object[prop]`
     syntax instead of saving values on the instance itself.
 
-    :param `prop_names`: Names of game properties as a list.
+    :param prop_names: Names of game properties as a list.
     """
 
     def on_attr(self, val):
@@ -183,7 +183,7 @@ def instance_props(*prop_names) -> KX_PythonComponent:
     Automatically adds property handlers for this class to use the `game_object.GroupObject[prop]`
     syntax instead of saving values on the instance itself. 
 
-    :param `prop_names`: Names of game properties as a list.
+    :param prop_names: Names of game properties as a list.
     """
 
     def on_attr(self, val):
@@ -231,7 +231,7 @@ def instance_property(*prop_names) -> KX_PythonComponent:
     Automatically adds property handlers for this class to use the `game_object.GroupObject[prop]`
     syntax instead of saving values on the instance itself.
 
-    :param `prop_names`: Names of game properties as a list.
+    :param prop_names: Names of game properties as a list.
     """
 
     def on_attr(self, val):
@@ -288,7 +288,7 @@ def bl_attrs(*attr_names) -> KX_PythonComponent:
     `game_object.blenderObject[attribute]` syntax instead of saving values on the
     instance itself.
 
-    :param `attr_names`: Names of custom attributes as a list.
+    :param attr_names: Names of custom attributes as a list.
     """
 
     def on_attr(self, val):
@@ -339,7 +339,7 @@ def attribute(*attr_names) -> KX_PythonComponent:
     `game_object.blenderObject[attribute]` syntax instead of saving values on the
     instance itself.
 
-    :param `attr_names`: Names of custom attributes as a list.
+    :param attr_names: Names of custom attributes as a list.
     """
 
     def on_attr(self, val):
@@ -389,7 +389,7 @@ def scene_attribute(*attr_names) -> KX_PythonComponent:
     `Scene[attribute]` syntax instead of saving values on the
     instance itself.
 
-    :param `attr_names`: Names of custom attributes as a list.
+    :param attr_names: Names of custom attributes as a list.
     """
 
     def on_attr(self, val):
@@ -436,7 +436,7 @@ def global_dict(*prop_names):
     """Automatically adds property handlers for this class to use the `bge.logic.globalDict[key]`
     syntax instead of saving values on the instance itself.
 
-    :param `prop_names`: Keys as a list.
+    :param prop_names: Keys as a list.
     """
     def deco(cls):
         if not (isinstance(prop_names, list) or isinstance(prop_names, tuple)):
@@ -463,7 +463,7 @@ def scene_props(*prop_names):
     Automatically adds property handlers for this class to use the `game_object.scene[prop]`
     syntax instead of saving values on the instance itself.
 
-    :param `prop_names`: Names of properties as a list.
+    :param prop_names: Names of properties as a list.
     """
     def deco(cls: KX_PythonComponent) -> KX_PythonComponent:
         warning('@scene_props decorator is deprecated, use @scene_property instead.')
@@ -502,7 +502,7 @@ def scene_property(*prop_names):
     Automatically adds property handlers for this class to use the `logic.getCurrentScene()[prop]`
     syntax instead of saving values on the instance itself.
 
-    :param `prop_names`: Names of properties as a list.
+    :param prop_names: Names of properties as a list.
     """
     def deco(cls):
         for scene_prop in prop_names:
