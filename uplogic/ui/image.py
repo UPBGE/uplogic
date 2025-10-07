@@ -245,7 +245,11 @@ class Image(Widget):
         if bpy.app.version[0] < 4:
             self._shader = gpu.shader.from_builtin('2D_IMAGE')
         else:
-            self._shader = gpu.types.GPUShader(self.vertex_shader, self.fragment_shader)
+            info = gpu.types.GPUShaderCreatInfo()
+            info.fragment_source = self.fragment_shader
+            info.vertex_source = self.vertex_shader
+            self._shader = gpu.shader.create_from_info(info)
+            # self._shader = gpu.types.GPUShader(self.vertex_shader, self.fragment_shader)
         uvs = self.uv
         self._batch = batch_for_shader(
             self._shader, 'TRI_STRIP',

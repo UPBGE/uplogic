@@ -51,19 +51,14 @@ class Widget():
     '''
 
     vertex_shader = '''
-    uniform mat4 ModelViewProjectionMatrix;
-    in vec3 pos;
-
     void main()
     {
+        pos = position;
         gl_Position = ModelViewProjectionMatrix * vec4(pos.xy, 0.0, 1.0f);
     }
     '''
 
     fragment_shader = '''
-    uniform vec4 color;
-    out vec4 fragColor;
-
     void main()
     {
         fragColor = color;
@@ -463,6 +458,7 @@ class Widget():
             return [0, 0]
         inherit_pos = self.parent._draw_pos if self.parent else [0, 0]
         pdsize = self.parent._draw_size
+        # import sys; sys.__stdout__.write(self)
         pos = [
             math.floor(self.pos[0] * pdsize[0]),
             math.floor(self.pos[1] * pdsize[1])
@@ -590,9 +586,25 @@ class Widget():
             (0, 1, 2), (2, 3, 0)
         )
         if bpy.app.version[0] < 4:
-            self._shader = gpu.shader.from_builtin('2D_UNIFORM_COLOR')
-        else:
+            self._shader = gpu.shader.from_builtin('UNIFORM_COLOR')
+        elif bpy.app.version[0] < 5:
             self._shader = gpu.types.GPUShader(self.vertex_shader, self.fragment_shader)
+        else:
+            vert_out = gpu.types.GPUStageInterfaceInfo("widget")
+            vert_out.smooth('VEC3', 'pos')
+
+            info = gpu.types.GPUShaderCreateInfo()
+            info.fragment_source(self.fragment_shader)
+        #     info.vertex_source(self.vertex_shader)
+
+        #     info.push_constant('MAT4', 'ModelViewProjectionMatrix')
+        #     info.vertex_in(0, 'VEC3', 'position')
+        #     info.vertex_out(vert_out)
+        #     # info.typedef_source()
+        #     info.uniform_buf(0, 'VEC4', 'color')
+        #     info.fragment_out(0, 'VEC4', 'fragColor')
+
+        #     self._shader = gpu.shader.create_from_info(info)
         self._batch = batch_for_shader(self._shader, 'TRIS', {"pos": vertices}, indices=indices)
         self._batch_line = batch_for_shader(self._shader, 'LINE_STRIP', {"pos": vertices})
         self._batch_points = batch_for_shader(self._shader, 'POINTS', {"pos": vertices})
@@ -600,6 +612,7 @@ class Widget():
     def _setup_draw(self):
         if self._rebuild:
             self._build_shader()
+            # self._rebuild_tree()
         self._rebuild = False
 
     def _rebuild_tree(self):
