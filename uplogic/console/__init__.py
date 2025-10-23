@@ -98,12 +98,45 @@ def set_log_level(level: int = 2) -> None:
     get_console().log_level = clamp(level, 0, 5)
 
 
+def set_log_directory(path):
+    get_console().log_directory = path
+    # ...
+
+
 class ConsoleLayout(Canvas):
     opacity = 1
     padding = [5, 10]
     toggle_key = 'F12'
 
-    def __init__(self, toggle_key='F12', visible=False):
+    
+    @property
+    def log_directory(self):
+        """Path to the log folder. This should be a directory, not a file."""
+        return self._log_directory
+
+    @log_directory.setter
+    def log_directory(self, folder):
+        if folder is not None:
+            if not os.path.isdir(folder):
+                os.makedirs(folder)
+            self._log_file = os.path.join(
+                folder,
+                f'log.{len(os.listdir(folder))}.txt'
+            )
+        else:
+            self._log_file = None
+        self._log_directory = folder
+
+    @property
+    def log_file(self):
+        return self._log_file
+
+    @log_file.setter
+    def log_file(self, val):
+        error("'ConsoleLayout.log_file' is read-only!")
+    
+    def __init__(self, toggle_key='F12', visible=False): 
+        self.log_directory = None
         scene = logic.getCurrentScene()
         log_levels = {
             'NOTSET': 0,
@@ -141,12 +174,9 @@ class ConsoleLayout(Canvas):
         self.nameplate.update = self.update_nameplate
         self.canvas.add_widget(self.nameplate)
         self.font_size = 12
-        # self.info_mode = False
         self.position = 'bottom'
         self.info_mode = getattr(bpy.context.scene, 'screen_console_open', False)
         self.active = False
-        # if not getattr(bpy.context.scene, 'screen_console_open', False) and not visible:
-        #     self.active = False
 
     @property
     def layout(self):
@@ -342,7 +372,7 @@ def get_console(create=False, toggle_key='F12', visible=False) -> ConsoleLayout:
     if console is None and create:
         console = ConsoleLayout(toggle_key=toggle_key, visible=visible)
         consoles.put('default', console)
-        debug('On-Screen Console active; Check System Console for Errors.')
+        console.add_message('On-Screen Console active; Check System Console for Errors.', type='DEBUG')
     return console
 
 
@@ -369,141 +399,67 @@ def write(*msg, type='LOG'):
     _f[type](msg)
 
 
-def log(*msg, type='LOG'):
+def _create_msg(msg, log_lvl, type: str, color):
     console = get_console(True)
     if console is None:
-        print(msg)
+        print(sysmsg)
         return
-    if console.log_level > 2:
+    if console.log_level > log_lvl:
         return
 
     msg = ' '.join([m.__repr__() if not isinstance(m, str) else m for m in msg])
     msg += '\n'
-    sys.__stdout__.write(f'{msg}')
+    sysmsg = f'{color}{type}{ansicol.END}: {msg}'
     show_time = True
+    sys.__stdout__.write(f'{sysmsg}')
     for msg in str(msg).split('\n'):
         if msg:
-            msg = msg.replace('  ', '    ')
-            console.add_message(f'{msg}', type, time=show_time)
+            msg.replace('  ', '    ')
+            console.add_message(f'{msg}', type.upper(), time=show_time)
             show_time = False
+            if console.log_file is not None:
+                with open(console.log_file, 'a') as f:
+                    date = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+                    f.write(f'[{date}][{type}]\t{msg}\n')
+
+
+def log(*msg, type='LOG'):
+    """Write to the console in a generic fashion.
+    
+    If `ConsoleLayout.log_directory` is defined, the message will be added to the log file.
+
+    Args:
+        type (str, optional): Message type of ['LOG', 'SUCCESS', 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']. Defaults to 'LOG'.
+    """
+    _create_msg(msg, 0, type, '')
 
 
 def success(*msg):
-    console = get_console(True)
-    if console is None:
-        print(sysmsg)
-        return
-    if console.log_level > 0:
-        return
-
-    msg = ' '.join([m.__repr__() if not isinstance(m, str) else m for m in msg])
-    msg += '\n'
-    sysmsg = f'{ansicol.GREEN}Success{ansicol.END}: {msg}'
-    show_time = True
-    sys.__stdout__.write(f'{sysmsg}')
-    for msg in str(msg).split('\n'):
-        if msg:
-            msg.replace('  ', '    ')
-            console.add_message(f'{msg}', 'SUCCESS', time=show_time)
-            show_time = False
+    """Write to the console with green colors if the `ConsoleLayout.log_level` is 0.
+    
+    If `ConsoleLayout.log_directory` is defined, the message will be added to the log file.
+    """
+    _create_msg(msg, 0, 'Success', ansicol.GREEN)
 
 
 def debug(*msg):
-    console = get_console(True)
-    if console is None:
-        print(sysmsg)
-        return
-    if console.log_level > 1:
-        return
-
-    msg = ' '.join([m.__repr__() if not isinstance(m, str) else m for m in msg])
-    msg += '\n'
-    sysmsg = f'{ansicol.BYELLOW}Debug{ansicol.END}: {msg}'
-    show_time = True
-    sys.__stdout__.write(f'{sysmsg}')
-    for msg in str(msg).split('\n'):
-        if msg:
-            msg.replace('  ', '    ')
-            console.add_message(f'{msg}', 'DEBUG', time=show_time)
-            show_time = False
+    _create_msg(msg, 1, 'Debug', ansicol.BYELLOW)
 
 
 def info(*msg):
-    console = get_console(True)
-    if console is None:
-        print(sysmsg)
-        return
-    if console.log_level > 2:
-        return
-
-    msg = ' '.join([m.__repr__() if not isinstance(m, str) else m for m in msg])
-    msg += '\n'
-    sysmsg = f'{ansicol.BBLUE}Info{ansicol.END}: {msg}'
-    show_time = True
-    sys.__stdout__.write(f'{sysmsg}')
-    for msg in str(msg).split('\n'):
-        if msg:
-            msg.replace('  ', '    ')
-            console.add_message(f'{msg}', 'INFO', time=show_time)
-            show_time = False
+    _create_msg(msg, 2, 'Info', ansicol.BBLUE)
 
 
 def warning(*msg):
-    console = get_console(True)
-    if console is None:
-        print(sysmsg)
-        return
-    if console.log_level > 3:
-        return
-
-    msg = ' '.join([m.__repr__() if not isinstance(m, str) else m for m in msg])
-    msg += '\n'
-    sysmsg = f'{ansicol.YELLOW}Warning{ansicol.END}: {msg}'
-    show_time = True
-    sys.__stdout__.write(f'{sysmsg}')
-    for msg in str(msg).split('\n'):
-        if msg:
-            msg.replace('  ', '    ')
-            console.add_message(f'{msg}', 'WARNING', time=show_time)
-            show_time = False
+    _create_msg(msg, 3, 'Warning', ansicol.YELLOW)
 
 
 def error(*msg):
-    console = get_console(True)
-    if console is None:
-        print(sysmsg)
-        return
-    if console.log_level > 4:
-        return
-
-    msg = ' '.join([m.__repr__() if not isinstance(m, str) else m for m in msg])
-    msg += '\n'
-    sysmsg = f'{ansicol.RED}Error{ansicol.END}: {msg}'
-    show_time = True
-    sys.__stdout__.write(f'{sysmsg}')
-    for msg in str(msg).split('\n'):
-        if msg:
-            msg.replace('  ', '    ')
-            console.add_message(f'{msg}', 'ERROR', time=show_time)
-            show_time = False
+    _create_msg(msg, 4, 'Error', ansicol.RED)
 
 
 def critical(*msg):
-    console = get_console(True)
-    if console is None:
-        print(sysmsg)
-        return
-
-    msg = ' '.join([m.__repr__() if not isinstance(m, str) else m for m in msg])
-    msg += '\n'
-    sysmsg = f'{ansicol.RED}CRITICAL{ansicol.END}: {msg}'
-    show_time = True
-    sys.__stdout__.write(f'{sysmsg}')
-    for msg in str(msg).split('\n'):
-        if msg:
-            msg.replace('  ', '    ')
-            console.add_message(f'{msg}', 'CRITICAL', time=show_time)
-            show_time = False
+    _create_msg(msg, 5, 'Critical', ansicol.RED)
 
 
 nodeprefs = bpy.context.preferences.addons.get('bge_netlogic', None)

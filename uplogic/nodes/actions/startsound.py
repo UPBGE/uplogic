@@ -83,7 +83,7 @@ class StartSoundNode(ULActionNode):
 
     def start_2D(self, volume, pitch):
         self._handle = Sound2D(
-            file=self.soundfile,
+            file=self.get_input(self.soundfile),
             volume=volume,
             pitch=pitch,
             loop_count=self.get_input(self.loop_count),
@@ -97,7 +97,7 @@ class StartSoundNode(ULActionNode):
         start = self.get_input(self.start_time)
         end = self.get_input(self.end_time)
         self._handle = Sample2D(
-            file=self.soundfile,
+            file=self.get_input(self.soundfile),
             sample=(start, end),
             volume=volume,
             pitch=pitch,
@@ -111,7 +111,7 @@ class StartSoundNode(ULActionNode):
     def start_3D(self, volume, pitch):
         self._handle = Sound3D(
             speaker=self.get_input(self.speaker),
-            file=self.soundfile,
+            file=self.get_input(self.soundfile),
             occlusion=self.get_input(self.occlusion),
             transition_speed=self.get_input(self.transition),
             cutoff_frequency=self.get_input(self.cutoff),
@@ -133,7 +133,7 @@ class StartSoundNode(ULActionNode):
         end = self.get_input(self.end_time)
         self._handle = Sample3D(
             speaker=self.get_input(self.speaker),
-            file=self.soundfile,
+            file=self.get_input(self.soundfile),
             sample=(start, end),
             occlusion=self.get_input(self.occlusion),
             transition_speed=self.get_input(self.transition),
