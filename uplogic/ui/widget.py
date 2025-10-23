@@ -5,6 +5,7 @@ import math
 from mathutils import Vector
 import bpy
 from bge import render
+import uuid
 
 try:
     from uplogic.utils.math import rotate2d
@@ -51,28 +52,24 @@ class Widget():
     '''
 
     vertex_shader = '''
-    uniform mat4 ModelViewProjectionMatrix;
-    in vec3 pos;
-
-    void main()
-    {
-        gl_Position = ModelViewProjectionMatrix * vec4(pos.xy, 0.0, 1.0f);
-    }
-    '''
+void main()
+{
+    pos = position;
+    gl_Position = ModelViewProjectionMatrix * vec4(pos.xy, 0.0, 1.0f);
+}
+'''
 
     fragment_shader = '''
-    uniform vec4 color;
-    out vec4 fragColor;
-
-    void main()
-    {
-        fragColor = color;
-    }
-    '''
+void main()
+{
+    fragColor = color;
+}
+'''
 
     _is_canvas = False
 
     def __init__(self, pos=(0, 0), size=(0, 0), bg_color=(0, 0, 0, 0), relative={}, halign='left', valign='bottom', angle=0, show=True):
+        self.id = uuid.uuid4()
         self._vertices = None  # (Vector((0, 0)), Vector((0, 0)), Vector((0, 0)), Vector((0, 0)))
         self.halign = halign
         self.valign = valign
@@ -589,13 +586,35 @@ class Widget():
         indices = (
             (0, 1, 2), (2, 3, 0)
         )
-        if bpy.app.version[0] < 4:
-            self._shader = gpu.shader.from_builtin('2D_UNIFORM_COLOR')
-        else:
-            self._shader = gpu.types.GPUShader(self.vertex_shader, self.fragment_shader)
+        self._shader = self._get_shader()
+
         self._batch = batch_for_shader(self._shader, 'TRIS', {"pos": vertices}, indices=indices)
         self._batch_line = batch_for_shader(self._shader, 'LINE_STRIP', {"pos": vertices})
         self._batch_points = batch_for_shader(self._shader, 'POINTS', {"pos": vertices})
+
+    def _get_shader(self):
+        if bpy.app.version[0] < 4:
+            self._shader = gpu.shader.from_builtin('2D_UNIFORM_COLOR')
+        elif bpy.app.version[0] < 5:
+            self._shader = gpu.types.GPUShader(self.vertex_shader, self.fragment_shader)
+        else:
+            vert_out = gpu.types.GPUStageInterfaceInfo(f'widget_{self.id}')
+            vert_out.smooth('VEC3', 'pos')
+            shader_info = gpu.types.GPUShaderCreateInfo()
+            shader_info.push_constant('MAT4', 'ModelViewProjectionMatrix')
+            shader_info.vertex_in(0, 'VEC3', 'pos')
+            shader_info.vertex_out(vert_out)
+            shader_info.fragment_out(0, 'VEC4', 'fragColor')
+            shader_info.vertex_source(self.vertex_shader)
+            shader_info.fragment_source(self.fragment_shader)
+
+            self._shader = gpu.shader.create_from_info(shader_info)
+
+            matrix = bpy.context.region_data.perspective_matrix * bpy.context.region_data.view_matrix.inverted()
+            self._shader.uniform_float("ModelViewProjectionMatrix")
+
+            del vert_out
+            del shader_info
 
     def _setup_draw(self):
         if self._rebuild:
