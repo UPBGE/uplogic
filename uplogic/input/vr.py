@@ -25,7 +25,7 @@ class VRController():
     This wrapper provides `position`, `position_aim`, `orientation`,
     `orientation_aim`, `trigger` and `thumbstick` attributes.
 
-    :param `idx`: Controller index; 0 for left, 1 for right controller.
+    :param idx: Controller index; 0 for left, 1 for right controller.
     """
 
     _deprecated = False

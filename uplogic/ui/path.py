@@ -8,12 +8,12 @@ import gpu
 class Path(Widget):
     '''Widget for displaying a path.
 
-    :param `pos`: Initial position of this widget in either pixels or factor.
-    :param `points`: List of points in screen coordinates (0-1).
-    :param `relative`: Whether to use pixels or factor for size or pos; example: `{'pos': True, 'points': True}`.
-    :param `line_width`: Thickness of the line.
-    :param `line_color`: Color to draw the path with.
-    :param `angle`: Rotation in degrees of this widget around first point defined by the alignment.
+    :param pos: Initial position of this widget in either pixels or factor.
+    :param points: List of points in screen coordinates (0-1).
+    :param relative: Whether to use pixels or factor for size or pos; example: `{'pos': True, 'points': True}`.
+    :param line_width: Thickness of the line.
+    :param line_color: Color to draw the path with.
+    :param angle: Rotation in degrees of this widget around first point defined by the alignment.
     '''
 
     def __init__(

@@ -16,10 +16,10 @@ class OSC_Client:
         - (`client_address`, `address`, `*osc_args`)
         - (`client_address`, `address`, `args`, `*osc_args`)
         
-        :param `address`: address identifier (example: `"/update"`).
-        :param `callback`: Callback function that will be called as the handler for the given address.
-        :param `args`: Fixed arguements that will be passed to the callback function.
-        :param `needs_reply_address`: Whether the IP address from which the message originated from shall be passed as
+        :param address: address identifier (example: `"/update"`).
+        :param callback: Callback function that will be called as the handler for the given address.
+        :param args: Fixed arguements that will be passed to the callback function.
+        :param needs_reply_address: Whether the IP address from which the message originated from shall be passed as
         an argument to the handler callback identifier.
         """
         return self.client.dispatcher.map(address, callback, *args, needs_reply_address=needs_reply_address)

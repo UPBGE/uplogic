@@ -9,7 +9,7 @@ class FileWrapper(dict):
     """Wrapper to allow easy access to files. The wrapper can be saved as a variable to modify and save back the file.\n
     Supports `.ini` and `.json` file formats.
 
-    :param `filepath`: Full path to the file.
+    :param filepath: Full path to the file.
     """
 
     def __init__(self, filepath):
@@ -79,7 +79,7 @@ def load_file(filepath) -> FileWrapper:
     """Read a file and keep it stored for later use.\n
     Supports `.ini` and `.json` file formats.
 
-    :param `filepath`: Full path to the file.
+    :param filepath: Full path to the file.
     """
     if filepath:
         return FileWrapper(filepath)
@@ -91,7 +91,7 @@ def read_file(filepath) -> FileWrapper:
     """Read a file and keep it stored for later use.\n
     Supports `.ini` and `.json` file formats.
 
-    :param `filepath`: Full path to the file.
+    :param filepath: Full path to the file.
     """
     if filepath:
         return FileWrapper(filepath)
@@ -103,8 +103,8 @@ def write_file(filepath, data) -> None:
     """Write data in form of `dict` back into a file.\n
     Supports `.ini` and `.json` file formats.
 
-    :param `filepath`: Full path to the file, including file ending.
-    :param `data`: `dict` to save back into the file.
+    :param filepath: Full path to the file, including file ending.
+    :param data: `dict` to save back into the file.
     """
     file = FileWrapper(filepath)
     file.data = data
@@ -115,6 +115,6 @@ def read_file(filepath) -> dict:
     """Read data in form of `dict` from a file.\n
     Supports `.ini` and `.json` file formats.
 
-    :param `filepath`: Full path to the file.
+    :param filepath: Full path to the file.
     """
     return FileWrapper(filepath).data

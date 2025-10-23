@@ -144,10 +144,10 @@ def gamepad_trigger(
 ) -> float:
     """Retrieve gamepad trigger values.
 
-    :param `trigger`: Whether to use the left or right trigger;
+    :param trigger: Whether to use the left or right trigger;
     `str` in [`'LT'`, `'RT'`].
-    :param `idx`: index of the gamepad.
-    :param `threshold`: Only detect values higher than the threshold.
+    :param idx: index of the gamepad.
+    :param threshold: Only detect values higher than the threshold.
 
     :returns: Intensity of the selected trigger.
     """
@@ -248,7 +248,9 @@ def gamepad_up(
 def gamepad_vibrate(idx: int = 0, strength: tuple = (.5, .5), time: float = 1.0):
     """Start the vibrators of the gamepad if available.
 
-    :param `idx`: 
+    :param idx: gamepad index (default = 0).
+    :param strength: Intensity of vibration as tuple(`left`, `right`).
+    :param time: Duration of vibration.
     """
     joystick = logic.joysticks[idx]
     if not joystick or not joystick.hasVibration:
@@ -265,8 +267,8 @@ class Gamepad():
     gamepad to use, the layout determines whether to use XBox or Sony button
     naming.
     
-    :param `idx`: Which gamepad to use.
-    :param `layout`: Layout determining button names; `str` in [`'XBOX'`,
+    :param idx: Which gamepad to use.
+    :param layout: Layout determining button names; `str` in [`'XBOX'`,
     `'SONY'`].
     """
 
@@ -322,20 +324,20 @@ class GamepadLook():
     This component can be activated/deactivated at any time to keep performance
     up.
     
-    :param `obj`: Main object to rotate around the object's Z axis.
-    :param `head`: Head object to rotate around the object's X/Y axis.
-    :param `sensitivity`: Translation factor of mouse movement to rotation.
-    :param `use_cap_x`: Whether to use capping on the mouse X movement (Z axis
+    :param obj: Main object to rotate around the object's Z axis.
+    :param head: Head object to rotate around the object's X/Y axis.
+    :param sensitivity: Translation factor of mouse movement to rotation.
+    :param use_cap_x: Whether to use capping on the mouse X movement (Z axis
     rotation).
-    :param `cap_x`: Minimum and Maximum amount of rotation on the Z axis.
-    :param `use_cap_y`: Whether to use capping on the mouse Y movement (X/Y axis
+    :param cap_x: Minimum and Maximum amount of rotation on the Z axis.
+    :param use_cap_y: Whether to use capping on the mouse Y movement (X/Y axis
     rotation).
-    :param `cap_y`: Minimum and Maximum amount of rotation on the X/Y axis.
-    :param `invert`: Whether to use inverted values for mous X/Y movement.
-    :param `smoothing`: Amount of movement smoothing.
-    :param `local`: Whether to use local transform for the body object.
-    :param `front`: Front axis (traditionally in blender, Y is front).
-    :param `active`: Whether to start this component in active or inactive mode
+    :param cap_y: Minimum and Maximum amount of rotation on the X/Y axis.
+    :param invert: Whether to use inverted values for mous X/Y movement.
+    :param smoothing: Amount of movement smoothing.
+    :param local: Whether to use local transform for the body object.
+    :param front: Front axis (traditionally in blender, Y is front).
+    :param active: Whether to start this component in active or inactive mode
     (can be changed later).
     """
     _deprecated = False

@@ -131,7 +131,6 @@ class Image(Widget):
         show=True
     ):
         self._texture = None
-        # self._image = None
         self.use_aspect_ratio = use_aspect_ratio
         self._uv: _UV[_UV_Point] = _UV((_UV_Point((0.001, .999)), _UV_Point((0.001, .999)), self))
         self._opacity = 1

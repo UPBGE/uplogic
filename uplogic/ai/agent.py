@@ -64,14 +64,13 @@ class Agent(NavContainer):
                     normal = dat.direction.cross(Vector((0, 0, 1))).normalized()
                     normal1 = next_direction.cross(Vector((0, 0, 1))).normalized()
                     angle = dat.direction.to_2d().angle_signed(n.to_2d())
-                    dir = 1 if angle > 0 else -1
+                    direction = 1 if angle > 0 else -1
 
-                    handle_1 = dat.obj.worldPosition + normal * rad * dir
-                    handle_2 = dat.obj.worldPosition + normal1 * rad * dir
+                    handle_1 = dat.obj.worldPosition + normal * rad * direction
+                    handle_2 = dat.obj.worldPosition + normal1 * rad * direction
                     dist_to_next_1 = (handle_1 - pathpoints[0]).length
                     dist_to_next_2 = (handle_2 - pathpoints[0]).length
 
-                    # normal = dat.direction.cross(Vector((0, 0, 1))).normalized()
                     while (pathpoints[0] - self.game_object.worldPosition).length < (self.game_object.worldPosition - handle_1).length:
                         self.pop()
                     pathpoints.insert(0, handle_1)

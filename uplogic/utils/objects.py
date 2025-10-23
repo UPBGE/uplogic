@@ -79,11 +79,11 @@ def rotate_to(
 ):
     """Rotate an object around a local axis towards a point
     
-    :param `object`:
-    :param `target`:
-    :param `rotation_axis`:
-    :param `front_axis`:
-    :param `factor`:
+    :param object:
+    :param target:
+    :param rotation_axis:
+    :param front_axis:
+    :param factor:
     """
     front = front_axis
     if front > 2:
@@ -267,13 +267,13 @@ def create_curve(
 ) -> KX_GameObject:
     """Create a `KX_GameObject` containing a `bpy.types.Curve` object.
 
-    :param `name`: Name of the new `KX_GameObject`.
-    :param `bevel_depth`: Define the "thickness" of the curve. This will add
+    :param name: Name of the new `KX_GameObject`.
+    :param bevel_depth: Define the "thickness" of the curve. This will add
     geometry along the spline.
-    :param `dimensions`: Set the coordinate space in which to calculate the
+    :param dimensions: Set the coordinate space in which to calculate the
     curve.
-    :param `material`: The material to use for bevel geometry.
-    :param `collection`: The collection to which to add the curve. Leave at
+    :param material: The material to use for bevel geometry.
+    :param collection: The collection to which to add the curve. Leave at
     `None` to use scene collection.
     """
     bcurve = bpy.data.curves.new(name, 'CURVE')
@@ -303,8 +303,8 @@ def set_curve_points(
 ) -> None:
     """Set the curve points of a `KX_GameObject` containing a `bpy.types.Curve` object.
 
-    :param `curve`: `KX_GameObject`
-    :param `points`: A list of points to use for the curve.
+    :param curve: `KX_GameObject`
+    :param points: A list of points to use for the curve.
     """
     bcurve = curve.blenderObject.data
     for spline in bcurve.splines:
@@ -474,13 +474,13 @@ def evaluate_curve(curve: KX_GameObject, factor: float = .5):
 class Curve(GameObject):
     """Wrapper class for creating and handling curves more easily.
 
-    :param `name`: Name of this curve object.
-    :param `bevel_depth`: Define the "thickness" of the curve. This will add
+    :param name: Name of this curve object.
+    :param bevel_depth: Define the "thickness" of the curve. This will add
     geometry along the spline.
-    :param `dimensions`: Set the coordinate space in which to calculate the
+    :param dimensions: Set the coordinate space in which to calculate the
     curve.
-    :param `material`: The material to use for bevel geometry.
-    :param `collection`: The collection to which to add the curve. Leave at
+    :param material: The material to use for bevel geometry.
+    :param collection: The collection to which to add the curve. Leave at
     `None` to use scene collection.
     """
 

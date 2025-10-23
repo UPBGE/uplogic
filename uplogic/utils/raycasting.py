@@ -72,19 +72,19 @@ def raycast(
 ) -> RayCastData[GameObject, Vector, Vector, Vector, KX_PolyProxy, Vector]:
     """Raycast from any point to any target
 
-    :param `caster`: casting object, this object will be ignored by the ray.
-    :param `origin`: origin point; any vector or list.
-    :param `dest`: target point; any vector or list.
-    :param `distance`: distance the ray will be cast
+    :param caster: casting object, this object will be ignored by the ray.
+    :param origin: origin point; any vector or list.
+    :param dest: target point; any vector or list.
+    :param distance: distance the ray will be cast
     (0 means the ray will only be cast to target).
-    :param `prop`: look only for objects with this property.
-    :param `material`: look only for objects with this material applied.
-    :param `exclude`: [DEPRECATED] invert the selection for `prop` and `material`.
-    :param `xray`: look for objects behind others.
-    :param `local`: add the target vector to the origin.
-    :param `mask`: Collision Mask for this ray.
-    :param `face_data`: Return additional information about the target polygon.
-    :param `visualize`: Show the raycast.
+    :param prop: look only for objects with this property.
+    :param material: look only for objects with this material applied.
+    :param exclude: [DEPRECATED] invert the selection for `prop` and `material`.
+    :param xray: look for objects behind others.
+    :param local: add the target vector to the origin.
+    :param mask: Collision Mask for this ray.
+    :param face_data: Return additional information about the target polygon.
+    :param visualize: Show the raycast.
 
     :returns: (`obj`, `point`, `normal`, `direction`, `face`, `uv`)
     """
@@ -192,18 +192,18 @@ def raycast_face(
     """[DEPRECATED]\n
     Raycast from any point to any target. Returns additional face data.
 
-    :param `caster`: casting object, this object will be ignored by the ray.
-    :param `origin`: origin point; any vector or list.
-    :param `dest`: target point; any vector or list.
-    :param `distance`: distance the ray will be cast
+    :param caster: casting object, this object will be ignored by the ray.
+    :param origin: origin point; any vector or list.
+    :param dest: target point; any vector or list.
+    :param distance: distance the ray will be cast
     (0 means the ray will only be cast to target).
-    :param `prop`: look only for objects with this property.
-    :param `material`: look only for objects with this material applied.
-    :param `exclude`: invert the selection for `prop` and `material`.
-    :param `xray`: look for objects behind others.
-    :param `local`: add the target vector to the origin.
-    :param `mask`: Collision Mask for this ray.
-    :param `visualize`: show the raycast.
+    :param prop: look only for objects with this property.
+    :param material: look only for objects with this material applied.
+    :param exclude: invert the selection for `prop` and `material`.
+    :param xray: look for objects behind others.
+    :param local: add the target vector to the origin.
+    :param mask: Collision Mask for this ray.
+    :param visualize: show the raycast.
 
     :returns: (`obj`, `point`, `normal`, `direction`, `face`, `uv`)
     """
@@ -244,17 +244,20 @@ def raycast_projectile(
 ) -> RayCastDataProjectile[GameObject, Vector, Vector, Vector, KX_PolyProxy, Vector, list]:
     """Raycast along the predicted parabola of a projectile.
 
-    :param `caster`: casting object, this object will be ignored by the ray.
-    :param `origin`: origin point; any vector or list.
-    :param `aim`: target point; the parabola will start towards this point.
-    :param `power`: "speed" of the projectile; a higher values mean further throws
-    :param `distance`: total distance the ray will be cast
-    :param `resolution`: detail quality of the parabola; higher values mean less detail
-    :param `prop`: look only for objects with this property.
-    :param `xray`: look for objects behind others.
-    :param `local`: add the target vector to the origin.
-    :param `mask`: Collision Mask for this ray.
-    :param `visualize`: show the raycast.
+    :param caster: casting object, this object will be ignored by the ray.
+    :param origin: origin point; any vector or list.
+    :param aim: target point; the parabola will start towards this point.
+    :param power: "speed" of the projectile; a higher values mean further throws
+    :param distance: total distance the ray will be cast
+    :param resolution: detail quality of the parabola; higher values mean less detail
+    :param prop: look only for objects with this property.
+    :param material: look only for objects with this material.
+    :param xray: look for objects behind others.
+    :param local: add the target vector to the origin.
+    :param mask: Collision Mask for this ray.
+    :param gravity: Define custom gravity. If left at `None`, scene gravity is used.
+    :param face_data: Include face data in the returned object. Comes at a slight extra cost.
+    :param visualize: show the raycast.
 
     :returns: (`obj`, `point`, `normal`, `points`)
     """
@@ -291,13 +294,6 @@ def raycast_projectile(
             face_data=face_data,
             visualize=False
         )
-        # obj, point, normal = caster.rayCast(
-        #     start,
-        #     target,
-        #     prop=prop,
-        #     xray=xray,
-        #     mask=mask
-        # )
         total_dist += (target-start).length
         if not data.obj:
             points.append(target)
@@ -339,11 +335,11 @@ def raycast_camera(
 
     Raycast from any point to any target. Returns additional face data.
 
-    :param `distance`: distance the ray will be cast
-    :param `prop`: look only for objects with this property.
-    :param `xray`: look for objects behind others.
-    :param `aim`: X and Y coordinates of the screen from 0-1
-    :param `mask`: Collision Mask for this ray.
+    :param distance: distance the ray will be cast
+    :param prop: look only for objects with this property.
+    :param xray: look for objects behind others.
+    :param aim: X and Y coordinates of the screen from 0-1
+    :param mask: Collision Mask for this ray.
 
     :returns: (`obj`, `point`, `normal`)
     """
@@ -379,14 +375,14 @@ def raycast_screen(
 ) -> RayCastCameraData[GameObject, Vector, Vector, Vector, KX_PolyProxy, Vector]:
     """Raycast from any point to any target. Returns additional face data.
 
-    :param `caster`: Caster object, this object will be ignored by the raycast itself
-    :param `aim`: Target screen coordinates
-    :param `distance`: look for objects behind others.
-    :param `prop`: Only look for objects that have this property attached
-    :param `material`: Only look for objects that have this material attached
-    :param `xray`: Ignore objects that don't have either material or property attached
-    :param `mask`: Collision Mask for this ray.
-    :param `face_data`: Add `KX_Polygon` and `Vector` of hitpoint UV coordinates to result.
+    :param caster: Caster object, this object will be ignored by the raycast itself
+    :param aim: Target screen coordinates
+    :param distance: look for objects behind others.
+    :param prop: Only look for objects that have this property attached
+    :param material: Only look for objects that have this material attached
+    :param xray: Ignore objects that don't have either material or property attached
+    :param mask: Collision Mask for this ray.
+    :param face_data: Add `KX_Polygon` and `Vector` of hitpoint UV coordinates to result.
 
     :returns: (`obj`, `point`, `normal`, `direction`, `polygon`, `uv`)
     """
@@ -426,12 +422,12 @@ def raycast_mouse(
 
     Raycast from the active camera to world cursor coordinates.
 
-    :param `distance`: distance the ray will be cast
-    :param `prop`: look only for objects with this property.
-    :param `material`: look only for objects with this material applied.
-    :param `exclude`: invert the selection for `prop` and `material`.
-    :param `xray`: look for objects behind others.
-    :param `mask`: Collision Mask for this ray.
+    :param distance: distance the ray will be cast
+    :param prop: look only for objects with this property.
+    :param material: look only for objects with this material applied.
+    :param exclude: invert the selection for `prop` and `material`.
+    :param xray: look for objects behind others.
+    :param mask: Collision Mask for this ray.
 
     :returns: (`obj`, `point`, `normal`, `direction`, `None`, `None`)
     """

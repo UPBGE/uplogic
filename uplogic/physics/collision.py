@@ -7,11 +7,11 @@ from ..console import error
 class Collision():
     """Callback handler for game object collisions.
 
-    :param `obj`: Object whose collision detection will be monitored.
-    :param `callback`: Callback to be called when collision occurs. Must have arguments `(obj, point, normal)`.
-    :param `prop`: Only look for objects that have this property.
-    :param `material`: Only look for objects that have this material applied.
-    :param `tap`: Only validate the first frame of the collision.
+    :param obj: Object whose collision detection will be monitored.
+    :param callback: Callback to be called when collision occurs. Must have arguments `(obj, point, normal)`.
+    :param prop: Only look for objects that have this property.
+    :param material: Only look for objects that have this material applied.
+    :param tap: Only validate the first frame of the collision.
     """
 
     _deprecated = False
@@ -120,11 +120,11 @@ def on_collision(
 ) -> Collision:
     """Bind a callback to an object's collision detection.
 
-    :param `obj`: Object whose collision detection will be monitored.
-    :param `callback`: Callback to be called when collision occurs. Must have arguments `(obj, point, normal)`.
-    :param `prop`: Only look for objects that have this property.
-    :param `material`: Only look for objects that have this material applied.
-    :param `tap`: Only validate the first frame of the collision.
+    :param obj: Object whose collision detection will be monitored.
+    :param callback: Callback to be called when collision occurs. Must have arguments `(obj, point, normal)`.
+    :param prop: Only look for objects that have this property.
+    :param material: Only look for objects that have this material applied.
+    :param tap: Only validate the first frame of the collision.
     """
     if not isinstance(obj, GameObject):
         error("'on_collision()' Argument 0: Expected 'KX_GameObject' type!")

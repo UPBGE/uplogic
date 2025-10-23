@@ -28,10 +28,10 @@ class OSC_Server:
     def map(self, address: str, callback, *args: list, needs_reply_address: bool = False):
         """Map a callback to an address. Callback receives (`address`, `args`, `volume`)
         
-        :param `address`: address identifier (example: `"/update"`).
-        :param `callback`: Callback function that will be called as the handler for the given address.
-        :param `args`: Fixed arguements that will be passed to the callback function.
-        :param `needs_reply_address`: Whether the IP address from which the message originated from shall be passed as
+        :param address: address identifier (example: `"/update"`).
+        :param callback: Callback function that will be called as the handler for the given address.
+        :param args: Fixed arguements that will be passed to the callback function.
+        :param needs_reply_address: Whether the IP address from which the message originated from shall be passed as
         an argument to the handler callback identifier.
         """
         def _deferred_cb(*a):
@@ -46,6 +46,7 @@ class OSC_Server:
     def unmap(self, address, handler):
         try:
             self.dispatcher.unmap(address, handler)
+            self._mapped_callbacks.get(address, []).remove(handler)
         except ValueError as e:
             console.error(e)
 
@@ -53,6 +54,7 @@ class OSC_Server:
         for address in self._mapped_callbacks.keys():
             for handler in self._mapped_callbacks.get(address, []).copy():
                 self.unmap(address, handler)
+        self._mapped_callbacks.clear()
 
     def shutdown(self) -> None:
         console.debug(f'Shutting down OSC Server on {self.server.server_address[0]}:{self.server.server_address[1]}')

@@ -4,6 +4,7 @@ from gpu_extras.batch import batch_for_shader
 import math
 from mathutils import Vector
 import bpy
+from bge import render
 
 try:
     from uplogic.utils.math import rotate2d
@@ -17,6 +18,22 @@ except Exception:
         ))
 
 
+ALIGN_CENTER = 0
+ALIGN_LEFT = 1
+ALIGN_RIGHT = 2
+ALIGN_BOTTOM = 3
+ALIGN_TOP = 4
+
+
+ALIGNMENTS = {
+    'center': ALIGN_CENTER,
+    'left': ALIGN_LEFT,
+    'right': ALIGN_RIGHT,
+    'bottom': ALIGN_BOTTOM,
+    'top': ALIGN_TOP,
+}
+
+
 class Widget():
     '''The widget Base class. a Widget has all the basic logic about
     sizing and positioning, but has no visual representation.
@@ -24,13 +41,13 @@ class Widget():
     This class is intended to be used as a base for inheriting from
     for custom widgets.
 
-    :param `pos`: Initial position of this widget in either pixels or factor.
-    :param `size`: Initial size of this widget in either pixels or factor.
-    :param `bg_color`: Color to draw in the area of the widget.
-    :param `relative`: Whether to use pixels or factor for size or pos; example: `{'pos': True, 'size': True}`.
-    :param `halign`: Horizontal alignment of the widget, can be (`left`, `center`, `right`).
-    :param `valign`: Vertical alignment of the widget, can be (`bottom`, `center`, `top`).
-    :param `angle`: Rotation in degrees of this widget around the pivot defined by the alignment.
+    :param pos: Initial position of this widget in either pixels or factor.
+    :param size: Initial size of this widget in either pixels or factor.
+    :param bg_color: Color to draw in the area of the widget.
+    :param relative: Whether to use pixels or factor for size or pos; example: `{'pos': True, 'size': True}`.
+    :param halign: Horizontal alignment of the widget, can be (`left`, `center`, `right`).
+    :param valign: Vertical alignment of the widget, can be (`bottom`, `center`, `top`).
+    :param angle: Rotation in degrees of this widget around the pivot defined by the alignment.
     '''
 
     vertex_shader = '''
@@ -76,11 +93,37 @@ class Widget():
         self.copy_height = False
         self.copy_width = False
         self.opacity = 1.
-        self.z = 0
+        self._z = 0
         self._active = True
 
+    def move_up(self):
+        if self.parent is not None:
+            children = self.parent.children
+            idx = children.index(self)
+            if idx < len(children)-1:
+                children[idx], children[idx + 1] = children[idx + 1], children[idx]
+
+    def move_down(self):
+        if self.parent is not None:
+            children = self.parent.children
+            idx = children.index(self)
+            if idx > 0:
+                children[idx], children[idx - 1] = children[idx - 1], children[idx]
+
+    def move_to_top(self):
+        if self.parent is not None:
+            children = self.parent.children
+            children.remove(self)
+            children.append(self)
+
+    def move_to_bottom(self):
+        if self.parent is not None:
+            children = self.parent.children
+            children.remove(self)
+            children.insert(0, self)
+
     def register(self):
-        pass
+        raise NotImplementedError
 
     def toggle(self, *args):
         """Toggle the widget on/off."""
@@ -95,16 +138,32 @@ class Widget():
     def make_floating(self, pos=True, size=True, halign='center', valign='center'):
         """Quickly set the attributes of this widget to use relative data.
 
-        :param `pos`: Use relative position.
-        :param `size`: Use relative size.
-        :param `halign`: The horizontal alignment.
-        :param `valign`: The vertical alignment.
+        :param pos: Use relative position.
+        :param size: Use relative size.
+        :param halign: The horizontal alignment.
+        :param valign: The vertical alignment.
         """
         self.relative['pos'] = pos
         self.relative['size'] = size
         self.halign = halign
         self.valign = valign
         return self
+
+    @property
+    def halign(self):
+        return self._halign
+
+    @halign.setter
+    def halign(self, val):
+        self._halign = ALIGNMENTS.get(val, val)
+
+    @property
+    def valign(self):
+        return self._valign
+
+    @valign.setter
+    def valign(self, val):
+        self._valign = ALIGNMENTS.get(val, val)
 
     @property
     def active(self):
@@ -121,7 +180,7 @@ class Widget():
 
     @property
     def show(self):
-        """If `False`, this widget and all its children will not be rendered."""
+        """If `False`, this widget and its children will not be rendered."""
         pshow = self.parent.show if self.parent is not None else True
         return self._show and pshow
 
@@ -132,7 +191,7 @@ class Widget():
             if val:
                 self._rebuild = True
                 for child in self.children:
-                    child.pos = child.pos
+                    child.pos = child.pos  # noqa
 
     @property
     def _children_reversed(self):
@@ -185,7 +244,11 @@ class Widget():
         return widgets
 
     @property
-    def childrenRecursive(self) -> list:
+    def childrenRecursive(self) -> list:  # noqa; for bge consistency reasons
+        return self.children_recursive
+
+    @property
+    def children_recursive(self) -> list:
         """All children and children's children of this widget."""
         widgets = []
         for w in self.children:
@@ -223,10 +286,10 @@ class Widget():
         if self.use_clipping is None:
             self.use_clipping = val.use_clipping
         self._parent = val
-        self.pos = self.pos
-        self.size = self.size
+        self.pos = self.pos  # noqa
+        self.size = self.size  # noqa
         for c in self.children:
-            c.parent = c.parent
+            c.parent = c.parent  # noqa
         self.on_parent()
         self._build_shader()
 
@@ -261,7 +324,7 @@ class Widget():
         if self.parent and self.show:
             self._rebuild = True
         for child in self.children:
-            child.pos = child.pos
+            child.pos = child.pos  # noqa
 
     @property
     def x(self):
@@ -272,12 +335,6 @@ class Widget():
     def x(self, val):
         self._pos = [val, self.pos[1]]
         self._rebuild = True
-        # if not self.show:
-        #     return
-        # if self.parent and self.show:
-        #     self._rebuild = True
-        # for child in self.children:
-        #     child.pos = child.pos
 
     @property
     def y(self):
@@ -288,12 +345,6 @@ class Widget():
     def y(self, val):
         self._pos = [self._pos[0], val]
         self._rebuild = True
-        # if not self.show:
-        #     return
-        # if self.parent and self.show:
-        #     self._rebuild = True
-        # for child in self.children:
-        #     child.pos = child.pos
 
     @property
     def size(self):
@@ -310,8 +361,8 @@ class Widget():
         if self.parent and self.show:
             self._rebuild = True
         for child in self.children:
-            child.pos = child.pos
-            child.size = child.size
+            child.pos = child.pos  # noqa
+            child.size = child.size  # noqa
         self.on_size()
 
     def on_size(self):
@@ -325,8 +376,8 @@ class Widget():
     @width.setter
     def width(self, val):
         self.size = [val, self.size[1]]
-        # if self.parent and self.show:
-        #     self._rebuild = True
+        if self.parent and self.show:
+            self._rebuild = True
 
     @property
     def height(self):
@@ -336,8 +387,8 @@ class Widget():
     @height.setter
     def height(self, val):
         self.size = [self.size[0], val]
-        # if self.parent and self.show:
-        #     self._rebuild = True
+        if self.parent and self.show:
+            self._rebuild = True
 
     @property
     def size_pixel(self):
@@ -354,6 +405,14 @@ class Widget():
     @property
     def height_pixel(self):
         return self.size_pixel[1]
+
+    @property
+    def clip(self):
+        return self.use_clipping
+
+    @clip.setter
+    def clip(self, val):
+        self.use_clipping = val
 
     @property
     def use_clipping(self):
@@ -412,13 +471,13 @@ class Widget():
             pos = rotate2d(pos, self.parent.pivot - Vector(inherit_pos), self.parent._draw_angle)
         offset = [0, 0]
         dsize = self._draw_size
-        if self.halign == 'center':
+        if self.halign == ALIGN_CENTER:
             offset[0] += dsize[0] * .5
-        elif self.halign == 'right':
+        elif self.halign == ALIGN_RIGHT:
             offset[0] += dsize[0]
-        if self.valign == 'center':
+        if self.valign == ALIGN_CENTER:
             offset[1] += dsize[1] * .5
-        elif self.valign == 'top':
+        elif self.valign == ALIGN_TOP:
             offset[1] += dsize[1]
         pos = [pos[0] + inherit_pos[0] - offset[0], pos[1] + inherit_pos[1] - offset[1]]
         return pos
@@ -430,9 +489,10 @@ class Widget():
             return self.size
         if self.relative.get('size'):
             pdsize = self.parent._draw_size
-            x_size = self.size[0] * pdsize[0]
-            y_size = self.size[1] * pdsize[1]
-            size = [x_size, y_size]
+            size = [
+                math.floor(self.size[0] * pdsize[0]),
+                math.floor(self.size[1] * pdsize[1])
+            ]
         if self.copy_width:
             size[1] = size[0]
         elif self.copy_height:
@@ -452,8 +512,6 @@ class Widget():
         self._build_shader()
 
     def check_inside(self, x, y):
-        # if bpy.app.version[0] < 4:
-        from bge import render
         y = render.getWindowHeight() - y
         dpos = self.pos_pixel
         dsize = self.size_pixel
@@ -472,23 +530,23 @@ class Widget():
         valign = self.valign
         if self.parent is None:
             return Vector((0, 0))
-        if halign == 'center' and valign == 'center':
+        if halign is valign is ALIGN_CENTER:
             return x0.lerp(y1, .5)
-        elif halign == 'center' and valign == 'top':
+        elif halign is ALIGN_CENTER and valign is ALIGN_TOP:
             return y0.lerp(y1, .5)
-        elif halign == 'center' and valign == 'bottom':
+        elif halign == ALIGN_CENTER and valign == ALIGN_BOTTOM:
             return x0.lerp(x1, .5)
-        elif halign == 'left' and valign == 'bottom':
+        elif halign == ALIGN_LEFT and valign == ALIGN_BOTTOM:
             return x0
-        elif halign == 'left' and valign == 'center':
+        elif halign == ALIGN_LEFT and valign == ALIGN_CENTER:
             return x0.lerp(y0, .5)
-        elif halign == 'left' and valign == 'top':
+        elif halign == ALIGN_LEFT and valign == ALIGN_TOP:
             return y0
-        elif halign == 'right' and valign == 'bottom':
+        elif halign == ALIGN_RIGHT and valign == ALIGN_BOTTOM:
             return x1
-        elif halign == 'right' and valign == 'center':
+        elif halign == ALIGN_RIGHT and valign == ALIGN_CENTER:
             return x1.lerp(y1, .5)
-        elif halign == 'right' and valign == 'top':
+        elif halign == ALIGN_RIGHT and valign == ALIGN_TOP:
             return y1
         return x0
 
@@ -564,24 +622,26 @@ class Widget():
                 widget.draw()
 
     def evaluate(self):
-        pass
+        """Logic evaluation
+        """
+        ...
 
     def update(self):
         """Put your custom update logic here.
         """
-        pass
+        ...
 
     def add_widget(self, widget):
         '''Add a `Widget` to this widget as child.
 
-        :param `widget`: `Widget` to add.
+        :param widget `Widget` to add.
         '''
         if widget not in self.children:
             widget.parent = self
             self.children.append(widget)
             if self.canvas is not None:
                 self.canvas._set_z(-1)
-        self.children = sorted(self.children, key=lambda widget: widget.z, reverse=False)
+        self.children = sorted(self.children, key=lambda widget: widget._z, reverse=False)
         return widget
 
     def add_widgets(self, *widgets):
@@ -591,17 +651,17 @@ class Widget():
     def on_parent(self):
         ...
 
-    def _set_z(self, z):
-        z += 1
-        self.z = z
+    def _set_z(self, _z):
+        _z += 1
+        self._z = _z
         for c in self.children:
-            z = c._set_z(z)
-        return z
+            _z = c._set_z(_z)
+        return _z
 
     def remove_widget(self, widget):
         '''Remove a `Widget` from this widget.
 
-        :param `widget`: `Widget` to remove.
+        :param widget: `Widget` to remove.
         '''
         if widget in self.children:
             self.children.remove(widget)

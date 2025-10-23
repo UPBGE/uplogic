@@ -32,13 +32,13 @@ def create_constraint(
 ) -> GameConstraint:
     """Wrapper function for `bge.constraints.createConstraint()`. Creates a constraint
 
-    :param `obj`: Object the constraint will be applied to.
-    :param `target`: Target for the constraint.
-    :param `constraint_type`: Type of the constraint. One of `['point', 'hinge', 'angular', 'conetwist', 'generic6dof']`.
-    :param `pivot`: Point of application for the constraint.
-    :param `limit`: Limit movement of the object (Like a doorstop).
-    :param `linked_collision`: Enable/Disable collision between obj and target.
-    :param `local`: Use obj's local space.
+    :param obj: Object the constraint will be applied to.
+    :param target: Target for the constraint.
+    :param constraint_type: Type of the constraint. One of `['point', 'hinge', 'angular', 'conetwist', 'generic6dof']`.
+    :param pivot: Point of application for the constraint.
+    :param limit: Limit movement of the object (Like a doorstop).
+    :param linked_collision: Enable/Disable collision between obj and target.
+    :param local: Use obj's local space.
     """
     if not local:
         pivot[0] -= obj.worldPosition.x
@@ -61,7 +61,7 @@ def create_constraint(
 def remove_constraint(constraint: GameConstraint) -> None:
     """Wrapper function for `bge.constraints.removeConstraint()`. Creates a constraint
 
-    :param `constraint`: The constraint to remove.
+    :param constraint: The constraint to remove.
     """
     constraints.removeConstraint(constraint.getConstraintId())
 
@@ -135,17 +135,17 @@ class Spring():
     be pulled towards each other if the string is streched, optionally they will
     be pushed apart when the spring is being compacted.
 
-    :param `origin`: First connection point of the spring.
-    :param `target`: Second connection point of the spring.
-    :param `rigid_body_origin`: Object to be influenced by the spring (optional).
-    :param `rigid_body_target`: Object to be influenced by the spring (optional).
-    :param `stiffness`: Amount the spring will bounce back.
-    :param `max_force`: Maximum force the spring will use.
-    :param `use_push`: Push the objects apart when spring is compressed.
-    :param `use_breaking`: Remove the constraint when spring is pulled too much.
-    :param `break_threshold`: Amount of strain the spring will endure.
-    :param `curve`: Set a curve object to fit the spring.
-    :param `visualize`: Enable a visual representation of the spring.
+    :param origin: First connection point of the spring.
+    :param target: Second connection point of the spring.
+    :param rigid_body_origin: Object to be influenced by the spring (optional).
+    :param rigid_body_target: Object to be influenced by the spring (optional).
+    :param stiffness: Amount the spring will bounce back.
+    :param max_force: Maximum force the spring will use.
+    :param use_push: Push the objects apart when spring is compressed.
+    :param use_breaking: Remove the constraint when spring is pulled too much.
+    :param break_threshold: Amount of strain the spring will endure.
+    :param curve: Set a curve object to fit the spring.
+    :param visualize: Enable a visual representation of the spring.
     """
 
     _deprecated = False
