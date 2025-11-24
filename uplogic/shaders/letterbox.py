@@ -4,11 +4,11 @@ from .shader import Filter2D
 glsl = """
 uniform sampler2D bgl_RenderedTexture;
 
-in vec4 bgl_TexCoord;
+// in vec4 bgl_TexCoord;
 uniform float power;
 uniform float factor;
 
-out vec4 fragColor;
+// out vec4 fragColor;
 
 void main()
 {

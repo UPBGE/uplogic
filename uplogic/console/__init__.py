@@ -67,7 +67,7 @@ def disable():
 class Console(StringIO):
 
     def write(self, __s: str) -> int:
-        log(__s)
+        _print(__s)
 
 
 class ErrorConsole(StringIO):
@@ -107,7 +107,6 @@ def set_log_level(level: int = 2) -> None:
 
 def set_log_directory(path):
     get_console().log_directory = path
-    # ...
 
 
 class ConsoleLayout(Canvas):
@@ -364,7 +363,7 @@ class ConsoleLayout(Canvas):
             if child is self.input:
                 continue
             child.pos[1] = y
-            y += cheight * 1.8
+            y += cheight * 1.5
             if child.pos[1] > lheight - cheight:
                 self.layout.remove_widget(child)
             child.opacity = 1 - (i * (1/amount))
@@ -430,6 +429,27 @@ def _create_msg(msg, log_lvl, type: str, color):
                     f.write(f'[{date}][{type}]\t{msg}\n')
 
 
+def _print(msg):
+    console = get_console(True)
+    if console is None:
+        print(sysmsg)
+        return
+
+    msg = ''.join([m.__repr__() if not isinstance(m, str) else m for m in msg])
+    sysmsg = msg
+    show_time = True
+    sys.__stdout__.write(f'{sysmsg}')
+    for msg in str(msg).split('\n'):
+        if msg:
+            msg.replace('  ', '    ')
+            console.add_message(f'{msg}', 'LOG', time=show_time)
+            show_time = False
+            if console.log_file is not None:
+                with open(console.log_file, 'a') as f:
+                    date = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+                    f.write(f'[{date}]\t{msg}\n')
+
+
 def log(*msg, type='LOG'):
     """Write to the console in a generic fashion.
     
@@ -438,7 +458,7 @@ def log(*msg, type='LOG'):
     Args:
         type (str, optional): Message type of ['LOG', 'SUCCESS', 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']. Defaults to 'LOG'.
     """
-    _create_msg(msg, 0, type, '')
+    _create_msg(msg, 5, type, '')
 
 
 def success(*msg):

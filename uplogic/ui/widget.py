@@ -51,20 +51,38 @@ class Widget():
     :param angle: Rotation in degrees of this widget around the pivot defined by the alignment.
     '''
 
+    vertex_in: list[tuple[str, str]] = [
+        ('VEC3', "position")
+    ]
+    """Data for the vertex shader."""
+
+    interfaces: list[tuple[str, str]] = [
+        ('VEC3', "pos")
+    ]
+    """Interfaces are passed from the vertex shader to the fragment shader under the same name."""
+
+    constants: list[tuple[str, str]] = [
+        ('VEC4', "color")
+    ]
+    """Constant Data."""
+
+    samplers: list[tuple[str, str]] = []
+    """Constant Data."""
+
     vertex_shader = '''
-void main()
-{
-    pos = position;
-    gl_Position = ModelViewProjectionMatrix * vec4(pos.xy, 0.0, 1.0f);
-}
-'''
+        void main()
+        {
+            pos = position;
+            gl_Position = ModelViewProjectionMatrix * vec4(position, 1.0f);
+        }
+    '''
 
     fragment_shader = '''
-void main()
-{
-    fragColor = color;
-}
-'''
+        void main()
+        {
+            FragColor = color;
+        }
+    '''
 
     _is_canvas = False
 
@@ -588,33 +606,45 @@ void main()
         )
         self._shader = self._get_shader()
 
-        self._batch = batch_for_shader(self._shader, 'TRIS', {"pos": vertices}, indices=indices)
-        self._batch_line = batch_for_shader(self._shader, 'LINE_STRIP', {"pos": vertices})
-        self._batch_points = batch_for_shader(self._shader, 'POINTS', {"pos": vertices})
+        self._shader.uniform_float("color", self.bg_color)
+
+        self._batch = batch_for_shader(self._shader, 'TRIS', {"position": vertices}, indices=indices)
+        self._batch_line = batch_for_shader(self._shader, 'LINE_STRIP', {"position": vertices})
+        self._batch_points = batch_for_shader(self._shader, 'POINTS', {"position": vertices})
 
     def _get_shader(self):
-        if bpy.app.version[0] < 4:
-            self._shader = gpu.shader.from_builtin('2D_UNIFORM_COLOR')
-        elif bpy.app.version[0] < 5:
-            self._shader = gpu.types.GPUShader(self.vertex_shader, self.fragment_shader)
-        else:
-            vert_out = gpu.types.GPUStageInterfaceInfo(f'widget_{self.id}')
-            vert_out.smooth('VEC3', 'pos')
+        # if bpy.app.version[0] < 4:
+        #     return gpu.shader.from_builtin('2D_UNIFORM_COLOR')
+        # elif bpy.app.version[0] < 5:
+        #     return gpu.types.GPUShader(self.vertex_shader, self.fragment_shader)
+        if True:
             shader_info = gpu.types.GPUShaderCreateInfo()
-            shader_info.push_constant('MAT4', 'ModelViewProjectionMatrix')
-            shader_info.vertex_in(0, 'VEC3', 'pos')
-            shader_info.vertex_out(vert_out)
-            shader_info.fragment_out(0, 'VEC4', 'fragColor')
+
+            for i, vertex_in in enumerate(self.vertex_in):
+                shader_info.vertex_in(i, vertex_in[0], vertex_in[1])
+
+            for i, interface in enumerate(self.interfaces):
+                vert_out = gpu.types.GPUStageInterfaceInfo(f'{interface[1]}_interface')
+                vert_out.smooth(interface[0], interface[1])
+                shader_info.vertex_out(vert_out)
+
+            for constant in self.constants:
+                shader_info.push_constant(constant[0], constant[1])
+
+            for i, sampler in enumerate(self.samplers):
+                shader_info.sampler(i, sampler[0], sampler[1])
+
+            shader_info.push_constant('MAT4', "ModelViewProjectionMatrix")
+            shader_info.fragment_out(0, 'VEC4', "FragColor")
+
             shader_info.vertex_source(self.vertex_shader)
             shader_info.fragment_source(self.fragment_shader)
 
-            self._shader = gpu.shader.create_from_info(shader_info)
+            shader = gpu.shader.create_from_info(shader_info)
 
-            matrix = bpy.context.region_data.perspective_matrix * bpy.context.region_data.view_matrix.inverted()
-            self._shader.uniform_float("ModelViewProjectionMatrix")
-
-            del vert_out
-            del shader_info
+            matrix = gpu.matrix.get_projection_matrix()
+            shader.uniform_float("ModelViewProjectionMatrix", matrix)
+            return shader
 
     def _setup_draw(self):
         if self._rebuild:

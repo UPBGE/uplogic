@@ -40,6 +40,9 @@ class FileWrapper(dict):
         ending = self.filepath.split('.')[-1]
         self.formats[ending]['write']()
 
+    def save(self):
+        self.write()
+
     def _read_json(self):
         with open(self.filepath, 'r') as f:
             self.data = json.load(f)

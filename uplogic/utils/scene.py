@@ -134,9 +134,11 @@ class FileLoader():
             return
         # XXX: Remove when crashing!
         self.object.endObject()
-        bpy.data.materials.remove(self.temp_map)
-        bpy.data.meshes.remove(self.bmesh)
-        bpy.data.objects.remove(self.bobj)
+
+        # XXX: 5.1 need to remove all pointers before removing
+            # bpy.data.materials.remove(self.temp_map)
+            # bpy.data.meshes.remove(self.bmesh)
+            # bpy.data.objects.remove(self.bobj)
         self.finished = True
         self.on_finish()
 
@@ -234,11 +236,12 @@ class SceneLoader():
             schedule(self.scale_loading_bar)
             self.on_progress(self._status)
             return
-        # logic.getCurrentScene().pre_draw.remove(self.load_next)
-        self.object.endObject()
-        bpy.data.materials.remove(self.temp_map)
-        bpy.data.objects.remove(self.bobj)
-        bpy.data.meshes.remove(self.bmesh)
+
+        # XXX: 5.1 need to remove all pointers before removing
+            # self.object.endObject()
+            # bpy.data.materials.remove(self.temp_map)
+            # bpy.data.objects.remove(self.bobj)
+            # bpy.data.meshes.remove(self.bmesh)
         self.finished = True
         self.on_finish()
 

@@ -93,31 +93,43 @@ class _UV(list):
 
 class Image(Widget):
 
+    vertex_in = [
+        ('VEC2', 'texCoord'),
+        ('VEC2', 'position')
+    ]
+
+    interfaces = [
+        ('VEC2', "pos"),
+        ('VEC2', 'uv')
+    ]
+
+    constants = [
+        ('FLOAT', 'alpha')
+    ]
+
+    samplers = [
+        ('FLOAT_2D', 'image')
+    ]
+
     vertex_shader = """
-    in vec2 texCoord;
-    in vec2 pos;
-    out vec2 uv;
 
-    uniform mat4 ModelViewProjectionMatrix;
-
-    void main() {
+    void main()
+    {
         uv = texCoord;
+        pos = position;
         gl_Position = ModelViewProjectionMatrix * vec4(pos.xy, 0.0, 1.0);
     }
     """
 
     fragment_shader = """
-    in vec2 uv;
-    out vec4 fragColor;
 
-    uniform sampler2D image;
-    uniform float alpha = 1.0;
-
-    void main() {
+    void main()
+    {
         vec4 color = mix(vec4(0.0), texture(image, uv), alpha);
-        fragColor = pow(color, vec4(.5));
+        FragColor = pow(color, vec4(0.5));
     }
     """
+
     def __init__(
         self,
         pos=[0, 0],
@@ -134,8 +146,8 @@ class Image(Widget):
         self.use_aspect_ratio = use_aspect_ratio
         self._uv: _UV[_UV_Point] = _UV((_UV_Point((0.001, .999)), _UV_Point((0.001, .999)), self))
         self._opacity = 1
-        super().__init__(pos, size, relative=relative, halign=halign, valign=valign, angle=angle, show=show)
         self._load_image(texture)
+        super().__init__(pos, size, relative=relative, halign=halign, valign=valign, angle=angle, show=show)
 
     @property
     def uv(self):
@@ -242,15 +254,14 @@ class Image(Widget):
             x1, x0, y1, y0
         )
 
-        if bpy.app.version[0] < 4:
-            self._shader = gpu.shader.from_builtin('2D_IMAGE')
-        else:
-            self._shader = gpu.types.GPUShader(self.vertex_shader, self.fragment_shader)
+        self._shader = self._get_shader()
+
+
         uvs = self.uv
         self._batch = batch_for_shader(
             self._shader, 'TRI_STRIP',
             {
-                "pos": vertices,
+                "position": vertices,
                 "texCoord": (
                     (uvs.x_max, uvs.y_min),
                     (uvs.x_min, uvs.y_min),
@@ -259,48 +270,22 @@ class Image(Widget):
                 ),
             },
         )
-    
+        if bpy.app.version[0] >= 4:
+            self._shader.uniform_float("alpha", self.opacity)
+
     def draw(self):
         gpu.state.blend_set("ALPHA")
         self._setup_draw()
         if self.texture is None:
             super().draw()
             return
-        self._shader.bind()
-        if bpy.app.version[0] >= 4:
-            self._shader.uniform_float("alpha", self.opacity)
         self._shader.uniform_sampler("image", self.texture)
+        self._shader.bind()
         self._batch.draw(self._shader)
         super().draw()
 
 
 class Sprite(Image):
-
-    tex_vert_shader = """
-    in vec2 texCoord;
-    in vec2 pos;
-    out vec2 uv;
-
-    uniform mat4 ModelViewProjectionMatrix;
-
-    void main() {
-        uv = texCoord;
-        gl_Position = ModelViewProjectionMatrix * vec4(pos.xy, 0.0, 1.0);
-    }
-    """
-
-    tex_frag_shader = """
-    in vec2 uv;
-    out vec4 fragColor;
-
-    uniform sampler2D image;
-    uniform float alpha = 1.0;
-
-    void main() {
-        vec4 color = mix(vec4(0.0), texture(image, uv), alpha);
-        fragColor = pow(color, vec4(.5));
-    }
-    """
 
     def __init__(
         self,
@@ -316,10 +301,11 @@ class Sprite(Image):
         use_aspect_ratio=True,
         show=True
     ):
-        self._idx = idx
+        # self._idx = idx
         self.rows = rows
         self.cols = cols
         super().__init__(pos, size, relative, texture, halign=halign, valign=valign, use_aspect_ratio=use_aspect_ratio, show=show)
+        self.idx = idx
 
     @property
     def idx(self):
@@ -328,7 +314,19 @@ class Sprite(Image):
     @idx.setter
     def idx(self, val):
         self._idx = val
-        self._build_shader()
+        self._get_uv()
+
+    def _get_uv(self):
+        ...
+        idx = self.idx
+        col = idx % self.cols
+        col_end = col + 1
+        row = ceil((idx + 1) / self.cols) - 1
+        row_end = row + 1
+        self.uv.y_max = 1 - row * self._row_height
+        self.uv.y_min = 1 - row_end * self._row_height
+        self.uv.x_max = col_end * self._col_width
+        self.uv.x_min = col * self._col_width
 
     @property
     def aspect_ratio(self):
@@ -344,8 +342,8 @@ class Sprite(Image):
     def rows(self, val):
         if val < 1:
             return
-        self._rows = val
-        self._row_height = 1 / val
+        self._rows = int(val)
+        self._row_height = 1 / int(val)
 
     @property
     def cols(self):
@@ -355,59 +353,8 @@ class Sprite(Image):
     def cols(self, val):
         if val < 1:
             return
-        self._cols = val
-        self._col_width = 1 / val
-
-    def _build_shader(self):
-        pos = self._draw_pos
-        size = self._draw_size
-        x0 = Vector((pos[0], pos[1]))
-        x1 = Vector((pos[0] + size[0], pos[1]))
-        y1 = Vector((pos[0] + size[0], pos[1] + size[1]))
-        y0 = Vector((pos[0], pos[1] + size[1]))
-        pivot = self._get_pivot(x0, x1, y0, y1)
-
-        if self._draw_angle and self._vertices is not None:
-            x0 = rotate2d(x0, pivot, self._draw_angle)
-            x1 = rotate2d(x1, pivot, self._draw_angle)
-            y0 = rotate2d(y0, pivot, self._draw_angle)
-            y1 = rotate2d(y1, pivot, self._draw_angle)
-
-        vertices = self._vertices = (
-            x1,
-            x0,
-            y1,
-            y0
-        )
-
-        if bpy.app.version[0] < 4:
-            self._shader = gpu.shader.from_builtin('2D_IMAGE')
-        else:
-            self._shader = gpu.types.GPUShader(self.tex_vert_shader, self.tex_frag_shader)
-        if bpy.app.version[0] >= 4:
-            self._shader.uniform_float("alpha", self.opacity)
-        else:
-            self._shader.uniform_sampler("image", self.texture)
-
-        idx = self.idx
-        col = idx % self.cols
-        col_end = col + 1
-        row = ceil((idx + 1) / self.cols) - 1
-        row_end = row + 1
-        texcoord = (
-            (col_end * self._col_width, 1 - row_end * self._row_height),
-            (col * self._col_width, 1 - row_end * self._row_height),
-            (col_end * self._col_width, 1 - row * self._row_height),
-            (col * self._col_width, 1 - row * self._row_height)
-        )
-        self._batch = batch_for_shader(
-            self._shader, 'TRI_STRIP',
-            {
-                "pos": vertices,
-                "texCoord": texcoord
-            },
-        )
-
+        self._cols = int(val)
+        self._col_width = 1 / int(val)
 
 class Video(Image):
 

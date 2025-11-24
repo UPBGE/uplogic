@@ -146,6 +146,8 @@ class Label(Widget):
         return self
 
     def _wrap(self, parsize):
+        if self.dimensions[0] < parsize[0]:
+            return self.text
         offset = parsize[0] * self.pos[0] if self.relative.get('pos') else self.pos[0]
         max_width = int(parsize[0] - offset)
         text = ''

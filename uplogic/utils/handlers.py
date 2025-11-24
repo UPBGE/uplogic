@@ -82,7 +82,7 @@ class ImageHandler:
             return
         texture = bpy.data.images.get(val, None)
         if not texture:
-            texture = bpy.data.images.load(val)
+            texture = bpy.data.images.load(val, check_existing=True)
         self.image = texture
         self._texture = gpu.texture.from_image(texture)
         self.max_frame = self.image.frame_duration

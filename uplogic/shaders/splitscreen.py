@@ -1,7 +1,6 @@
-from .rendertoscreen import RenderToScreen
+# from .rendertoscreen import RenderToScreen
 from bge.types import KX_Camera
 from bge import render, logic
-from uplogic.ui import Canvas, Path
 from uplogic import console
 
 

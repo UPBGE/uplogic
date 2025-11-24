@@ -49,7 +49,7 @@ class Slider(RelativeLayout):
         if allow_bar_click:
             self.bar.on_hold = self._on_press
         self.knob = Button(size=(0, 0), bg_color=knob_color, click_color=knob_color, hover_color=knob_hover_color, valign='center', halign='center')
-        self.knob_size = knob_size
+        self.knob_size = [knob_size, knob_size] if isinstance(knob_size, float) else knob_size
         self.knob.on_hold = self._on_press
         self.add_widget(self.knob)
         self.steps = steps
