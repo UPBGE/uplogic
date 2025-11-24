@@ -75,7 +75,7 @@ class TweenValueNode(ULConditionNode):
         if not self.active and not self.on_demand:
             return
         duration = self.get_input(self.duration)
-        mapping = self.mapping.curve
+        mapping = self.mapping.automasking_cavity_curve
         if forward:
             self._direction = 1
             if duration > 0:

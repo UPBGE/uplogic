@@ -10,6 +10,6 @@ class CurveInterpolationNode(ULParameterNode):
 
     def get_result(self):
         val = self.get_input(self.value)
-        mapping = self.mapping.curve
+        mapping = self.mapping.automasking_cavity_curve
 
         return mapping.evaluate(mapping.curves[0], val)
