@@ -1,5 +1,6 @@
 from uplogic.nodes import ULActionNode
 from uplogic.utils.math import clamp
+from uplogic.utils.constants import PROP_TYPE_INVALID
 
 
 class ULModifyProperty(ULActionNode):
@@ -27,7 +28,9 @@ class ULModifyProperty(ULActionNode):
         property_name = self.get_input(self.property_name)
         property_value = self.get_input(self.property_value)
         obj = game_object.blenderObject if self.mode else game_object
-        value = obj.get(property_name, 0)
+        value = obj.get(property_name, PROP_TYPE_INVALID)
+        if value is PROP_TYPE_INVALID:
+            return
         result = self.operator(value, property_value)
         if self.clamp:
             result = clamp(
