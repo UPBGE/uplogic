@@ -35,8 +35,5 @@ class ULMoveTo(ULActionNode):
             destination_point,
             speed,
             distance
-            # self.network.time_per_frame,
-            # dynamic,
-            # distance
         )
         self._done = True

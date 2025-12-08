@@ -217,7 +217,6 @@ class Event(Sound):
             mask=self.occlusion_mask,
             visualize=True
         )
-        # print(ray.obj)
         while ray.obj and not ray.obj.blenderObject.get('sound_occluder', True):
             ray = raycast(
                 ray.obj,
@@ -226,7 +225,6 @@ class Event(Sound):
                 mask=self.occlusion_mask,
                 visualize=True
             )
-            # print(ray.obj)
         return ray.obj is not None
             
 
@@ -383,9 +381,6 @@ class FMod:
         cls.listener = VR_HEADSET if VR_STATE else scene.active_camera
         studio = cls.studio
         cam = cls.listener
-        # if cam is None:
-        #     scene = bge.logic.getCurrentScene()
-        #     cam = cls.listener = scene.active_camera
         studio.core_system.listener().position = cam.worldPosition
         studio.core_system.listener().set_orientation(
             list(cam.getAxisVect((0, 0, 1))),
