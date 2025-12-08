@@ -33,7 +33,8 @@ class ULMoveTo(ULActionNode):
         self._reached = move_to(
             moving_object,
             destination_point,
-            speed
+            speed,
+            distance
             # self.network.time_per_frame,
             # dynamic,
             # distance

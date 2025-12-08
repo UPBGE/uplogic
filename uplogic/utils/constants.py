@@ -146,3 +146,10 @@ TORQUISE = [0, 1, 1, 1]
 WHITE = [1, 1, 1, 1]
 BLACK = [0, 0, 0, 1]
 GREY = [.5, .5, .5, 1]
+
+
+class prop_type_invalid:
+    ...
+
+
+PROP_TYPE_INVALID = prop_type_invalid

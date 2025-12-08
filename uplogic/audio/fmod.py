@@ -217,6 +217,7 @@ class Event(Sound):
             mask=self.occlusion_mask,
             visualize=True
         )
+        # print(ray.obj)
         while ray.obj and not ray.obj.blenderObject.get('sound_occluder', True):
             ray = raycast(
                 ray.obj,
@@ -225,6 +226,7 @@ class Event(Sound):
                 mask=self.occlusion_mask,
                 visualize=True
             )
+            # print(ray.obj)
         return ray.obj is not None
             
 

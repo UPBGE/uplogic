@@ -113,12 +113,12 @@ def rotate_to(
         )
 
 
-def move_to(game_object: KX_GameObject, target: Vector, speed: float):
-    direction = (game_object.worldPosition - target)
-    if direction.length < speed:
-        game_object.worldPosition = target
+def move_to(game_object: KX_GameObject, target: Vector, speed: float, stop_distance=0):
+    distance = (game_object.worldPosition - target)
+    direction = distance.normalized()
+    if distance.length < speed + stop_distance:
+        game_object.worldPosition = target + direction * stop_distance
         return True
-    direction.normalize()
     game_object.worldPosition -= direction * speed
 
 
