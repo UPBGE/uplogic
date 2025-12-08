@@ -88,10 +88,10 @@ class Widget():
 
     def __init__(self, pos=(0, 0), size=(0, 0), bg_color=(0, 0, 0, 0), relative={}, halign='left', valign='bottom', angle=0, show=True):
         self.id = uuid.uuid4()
+        self._parent = None
         self._vertices = None  # (Vector((0, 0)), Vector((0, 0)), Vector((0, 0)), Vector((0, 0)))
         self.halign = halign
         self.valign = valign
-        self._parent = None
         self._show = show
         self._pos = [0, 0]
         self._size = [0, 0]
@@ -171,6 +171,7 @@ class Widget():
     @halign.setter
     def halign(self, val):
         self._halign = ALIGNMENTS.get(val, val)
+        self._rebuild_tree()
 
     @property
     def valign(self):
@@ -179,6 +180,7 @@ class Widget():
     @valign.setter
     def valign(self, val):
         self._valign = ALIGNMENTS.get(val, val)
+        self._rebuild_tree()
 
     @property
     def active(self):
@@ -248,8 +250,7 @@ class Widget():
     @angle.setter
     def angle(self, val):
         self._angle = val
-        if self.parent:
-            self._rebuild_tree()
+        self._rebuild_tree()
 
     @property
     def _recurse(self):
@@ -300,13 +301,16 @@ class Widget():
             self.parent.remove_widget(self)
         if self.use_clipping is None:
             self.use_clipping = val.use_clipping
+        # val.add_widget(self)
         self._parent = val
+        # self._parent.children.append(self)
         self.pos = self.pos  # noqa
         self.size = self.size  # noqa
         for c in self.children:
             c.parent = c.parent  # noqa
         self.on_parent()
-        self._build_shader()
+        # self._build_shader()
+        self._rebuild_tree()
 
     @property
     def pos_pixel(self):
@@ -338,8 +342,9 @@ class Widget():
             return
         if self.parent and self.show:
             self._rebuild = True
-        for child in self.children:
-            child.pos = child.pos  # noqa
+        self._rebuild_tree()
+        # for child in self.children:
+        #     child.pos = child.pos  # noqa
 
     @property
     def x(self):
@@ -350,6 +355,7 @@ class Widget():
     def x(self, val):
         self._pos = [val, self.pos[1]]
         self._rebuild = True
+        self._rebuild_tree()
 
     @property
     def y(self):
@@ -360,6 +366,7 @@ class Widget():
     def y(self, val):
         self._pos = [self._pos[0], val]
         self._rebuild = True
+        self._rebuild_tree()
 
     @property
     def size(self):
@@ -375,10 +382,11 @@ class Widget():
             return
         if self.parent and self.show:
             self._rebuild = True
-        for child in self.children:
-            child.pos = child.pos  # noqa
-            child.size = child.size  # noqa
+        # for child in self.children:
+        #     child.pos = child.pos  # noqa
+        #     child.size = child.size  # noqa
         self.on_size()
+        self._rebuild_tree()
 
     def on_size(self):
         ...
@@ -393,6 +401,7 @@ class Widget():
         self.size = [val, self.size[1]]
         if self.parent and self.show:
             self._rebuild = True
+        self._rebuild_tree()
 
     @property
     def height(self):
@@ -404,6 +413,7 @@ class Widget():
         self.size = [self.size[0], val]
         if self.parent and self.show:
             self._rebuild = True
+        self._rebuild_tree()
 
     @property
     def size_pixel(self):
@@ -652,9 +662,10 @@ class Widget():
         self._rebuild = False
 
     def _rebuild_tree(self):
-        self._build_shader()
-        for c in self.children:
-            c._rebuild_tree()
+        if self.parent:
+            self._build_shader()
+            for c in self.children:
+                c._rebuild_tree()
 
     @property
     def _render_needed(self):
