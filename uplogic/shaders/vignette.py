@@ -5,11 +5,11 @@ from mathutils import Vector
 glsl = """
 uniform sampler2D bgl_RenderedTexture;
 
-in vec4 bgl_TexCoord;
+// in vec4 bgl_TexCoord;
 uniform float power;
 uniform vec3 color;
 
-out vec4 fragColor;
+// out vec4 fragColor;
 
 void main( )
 {

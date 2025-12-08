@@ -1,4 +1,5 @@
 from bge import logic
+from bge import render
 from mathutils import Vector
 from uplogic.events import schedule
 from uplogic.utils.math import lerp
@@ -14,24 +15,27 @@ def get_custom_loop():
     return logic.globalDict.get('loop', None)
 
 
-def world_to_screen(position: Vector = Vector((0, 0, 0)), inv_y: bool = True) -> Vector:
-    pos = Vector(logic.getCurrentScene().active_camera.getScreenPosition(position))
+def world_to_screen(position: Vector = Vector((0, 0, 0)), inv_y: bool = True, camera=None) -> Vector:
+    if camera is None:
+        camera = logic.getCurrentScene().active_camera
+    pos = Vector(camera.getScreenPosition(position))
     if inv_y:
         pos[1] = 1 - pos[1]
     return pos
 
 
-def screen_to_world(x:float = None, y: float = None, distance: float = 10) -> Vector:
+def screen_to_world(x:float = None, y: float = None, distance: float = 10, camera = None) -> Vector:
     """Get the world coordinates of a point on the screen in a given distance.
     
-    :param `x`: X position on the screen. Leave at `None` to use mouse position.
-    :param `y`: Y position on the screen. Leave at `None` to use mouse position.
-    :param `distance`: The distance from the camera at which to get the position.
+    :param x: X position on the screen. Leave at `None` to use mouse position.
+    :param y: Y position on the screen. Leave at `None` to use mouse position.
+    :param distance: The distance from the camera at which to get the position.
     
     :returns: Position as `Vector`
     """
 
-    camera = logic.getCurrentScene().active_camera
+    if camera is None:
+        camera = logic.getCurrentScene().active_camera
     mouse = logic.mouse
     x = x if x is not None else mouse.position[0]
     y = y if y is not None else mouse.position[1]
@@ -41,8 +45,22 @@ def screen_to_world(x:float = None, y: float = None, distance: float = 10) -> Ve
     return origin + (aim)
 
 
+def screen_to_pixels(pos: Vector):
+    """Transform a Vector from 0-1 to pixel position on screen.
+    
+    :param pos: Iterable with 2 items, `[x, y]`"""
+    return Vector((
+        pos[0] * render.getWindowWidth(),
+        pos[1] * render.getWindowHeight()
+    ))
+
+
 class FileLoader():
-    '''Load the content of the currently open .blend file'''
+    '''Load the content of the currently open `.blend` file.
+
+    :param start: Start loading as soon as an instance is created.
+    :param lerp_factor: Smooth the progress before loading the next item.
+    '''
 
     def __init__(self, start=False, lerp_factor=0.2):
         self.lerp_factor = lerp_factor
@@ -116,9 +134,11 @@ class FileLoader():
             return
         # XXX: Remove when crashing!
         self.object.endObject()
-        bpy.data.materials.remove(self.temp_map)
-        bpy.data.meshes.remove(self.bmesh)
-        bpy.data.objects.remove(self.bobj)
+
+        # XXX: 5.1 need to remove all pointers before removing
+            # bpy.data.materials.remove(self.temp_map)
+            # bpy.data.meshes.remove(self.bmesh)
+            # bpy.data.objects.remove(self.bobj)
         self.finished = True
         self.on_finish()
 
@@ -130,6 +150,12 @@ class FileLoader():
 
 
 class SceneLoader():
+    '''Load the content of a scene in the currently open `.blend` file.
+
+    :param scene: Name of the scene to load.
+    :param start: Start loading as soon as an instance is created.
+    :param lerp_factor: Smooth the progress before loading the next item.
+    '''
 
     def __init__(self, scene: str, start=True, lerp_factor=0.2):
         if isinstance(scene, str):
@@ -210,11 +236,12 @@ class SceneLoader():
             schedule(self.scale_loading_bar)
             self.on_progress(self._status)
             return
-        # logic.getCurrentScene().pre_draw.remove(self.load_next)
-        self.object.endObject()
-        bpy.data.materials.remove(self.temp_map)
-        bpy.data.objects.remove(self.bobj)
-        bpy.data.meshes.remove(self.bmesh)
+
+        # XXX: 5.1 need to remove all pointers before removing
+            # self.object.endObject()
+            # bpy.data.materials.remove(self.temp_map)
+            # bpy.data.objects.remove(self.bobj)
+            # bpy.data.meshes.remove(self.bmesh)
         self.finished = True
         self.on_finish()
 

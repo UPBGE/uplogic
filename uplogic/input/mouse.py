@@ -7,6 +7,7 @@ from mathutils import Vector
 from uplogic.utils.math import interpolate
 from uplogic.utils.math import clamp
 from uplogic.events import schedule_callback
+from uplogic import console
 
 
 MOUSE_EVENTS = logic.mouse.inputs
@@ -139,6 +140,38 @@ def mouse_up(button=events.LEFTMOUSE) -> bool:
     return (
         MOUSE_EVENTS[button].released
     )
+    
+
+_buttons_active = {}
+
+
+def mouse_pulse(button=events.LEFTMOUSE, time: float = .4) -> bool:
+    '''Detect key tapped, then held down after `time` has passed.
+
+    :param key: key as `str` of
+    [`'A'`, `'B'`, `'C'`, `'D'`, `'E'`, `'F'`, `'G'`, `'H'`, `'I'`, `'J'`, `'K'`, `'L'`, `'M'`, `'N'`, `'O'`, `'P'`, `'Q'`,
+    `'R'`, `'S'`, `'T'`, `'U'`, `'V'`, `'W'`, `'X'`, `'Y'`, `'Z'`, `'ZERO'`, `'ONE'`, `'TWO'`, `'THREE'`, `'FOUR'`, `'FIVE'`,
+    `'SIX'`, `'SEVEN'`, `'EIGHT'`, `'NINE'`, `'CAPSLOCK'`, `'LEFTCTRL'`, `'LEFTSHIFT'` `'LEFTARROW'`, `'DOWNARROW'`, `'RIGHTARROW'`,
+    `'UPARROW'`, `'0'`, `'1'`, `'2'`, `'3'`, `'4'`, `'5'`, `'6'`, `'7'`, `'8'`, `'9'`, `'PADPERIOD'`, `'PADSLASH'`, `'PADASTER'`,
+    `'PADMINUS'`, `'PADENTER'`, `'PADPLUS'`, `'F1'`, `'F2'`, `'F3'`, `'F4'`, `'F5'`, `'F6'`, `'F7'`, `'F8'`, `'F9'`, `'F10'`,
+    `'F11'`, `'F12'`, `'F13'`, `'F14'`, `'F15'`, `'F16'`, `'F17'`, `'F18'`, `'F19'`, `'ACCENTGRAVE'`, `'BACKSLASH'`,
+    `'BACKSPACE'`, `'COMMA'`, `'DEL'`, `'END'`, `'EQUAL'`, `'ESC'`, `'HOME'`, `'INSERT'`, `'LEFTBRACKET'`, `'RIGHTBRACKET'`,
+    `'LINEFEED'`, `'MINUS'`, `'PAGEDOWN'`, `'PAGEUP'`, `'PAUSE'`, `'PERIOD'`, `'QUOTE'`, `'RET'`, `'ENTER'`, `'SEMICOLON'`,
+    `'SLASH'`, `'SPACE'`, `'TAB'`]
+    :param time: timeout for key down
+
+    :returns: boolean
+    '''
+    button = MOUSE_BUTTONS.get(button, button)
+    evt = MOUSE_EVENTS[button]
+    if evt.activated:
+        _buttons_active[button] = 0
+        return True
+    k = _buttons_active.get(button, 0)
+    _buttons_active[button] = k + (1 / (logic.getAverageFrameRate() or 0.01))
+    if _buttons_active[button] > time:
+        return evt.active
+    return False
 
 
 def mouse_wheel(tap: bool = False) -> int:
@@ -214,7 +247,7 @@ class Mouse():
 
     @moved.setter
     def moved(self, val):
-        print('ULMouse.moved is read-only!')
+        console.debug('Mouse.moved is read-only!')
 
     @property
     def wheel(self):
@@ -225,7 +258,7 @@ class Mouse():
 
     @wheel.setter
     def wheel(self, val):
-        print('ULMouse.wheel is read-only!')
+        console.debug('Mouse.wheel is read-only!')
 
     def update(self) -> None:
         """This is executed each frame if component is active."""
@@ -240,21 +273,21 @@ class Mouse():
     def button_down(self, button: str = 'LMB'):
         """Check if a button on the mouse is held down.
         
-        :param `button`: The button to check for; `str` of [`'LMB'`, `'MMB'`,
+        :param button: The button to check for; `str` of [`'LMB'`, `'MMB'`,
         `'RMB'`]"""
         return mouse_down(MOUSE_BUTTONS[button])
 
     def button_up(self, button: str = 'LMB'):
         """Check if a button on the mouse is released.
         
-        :param `button`: The button to check for; `str` of [`'LMB'`, `'MMB'`,
+        :param button: The button to check for; `str` of [`'LMB'`, `'MMB'`,
         `'RMB'`]"""
         return mouse_up(MOUSE_BUTTONS[button])
 
     def button_tap(self, button: str = 'LMB'):
         """Check if a button on the mouse is pressed once.
         
-        :param `button`: The button to check for; `str` of [`'LMB'`, `'MMB'`,
+        :param button: The button to check for; `str` of [`'LMB'`, `'MMB'`,
         `'RMB'`]"""
         return mouse_tap(MOUSE_BUTTONS[button])
 
@@ -273,20 +306,20 @@ class MouseLook():
     This component can be activated/deactivated at any time to keep performance
     up.
 
-    :param `obj`: Main object to rotate around the object's Z axis.
-    :param `head`: Head object to rotate around the object's X/Y axis.
-    :param `sensitivity`: Translation factor of mouse movement to rotation.
-    :param `use_cap_x`: Whether to use capping on the mouse X movement (Z axis
+    :param obj: Main object to rotate around the object's Z axis.
+    :param head: Head object to rotate around the object's X/Y axis.
+    :param sensitivity: Translation factor of mouse movement to rotation.
+    :param use_cap_x: Whether to use capping on the mouse X movement (Z axis
     rotation).
-    :param `cap_x`: Minimum and Maximum amount of rotation on the Z axis.
-    :param `use_cap_y`: Whether to use capping on the mouse Y movement (X/Y axis
+    :param cap_x: Minimum and Maximum amount of rotation on the Z axis.
+    :param use_cap_y: Whether to use capping on the mouse Y movement (X/Y axis
     rotation).
-    :param `cap_y`: Minimum and Maximum amount of rotation on the X/Y axis.
-    :param `invert`: Whether to use inverted values for mous X/Y movement.
-    :param `smoothing`: Amount of movement smoothing.
-    :param `local`: Whether to use local transform for the body object.
-    :param `front`: Front axis (traditionally in blender, Y is front).
-    :param `active`: Whether to start this component in active or inactive mode
+    :param cap_y: Minimum and Maximum amount of rotation on the X/Y axis.
+    :param invert: Whether to use inverted values for mous X/Y movement.
+    :param smoothing: Amount of movement smoothing.
+    :param local: Whether to use local transform for the body object.
+    :param front: Front axis (traditionally in blender, Y is front).
+    :param active: Whether to start this component in active or inactive mode
     (can be changed later).
     """
 
@@ -367,7 +400,7 @@ class MouseLook():
     def stop(self, reset: bool = False):
         """Stop this component.
         
-        :param `reset`: Reset the orientation of objects to their original
+        :param reset: Reset the orientation of objects to their original
         state."""
         self.active = False
         if reset:
@@ -386,7 +419,7 @@ class MouseLook():
         """Reset the orientation of the objects in this component to their
         original state.
         
-        :param `factor`: Smoothing factor of the reset. If < 1, component will
+        :param factor: Smoothing factor of the reset. If < 1, component will
         be reset smoothly."""
         if factor < 1:
             self.active = False

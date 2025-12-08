@@ -6,6 +6,24 @@ from pathlib import Path
 import bpy, bge
 
 
+def uniforms(*uniforms):
+    def deco(cls):
+        for uniform in uniforms:
+
+            def getProp(self, attr_name=uniform):
+                return self.uniforms.get(attr_name)
+
+            def setProp(self, value, attr_name=uniform):
+                self.uniforms[attr_name] = value
+
+            prop = property(getProp, setProp)
+
+            setattr(cls, uniform, prop)
+        return cls
+
+    return deco
+
+
 def load_glsl(filepath: str):
     return Path(filepath).read_text()
 
@@ -27,9 +45,9 @@ def set_filter_state(pass_idx, state=True):
 class Filter2D():
     '''Wrapper for KX_2DFilter.
 
-    :param `program`: GLSL code as `str`.
-    :param `idx`: Pass Index for this filter.
-    :param `uniforms`: A `dict` of [`str`: `dict`] binding dictionary values to
+    :param program: GLSL code as `str`.
+    :param idx: Pass Index for this filter.
+    :param uniforms: A `dict` of [`str`: `dict`] binding dictionary values to
     the filter in the form "key of dictionary".
     '''
 

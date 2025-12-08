@@ -1,5 +1,5 @@
 from uplogic.nodes import ULActionNode
-from uplogic.utils import debug
+from uplogic import console
 import bpy
 import json
 import os
@@ -31,7 +31,7 @@ class ULRemoveVariable(ULActionNode):
             json.dump(data, f, indent=2)
             f.close()
         else:
-            debug('File does not exist!')
+            console.debug('File does not exist!')
 
     def evaluate(self):
         if not self.get_condition():

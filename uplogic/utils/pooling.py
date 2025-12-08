@@ -8,6 +8,7 @@ from .raycasting import raycast, raycast_projectile
 from .math import cycle
 from .visuals import draw_cube
 from .constants import RED, WHITE
+from uplogic import console
 
 
 class Spawn:
@@ -80,7 +81,7 @@ class Spawn:
 
     @game_object.setter
     def game_object(self, val):
-        print("Attribute 'game_object' of 'Spawn' is read-only!")
+        console.debug("Attribute 'game_object' of 'Spawn' is read-only!")
 
     def start(self):
         pass
@@ -181,7 +182,7 @@ class SpawnedInstance(Spawn):
 
     @game_object.setter
     def game_object(self, val):
-        print("Attribute 'game_object' of 'Spawn' is read-only!")
+        console.debug("Attribute 'game_object' of 'Spawn' is read-only!")
 
     def start(self):
         pass

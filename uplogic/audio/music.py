@@ -1,6 +1,7 @@
 from uplogic.audio.audiosystem import get_audio_system
 from .sound import Sound2D
 from uuid import uuid4
+from uplogic import console
 from uplogic.utils.math import interpolate
 from uplogic.events import schedule_callback
 
@@ -26,7 +27,7 @@ class ULMusicEffect():
     def fade_out(self, factor=.02):
         '''Fade out this sound using linear interpolation.
 
-        :param `factor`: Speed of interpolation.'''
+        :param factor: Speed of interpolation.'''
         self.volume = interpolate(self.volume, 0, factor)
         if self._fade_event:
             self._fade_event.cancel()
@@ -37,7 +38,7 @@ class ULMusicEffect():
     def fade_in(self, factor=.01):
         '''Fade in this sound using linear interpolation.
 
-        :param `factor`: Speed of interpolation.'''
+        :param factor: Speed of interpolation.'''
         self.volume = interpolate(self.volume, 1, factor)
         if self._fade_event:
             self._fade_event.cancel()
@@ -50,7 +51,7 @@ class Music(ULMusicEffect):
     '''
     Management class for controlling multiple music tracks.
 
-    :param `name`: Name of this music.'''
+    :param name: Name of this music.'''
     _deprecated = False
 
     def __init__(
@@ -115,8 +116,8 @@ class Music(ULMusicEffect):
         '''Add a track to this music. A track is typically one instrument or
         effect.
         
-        :param `sound`: Path to the sound file or `Sound2D` instance.
-        :param `name`: Name of this track (e.g. "Drums")'''
+        :param sound: Path to the sound file or `Sound2D` instance.
+        :param name: Name of this track (e.g. "Drums")'''
         if not track_name:
             track_name = uuid4()
         track = ULMusicTrack(self, sound, track_name)
@@ -129,20 +130,20 @@ class Music(ULMusicEffect):
     ):
         '''Remove a track from this music.
         
-        :param `track`: Index or name of the track to be removed.'''
+        :param track: Index or name of the track to be removed.'''
         if isinstance(track, str):
             for t in self.tracks:
                 if t.name == track:
                     t.remove()
                     return
-            print(f'Track "{track}" not found!')
+            console.warning(f'Track "{track}" not found!')
         else:
             self.tracks[track].remove()
 
     def get_track(self, name):
         '''Get track by name.
         
-        :param `name`: Name of the track.'''
+        :param name: Name of the track.'''
         for track in self.tracks:
             if track.name == name:
                 return track
@@ -174,9 +175,9 @@ class MusicTrack(ULMusicEffect):
     '''
     Track to be played on a `Music` instance.
     
-    :param `music`: The music object this track will be played on.
-    :param `sound`: Path to the soundfile of this track.
-    :param `name`: Name of this track (e.g. "Drums).'''
+    :param music: The music object this track will be played on.
+    :param sound: Path to the soundfile of this track.
+    :param name: Name of this track (e.g. "Drums).'''
     _deprecated = False
 
     def __init__(

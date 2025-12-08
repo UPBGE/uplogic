@@ -21,6 +21,7 @@ from .objects import controller_brick  # noqa
 from .objects import create_curve  # noqa
 from .objects import set_curve_points  # noqa
 from .raycasting import raycast  # noqa
+from .raycasting import raycast_screen  # noqa
 from .raycasting import raycast_camera  # noqa
 from .raycasting import raycast_face  # noqa
 from .raycasting import raycast_projectile  # noqa
@@ -152,15 +153,15 @@ def compute_distance(parama, paramb) -> float:
     return (va - vb).length
 
 
-def debug(message: str):
-    if not hasattr(bpy.types.Scene, 'logic_node_settings'):
-        return
-    if not bpy.context or not bpy.context.scene:
-        return
-    if not bpy.context.scene.logic_node_settings.use_node_debug:
-        return
-    else:
-        print('[UPLOGIC] ' + message)
+# def debug(message: str):
+#     if not hasattr(bpy.types.Scene, 'logic_node_settings'):
+#         return
+#     if not bpy.context or not bpy.context.scene:
+#         return
+#     if not bpy.context.scene.logic_node_settings.use_node_debug:
+#         return
+#     else:
+#         print('[UPLOGIC] ' + message)
 
 
 def is_invalid(*a) -> bool:
@@ -232,10 +233,10 @@ def is_water(game_object: GameObject):
 def get_child_by_name(obj: GameObject, child: str, recursive: bool = True, partial: bool = False) -> GameObject:
     """Get a named child object.
 
-    :param `obj`: The parent object.
-    :param `child`: The child's name.
-    :param `recursive`: If True, children's children will be seached too.
-    :param `partial`: If a child object name has the given name in it, it counts as a hit.
+    :param obj: The parent object.
+    :param child: The child's name.
+    :param recursive: If True, children's children will be seached too.
+    :param partial: If a child object name has the given name in it, it counts as a hit.
     """
     children = obj.childrenRecursive if recursive else obj.children
     if partial:
@@ -254,11 +255,19 @@ def check_vr_session_status() -> bool:
 
 
 def get_project_folder(folder_name, *structure):
-    directory = path.join(bpy.path.abspath('//'))[:-1]
+    from uplogic.console import warning
+    warning("'get_project_folder' is deprecated, please use 'get_project_path' instead.")
+    return get_project_path(folder_name, *structure)
+
+
+def get_project_path(folder_name, *structure):
+    from uplogic.console import error
+    directory = og_path = path.join(bpy.path.abspath('//'))[:-1]
     while not directory.endswith(folder_name):
+        # print(folder_name)
         pdir = path.abspath(path.join(directory, pardir))
         if pdir == directory:
-            print("Can't go beyond drive's root!")
+            error(f"Can't go beyond drive's root from {og_path}!")
             return ''
         directory = pdir
     return path.join(directory, *structure)

@@ -1,5 +1,5 @@
 from uplogic.nodes import ULConditionNode
-from uplogic.utils import debug
+from uplogic import console
 
 
 class ULControllerStatus(ULConditionNode):
@@ -45,7 +45,7 @@ class ULControllerStatus(ULConditionNode):
                     cont.sensors
                 ]
         else:
-            debug('Expression/Python not supported for controller.')
+            console.debug('Expression/Python not supported for controller.')
             return False
 
     def get_sensors(self):

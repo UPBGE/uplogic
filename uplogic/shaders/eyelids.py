@@ -4,11 +4,11 @@ from .shader import Filter2D
 glsl = """
 uniform sampler2D bgl_RenderedTexture;
 
-in vec4 bgl_TexCoord;
+// in vec4 bgl_TexCoord;
 uniform float power;
 uniform float factor;
 
-out vec4 fragColor;
+// out vec4 fragColor;
 
 float map_range(float value, float in_min, float in_max, float out_min, float out_max){
     return (value - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;

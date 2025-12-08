@@ -12,6 +12,7 @@ class ActionSystem():
 
     def __init__(self, name: str):
         self.actions: list = []
+        self.name = name
         self.scene = scene = logic.getCurrentScene()
         GlobalDB.retrieve('uplogic.animation').put(name, self)
         scene.pre_draw.append(self.update)
@@ -21,7 +22,7 @@ class ActionSystem():
     def lock_layer(cls, action):
         """Lock a layer according to a `Action`.
 
-        :param `action`: The `Action` whose layer will be locked.
+        :param action: The `Action` whose layer will be locked.
         """
         layers = cls.layers.get(action.game_object, {})
         layers[str(action.layer)] = action
@@ -31,7 +32,7 @@ class ActionSystem():
     def free_layer(cls, action):
         """Allow for the layer of the given action to be used again.
 
-        :param `action`: The `Action` whose layer will be freed.
+        :param action: The `Action` whose layer will be freed.
         """
         layers = cls.layers.get(action.game_object, {})
         layers.pop(str(action.layer), None)
@@ -39,9 +40,9 @@ class ActionSystem():
 
     @classmethod
     def find_free_layer(cls, action):
-        """Incrementally find the next free layer for a `Action`.
+        """Incrementally find the next free layer for an `Action`.
 
-        :param `action`: The `Action` for which to find a free layer.
+        :param action: The `Action` for which to find a free layer.
         """
         layers = cls.layers.get(action.game_object, {})
         action.layer = 0
@@ -52,7 +53,7 @@ class ActionSystem():
     def check_layer(cls, action):
         """Check if the layer for this `Action` is free.
 
-        :param `action`: The `Action` whose layer to check.
+        :param action: The `Action` whose layer to check.
 
         :return: `True` if the layer is occupied, `False` if not
         """
@@ -63,9 +64,9 @@ class ActionSystem():
     def get_layer(cls, game_object: KX_GameObject, layer: int = 0):
         """Get the `Action` of an object on the given layer.
 
-        :param `game_object`: The `KX_GameObject` on which the action is
+        :param game_object: The `KX_GameObject` on which the action is
         playing.
-        :param `layer`: The layer on which the action is playing.
+        :param layer: The layer on which the action is playing.
 
         :return: `Action` if layer is occupied, else `None`
         """
@@ -91,7 +92,7 @@ class ActionSystem():
     def add(self, action):
         '''Add a `Action` to this system.
 
-        :param `action`: `Action` to add.
+        :param action: `Action` to add.
         '''
         self.actions.append(action)
         self.actions.sort(key=lambda action: action.layer, reverse=True)
@@ -100,9 +101,10 @@ class ActionSystem():
     def remove(self, action):
         '''Remove a `Action` from this system.
 
-        :param `action`: `Action` which to remove.
+        :param action: `Action` which to remove.
         '''
-        action._stop()
+        if not action.game_object.invalid:
+            action._stop()
         if action in self.actions:
             self.actions.remove(action)
         ActionSystem.free_layer(action)
@@ -113,14 +115,14 @@ class ActionSystem():
         self.scene.pre_draw.remove(self.update)
         for action in self.actions.copy():
             self.remove(action)
-        GlobalDB.retrieve('uplogic.animation').remove(self)
+        GlobalDB.retrieve('uplogic.animation').remove(self.name)
 
 
 def get_action_system(system_name: str = 'default') -> ActionSystem:
     """Get or create a `ActionSystem` with the given name. Using more than one
     action system is highly discouraged.
 
-    :param `system_name`: Look for this name.
+    :param system_name: Look for this name.
 
     :returns: `ActionSystem`, new system is created if none is found.
     """

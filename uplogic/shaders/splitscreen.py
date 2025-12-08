@@ -1,7 +1,7 @@
-from .rendertoscreen import RenderToScreen
+# from .rendertoscreen import RenderToScreen
 from bge.types import KX_Camera
 from bge import render, logic
-from uplogic.ui import Canvas, Path
+from uplogic import console
 
 
 class SplitScreen:
@@ -29,7 +29,7 @@ class SplitScreen:
     def add_camera(self, camera: KX_Camera):
         cameras = self.cameras
         if len(cameras) == 4:
-            print('Maximum amount of cameras reached!')
+            console.warning('Maximum amount of cameras reached!')
             return
         cameras.append(camera)
         if len(cameras) == 0:

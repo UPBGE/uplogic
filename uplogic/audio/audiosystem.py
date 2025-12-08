@@ -11,6 +11,14 @@ import aud
 import bpy
 
 
+class AudioCache:
+    _sounds = {}
+
+    @classmethod
+    def get(cls, key, default=None):
+        return cls._sounds.get(key, default)
+
+
 DISTANCE_MODELS = {
     'EXPONENT': aud.DISTANCE_MODEL_EXPONENT,
     'EXPONENT_CLAMPED': aud.DISTANCE_MODEL_EXPONENT_CLAMPED,
@@ -59,8 +67,8 @@ def stop_all_audio() -> None:
 class AudioSystem(object):
     '''System for managing sounds started using `Sound2D` or `Sound3D`.
     
-    :param `name`: ID of this AudioSystem; must be unique.
-    :param `mode`: Playback mode for sounds of this system, must be one of `['2D', '3D']`
+    :param name: ID of this AudioSystem; must be unique.
+    :param mode: Playback mode for sounds of this system, must be one of `['2D', '3D']`
     '''
     _deprecated = False
 
@@ -71,6 +79,7 @@ class AudioSystem(object):
             warning(f"AudioSystem argument 'mode': '{mode}' not recognized in ['2D', '3D'], defaulting to '3D'.")
             mode = '3D'
         self._active_sounds = []
+        self._cached_sounds = {}
         self.name = name
         self.mode = mode
         self.bounces = 0
@@ -95,6 +104,30 @@ class AudioSystem(object):
         '''Frequency cutoff for muffled sounds.'''
         return self._lowpass
 
+    @property
+    def listener_location(self):
+        return self.device.listener_location
+
+    @listener_location.setter
+    def listener_location(self, val):
+        self.device.listener_location = val
+
+    @property
+    def listener_orientation(self):
+        return self.device.listener_orientation
+
+    @listener_orientation.setter
+    def listener_orientation(self, val):
+        self.device.listener_orientation = val
+
+    @property
+    def listener_velocity(self):
+        return self.device.listener_velocity
+
+    @listener_velocity.setter
+    def listener_velocity(self, val):
+        self.device.listener_velocity = val
+
     @lowpass.setter
     def lowpass(self, val):
         if val == self._lowpass:
@@ -112,7 +145,14 @@ class AudioSystem(object):
     def volume(self, val):
         self._volume = val
         for sound in self._active_sounds:
-            sound.volume = sound.volume
+            sound.volume = sound.volume  # noqa
+
+    def cache(self, sound):
+        AudioCache._sounds[sound.file] = sound.soundfile
+
+    def uncache(self, sound):
+        if sound.file in self._cached_sounds.keys():
+            del AudioCache._sounds[sound.file]
 
     def pause(self):
         '''Pause all sounds in this system.'''
@@ -192,9 +232,9 @@ class AudioSystem(object):
                         self.bounces = ob.reverb_samples
             listener_vel = (0, 0, 0) if self.use_vr or not same_cam else self.compute_listener_velocity(listener)
             dev = self.device
-            dev.listener_location = cpos
-            dev.listener_orientation = listener.worldOrientation.to_quaternion()
-            dev.listener_velocity = listener_vel
+            self.listener_location = cpos
+            self.listener_orientation = listener.worldOrientation.to_quaternion()
+            self.listener_velocity = listener_vel
         for s in self._active_sounds:
             s.update()
 
@@ -210,6 +250,8 @@ class AudioSystem(object):
         '''Stop and remove this audio system. This will stop all sounds playing
         on this system.'''
         self.device.stopAll()
+        # for sound in self._cached_sounds.copy():
+        #     self.uncache(sound)
         self.scene.pre_draw.remove(self.update)
         GlobalDB.retrieve('uplogic.audio').remove(self.name)
 
@@ -224,8 +266,8 @@ class ULAudioSystem(AudioSystem):
 def get_audio_system(system_name: str = 'default', mode: str = '3D') -> AudioSystem:
     '''Get or create a `AudioSystem` with the given name.
 
-    :param `system_name`: Look for this name.
-    :param `mode`: Playback mode of `['2D', '3D']`. Only relevant a new system is created.
+    :param system_name: Look for this name.
+    :param mode: Playback mode of `['2D', '3D']`. Only relevant a new system is created.
 
     :returns: `AudioSystem`, new system is created if none is found.
     '''

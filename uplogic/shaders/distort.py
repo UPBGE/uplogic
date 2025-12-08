@@ -7,11 +7,11 @@ glsl = """
 Modified by Iza Zed for uplogic
 */
 
-in vec4 bgl_TexCoord;
+// in vec4 bgl_TexCoord;
 #define gl_TexCoord glTexCoord
 vec4 glTexCoord[4] = vec4[](bgl_TexCoord,bgl_TexCoord,bgl_TexCoord,bgl_TexCoord);
 
-out vec4 fragColor;
+// out vec4 fragColor;
 
 
 uniform sampler2D bgl_RenderedTexture;

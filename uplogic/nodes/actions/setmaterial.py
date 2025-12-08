@@ -1,5 +1,5 @@
 from uplogic.nodes import ULActionNode
-from uplogic.utils import debug
+from uplogic import console
 from bpy.types import Material
 from bge.types import KX_GameObject
 
@@ -24,7 +24,7 @@ class ULSetMaterial(ULActionNode):
         material: Material = self.get_input(self.mat_name)
         bl_obj = game_object.blenderObject
         if slot > len(bl_obj.material_slots) - 1:
-            debug('Set Material: Slot does not exist!')
+            console.debug('Set Material: Slot does not exist!')
             return
         bl_obj.material_slots[slot].material = material
         self._done = True

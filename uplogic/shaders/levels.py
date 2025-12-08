@@ -4,11 +4,11 @@ from mathutils import Vector
 
 glsl = """
 uniform sampler2D bgl_RenderedTexture;
-in vec4 bgl_TexCoord;
+// in vec4 bgl_TexCoord;
 vec2 texcoord = bgl_TexCoord.xy;
 uniform vec3 color;
 
-out vec4 fragColor;
+// out vec4 fragColor;
 
 vec4 gradient(vec4 coo)
 {

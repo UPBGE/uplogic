@@ -2,6 +2,7 @@ from uplogic.nodes import ULActionNode
 import bpy
 import json
 import os
+from uplogic import console
 
 
 class ULListVariables(ULActionNode):
@@ -29,16 +30,16 @@ class ULListVariables(ULActionNode):
             f = open(path, 'r')
             data = json.load(f)
             if len(data) == 0:
-                print('There are no saved variables')
+                console.debug('There are no saved variables')
                 return
             li = []
             for x in data:
                 if p_l:
-                    print('{}\t->\t{}'.format(x, data[x]))
+                    console.log('{}\t->\t{}'.format(x, data[x]))
                 li.append(x)
             self.items = li
         else:
-            print('There are no saved variables')
+            console.debug('There are no saved variables')
         f.close()
 
     def evaluate(self):

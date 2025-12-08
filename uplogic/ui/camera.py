@@ -40,7 +40,7 @@ class Camera(Widget):
         self._camera = val
 
     def draw(self):
-        super()._setup_draw()
+        self._setup_draw()
         self.camera.useViewport = self.parent is not None and self.parent.show and self.show
         super().draw()
 

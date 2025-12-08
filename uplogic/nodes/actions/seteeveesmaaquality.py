@@ -1,6 +1,10 @@
 from bge import logic
 from uplogic.nodes import ULActionNode
 import bpy
+from uplogic import console
+
+
+#  XXX: REMOVE FOR 5.0
 
 
 class ULSetEeveeSMAAQuality(ULActionNode):
@@ -17,6 +21,6 @@ class ULSetEeveeSMAAQuality(ULActionNode):
     def evaluate(self):
         if not self.get_condition():
             return
-        print("SMAA has been removed from UPBGE. Delete 'Set SMAA Quality' node to avoid issues.")
+        console.error("SMAA has been removed from UPBGE. Delete 'Set SMAA Quality' node to avoid issues.")
         self._done = True
         

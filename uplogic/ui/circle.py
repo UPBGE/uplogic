@@ -80,7 +80,7 @@ class Circle(Widget):
         self._batch_line = batch_for_shader(self._shader, 'LINE_STRIP', {"pos": vertices})
 
     def draw(self):
-        super()._setup_draw()
+        self._setup_draw()
         gpu.state.line_width_set(self.width)
         # col = self.line_color.copy()
         col = Vector((0, 1, 0, 1))

@@ -1,7 +1,7 @@
 from mathutils import Euler
 from mathutils import Vector
 from uplogic.nodes import ULActionNode
-from uplogic.utils import debug
+from uplogic import console
 
 
 class ULSetBonePosition(ULActionNode):
@@ -29,6 +29,6 @@ class ULSetBonePosition(ULActionNode):
         if set_translation is not None:
             bone_channel.location = set_translation
         else:
-            debug('Set Bone Node: Position is None!')
+            console.debug('Set Bone Node: Position is None!')
         armature.update()
         self._done = True

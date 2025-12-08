@@ -44,5 +44,4 @@ class ULMouseRayCast(ULActionNode):
             prop=self.get_input(self.property),
             xray=self.get_input(self.xray),
             mask=self.get_input(self.mask)
-
         )

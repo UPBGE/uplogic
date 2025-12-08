@@ -5,7 +5,7 @@ from uplogic.ui.layout import RelativeLayout
 from uplogic.ui.label import Label
 from uplogic.ui.textinput import TextInput
 from uplogic.data import GlobalDB
-from uplogic.utils.raycasting import raycast_mouse
+from uplogic.utils.raycasting import raycast_screen
 from uplogic.utils.scene import world_to_screen
 from uplogic.utils.math import cycle
 from uplogic.utils.math import clamp
@@ -36,21 +36,28 @@ def _get_globals():
     GLOBALS['uplogic'] = uplogic
     GLOBALS['logic'] = logic
     GLOBALS['render'] = render
-    GLOBALS['console'] = get_console()
+    GLOBALS['console'] = get_console(True)
     for obj in scene.objects:
         GLOBALS[obj.blenderObject.name] = obj
     return GLOBALS
 
 
 def enable(toggle_key='F12', visible=False):
-    get_console(True, toggle_key=toggle_key, visible=visible)
+    scene = logic.getCurrentScene()
+    c = get_console(True, toggle_key=toggle_key, visible=visible)
+    c.scene = scene
+    if disable not in scene.onRemove:
+        scene.onRemove.append(disable)
+    if c.update not in scene.pre_draw:
+        c.register()
+        scene.pre_draw.append(c.update)
     sys.stdout = Console()
 
 
 def disable():
     sys.stdout = sys.__stdout__
     sys.stderr = sys.__stderr__
-    console = get_console()
+    console = get_console(True)
     if console:
         console.stop()
     consoles = GlobalDB.retrieve('uplogic.consoles')
@@ -60,7 +67,7 @@ def disable():
 class Console(StringIO):
 
     def write(self, __s: str) -> int:
-        log(__s)
+        _print(__s)
 
 
 class ErrorConsole(StringIO):
@@ -68,10 +75,12 @@ class ErrorConsole(StringIO):
         error(__s)
 
 COLORS = {
-    'INFO': [1, 1, 1, 1],
+    'LOG': [1, 1, 1, 1],
+    'INFO': [.3, .8, 1, 1],
     'DEBUG': [1, 1, .6, 1],
     'WARNING': [1, .8, .2, 1],
     'ERROR': [1, .3, .3, 1],
+    'CRITICAL': [1, .0, .0, 1],
     'SUCCESS': [.3, 1, .3, 1]
 }
 
@@ -80,13 +89,70 @@ class CommandLabel(Label):
     pass
 
 
+def set_log_level(level: int = 2) -> None:
+    """Set the log level for the console. Higher values mean less important messages will be hidden.
+
+    - 0: No Restrictions
+    - 1: Debug
+    - 2: Info (Default)
+    - 3: Warning
+    - 4: Error
+    - 5: Critical
+
+    Args:
+        level (int): Log Level
+    """
+    get_console().log_level = clamp(level, 0, 5)
+
+
+def set_log_directory(path):
+    get_console().log_directory = path
+
+
 class ConsoleLayout(Canvas):
     opacity = 1
     padding = [5, 10]
     toggle_key = 'F12'
 
-    def __init__(self, toggle_key='F12', visible=False):
+    
+    @property
+    def log_directory(self):
+        """Path to the log folder. This should be a directory, not a file."""
+        return self._log_directory
+
+    @log_directory.setter
+    def log_directory(self, folder):
+        if folder is not None:
+            if not os.path.isdir(folder):
+                os.makedirs(folder)
+            self._log_file = os.path.join(
+                folder,
+                f'log.{len(os.listdir(folder))}.txt'
+            )
+        else:
+            self._log_file = None
+        self._log_directory = folder
+
+    @property
+    def log_file(self):
+        return self._log_file
+
+    @log_file.setter
+    def log_file(self, val):
+        error("'ConsoleLayout.log_file' is read-only!")
+    
+    def __init__(self, toggle_key='F12', visible=False): 
+        self.log_directory = None
         scene = logic.getCurrentScene()
+        log_levels = {
+            'NOTSET': 0,
+            'DEBUG': 1,
+            'INFO': 2,
+            'WARNING': 3,
+            'ERROR': 4,
+            'CRITICAL': 5
+        }
+        self.log_level = log_levels.get(bpy.data.scenes[scene.name].game_settings.log_level)
         self.toggle_key = toggle_key
         self._mouse_visible = False
         self.issued_commands = []
@@ -114,12 +180,9 @@ class ConsoleLayout(Canvas):
         self.nameplate.update = self.update_nameplate
         self.canvas.add_widget(self.nameplate)
         self.font_size = 12
-        # self.info_mode = False
         self.position = 'bottom'
         self.info_mode = getattr(bpy.context.scene, 'screen_console_open', False)
         self.active = False
-        # if not getattr(bpy.context.scene, 'screen_console_open', False) and not visible:
-        #     self.active = False
 
     @property
     def layout(self):
@@ -211,8 +274,8 @@ class ConsoleLayout(Canvas):
     def on_enter(self):
         if self.input.text:
             self.issued_commands.append(self.input.text)
-        sys.__stdout__.write(f'{self.input.text}\n')
-        self.add_message(self.input.text)
+        sys.__stdout__.write(f'>{self.input.text}\n')
+        self.add_message(f'>{self.input.text}')
         command_name = self.input.text.split(' ')[0]
         command = Commands.commands.get(command_name)
         if command:
@@ -227,7 +290,7 @@ class ConsoleLayout(Canvas):
         self.input.edit = True
 
     def update_nameplate(self):
-        ray = raycast_mouse()
+        ray = raycast_screen()
         mdown = mouse_down()
         if ray.obj:
             self.nameplate.pos = world_to_screen(ray.point) + Vector((0, .01))
@@ -276,7 +339,7 @@ class ConsoleLayout(Canvas):
         if self.toggle in scene.pre_draw:
             scene.pre_draw.remove(self.toggle)
 
-    def add_message(self, msg, type='INFO', time=True, command=False):
+    def add_message(self, msg, type='LOG', time=True, command=False):
         if (msg == ' ' or self._prev_msg == ' ') and len(self.layout.children):
             self.layout.children[-1].text += msg
             self._prev_msg = msg
@@ -300,7 +363,7 @@ class ConsoleLayout(Canvas):
             if child is self.input:
                 continue
             child.pos[1] = y
-            y += cheight * 1.8
+            y += cheight * 1.5
             if child.pos[1] > lheight - cheight:
                 self.layout.remove_widget(child)
             child.opacity = 1 - (i * (1/amount))
@@ -315,7 +378,7 @@ def get_console(create=False, toggle_key='F12', visible=False) -> ConsoleLayout:
     if console is None and create:
         console = ConsoleLayout(toggle_key=toggle_key, visible=visible)
         consoles.put('default', console)
-        debug('On-Screen Console active; Check System Console for Errors.')
+        console.add_message('On-Screen Console active; Check System Console for Errors.', type='DEBUG')
     return console
 
 
@@ -328,9 +391,11 @@ class ansicol:
     END = '\033[0m'
 
 
-def write(msg, type):
+def write(*msg, type='LOG'):
+    msg = ' '.join([m.__repr__() if not isinstance(m, str) else m for m in msg])
     _f = {
-        'INFO': log,
+        'LOG': log,
+        'INFO': info,
         'DEBUG': debug,
         'WARNING': warning,
         'ERROR': error,
@@ -340,80 +405,89 @@ def write(msg, type):
     _f[type](msg)
 
 
-def log(msg, type='INFO'):
-    console = get_console()
-
-    if console is None:
-        print(msg)
-        return
-    show_time = True
-    sys.__stdout__.write(f'{msg}\n')
-    for msg in str(msg).split('\n'):
-        if msg:
-            msg = msg.replace('  ', '    ')
-            console.add_message(f'{msg}', type, time=show_time)
-            show_time = False
-
-
-def warning(msg):
-    console = get_console()
-    sysmsg = f'{ansicol.YELLOW}Warning{ansicol.END}: {msg}'
+def _create_msg(msg, log_lvl, type: str, color):
+    console = get_console(True)
     if console is None:
         print(sysmsg)
         return
-    show_time = True
-    sys.__stdout__.write(f'{sysmsg}\n')
-    for msg in str(msg).split('\n'):
-        if msg:
-            msg.replace('  ', '    ')
-            console.add_message(f'{msg}', 'WARNING', time=show_time)
-            show_time = False
-
-
-def error(msg):
-    console = get_console()
-    sysmsg = f'{ansicol.RED}Error{ansicol.END}: {msg}'
-    if console is None:
-        print(sysmsg)
-        # print(msg)
+    if console.log_level > log_lvl:
         return
+
+    msg = ' '.join([m.__repr__() if not isinstance(m, str) else m for m in msg])
+    msg += '\n'
+    sysmsg = f'{color}{type}{ansicol.END}: {msg}'
     show_time = True
-    sys.__stdout__.write(f'{sysmsg}\n')
+    sys.__stdout__.write(f'{sysmsg}')
     for msg in str(msg).split('\n'):
         if msg:
             msg.replace('  ', '    ')
-            console.add_message(f'{msg}', 'ERROR', time=show_time)
+            console.add_message(f'{msg}', type.upper(), time=show_time)
             show_time = False
+            if console.log_file is not None:
+                with open(console.log_file, 'a') as f:
+                    date = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+                    f.write(f'[{date}][{type}]\t{msg}\n')
 
 
-def success(msg):
-    console = get_console()
-    sysmsg = f'{ansicol.GREEN}Success{ansicol.END}: {msg}'
+def _print(msg):
+    console = get_console(True)
     if console is None:
         print(sysmsg)
         return
+
+    msg = ''.join([m.__repr__() if not isinstance(m, str) else m for m in msg])
+    sysmsg = msg
     show_time = True
-    sys.__stdout__.write(f'{sysmsg}\n')
+    sys.__stdout__.write(f'{sysmsg}')
     for msg in str(msg).split('\n'):
         if msg:
             msg.replace('  ', '    ')
-            console.add_message(f'{msg}', 'SUCCESS', time=show_time)
+            console.add_message(f'{msg}', 'LOG', time=show_time)
             show_time = False
+            if console.log_file is not None:
+                with open(console.log_file, 'a') as f:
+                    date = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+                    f.write(f'[{date}]\t{msg}\n')
 
 
-def debug(msg):
-    console = get_console()
-    sysmsg = f'{ansicol.BYELLOW}Debug{ansicol.END}: {msg}'
-    if console is None:
-        print(sysmsg)
-        return
-    show_time = True
-    sys.__stdout__.write(f'{sysmsg}\n')
-    for msg in str(msg).split('\n'):
-        if msg:
-            msg.replace('  ', '    ')
-            console.add_message(f'{msg}', 'DEBUG', time=show_time)
-            show_time = False
+def log(*msg, type='LOG'):
+    """Write to the console in a generic fashion.
+    
+    If `ConsoleLayout.log_directory` is defined, the message will be added to the log file.
+
+    Args:
+        type (str, optional): Message type of ['LOG', 'SUCCESS', 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']. Defaults to 'LOG'.
+    """
+    _create_msg(msg, 5, type, '')
+
+
+def success(*msg):
+    """Write to the console with green colors if the `ConsoleLayout.log_level` is 0.
+    
+    If `ConsoleLayout.log_directory` is defined, the message will be added to the log file.
+    """
+    _create_msg(msg, 0, 'Success', ansicol.GREEN)
+
+
+def debug(*msg):
+    _create_msg(msg, 1, 'Debug', ansicol.BYELLOW)
+
+
+def info(*msg):
+    _create_msg(msg, 2, 'Info', ansicol.BBLUE)
+
+
+def warning(*msg):
+    _create_msg(msg, 3, 'Warning', ansicol.YELLOW)
+
+
+def error(*msg):
+    _create_msg(msg, 4, 'Error', ansicol.RED)
+
+
+def critical(*msg):
+    _create_msg(msg, 5, 'Critical', ansicol.RED)
+
 
 nodeprefs = bpy.context.preferences.addons.get('bge_netlogic', None)
 if nodeprefs and getattr(bpy.context.scene, 'use_screen_console', True):
@@ -435,12 +509,32 @@ class Commands:
 
 def add_command(command):
     Commands.add_command(command)
+    return command
 
 
 def console_command(command):
     Commands.add_command(command)
+    return command
 
 class Command:
+    """
+    Command to be executed via the On-Screen Console.
+
+    Set the following attributes on subclass:
+    - `command`: id of the command
+    - `usage`: sequence of argument names (for a command "setres 1920 1080", put "RES_X RES_Y")
+    - `arg_count` (default 0): number of possible arguments
+    - `description`: Shown when executing "help -d" command
+
+    Also, override 
+    ```
+    @classmethod
+    def execute(cls, args):
+        ...
+    ```
+
+    If decorated with `@console_command`, this command will be added to the Console when imported.
+    """
     command = ''
     usage = ''
     arg_count = 0
@@ -613,7 +707,7 @@ class FontSizeCommand(Command):
     @classmethod
     def execute(cls, args):
         size = args[0]
-        get_console().font_size = int(size)
+        get_console(True).font_size = int(size)
 
 
 @console_command
@@ -637,6 +731,6 @@ class ToggleDebugCommand(Command):
 
     @classmethod
     def execute(cls, args):
-        console = get_console()
+        console = get_console(True)
         console.info_mode = not console.info_mode
         debug(f'Console Debug Mode is now {"ON" if console.info_mode else "OFF"}.')

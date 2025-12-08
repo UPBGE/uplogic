@@ -14,5 +14,5 @@ class ULPrintValue(ULActionNode):
         if not self.get_condition():
             return
         value = self.get_input(self.value)
-        write(value, self.msg_type)
+        write(value, type=self.msg_type)
         self._done = True

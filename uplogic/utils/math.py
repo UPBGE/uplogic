@@ -4,6 +4,7 @@ from mathutils import Matrix
 from bge import logic
 from bge.types import KX_GameObject as GameObject
 import math
+from typing import overload
 
 
 def matmul (a, b):
@@ -106,9 +107,9 @@ def _lerp(a, b, fac):
 def clamp(value: float, lower: float = 0.0, upper: float = 1.0) -> float:
     """Clamp a value in between two other values.
 
-    :param `value`: input value
-    :param `min`: minimum value
-    :param `max`: maximum value
+    :param value: input value
+    :param min: minimum value
+    :param max: maximum value
 
     :returns: clamped value as float
     """
@@ -120,9 +121,9 @@ def clamp(value: float, lower: float = 0.0, upper: float = 1.0) -> float:
 def cycle(value: float, min: float = 0, max: float = 1) -> float:
     """Clamp a value in between two other values.
 
-    :param `value`: input value
-    :param `min`: minimum value
-    :param `max`: maximum value
+    :param value: input value
+    :param min: minimum value
+    :param max: maximum value
 
     :returns: clamped value as float
     """
@@ -138,9 +139,9 @@ def cycle(value: float, min: float = 0, max: float = 1) -> float:
 def vec_clamp(vec: Vector, min: float = 0, max: float = 1) -> Vector:
     """Clamp length of a vector.
 
-    :param `value`: `Vector`
-    :param `min`: minimum length
-    :param `max`: maximum length
+    :param value: `Vector`
+    :param min: minimum length
+    :param max: maximum length
 
     :returns: clamped vector as float
     """
@@ -157,9 +158,9 @@ def vec_clamp(vec: Vector, min: float = 0, max: float = 1) -> Vector:
 def interpolate(a: float, b: float, fac: float, threshold: float = 0.001) -> float:
     """Interpolate between 2 values using a factor.
 
-    :param `a`: starting value
-    :param `b`: target value
-    :param `fac`: interpolation factor
+    :param a: starting value
+    :param b: target value
+    :param fac: interpolation factor
 
     :returns: calculated value as float
     """
@@ -171,9 +172,9 @@ def interpolate(a: float, b: float, fac: float, threshold: float = 0.001) -> flo
 def lerp(a: float, b: float, fac: float, threshold: float = 0.001) -> float:
     """Interpolate between 2 values using a factor.
 
-    :param `a`: starting value
-    :param `b`: target value
-    :param `fac`: interpolation factor
+    :param a: starting value
+    :param b: target value
+    :param fac: interpolation factor
 
     :returns: calculated value as float
     """
@@ -186,7 +187,7 @@ def vec_abs(vec):
     """Make every value of this vector positive.\n
     Only supports less than 4 Dimensions.
 
-    :param `a`: `Vector`
+    :param a: `Vector`
 
     :returns: positive vector
     """
@@ -200,9 +201,9 @@ def vec_abs(vec):
 def get_angle(a: Vector, b: Vector, up=Vector((0, 0, 1))) -> float:
     """Get the angle between the direction from a to b and up.
 
-    :param `a`: `Vector` a
-    :param `b`: `Vector` b
-    :param `up`: compare direction
+    :param a: `Vector` a
+    :param b: `Vector` b
+    :param up: compare direction
 
     :returns: calculated value as float
     """
@@ -215,9 +216,9 @@ def get_angle(a: Vector, b: Vector, up=Vector((0, 0, 1))) -> float:
 def get_raw_angle(a: Vector, b: Vector) -> float:
     """Get the angle between the direction from a to b and up.
 
-    :param `a`: `Vector` a
-    :param `b`: `Vector` b
-    :param `up`: compare direction
+    :param a: `Vector` a
+    :param b: `Vector` b
+    :param up: compare direction
 
     :returns: calculated value as float
     """
@@ -232,9 +233,9 @@ def angle_signed(a: Vector, b: Vector, up: Vector) -> float:
 def get_direction(a, b, local=False) -> Vector:
     """Get the direction from one vector to another.
 
-    :param `a`: `Vector` a
-    :param `b`: `Vector` b
-    :param `local`: use local space (position only)
+    :param a: `Vector` a
+    :param b: `Vector` b
+    :param local: use local space (position only)
 
     :returns: direction as `Vector`
     """
@@ -251,14 +252,17 @@ def get_direction(a, b, local=False) -> Vector:
 def map_range(value: float, in_min: float, in_max: float, out_min: float, out_max: float, clamp: bool = False) -> float:
     """Map a value from one range to another.
     
-    :param `value`: Value to be remapped.
-    :param `in_min`: Lower end of the original range.
-    :param `in_max`: Upper end of the original range.
-    :param `out_min`: Lower end of the new range.
-    :param `out_max`: Upper end of the new range.
-    :param `clamp`: Clamp the modified value.
+    :param value: Value to be remapped.
+    :param in_min: Lower end of the original range.
+    :param in_max: Upper end of the original range.
+    :param out_min: Lower end of the new range.
+    :param out_max: Upper end of the new range.
+    :param clamp: Clamp the modified value.
     """
-    result = (value - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
+    div = (in_max - in_min)
+    if div == 0:
+        return out_max
+    result = (value - in_min) * (out_max - out_min) / div + out_min
     if out_min > out_max:
         out_min, out_max = out_max, out_min
     if clamp and result < out_min:
@@ -271,12 +275,12 @@ def map_range(value: float, in_min: float, in_max: float, out_min: float, out_ma
 def map_range_vector(value: float, in_min: float, in_max: float, out_min: float, out_max: float, clamp: bool = False) -> float:
     """Map a vector from one range to another.
 
-    :param `value`: Value to be remapped.
-    :param `in_min`: Lower end of the original range.
-    :param `in_max`: Upper end of the original range.
-    :param `out_min`: Lower end of the new range.
-    :param `out_max`: Upper end of the new range.
-    :param `clamp`: Clamp the modified value.
+    :param value: Value to be remapped.
+    :param in_min: Lower end of the original range.
+    :param in_max: Upper end of the original range.
+    :param out_min: Lower end of the new range.
+    :param out_max: Upper end of the new range.
+    :param clamp: Clamp the modified value.
     """
     outvec = Vector(value)
     for i in range(len(value)):
@@ -298,8 +302,8 @@ def get_bitmask(
 ) -> int:
     """Get the collision bitmask value for the provided slot indices. Slots range from 0 to 15.
     
-    :param `slots`: Arbitrary arguments, slots from 0-15 as int.
-    :param `all`: Get the bitmask value of all slots combined, ignores `slots` argument."""
+    :param slots: Arbitrary arguments, slots from 0-15 as int.
+    :param all: Get the bitmask value of all slots combined, ignores `slots` argument."""
     if not all and not slots:
         return 0
     mask = 0
@@ -408,3 +412,4 @@ def rotate_by_euler(origin: Vector, pivot: Vector, angles: Euler):
     transmat = angles.to_matrix()
 
     return pivot + origin @ transmat
+

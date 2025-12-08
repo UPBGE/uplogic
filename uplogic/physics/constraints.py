@@ -9,6 +9,7 @@ from uplogic.utils.objects import set_curve_points
 from uplogic.utils.objects import xrot_to
 from uplogic.utils.objects import yrot_to
 from uplogic.utils.objects import zrot_to
+from uplogic import console
 
 
 CONSTRAINT_TYPES = {
@@ -31,13 +32,13 @@ def create_constraint(
 ) -> GameConstraint:
     """Wrapper function for `bge.constraints.createConstraint()`. Creates a constraint
 
-    :param `obj`: Object the constraint will be applied to.
-    :param `target`: Target for the constraint.
-    :param `constraint_type`: Type of the constraint. One of `['point', 'hinge', 'angular', 'conetwist', 'generic6dof']`.
-    :param `pivot`: Point of application for the constraint.
-    :param `limit`: Limit movement of the object (Like a doorstop).
-    :param `linked_collision`: Enable/Disable collision between obj and target.
-    :param `local`: Use obj's local space.
+    :param obj: Object the constraint will be applied to.
+    :param target: Target for the constraint.
+    :param constraint_type: Type of the constraint. One of `['point', 'hinge', 'angular', 'conetwist', 'generic6dof']`.
+    :param pivot: Point of application for the constraint.
+    :param limit: Limit movement of the object (Like a doorstop).
+    :param linked_collision: Enable/Disable collision between obj and target.
+    :param local: Use obj's local space.
     """
     if not local:
         pivot[0] -= obj.worldPosition.x
@@ -60,7 +61,7 @@ def create_constraint(
 def remove_constraint(constraint: GameConstraint) -> None:
     """Wrapper function for `bge.constraints.removeConstraint()`. Creates a constraint
 
-    :param `constraint`: The constraint to remove.
+    :param constraint: The constraint to remove.
     """
     constraints.removeConstraint(constraint.getConstraintId())
 
@@ -78,7 +79,7 @@ class TrackTo():
         factor: float = 1
     ) -> None:
         if self._deprecated:
-            print('ULTrackTo class will be renamed to "TrackTo" in future releases!')
+            console.warning('ULTrackTo class will be renamed to "TrackTo" in future releases!')
         self._axis = None
         self._target = None
         self.game_object = game_object
@@ -98,7 +99,7 @@ class TrackTo():
         elif isinstance(val, Vector):
             self._target = val
         else:
-            print('Could not set TrackTo target!')
+            console.error('Could not set TrackTo target!')
 
     @property
     def axis(self):
@@ -134,17 +135,17 @@ class Spring():
     be pulled towards each other if the string is streched, optionally they will
     be pushed apart when the spring is being compacted.
 
-    :param `origin`: First connection point of the spring.
-    :param `target`: Second connection point of the spring.
-    :param `rigid_body_origin`: Object to be influenced by the spring (optional).
-    :param `rigid_body_target`: Object to be influenced by the spring (optional).
-    :param `stiffness`: Amount the spring will bounce back.
-    :param `max_force`: Maximum force the spring will use.
-    :param `use_push`: Push the objects apart when spring is compressed.
-    :param `use_breaking`: Remove the constraint when spring is pulled too much.
-    :param `break_threshold`: Amount of strain the spring will endure.
-    :param `curve`: Set a curve object to fit the spring.
-    :param `visualize`: Enable a visual representation of the spring.
+    :param origin: First connection point of the spring.
+    :param target: Second connection point of the spring.
+    :param rigid_body_origin: Object to be influenced by the spring (optional).
+    :param rigid_body_target: Object to be influenced by the spring (optional).
+    :param stiffness: Amount the spring will bounce back.
+    :param max_force: Maximum force the spring will use.
+    :param use_push: Push the objects apart when spring is compressed.
+    :param use_breaking: Remove the constraint when spring is pulled too much.
+    :param break_threshold: Amount of strain the spring will endure.
+    :param curve: Set a curve object to fit the spring.
+    :param visualize: Enable a visual representation of the spring.
     """
 
     _deprecated = False
@@ -165,7 +166,7 @@ class Spring():
         visualize: bool = False
     ) -> None:
         if self._deprecated:
-            print('ULSpring class will be renamed to "Spring" in future releases!')
+            console.warning('ULSpring class will be renamed to "Spring" in future releases!')
         self.force = 0
         if isinstance(origin, tuple) or isinstance(origin, list):
             origin = Vector((origin))
@@ -194,7 +195,7 @@ class Spring():
     
     @points.setter
     def points(self, val):
-        print("Attribute 'points' is read-only")
+        console.debug("Attribute 'points' is read-only")
 
     @property
     def active(self):
@@ -202,7 +203,7 @@ class Spring():
 
     @active.setter
     def active(self, val):
-        print("Attribute 'active' is read-only")
+        console.debug("Attribute 'active' is read-only")
 
     def remove(self):
         pre_draw = logic.getCurrentScene().pre_draw

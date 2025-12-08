@@ -1,5 +1,5 @@
 from uplogic.nodes import ULParameterNode
-from uplogic.utils import debug
+from uplogic import console
 import bpy
 import json
 import os
@@ -30,12 +30,12 @@ class ULLoadVariable(ULParameterNode):
             f = open(path, 'r')
             data = json.load(f)
             if name not in data:
-                debug(f'"{name}" is not a saved Variabe!')
+                console.debug(f'"{name}" is not a saved Variabe!')
                 return self.get_input(self.default_value)
             f.close()
             return data.get(name)
         else:
-            debug('No saved variables!')
+            console.debug('No saved variables!')
             return self.get_input(self.default_value)
 
 

@@ -1,5 +1,6 @@
 from bge.types import BL_ArmatureChannel, BL_ArmatureObject
 from bge.logic import ROT_MODE_XYZ
+from uplogic import console
 from uplogic.utils.objects import GameObject
 from mathutils import Vector, Quaternion, Matrix, Euler
 from uplogic.utils.visualize import draw_line
@@ -121,7 +122,7 @@ class RigBone():
 
     @center.setter
     def center(self, val):
-        print('RigBone.center is read-only!')
+        console.debug('RigBone.center is read-only!')
 
     @property
     def center_local(self) -> Vector:
@@ -129,7 +130,7 @@ class RigBone():
 
     @center_local.setter
     def center_local(self, val):
-        print('RigBone.center_local is read-only!')
+        console.debug('RigBone.center_local is read-only!')
 
     @property
     def center_pose(self) -> Vector:
@@ -137,7 +138,7 @@ class RigBone():
 
     @center_pose.setter
     def center_pose(self, val):
-        print('RigBone.center_pose is read-only!')
+        console.debug('RigBone.center_pose is read-only!')
 
     @property
     def inherit_rotation(self):

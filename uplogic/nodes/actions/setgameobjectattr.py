@@ -1,5 +1,5 @@
 from uplogic.nodes import ULActionNode
-from uplogic.utils import debug
+from uplogic import console
 
 
 class ULSetGameObjectAttribue(ULActionNode):
@@ -26,7 +26,7 @@ class ULSetGameObjectAttribue(ULActionNode):
         if hasattr(value, attribute):
             value = getattr(value, attribute).copy()
         if not hasattr(game_object, attribute):
-            debug(
+            console.debug(
                 'Set Object Data Node: {} has no attribute {}!'
                 .format(game_object, attribute)
             )

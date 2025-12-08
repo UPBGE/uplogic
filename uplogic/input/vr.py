@@ -3,6 +3,7 @@ from mathutils import Quaternion
 from mathutils import Matrix
 from mathutils import Vector
 from bge import logic
+from uplogic import console
 from bge.types import KX_GameObject as GameObject
 from uplogic.utils.errors import NoXRSessionError
 
@@ -24,15 +25,14 @@ class VRController():
     This wrapper provides `position`, `position_aim`, `orientation`,
     `orientation_aim`, `trigger` and `thumbstick` attributes.
 
-    :param `idx`: Controller index; 0 for left, 1 for right controller.
+    :param idx: Controller index; 0 for left, 1 for right controller.
     """
 
     _deprecated = False
 
     def __init__(self, idx: int=0) -> None:
         if self._deprecated:
-            from uplogic.console import warning
-            warning('Warning: ULControllerVR class will be renamed to "VRController" in future releases!')
+            console.warning('Warning: ULControllerVR class will be renamed to "VRController" in future releases!')
         self.idx = idx
         self.stick_threshold = 0.0
         self.session = bpy.context.window_manager.xr_session_state
@@ -46,7 +46,7 @@ class VRController():
 
     @position.setter
     def position(self, val):
-        print("Attribute 'position' of 'VRController' is read-only!")
+        console.debug("Attribute 'position' of 'VRController' is read-only!")
 
     @property
     def orientation(self) -> Matrix:
@@ -55,7 +55,7 @@ class VRController():
 
     @orientation.setter
     def orientation(self, val):
-        print("Attribute 'orientation' of 'VRController' is read-only!")
+        console.debug("Attribute 'orientation' of 'VRController' is read-only!")
 
     @property
     def position_aim(self) -> Vector:
@@ -64,7 +64,7 @@ class VRController():
 
     @position_aim.setter
     def position_aim(self, val):
-        print("Attribute 'position_aim' of 'VRController' is read-only!")
+        console.debug("Attribute 'position_aim' of 'VRController' is read-only!")
 
     @property
     def orientation_aim(self) -> Matrix:
@@ -73,7 +73,7 @@ class VRController():
 
     @orientation_aim.setter
     def orientation_aim(self, val):
-        print("Attribute 'orientation_aim' of 'VRController' is read-only!")
+        console.debug("Attribute 'orientation_aim' of 'VRController' is read-only!")
 
     @property
     def aim(self) -> Vector:
@@ -83,7 +83,7 @@ class VRController():
 
     @aim.setter
     def aim(self, val):
-        print("Attribute 'aim' of 'VRController' is read-only!")
+        console.debug("Attribute 'aim' of 'VRController' is read-only!")
 
     @property
     def trigger(self) -> float:
@@ -97,7 +97,7 @@ class VRController():
 
     @trigger.setter
     def trigger(self, val):
-        print("Attribute 'trigger' of 'VRController' is read-only!")
+        console.debug("Attribute 'trigger' of 'VRController' is read-only!")
 
     @property
     def thumbstick(self) -> Vector:
@@ -133,7 +133,7 @@ class VRController():
 
     @thumbstick.setter
     def thumbstick(self, val):
-        print("Attribute 'thumbstick' of 'VRController' is read-only!")
+        console.debug("Attribute 'thumbstick' of 'VRController' is read-only!")
 
 
 class ULControllerVR(VRController):
@@ -148,8 +148,7 @@ class VRHeadset():
 
     def __init__(self) -> None:
         if self._deprecated:
-            from uplogic.console import warning
-            warning('Warning: ULHeadsetVR class will be renamed to "VRHeadset" in future releases!')
+            console.warning('Warning: ULHeadsetVR class will be renamed to "VRHeadset" in future releases!')
         self.session = bpy.context.window_manager.xr_session_state
         if not self.session:
             raise NoXRSessionError
@@ -160,7 +159,7 @@ class VRHeadset():
 
     @position.setter
     def position(self, val):
-        print("Attribute 'position' of 'ULHeadsetVR' is read-only!")
+        console.debug("Attribute 'position' of 'ULHeadsetVR' is read-only!")
 
     @property
     def orientation(self) -> Matrix:
@@ -168,7 +167,7 @@ class VRHeadset():
 
     @orientation.setter
     def orientation(self, val):
-        print("Attribute 'orientation' of 'ULHeadsetVR' is read-only!")
+        console.debug("Attribute 'orientation' of 'ULHeadsetVR' is read-only!")
 
     def getAxisVect(self, vector):
         return self.orientation @ vector
@@ -185,7 +184,7 @@ class ULHeadsetVRWrapper(VRHeadset):
 
     @worldPosition.setter
     def worldPosition(self, val):
-        print("Attribute 'worldPosition' of 'ULHeadsetVRWrapper' is read-only!")
+        console.debug("Attribute 'worldPosition' of 'ULHeadsetVRWrapper' is read-only!")
 
     @property
     def worldOrientation(self) -> Matrix:
@@ -193,7 +192,7 @@ class ULHeadsetVRWrapper(VRHeadset):
 
     @worldOrientation.setter
     def worldOrientation(self, val):
-        print("Attribute 'worldOrientation' of 'ULHeadsetVRWrapper' is read-only!")
+        console.debug("Attribute 'worldOrientation' of 'ULHeadsetVRWrapper' is read-only!")
     
     def rayCast(
         self,
@@ -224,8 +223,7 @@ class VRCharacter():
         right_hand_object: GameObject = None
     ) -> None:
         if self._deprecated:
-            from uplogic.console import warning
-            warning('Warning: ULCharacterVR class will be renamed to "VRCharacter" in future releases!')
+            console.warning('Warning: ULCharacterVR class will be renamed to "VRCharacter" in future releases!')
         self.session = bpy.context.window_manager.xr_session_state
         if not self.session:
             raise NoXRSessionError
@@ -251,7 +249,7 @@ class VRCharacter():
 
     @position.setter
     def position(self, val):
-        print("Attribute 'position' of 'ULHeadsetVR' is read-only!")
+        console.debug("Attribute 'position' of 'ULHeadsetVR' is read-only!")
 
     @property
     def orientation(self) -> Matrix:
@@ -259,7 +257,7 @@ class VRCharacter():
 
     @orientation.setter
     def orientation(self, val):
-        print("Attribute 'orientation' of 'ULHeadsetVR' is read-only!")
+        console.debug("Attribute 'orientation' of 'ULHeadsetVR' is read-only!")
 
     @property
     def scale(self) -> float:
@@ -267,7 +265,7 @@ class VRCharacter():
 
     @scale.setter
     def scale(self, val):
-        print("Attribute 'scale' of 'ULHeadsetVR' is read-only!")
+        console.debug("Attribute 'scale' of 'ULHeadsetVR' is read-only!")
 
 
 class ULCharacterVR(VRCharacter):

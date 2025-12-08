@@ -1,5 +1,6 @@
 from uplogic.nodes import ULActionNode
 from bge.logic import getRealTime
+from uplogic import console
 
 
 class ULGetPerformanceProfile(ULActionNode):
@@ -55,5 +56,5 @@ class ULGetPerformanceProfile(ULActionNode):
             )
         self.data += '----------------------------------End Profile'
         if print_profile:
-            print(self.data)
+            console.log(self.data)
         self._done = True

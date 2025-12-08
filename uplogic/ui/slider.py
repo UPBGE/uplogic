@@ -19,13 +19,14 @@ class Slider(RelativeLayout):
         bar_width=.3,
         bar_color=(1, 1, 1, 1),
         bar_hover_color=(1, 1, 1, 1),
-        knob_size=1,
+        knob_size=[1, 1],
         knob_color=(.8, .8, .8, 1),
         knob_hover_color=(.8, .8, .8, 1),
         steps=-1,
         allow_bar_click=True,
         angle=0
     ):
+        self.square_knob = True
         self.bar = None
         self.knob = None
         self._horiz = orientation != 'vertical'
@@ -48,7 +49,7 @@ class Slider(RelativeLayout):
         if allow_bar_click:
             self.bar.on_hold = self._on_press
         self.knob = Button(size=(0, 0), bg_color=knob_color, click_color=knob_color, hover_color=knob_hover_color, valign='center', halign='center')
-        self.knob_size = knob_size
+        self.knob_size = [knob_size, knob_size] if isinstance(knob_size, float) else knob_size
         self.knob.on_hold = self._on_press
         self.add_widget(self.knob)
         self.steps = steps
@@ -138,20 +139,7 @@ class Slider(RelativeLayout):
     
     @value.setter
     def value(self, value):
-        newval = value
-        if self.steps > 0:
-            newval -= newval % (1 / self.steps)
-        newval = clamp(newval)
-        # print(newval)
-        if newval != self._value:
-            self._value = newval
-            self.on_value(self)
-        knob_size = (self.knob._draw_size[self._slide_axis] * .5)
-        self.knob.pos[self._slide_axis] = map_range(self._value, 0, 1, knob_size + self.border_width * .5, self._draw_size[self._slide_axis] - knob_size - self.border_width * .5)
-        size = self._draw_size
-        self.knob.pos[self._up_axis] = (size[1] * .5) if self._horiz else (size[0] * .5)
-        knob_width = (size[1] if self._horiz else size[0])
-        self.knob.size = (knob_width * self.knob_size - self.border_width, knob_width * self.knob_size - self.border_width)
+        self.set_value(value, self.on_value)
 
     def _on_press(self, widget):
         pos = self._draw_pos
@@ -164,6 +152,22 @@ class Slider(RelativeLayout):
             0,
             1
         )
+
+    def set_value(self, val, callback=None):
+        newval = val
+        if self.steps > 0:
+            newval -= newval % (1 / self.steps)
+        newval = clamp(newval)
+        if newval != self._value:
+            self._value = newval
+            if callback:
+                callback(self)
+        knob_size = (self.knob._draw_size[self._slide_axis] * .5)
+        self.knob.pos[self._slide_axis] = map_range(self._value, 0, 1, knob_size + self.border_width * .5, self._draw_size[self._slide_axis] - knob_size - self.border_width * .5)
+        size = self._draw_size
+        self.knob.pos[self._up_axis] = (size[1] * .5) if self._horiz else (size[0] * .5)
+        knob_width, knob_height = (size[1], size[0]) if self._horiz else (size[0], size[1])
+        self.knob.size = (knob_width * self.knob_size[0] - self.border_width, knob_width if self.square_knob else knob_height * self.knob_size[1] - self.border_width)
 
     def on_hold(self, widget):
         pass
@@ -199,6 +203,7 @@ class FrameSlider(Slider):
     ):
         self.bar = None
         self.knob = None
+        self.square_knob = True
         Widget.__init__(self, pos, size, (0, 0, 0, 0), relative, halign=halign, valign=valign, angle=angle)
         self._value = 0
         self._horiz = orientation != 'vertical'
@@ -218,7 +223,7 @@ class FrameSlider(Slider):
         self.border_width = border_width
         self._slide_axis = 0 if self._horiz else 1
         self._up_axis = 1 if self._horiz else 0
-        self.knob_size = 1
+        self.knob_size = [1, 1]
         if allow_bar_click:
             self.bar.on_hold = self._on_press
         self.knob = RelativeLayout(size=(1, 1), bg_color=bar_color, valign='center', halign='center')

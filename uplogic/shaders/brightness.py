@@ -3,10 +3,10 @@ from .shader import Filter2D
 
 glsl = """
 uniform sampler2D bgl_RenderedTexture;
-in vec4 bgl_TexCoord;
+// in vec4 bgl_TexCoord;
 uniform float brightness;
 
-out vec4 fragColor;
+// out vec4 fragColor;
 
 void main() {
     fragColor = texture(bgl_RenderedTexture, bgl_TexCoord.xy) * brightness;

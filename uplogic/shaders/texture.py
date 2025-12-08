@@ -102,10 +102,18 @@ class Mask(Texture):
 
     glsl = """
 uniform sampler2D bgl_RenderedTexture;
+uniform float bgl_RenderedTextureWidth;
+uniform float bgl_RenderedTextureHeight;
+vec2 resolution = vec2(bgl_RenderedTextureWidth, bgl_RenderedTextureHeight);
+
 uniform sampler2D tex;
 uniform float opacity;
 uniform vec2 pos;
 uniform vec2 size;
+uniform float threshold;
+uniform int blur_samples;
+uniform int blur_quality;
+uniform int blur_radius;
 
 in vec4 bgl_TexCoord;
 
@@ -119,6 +127,7 @@ float map_range(float value, float in_min, float in_max, float out_min, float ou
 
 void main()
 {
+    float Pi = 6.28318530718;
 
     vec2 texcoord = bgl_TexCoord.xy;
     float opa = opacity;
@@ -132,7 +141,76 @@ void main()
         map_range(texcoord.y, pos.y, pos.y + size.y, 0, 1)
     );
 
-    vec4 mask_frag = mix(vec4(1.0), texture(tex, texMap), opa);
-    fragColor = texture(bgl_RenderedTexture, texcoord) * mask_frag;
+    vec4 mask = mix(vec4(1.0), texture(tex, texMap), opa);
+
+    vec2 radius = blur_radius / resolution.xy;
+
+    for (float d = 0.0; d < Pi; d += Pi / 15)
+    {
+		for(float i = 1.0; i <= 1.0; i += 1.0)
+        {
+			mask += texture(tex, texcoord - vec2(cos(d), sin(d)) * radius * i);
+        }
+    }
+    mask /= blur_samples;
+
+    mask *= vec4(1 + threshold);
+    mask -= vec4(threshold);
+
+    fragColor = texture(bgl_RenderedTexture, texcoord) * clamp(mask, 0.0, 1.0);
 }
 """
+
+    def __init__(
+        self,
+        texture: bpy.types.Image = None,
+        opacity: float = 1.0,
+        pos=Vector((0, 0)),
+        size=Vector((1, 1)),
+        threshold=0.0,
+        blur_samples=15,
+        blur_radius=0.003,
+        idx: int = None
+    ) -> None:
+        texture = bpy.data.images.get(str(texture), texture)
+        if not isinstance(texture, bpy.types.Image):
+            error("'Texture': first argument requires an object of type 'bpy.types.Image'!")
+            return
+        texture.gl_load()
+        self.free_textures = True
+        super().__init__(texture=texture, opacity=opacity, pos=pos, size=size, idx=idx)
+        self.uniforms.update({
+            'blur_samples': int(blur_samples),
+            'blur_radius': int(blur_radius),
+            'threshold': float(threshold)
+        })
+        self._uniforms.update({
+            'blur_samples': self.uniforms,
+            'blur_radius': self.uniforms,
+            'threshold': self.uniforms,
+            'blur_quality': self.uniforms
+        })
+
+    @property
+    def blur_radius(self):
+        return self.uniforms['blur_radius']
+
+    @blur_radius.setter
+    def blur_radius(self, val):
+        self.uniforms['blur_radius'] = int(val)
+
+    @property
+    def blur_samples(self):
+        return self.uniforms['blur_samples']
+
+    @blur_samples.setter
+    def blur_samples(self, val):
+        self.uniforms['blur_samples'] = int(val)
+
+    @property
+    def threshold(self):
+        return self.uniforms['threshold']
+
+    @threshold.setter
+    def threshold(self, val):
+        self.uniforms['threshold'] = float(val)

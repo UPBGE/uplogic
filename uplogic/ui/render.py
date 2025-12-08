@@ -71,6 +71,6 @@ class RenderedTexture(Widget):
 
     def draw(self):
         self._shader.uniform_sampler("renderedTexture", self.buffer.texture)
-        super()._setup_draw()
+        self._setup_draw()
         self._batch.draw(self._shader)
         super().draw()

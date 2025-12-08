@@ -1,5 +1,6 @@
 from bge import logic
 from uplogic.nodes import ULActionNode
+from uplogic import console
 
 
 class ULGamepadVibration(ULActionNode):
@@ -26,7 +27,7 @@ class ULGamepadVibration(ULActionNode):
             return
         joystick = logic.joysticks[index]
         if not joystick.hasVibration:
-            print('Joystick at index {} has no vibration!'.format(index))
+            console.debug('Joystick at index {} has no vibration!'.format(index))
             return
 
         joystick.strengthLeft = left

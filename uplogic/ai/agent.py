@@ -11,13 +11,13 @@ from mathutils import Vector
 class Agent(NavContainer):
     """Simple AI Agent implementation that uses a Navigation Mesh.
 
-    :param `game_object`: The game object acting as the agent.
-    :param `speed`: The speed this agent will move at towards the target.
-    :param `threshold`: Reach threshold for Navigation Path points. If none is set, `speed` will be used as theshold.
-    :param `bevel`: Bevel distance at corners. This will cut corners outside of the navmesh.
-    :param `dynamic`: Whether to move the agent using forces or pure vectors.
-    :param `obstacle_mask`: Objects in this collision group will be recognized as obstacles. Set to `65535` for all objects.
-    :param `height`: Z-Offset for the path calculation.
+    :param game_object: The game object acting as the agent.
+    :param speed: The speed this agent will move at towards the target.
+    :param threshold: Reach threshold for Navigation Path points. If none is set, `speed` will be used as theshold.
+    :param bevel: Bevel distance at corners. This will cut corners outside of the navmesh.
+    :param dynamic: Whether to move the agent using forces or pure vectors.
+    :param obstacle_mask: Objects in this collision group will be recognized as obstacles. Set to `65535` for all objects.
+    :param height: Z-Offset for the path calculation.
     """
     def __init__(
             self,
@@ -64,14 +64,13 @@ class Agent(NavContainer):
                     normal = dat.direction.cross(Vector((0, 0, 1))).normalized()
                     normal1 = next_direction.cross(Vector((0, 0, 1))).normalized()
                     angle = dat.direction.to_2d().angle_signed(n.to_2d())
-                    dir = 1 if angle > 0 else -1
+                    direction = 1 if angle > 0 else -1
 
-                    handle_1 = dat.obj.worldPosition + normal * rad * dir
-                    handle_2 = dat.obj.worldPosition + normal1 * rad * dir
+                    handle_1 = dat.obj.worldPosition + normal * rad * direction
+                    handle_2 = dat.obj.worldPosition + normal1 * rad * direction
                     dist_to_next_1 = (handle_1 - pathpoints[0]).length
                     dist_to_next_2 = (handle_2 - pathpoints[0]).length
 
-                    # normal = dat.direction.cross(Vector((0, 0, 1))).normalized()
                     while (pathpoints[0] - self.game_object.worldPosition).length < (self.game_object.worldPosition - handle_1).length:
                         self.pop()
                     pathpoints.insert(0, handle_1)

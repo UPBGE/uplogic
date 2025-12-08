@@ -8,15 +8,15 @@ from ..widget import rotate2d
 class Layout(Widget):
     '''The Layout class allows you to arrange widgets in a specified area.
 
-    :param `pos`: Initial position of this widget in either pixels or factor.
-    :param `size`: Initial size of this widget in either pixels or factor.
-    :param `bg_color`: Color to draw in the area of the widget.
-    :param `relative`: Whether to use pixels or factor for size or pos; example: `{'pos': True, 'size': True}`.
-    :param `border_width`: Width (in pixels) of the border drawn around the area of the widget.
-    :param `border_color`: Color to use for drawing the border.
-    :param `halign`: Horizontal alignment of the widget, can be (`left`, `center`, `right`).
-    :param `valign`: Vertical alignment of the widget, can be (`bottom`, `center`, `top`).
-    :param `angle`: Rotation in degrees of this widget around the pivot defined by the alignment.
+    :param pos`: Initial position of this widget in either pixels or factor.
+    :param size`: Initial size of this widget in either pixels or factor.
+    :param bg_color`: Color to draw in the area of the widget.
+    :param relative`: Whether to use pixels or factor for size or pos; example: `{'pos': True, 'size': True}`.
+    :param border_width`: Width (in pixels) of the border drawn around the area of the widget.
+    :param border_color`: Color to use for drawing the border.
+    :param halign`: Horizontal alignment of the widget, can be (`left`, `center`, `right`).
+    :param valign`: Vertical alignment of the widget, can be (`bottom`, `center`, `top`).
+    :param angle`: Rotation in degrees of this widget around the pivot defined by the alignment.
     '''
 
     def __init__(
@@ -55,7 +55,7 @@ class Layout(Widget):
         self._border_width = int(val)
 
     def draw(self):
-        super()._setup_draw()
+        self._setup_draw()
         gpu.state.line_width_set(self.border_width)
         gpu.state.point_size_set(self.border_width)
         col = self.bg_color.copy()
@@ -73,15 +73,15 @@ class Layout(Widget):
 class RelativeLayout(Layout):
     '''The RelativeLayout allows you to place widgets relative to the Layouts coordinates.
 
-    :param `pos`: Initial position of this widget in either pixels or factor.
-    :param `size`: Initial size of this widget in either pixels or factor.
-    :param `bg_color`: Color to draw in the area of the widget.
-    :param `relative`: Whether to use pixels or factor for size or pos; example: `{'pos': True, 'size': True}`.
-    :param `border_width`: Width (in pixels) of the border drawn around the area of the widget.
-    :param `border_color`: Color to use for drawing the border.
-    :param `halign`: Horizontal alignment of the widget, can be (`left`, `center`, `right`).
-    :param `valign`: Vertical alignment of the widget, can be (`bottom`, `center`, `top`).
-    :param `angle`: Rotation in degrees of this widget around the pivot defined by the alignment.
+    :param pos: Initial position of this widget in either pixels or factor.
+    :param size: Initial size of this widget in either pixels or factor.
+    :param bg_color: Color to draw in the area of the widget.
+    :param relative: Whether to use pixels or factor for size or pos; example: `{'pos': True, 'size': True}`.
+    :param border_width: Width (in pixels) of the border drawn around the area of the widget.
+    :param border_color: Color to use for drawing the border.
+    :param halign: Horizontal alignment of the widget, can be (`left`, `center`, `right`).
+    :param valign: Vertical alignment of the widget, can be (`bottom`, `center`, `top`).
+    :param angle: Rotation in degrees of this widget around the pivot defined by the alignment.
     '''
     @property
     def clipping(self):
@@ -102,15 +102,15 @@ class RelativeLayout(Layout):
 class FloatLayout(Layout):
     '''The FloatLayout allows you to place widgets in Canvas space.
 
-    :param `pos`: Initial position of this widget in either pixels or factor.
-    :param `size`: Initial size of this widget in either pixels or factor.
-    :param `bg_color`: Color to draw in the area of the widget.
-    :param `relative`: Whether to use pixels or factor for size or pos; example: `{'pos': True, 'size': True}`.
-    :param `border_width`: Width (in pixels) of the border drawn around the area of the widget.
-    :param `border_color`: Color to use for drawing the border.
-    :param `halign`: Horizontal alignment of the widget, can be (`left`, `center`, `right`).
-    :param `valign`: Vertical alignment of the widget, can be (`bottom`, `center`, `top`).
-    :param `angle`: Rotation in degrees of this widget around the pivot defined by the alignment.
+    :param pos: Initial position of this widget in either pixels or factor.
+    :param size: Initial size of this widget in either pixels or factor.
+    :param bg_color: Color to draw in the area of the widget.
+    :param relative: Whether to use pixels or factor for size or pos; example: `{'pos': True, 'size': True}`.
+    :param border_width: Width (in pixels) of the border drawn around the area of the widget.
+    :param border_color: Color to use for drawing the border.
+    :param halign: Horizontal alignment of the widget, can be (`left`, `center`, `right`).
+    :param valign: Vertical alignment of the widget, can be (`bottom`, `center`, `top`).
+    :param angle: Rotation in degrees of this widget around the pivot defined by the alignment.
     '''
 
     @property
@@ -167,17 +167,17 @@ class ArrangedLayout(Layout):
 class BoxLayout(ArrangedLayout):
     '''The BoxLayout allows you to automatically arrange widgets in a row or column.
 
-    :param `orientation`: Whether to arrange widgets horizontally or vertically; Can be (`'horizontal'`, `'vertical'`).
-    :param `pos`: Initial position of this widget in either pixels or factor.
-    :param `size`: Initial size of this widget in either pixels or factor.
-    :param `bg_color`: Color to draw in the area of the widget.
-    :param `relative`: Whether to use pixels or factor for size or pos; example: `{'pos': True, 'size': True}`.
-    :param `border_width`: Width (in pixels) of the border drawn around the area of the widget.
-    :param `border_color`: Color to use for drawing the border.
-    :param `spacing`: Pixels in between child widgets.
-    :param `halign`: Horizontal alignment of the widget, can be (`left`, `center`, `right`).
-    :param `valign`: Vertical alignment of the widget, can be (`bottom`, `center`, `top`).
-    :param `angle`: Rotation in degrees of this widget around the pivot defined by the alignment.
+    :param orientation: Whether to arrange widgets horizontally or vertically; Can be (`'horizontal'`, `'vertical'`).
+    :param pos: Initial position of this widget in either pixels or factor.
+    :param size: Initial size of this widget in either pixels or factor.
+    :param bg_color: Color to draw in the area of the widget.
+    :param relative: Whether to use pixels or factor for size or pos; example: `{'pos': True, 'size': True}`.
+    :param border_width: Width (in pixels) of the border drawn around the area of the widget.
+    :param border_color: Color to use for drawing the border.
+    :param spacing: Pixels in between child widgets.
+    :param halign: Horizontal alignment of the widget, can be (`left`, `center`, `right`).
+    :param valign: Vertical alignment of the widget, can be (`bottom`, `center`, `top`).
+    :param angle: Rotation in degrees of this widget around the pivot defined by the alignment.
     '''
     def __init__(
             self,
@@ -234,19 +234,19 @@ class BoxLayout(ArrangedLayout):
 class GridLayout(BoxLayout):
     '''The GridLayout allows you automatically arrange widgets in a grid.
 
-    :param `orientation`: Whether to arrange widgets horizontally or vertically; Can be (`'horizontal'`, `'vertical'`).
-    :param `pos`: Initial position of this widget in either pixels or factor.
-    :param `size`: Initial size of this widget in either pixels or factor.
-    :param `bg_color`: Color to draw in the area of the widget.
-    :param `relative`: Whether to use pixels or factor for size or pos; example: `{'pos': True, 'size': True}`.
-    :param `border_width`: Width (in pixels) of the border drawn around the area of the widget.
-    :param `border_color`: Color to use for drawing the border.
-    :param `spacing`: Pixels in between child widgets.
-    :param `cols`: How many columns this layout should have.
-    :param `rows`: How many rows this column should have.
-    :param `halign`: Horizontal alignment of the widget, can be (`left`, `center`, `right`).
-    :param `valign`: Vertical alignment of the widget, can be (`bottom`, `center`, `top`).
-    :param `angle`: Rotation in degrees of this widget around the pivot defined by the alignment.
+    :param orientation: Whether to arrange widgets horizontally or vertically; Can be (`'horizontal'`, `'vertical'`).
+    :param pos: Initial position of this widget in either pixels or factor.
+    :param size: Initial size of this widget in either pixels or factor.
+    :param bg_color: Color to draw in the area of the widget.
+    :param relative: Whether to use pixels or factor for size or pos; example: `{'pos': True, 'size': True}`.
+    :param border_width: Width (in pixels) of the border drawn around the area of the widget.
+    :param border_color: Color to use for drawing the border.
+    :param spacing: Pixels in between child widgets.
+    :param cols: How many columns this layout should have.
+    :param rows: How many rows this column should have.
+    :param halign: Horizontal alignment of the widget, can be (`left`, `center`, `right`).
+    :param valign: Vertical alignment of the widget, can be (`bottom`, `center`, `top`).
+    :param angle: Rotation in degrees of this widget around the pivot defined by the alignment.
     '''
 
     def __init__(
@@ -292,47 +292,64 @@ class GridLayout(BoxLayout):
         dsize = self._draw_size
         idx = 0
         _widget_sizes = []
-        _offset_y = 0
         if self.orientation == 'horizontal':
+            _offset_y = 0
             row = 0
             offset = 0
-            for widget in self.children:
+            for widget in filter(lambda widget: widget.show is True, self.children):
                 offset_y = _offset_y + (self.spacing if row else 0)
                 widget.relative['pos'] = False
                 wsize = widget._draw_size
                 widget.pos = [offset, dsize[1] - wsize[1] - offset_y]
-                _widget_sizes.append(widget._draw_pos[1])
+                _widget_sizes.append(widget._draw_size[1])
                 offset += wsize[0] + self.spacing
                 idx += 1
                 if idx >= self.cols:
-                    _offset_y = min(_widget_sizes)
-                    _widget_sizes = []
                     idx = 0
                     row += 1
+                    _offset_y = max(_widget_sizes)
+                    _widget_sizes = []
                     offset = 0
         if self.orientation == 'vertical':
+            _offset_x = 0
             col = 0
-            offset = dsize[1]
-            for widget in self.children:
-                offset_x = (self._draw_size[0] / (self.cols) + self.spacing) * col
-                offset -= widget._draw_size[0]
+            offset = 0
+            for widget in filter(lambda widget: widget.show is True, self.children):
+                offset_x = _offset_x + (self.spacing if col else 0)
                 widget.relative['pos'] = False
-                widget.pos = [offset_x, offset]
-                offset -= self.spacing
+                wsize = widget._draw_size
+                widget.pos = [offset_x, dsize[1] - wsize[1] - offset]
+                _widget_sizes.append(widget._draw_size[0])
+                offset += wsize[1] + self.spacing
                 idx += 1
                 if idx >= self.rows:
                     idx = 0
                     col += 1
-                    offset = dsize[1]
+                    _offset_x = max(_widget_sizes)
+                    _widget_sizes = []
+                    offset = 0
+            # col = 0
+            # offset = dsize[1]
+            # for widget in filter(lambda widget: widget.show is True, self.children):
+            #     offset_x = (self._draw_size[0] / (self.cols) + self.spacing) * col
+            #     offset -= widget._draw_size[0]
+            #     widget.relative['pos'] = False
+            #     widget.pos = [offset_x, offset]
+            #     offset -= self.spacing
+            #     idx += 1
+            #     if idx >= self.rows:
+            #         idx = 0
+            #         col += 1
+            #         offset = dsize[1]
 
 
 class PolarLayout(ArrangedLayout):
     '''The Polar Layout allows you automatically arrange widgets in a circular fashion.
 
-    :param `pos`: Initial position of this widget in either pixels or factor.
-    :param `relative`: Whether to use pixels or factor for size or pos; example: `{'pos': True}`.
-    :param `starting_angle`: Position angle of the first widget. 0 is to the right, 90 is up, 180 is left, 270 is down.
-    :param `angle`: Rotation in degrees of this widget around the pivot defined by the alignment.
+    :param pos: Initial position of this widget in either pixels or factor.
+    :param relative: Whether to use pixels or factor for size or pos; example: `{'pos': True}`.
+    :param starting_angle: Position angle of the first widget. 0 is to the right, 90 is up, 180 is left, 270 is down.
+    :param angle: Rotation in degrees of this widget around the pivot defined by the alignment.
     '''
 
     def __init__(

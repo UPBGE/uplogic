@@ -1,5 +1,5 @@
 from uplogic.nodes import ULActionNode
-from uplogic.utils import debug
+from uplogic import console
 
 
 class ULPopDictKey(ULActionNode):
@@ -30,7 +30,7 @@ class ULPopDictKey(ULActionNode):
         if key in dictionary:
             self.value = dictionary.pop(key)
         else:
-            debug("Dict Delete Key Node: Key '{}' not in Dict!".format(key))
+            console.debug("Dict Delete Key Node: Key '{}' not in Dict!".format(key))
             return
         self.new_dict = dictionary
         self._done = True
