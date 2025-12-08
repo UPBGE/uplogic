@@ -64,5 +64,9 @@ setup(
     #     'uplogic\\nodes\\logictree.pyx'
     # ]),
     zip_safe=True,
-    install_requires=['setuptools']
+    install_requires=['setuptools'],
+    extras_require=dict(
+        test=['pytest', 'coverage'],
+        docs=['sphinx', 'sphinx_rtd_theme']
+    )
 )
