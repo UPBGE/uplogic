@@ -4,7 +4,6 @@ from gpu_extras.batch import batch_for_shader
 import math
 from mathutils import Vector
 import bpy
-from bge import render
 import uuid
 
 try:
@@ -138,7 +137,7 @@ class Widget():
             children.insert(0, self)
 
     def register(self):
-        raise NotImplementedError
+        pass
 
     def toggle(self, *args):
         """Toggle the widget on/off."""
@@ -537,6 +536,7 @@ class Widget():
         self._build_shader()
 
     def check_inside(self, x, y):
+        from bge import render
         y = render.getWindowHeight() - y
         dpos = self.pos_pixel
         dsize = self.size_pixel

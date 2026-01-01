@@ -4,9 +4,9 @@ from .shader import Filter2D
 glsl = """
 uniform sampler2D bgl_RenderedTexture;
 
-in vec4 bgl_TexCoord;
+// in vec4 bgl_TexCoord;
+// out vec4 fragColor;
 uniform float gamma;
-out vec4 fragColor;
 
 void main()
 {
@@ -34,9 +34,9 @@ class Buffer(Filter2D):
 depth_glsl = """
 uniform sampler2D bgl_DepthTexture;
 
-in vec4 bgl_TexCoord;
+// in vec4 bgl_TexCoord;
+// out vec4 fragColor;
 uniform float gamma;
-out vec4 fragColor;
 
 void main()
 {

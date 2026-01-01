@@ -39,19 +39,22 @@ class Agent(NavContainer):
         self.dynamic = dynamic
 
     def set_navmesh(self, navmesh: KX_GameObject):
+        """Define what navmesh object should be used to calculate a path."""
         self.navmesh = navmesh
 
     @property
     def position(self):
+        """Current horizontal world position of this object. Z is set to 0 for distance calculation """
         pos = self.game_object.worldPosition.copy()
         pos.z = 0
         return pos
 
     @property
     def next_point(self) -> Vector:
-        if self._path.points:
+        """World position of next point to approach."""
+        if self._path:
             if self.obstacle_mask:
-                pathpoints = self._path.points
+                pathpoints = self._path
                 dat = raycast(self.game_object, self.game_object.worldPosition.xy.to_3d(), pathpoints[0], distance=5, mask=self.obstacle_mask)
                 if dat.obj and dat.obj.blenderObject.game.use_obstacle_create:
                     rad = dat.obj.blenderObject.game.obstacle_radius * 1.5
@@ -77,34 +80,40 @@ class Agent(NavContainer):
                     if (pathpoints[0] - handle_2).length > self.speed and dist_to_next_1 > dist_to_next_2:
                         pathpoints.insert(1, handle_2)
 
-            return self._path.points[0]
+            return self._path[0]
 
     def find_path(self, target: Vector, navmesh: KX_NavMeshObject = None):
+        """Calculate a path to the current target position."""
         return super().find_path(self.game_object.worldPosition, target, navmesh if navmesh else self.navmesh)
 
     def visualize(self, color=Vector((0, 1, 0))):
-        if self._path.points:
+        """Draw a line showing the currently calculated path."""
+        if self._path:
             compare = self.game_object.worldPosition.copy()
             compare.z = self.next_point.z
             draw_line(compare, self.next_point, color)
             return super().visualize(color)
 
     def pop(self, idx=0):
-        points = self._path.points
+        """Remove a point from the calculated path."""
+        points = self._path
         if not points:
             return None
         return points.pop(idx)
 
     def clean(self):
-       while self.next_point and self.distance < .3:
+        """Clean all points too close to the agent."""
+        while self.next_point and self.distance < .3:
            self.pop()
 
     @property
     def idle(self):
-        return not self._path.points
+        """True if agent has no path to follow."""
+        return not self._path
 
     @property
     def distance(self):
+        """Horizontal distance from agent to the next point."""
         compare = self.game_object.worldPosition.copy()
         np = self.next_point
         if np is None:
@@ -114,6 +123,7 @@ class Agent(NavContainer):
 
     @property
     def direction(self):
+        """Horizontal direction from agent to the next point."""
         compare = self.game_object.worldPosition.copy()
         np = self.next_point
         if np is None:
@@ -122,12 +132,14 @@ class Agent(NavContainer):
         return super().direction(compare)
 
     def lookat(self, factor=.1):
+        """Rotate the agent to look towards the next point."""
         next_point = self.next_point
         if next_point is not None:
             zrot_to(self.game_object, next_point, 1, factor)
 
     @property
     def threshold(self):
+        """Reach threshold. If set to 0, an appropriate threshold is calculated automatically."""
         if self._threshold >= 0:
             return self._threshold
         elif self.dynamic:
@@ -140,11 +152,14 @@ class Agent(NavContainer):
         self._threshold = val
 
     def move(self):
-        while self._path.points and self.distance < self.threshold:
+        """Move the agent to the target along the calculated path."""
+        while self._path and self.distance < self.threshold:
             self.pop()
-        if not self._path.points:
+        if not self._path:
             return
         if self.dynamic:
-            self.game_object.applyForce(self.direction * self.speed)
+            print(self.speed)
+            # self.game_object.applyForce(self.direction * self.speed)
+            self.game_object.worldLinearVelocity.xy = (self.direction * self.speed).xy
         else:
             self.game_object.applyMovement(self.direction * self.speed)

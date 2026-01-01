@@ -4,17 +4,18 @@ from bge.types import KX_NavMeshObject, KX_GameObject
 from ..utils.visualize import draw_path
 
 
-class NavPath:
-    def __init__(self):
-        self.points: list[Vector] = []
+class NavPath(list[Vector]):
+    """Sequence of points used for NavMesh Pathfinding."""
+    # def __init__(self):
+    #     self.points: list[Vector] = []
     
-    @property
-    def points(self) -> list[Vector]:
-        return self._points
+    # @property
+    # def points(self) -> list[Vector]:
+    #     return self._points
 
-    @points.setter
-    def points(self, val: list[Vector]):
-        self._points = val
+    # @points.setter
+    # def points(self, val: list[Vector]):
+    #     self._points = val
 
 
 class NavContainer(GameObject):
@@ -27,8 +28,8 @@ class NavContainer(GameObject):
 
     @property
     def next_point(self) -> Vector:
-        if self._path.points:
-            return self._path.points[0]
+        if self._path:
+            return self._path[0]
 
     def find_path(self, start: Vector, target: Vector, navmesh: KX_NavMeshObject):
         height = Vector((0, 0, self.height))
@@ -39,8 +40,8 @@ class NavContainer(GameObject):
 
         bevel = self.bevel
         if bevel:
-            # last_point = None
-            _points: list[Vector] = []
+            _points = self._path
+            _points.clear()
             for i, p in enumerate(points):
                 if i == 0 or i == len(points) - 1:
                     _points.append(p)
@@ -50,7 +51,6 @@ class NavContainer(GameObject):
                 next_direction = (next_point - p).normalized()
                 start_circle = p - direction * bevel
                 end_circle = p + next_direction * bevel
-
 
                 # XXX KEEP for debugging!
                 # up = direction.cross(next_direction).normalized()
@@ -63,23 +63,23 @@ class NavContainer(GameObject):
                 _points.append(end_circle)
             points = _points
 
-        self._path.points = points
-        return self._path.points
+        self._path = points
+        return self._path
 
     def visualize(self, color=Vector((1, 1, 1, 1))):
-        draw_path(self._path.points, color)
+        draw_path(self._path, color)
 
     def pop(self, idx=0):
-        return self._path.points.pop(idx)
+        return self._path.pop(idx)
 
     def distance(self, position: Vector):
-        if self._path.points:
+        if self._path:
             return (self.next_point - position).length
         else:
             return Vector((0, 0, 0))
 
     def direction(self, position: Vector):
-        if self._path.points:
+        if self._path:
             return (self.next_point - position).normalized()
         else:
             return Vector((0, 0, 0))

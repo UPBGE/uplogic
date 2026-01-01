@@ -13,9 +13,9 @@ uniform float opacity;
 uniform vec2 pos;
 uniform vec2 size;
 
-in vec4 bgl_TexCoord;
+// in vec4 bgl_TexCoord;
 
-out vec4 fragColor;
+// out vec4 fragColor;
 
 
 float map_range(float value, float in_min, float in_max, float out_min, float out_max){
@@ -115,9 +115,9 @@ uniform int blur_samples;
 uniform int blur_quality;
 uniform int blur_radius;
 
-in vec4 bgl_TexCoord;
+// in vec4 bgl_TexCoord;
 
-out vec4 fragColor;
+// out vec4 fragColor;
 
 
 float map_range(float value, float in_min, float in_max, float out_min, float out_max){

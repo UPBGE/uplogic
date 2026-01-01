@@ -11,8 +11,8 @@ uniform sampler2D bgl_RenderedTexture;
 uniform float bgl_RenderedTextureWidth;
 uniform float bgl_RenderedTextureHeight;
 uniform float power;
-in vec4 bgl_TexCoord;
-out vec4 fragColor;
+// in vec4 bgl_TexCoord;
+// out vec4 fragColor;
 
 //THIS NEEDS TO MATCH YOUR CAMERA uniforms---------------------
 uniform float znear;                    //Z-near

@@ -8,7 +8,7 @@ def read_file(name):
         return f.read()
 
 
-version = '5.1.0b'
+version = '5.1.1b'
 shortdesc = "Uplogic utility for UPBGE."
 longdesc = '\n\n'.join([read_file(name) for name in [
     'README.md',
@@ -42,6 +42,7 @@ setup(
         'uplogic.data',
         'uplogic.decorators',
         'uplogic.events',
+        'uplogic.handlers',
         'uplogic.input',
         'uplogic.network',
         'uplogic.network.osc',
@@ -50,6 +51,7 @@ setup(
         'uplogic.nodes.conditions',
         'uplogic.nodes.fmod',
         'uplogic.nodes.parameters',
+        'uplogic.nodes.ui',
         'uplogic.physics',
         'uplogic.serialize',
         'uplogic.shaders',

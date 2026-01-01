@@ -11,8 +11,8 @@ uniform float bgl_RenderedTextureWidth;
 uniform float bgl_RenderedTextureHeight;
 vec2 resolution = vec2(bgl_RenderedTextureWidth, bgl_RenderedTextureHeight);
 
-out vec4 fragColor;
-in vec4 bgl_TexCoord;
+// out vec4 fragColor;
+// in vec4 bgl_TexCoord;
 
 vec2 texcoord = bgl_TexCoord.xy;
 
@@ -23,7 +23,7 @@ void main()
 {
     float Pi = 6.28318530718;
 
-    float quality = 3.0;
+    float quality = 9.0;
    
     vec2 radius = power / resolution.xy;
     
@@ -39,7 +39,7 @@ void main()
 			color += texture(bgl_RenderedTexture, uv + vec2(cos(d), sin(d)) * radius * i);
         }
     }
-    color /= quality * samples - 15.0;
+    color /= quality;
     fragColor = color;
 }"""
 

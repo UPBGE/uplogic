@@ -28,5 +28,6 @@ class FModStartEventNode(ULActionNode):
             self.get_input(self.source),
             self.get_input(self.channel)
         )
+        print(self._evt)
         self._evt.occlusion_mask = self.mask
         self._done = True

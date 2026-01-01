@@ -53,8 +53,8 @@ uniform sampler2D bgl_RenderedTexture;
 uniform float bgl_RenderedTextureWidth;
 uniform float bgl_RenderedTextureHeight;
 
-in vec4 bgl_TexCoord;
-out vec4 fragColor;
+// in vec4 bgl_TexCoord;
+// out vec4 fragColor;
 
 vec2 fxaaQualityRcpFrame = 1.0 / vec2(bgl_RenderedTextureWidth, bgl_RenderedTextureHeight);
 

@@ -67,7 +67,7 @@ def init_glob_cats():
         None
     )
     if not cats:
-        console.debug('No global categories found in', bpy.data.scenes[scene.name], bpy.data.scenes)
+        # console.debug('No global categories found in', bpy.data.scenes[scene.name], bpy.data.scenes)
         return
 
     msg = ''
