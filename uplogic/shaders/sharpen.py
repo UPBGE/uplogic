@@ -17,9 +17,9 @@ uniform sampler2D bgl_RenderedTexture;
 uniform float bgl_RenderedTextureWidth;
 uniform float bgl_RenderedTextureHeight;
 
-in vec4 bgl_TexCoord;
+// in vec4 bgl_TexCoord;
 
-out vec4 fragColor;
+// out vec4 fragColor;
 
 void main(void)
 {

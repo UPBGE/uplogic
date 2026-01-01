@@ -2,7 +2,6 @@ from bge import logic
 import bpy
 import gpu
 from math import floor
-from uplogic.utils import clamp
 from os.path import isfile
 from uplogic import console
 
@@ -103,7 +102,7 @@ class ImageHandler:
 
     @frame.setter
     def frame(self, val):
-        self._frame = clamp(val, self.min_frame, self.max_frame)
+        self._frame = max(self.min_frame, min(val, self.max_frame))
         self.flush()
 
     def play(self):

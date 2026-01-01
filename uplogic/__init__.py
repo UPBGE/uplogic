@@ -1,4 +1,4 @@
-__version__ = '5.1.0b'
+__version__ = '5.1.1b'
 
 try:
     from . import console

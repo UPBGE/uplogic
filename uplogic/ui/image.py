@@ -2,12 +2,10 @@ from .widget import Widget
 import gpu
 import bpy
 from math import ceil
-from uplogic.utils import clamp
 from .widget import rotate2d
 from gpu_extras.batch import batch_for_shader
 from mathutils import Vector
-from os.path import isfile
-from uplogic.utils.handlers import ImageHandler
+from uplogic.handlers.imagehandler import ImageHandler
 
 
 

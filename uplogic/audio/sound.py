@@ -157,6 +157,19 @@ class ULSound():
     def uncache(self):
         self.aud_system.uncache(self)
 
+    def _get_soundpath(self, file):
+        soundpath = file
+        if not isinstance(soundpath, bpy.types.Sound):
+            soundpath = bpy.data.sounds.get(file, None)
+        if soundpath:
+            soundpath = soundpath.filepath
+        else:
+            soundpath = logic.expandPath(file)
+        if not isfile(soundpath):
+            console.error(f'Soundfile {soundpath} could not be loaded!')
+            return None
+        return soundpath
+
     @property
     def keep(self):
         return self.sound.keep
@@ -199,19 +212,17 @@ class Sound2D(ULSound):
     ):
         if self._deprecated:
             console.warning('Warning: ULSound2D class will be renamed to "Sound2D" in future releases!')
-        self.soundfile = None
         self.file = file
         self._volume = 1
         self.finished = False
         if not (file):
             return
         self.aud_system = get_audio_system(aud_sys)
-        soundfile = logic.expandPath(file)
         self.ignore_timescale = ignore_timescale
-        if not isfile(soundfile):
-            console.warning(f'Soundfile {soundfile} could not be loaded!')
+        soundpath = self._get_soundpath(file)
+        if soundpath is None:
             return
-        sound = self.soundfile = AudioCache.get(self.file, aud.Sound(soundfile))
+        sound = self.soundfile = AudioCache.get(self.file, aud.Sound(soundpath))
         lowpass = self.aud_system.lowpass or lowpass
         if lowpass:
             sound = self.soundfile = sound.lowpass(lowpass, .5)
@@ -351,12 +362,18 @@ class Sample2D(Sound2D):
         if not (file):
             return
         self.aud_system = get_audio_system(aud_sys)
-        soundfile = logic.expandPath(file)
         self.ignore_timescale = ignore_timescale
-        if not isfile(soundfile):
-            console.warning(f'Soundfile {soundfile} could not be loaded!')
+        soundpath = file
+        if not isinstance(soundpath, bpy.types.Sound):
+            soundpath = bpy.data.sounds.get(file, None)
+        if soundpath:
+            soundpath = soundpath.filepath
+        else:
+            soundpath = logic.expandPath(file)
+        soundpath = self._get_soundpath(file)
+        if soundpath is None:
             return
-        sound = self.soundfile = AudioCache.get(self.file, aud.Sound(soundfile))
+        sound = self.soundfile = AudioCache.get(self.file, aud.Sound(soundpath))
         if sample[1]:
             sound = sound.limit(sample[0], sample[1])
         if mono:
@@ -450,15 +467,10 @@ class Sound3D(ULSound):
         master_volume = self.aud_system.volume
         self.transition = transition_speed
         self.ignore_timescale = ignore_timescale
-        soundfile = bpy.data.sounds.get(file)
-        if soundfile:
-            soundfile = soundfile.filepath
-        else:
-            soundfile = logic.expandPath(file)
-        if not isfile(soundfile):
-            console.error(f'Soundfile {soundfile} could not be loaded!')
+        soundpath = self._get_soundpath(file)
+        if soundpath is None:
             return
-        sound = self.soundfile = AudioCache.get(self.file, aud.Sound(soundfile).rechannel(1))
+        sound = self.soundfile = AudioCache.get(self.file, aud.Sound(soundpath).rechannel(1))
         device = self.aud_system.device
         handle = self.sound = device.play(sound)
         handle.volume = 0
@@ -705,11 +717,10 @@ class Sample3D(Sound3D):
         master_volume = self.aud_system.volume
         self.transition = transition_speed
         self.ignore_timescale = ignore_timescale
-        soundfile = logic.expandPath(file)
-        if not isfile(soundfile):
-            console.warning(f'Soundfile {soundfile} could not be loaded!')
+        soundpath = self._get_soundpath(file)
+        if soundpath is None:
             return
-        sound = self.soundfile = AudioCache.get(self.file, aud.Sound(soundfile).rechannel(1))
+        sound = self.soundfile = AudioCache.get(self.file, aud.Sound(soundpath).rechannel(1))
         device = self.aud_system.device
         if sample[1]:
             sound = sound.limit(sample[0], sample[1])

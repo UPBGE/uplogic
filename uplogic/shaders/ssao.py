@@ -17,7 +17,7 @@ uniform sampler2D bgl_DepthTexture;
 uniform sampler2D bgl_RenderedTexture;
 uniform float bgl_RenderedTextureWidth;
 uniform float bgl_RenderedTextureHeight;
-in vec4 bgl_TexCoord;
+// in vec4 bgl_TexCoord;
 
 #define PI    3.14159265
 
@@ -55,7 +55,7 @@ float mistend = 100.0; //mist end
 bool onlyAO = false; //use only ambient occlusion pass?
 float lumInfluence = 0.7; //how much luminance affects occlusion
 
-out vec4 fragColor;
+// out vec4 fragColor;
 
 //--------------------------------------------------------
 

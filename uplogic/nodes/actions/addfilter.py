@@ -52,6 +52,8 @@ class ULAddFilter(ULActionNode):
                     self.filter.uniforms['density'] = self.get_input(self.density)
                 elif ftype in [1, 2, 'HBAO', 'SSAO']:
                     self.filter.uniforms['power'] = self.get_input(self.power)
+                elif ftype in [9, 'BLUR']:
+                    self.filter.uniforms['power'] = self.get_input(self.power)
             return
 
         if ftype in [0, 'FXAA']:

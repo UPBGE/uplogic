@@ -88,10 +88,10 @@ uniform float bgl_RenderedTextureHeight;
 float width = bgl_RenderedTextureWidth; //texture width
 float height = bgl_RenderedTextureHeight; //texture height
 
-in vec4 bgl_TexCoord;
+// in vec4 bgl_TexCoord;
 vec2 texcoord = bgl_TexCoord.xy;
 
-out vec4 fragColor;
+// out vec4 fragColor;
 
 vec2 texel = vec2(1.0/width,1.0/height);
 

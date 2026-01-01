@@ -14,10 +14,14 @@ import bge, bpy
 from bge.types import KX_GameObject
 from mathutils import Vector, Matrix
 
+try:
+    import pyfmodex
+except ImportError:
+    error('"pyfmodex" module missing, please install!')
 
 pypath = sys.executable
 if platform == "linux" or platform == "linux2":
-    error('FMod: Linux support not added yet.')
+    error('FMod: Linux support not added yet, please consider contributing.')
 elif platform == "darwin":
     error('FMod: OS X not supported, please consider contributing.')
 elif platform == "win32":
@@ -39,12 +43,9 @@ elif platform == "win32":
         os.environ["PYFMODEX_STUDIO_DLL_PATH"] = fmodstudioL
         os.environ["PYFMODEX_DLL_PATH"] = fmodL
         success('FMod libraries successfully loaded. Please check license at "https://www.fmod.com/licensing".')
+        success(f'Using pyfmodex version {pyfmodex.__version__}.')
 
 
-try:
-    import pyfmodex
-except ImportError:
-    error('"pyfmodex" module missing, please install!')
 
 
 from pyfmodex import studio as fstudio
@@ -53,7 +54,7 @@ from pyfmodex import flags
 
 
 version = pyfmodex.__version__.split('.')
-if int(version[1]) <= 7 and int(version[2]) <= 2:
+if int(version[1]) < 7 and int(version[2]) < 2:
     error(f'"pyfmodex" module version {version} not supported, please update!')
     sys.exit(0)
 
@@ -140,6 +141,7 @@ class Event(Sound):
         self._orientation = Matrix()
         self.channel = FMod.channels.get(channel, None)
         self.evt = FMod.studio.get_event(name).create_instance()
+        print('START')
         self.occlusion_mask = self.channel.occlusion_mask
         self.evt.start()
         self.velocity = Vector((0, 0, 0))

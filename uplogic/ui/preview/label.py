@@ -67,22 +67,6 @@ class Label(Widget):
     def text(self, val):
         self._text = str(val)
 
-    # @property
-    # def halign(self):
-    #     return self.text_halign
-
-    # @halign.setter
-    # def halign(self, val):
-    #     self.text_halign = str(val)
-
-    # @property
-    # def valign(self):
-    #     return self.text_valign
-
-    # @valign.setter
-    # def valign(self, val):
-    #     self.text_valign = str(val)
-
     @property
     def pos_abs(self):
         return self._draw_pos

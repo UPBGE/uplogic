@@ -452,7 +452,7 @@ def _print(msg):
 
 def log(*msg, type='LOG'):
     """Write to the console in a generic fashion.
-    
+
     If `ConsoleLayout.log_directory` is defined, the message will be added to the log file.
 
     Args:
@@ -463,29 +463,49 @@ def log(*msg, type='LOG'):
 
 def success(*msg):
     """Write to the console with green colors if the `ConsoleLayout.log_level` is 0.
-    
+
     If `ConsoleLayout.log_directory` is defined, the message will be added to the log file.
     """
     _create_msg(msg, 0, 'Success', ansicol.GREEN)
 
 
 def debug(*msg):
+    """Write to the console with bright yellow colors if the `ConsoleLayout.log_level` is 1 or less.
+
+    If `ConsoleLayout.log_directory` is defined, the message will be added to the log file.
+    """
     _create_msg(msg, 1, 'Debug', ansicol.BYELLOW)
 
 
 def info(*msg):
+    """Write to the console with blue colors if the `ConsoleLayout.log_level` is 2 or less.
+
+    If `ConsoleLayout.log_directory` is defined, the message will be added to the log file.
+    """
     _create_msg(msg, 2, 'Info', ansicol.BBLUE)
 
 
 def warning(*msg):
+    """Write to the console with yellow colors if the `ConsoleLayout.log_level` is 3 or less.
+
+    If `ConsoleLayout.log_directory` is defined, the message will be added to the log file.
+    """
     _create_msg(msg, 3, 'Warning', ansicol.YELLOW)
 
 
 def error(*msg):
+    """Write to the console with red colors if the `ConsoleLayout.log_level` is 4 or less.
+
+    If `ConsoleLayout.log_directory` is defined, the message will be added to the log file.
+    """
     _create_msg(msg, 4, 'Error', ansicol.RED)
 
 
 def critical(*msg):
+    """Write to the console with red colors if the `ConsoleLayout.log_level` is 5 or less.
+
+    If `ConsoleLayout.log_directory` is defined, the message will be added to the log file.
+    """
     _create_msg(msg, 5, 'Critical', ansicol.RED)
 
 
