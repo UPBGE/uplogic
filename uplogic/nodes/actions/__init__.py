@@ -158,3 +158,4 @@ from .setrigboneattribute import SetRigBoneAttributeNode
 from .setportal import SetPortalNode
 from .storevalue import ULStoreValue
 from .distributecurvepoints import DistributeCurvePointsNode
+from .togglelogictreeproperty import ToggleLogicTreePropertyNode

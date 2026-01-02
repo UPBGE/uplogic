@@ -11,19 +11,25 @@ KEYBOARD_EVENTS = logic.keyboard.inputs
 _keys_active = {}
 
 
+class DummyInput:
+
+    active = False
+    activated = False
+    released = False
+
+
 def key_event(key: str) -> SCA_InputEvent:
     '''Retrieve key event.\n
     Not intended for manual use.
     '''
     if isinstance(key, int):
-        key = KEYBOARD_EVENTS[key]
+        key = KEYBOARD_EVENTS.get(key, DummyInput())
     else:
-        key = KEYBOARD_EVENTS[
+        key = KEYBOARD_EVENTS.get(
         getattr(
             events, f'{key.upper()}KEY',
             (getattr(events, f'PAD{key.upper()}', None))
-        )
-    ]
+        ), DummyInput())
     if key:
         return key
     else:
