@@ -30,6 +30,7 @@ class ULAddObject(ULActionNode):
         full_copy = self.get_input(self.full_copy)
         reference = self.get_input(self.reference)
         scene = logic.getCurrentScene()
-        # self.obj = scene.addObject(name, reference, life, full_copy)
-        self.obj = add_object(name, reference, life, full_copy)
+        self.obj = scene.addObject(name, reference, life, full_copy)
+        # self.obj = add_object(name, reference, life, full_copy)
+        
         self._done = True
