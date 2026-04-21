@@ -31,12 +31,12 @@ class NavContainer(GameObject):
         if self._path:
             return self._path[0]
 
-    def find_path(self, start: Vector, target: Vector, navmesh: KX_NavMeshObject):
+    def find_path(self, start: Vector, target: Vector, navmesh: KX_NavMeshObject) -> NavPath:
         height = Vector((0, 0, self.height))
-        points: list[Vector] = [Vector(p) + height for p in navmesh.findPath(
+        points: NavPath = NavPath([Vector(p) + height for p in navmesh.findPath(
             start,
             target
-        )]
+        )])
 
         bevel = self.bevel
         if bevel:
@@ -66,19 +66,41 @@ class NavContainer(GameObject):
         self._path = points
         return self._path
 
-    def visualize(self, color=Vector((1, 1, 1, 1))):
+    def visualize(self, color: Vector = Vector((1, 1, 1, 1))):
+        """
+        Visualize the NavPath if there is one.
+
+        :param Vector color: Color of the NavPath.
+        """
         draw_path(self._path, color)
 
-    def pop(self, idx=0):
+    def pop(self, idx: int = 0):
+        """
+        Remove a point from the NavPath.
+
+        :param int idx: Index of the point.
+        """
         return self._path.pop(idx)
 
     def distance(self, position: Vector):
+        """
+        Distance from the next point of the NavPath to the target position.
+
+        :param position: Target position in world space.
+        :type position: Vector
+        """
         if self._path:
             return (self.next_point - position).length
         else:
-            return Vector((0, 0, 0))
+            return 0
 
     def direction(self, position: Vector):
+        """
+        Direction from the next point of the NavPath to the target position
+
+        :param position: Target position in world space.
+        :type position: Vector
+        """
         if self._path:
             return (self.next_point - position).normalized()
         else:
@@ -86,7 +108,13 @@ class NavContainer(GameObject):
 
 
 class NavMesh(NavContainer):
-    def __init__(self, game_obj: KX_NavMeshObject):
+    """
+    Logic container for a NavMesh
+
+    :param KX_NavMeshObject | KX_GameObject game_obj: GameObject to use as NavMesh. Must have a NavMesh generated.
+    """
+
+    def __init__(self, game_obj: KX_NavMeshObject | KX_GameObject):
         self.game_object: KX_NavMeshObject = game_obj
         self._path = NavPath()
 

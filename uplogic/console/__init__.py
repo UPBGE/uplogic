@@ -607,7 +607,7 @@ class DisableCommand(Command):
         obj = scene.getGameObjectFromObject(
             bpy.data.objects[object_name]
         )
-        obj.setVisible(False)
+        obj.setVisible(False, True)
         obj.suspendPhysics()
         obj.suspendDynamics()
 
@@ -626,7 +626,7 @@ class EnableCommand(Command):
         obj = scene.getGameObjectFromObject(
             bpy.data.objects[object_name]
         )
-        obj.setVisible(True)
+        obj.setVisible(True, True)
         obj.restorePhysics()
         obj.restoreDynamics()
 

@@ -211,15 +211,15 @@ class Mouse():
         """Staggered updated mouse position for pos difference calculation."""
         self.movement = (0, 0)
         """Movement of the mouse as a tuple `(x, y)`."""
-        self.active = True
+        self.enabled = True
 
     @property
-    def active(self):
+    def enabled(self):
         """Tracking state of this component."""
         return self.update in logic.getCurrentScene().pre_draw
 
-    @active.setter
-    def active(self, val):
+    @enabled.setter
+    def enabled(self, val):
         pre_draw = logic.getCurrentScene().pre_draw
         if val and self.update not in pre_draw:
             pre_draw.append(self.update)
@@ -339,7 +339,7 @@ class MouseLook():
         local: bool = True,
         front: int = 1,
         center_mouse: bool = True,
-        active: bool = True,
+        enabled: bool = True,
     ) -> None:
         if self._deprecated:
             from uplogic.console import warning
@@ -368,18 +368,30 @@ class MouseLook():
         self.local = local
         self.axis_lock = [False, False]
         self.reset_factor = 0
-        self.active = active
+        self.enabled = enabled
         self.get_data()
-        if active:
+        self._active = True
+        if enabled:
             self.mouse.position = self.screen_center
 
     @property
     def active(self):
-        """State of this component."""
-        return self.update in logic.getCurrentScene().pre_draw
+        return self._active
 
     @active.setter
     def active(self, val):
+        if val and self._active is False:
+            self.screen_center = (logic.mouse.position[0], logic.mouse.position[1])
+            self.center = Vector(self.screen_center)
+        self._active = bool(val)
+
+    @property
+    def enabled(self):
+        """State of this component."""
+        return self.update in logic.getCurrentScene().pre_draw
+
+    @enabled.setter
+    def enabled(self, val):
         pre_draw = logic.getCurrentScene().pre_draw
         if val and self.update not in pre_draw:
             pre_draw.append(self.update)
@@ -402,18 +414,22 @@ class MouseLook():
         
         :param reset: Reset the orientation of objects to their original
         state."""
-        self.active = False
+        self.enabled = False
         if reset:
             self.reset()
         self.initialized = False
 
     def disable(self):
         """Set this component to inactive."""
-        self.active = False
+        self.enabled = False
 
     def enable(self):
         """Set this component to active."""
-        self.active = True
+        self.enabled = True
+
+    @property
+    def movement(self):
+        return Vector((self._x, self._y))
 
     def reset(self, factor=1):
         """Reset the orientation of the objects in this component to their
@@ -422,7 +438,7 @@ class MouseLook():
         :param factor: Smoothing factor of the reset. If < 1, component will
         be reset smoothly."""
         if factor < 1:
-            self.active = False
+            self.enabled = False
             if self.reset_factor < 1:
                 self.obj.localOrientation = self.obj.localOrientation.lerp(self._defaults[0], factor)
                 self.head.localOrientation = self.head.localOrientation.lerp(self._defaults[1], factor)
@@ -453,7 +469,7 @@ class MouseLook():
 
     def update(self):
         """This is executed each frame if component is active."""
-        self.get_data()
+        # self.get_data()
         if not self.initialized and self.center_mouse:
             self.mouse.position = self.screen_center
             self.initialized = True
@@ -466,7 +482,7 @@ class MouseLook():
         invert = self.invert
         smooth = 1 - (self.smoothing * .99)
 
-        mouse_position = Vector(self.mouse.position)
+        mouse_position = Vector(self.mouse.position) if self.active else self.center
         offset = (mouse_position - self.center) * -0.2
 
         if invert[1] is True:
@@ -516,7 +532,7 @@ class MouseLook():
         rot[1-self.front] = offset.y
         if not self.axis_lock[1]:
             game_object_y.applyRotation((*rot, ), True)
-        if self.center_mouse and (Vector(self.mouse.position) - Vector(self.screen_center)).length > .00001:
+        if self.center_mouse and self.active and (Vector(self.mouse.position) - Vector(self.screen_center)).length > .00001:
             self.mouse.position = self.screen_center
             self._old_mouse_pos = self.mouse.position
         elif not self.center_mouse:

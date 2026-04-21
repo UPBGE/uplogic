@@ -6,6 +6,7 @@ from .widget import rotate2d
 from gpu_extras.batch import batch_for_shader
 from mathutils import Vector
 from uplogic.handlers.imagehandler import ImageHandler
+from uplogic.utils import clamp
 
 
 
@@ -102,7 +103,8 @@ class Image(Widget):
     ]
 
     constants = [
-        ('FLOAT', 'alpha')
+        ('FLOAT', 'alpha'),
+        ('FLOAT', 'saturation')
     ]
 
     samplers = [
@@ -123,8 +125,20 @@ class Image(Widget):
 
     void main()
     {
-        vec4 color = mix(vec4(0.0), texture(image, uv), alpha);
+        vec4 color = texture(image, uv);
+        
+        float power = clamp(saturation, 0.0, 1.0);
+
+        float grey = 0.21 * color.r + 0.71 * color.g + 0.07 * color.b;
+        color = vec4(
+            color.r * power + grey * (1.0 - power),
+            color.g * power + grey * (1.0 - power),
+            color.b * power + grey * (1.0 - power),
+            color.a
+        );
+        color = mix(vec4(0.0), color, alpha);
         FragColor = pow(color, vec4(0.5));
+
     }
     """
 
@@ -144,8 +158,20 @@ class Image(Widget):
         self.use_aspect_ratio = use_aspect_ratio
         self._uv: _UV[_UV_Point] = _UV((_UV_Point((0.001, .999)), _UV_Point((0.001, .999)), self))
         self._opacity = 1
+        self._saturation = 1
         self._load_image(texture)
         super().__init__(pos, size, relative=relative, halign=halign, valign=valign, angle=angle, show=show)
+
+    @property
+    def saturation(self):
+        return self._saturation
+
+    @saturation.setter
+    def saturation(self, val):
+        if val == self._saturation:
+            return
+        self._saturation = clamp(val, 0, 1)
+        self._rebuild = True
 
     @property
     def uv(self):
@@ -248,6 +274,32 @@ class Image(Widget):
             x1 = rotate2d(x1, pivot, self._draw_angle)
             y0 = rotate2d(y0, pivot, self._draw_angle)
             y1 = rotate2d(y1, pivot, self._draw_angle)
+        v = [x0, x1, y0, y1]
+        uvs = [self.uv.x.copy(), self.uv.y.copy()]
+        parent = self.parent
+        if parent and parent.use_clipping:
+            clip = self.clipping
+            for vert in v:
+                if vert[0] < clip[0]:
+                    self._clipped[0] = clip[0] - vert[0]
+                    if size[0] != 0:
+                        uvs[0][0] = self._clipped[0] / size[0]
+                    vert[0] = clip[0]
+                elif vert[0] > clip[1]:
+                    self._clipped[0] = vert[1] - clip[1]
+                    if size[0] != 0:
+                        uvs[0][1] = 1 - self._clipped[0] / size[0]
+                    vert[0] = clip[1]
+                if vert[1] < clip[3]:
+                    self._clipped[1] = clip[3] - vert[1]
+                    if size[1] != 0:
+                        uvs[1][0] = self._clipped[1] / size[1]
+                    vert[1] = clip[3]
+                elif vert[1] > clip[2]:
+                    self._clipped[1] = vert[1] - clip[2]
+                    if size[1] != 0:
+                        uvs[1][1] = 1 - self._clipped[1] / size[1]
+                    vert[1] = clip[2]
         vertices = self._vertices = (
             x1, x0, y1, y0
         )
@@ -255,21 +307,21 @@ class Image(Widget):
         self._shader = self._get_shader()
 
 
-        uvs = self.uv
         self._batch = batch_for_shader(
             self._shader, 'TRI_STRIP',
             {
                 "position": vertices,
                 "texCoord": (
-                    (uvs.x_max, uvs.y_min),
-                    (uvs.x_min, uvs.y_min),
-                    (uvs.x_max, uvs.y_max),
-                    (uvs.x_min, uvs.y_max)
+                    (uvs[0][1], uvs[1][0]),
+                    (uvs[0][0], uvs[1][0]),
+                    (uvs[0][1], uvs[1][1]),
+                    (uvs[0][0], uvs[1][1])
                 ),
             },
         )
         if bpy.app.version[0] >= 4:
             self._shader.uniform_float("alpha", self.opacity)
+            self._shader.uniform_float("saturation", self.saturation)
 
     def draw(self):
         gpu.state.blend_set("ALPHA")

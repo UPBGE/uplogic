@@ -67,7 +67,7 @@ class Collision():
         self._active = True
         if obj not in self._old_objs:
             self.consumed = False
-            self.target = obj
+        self.target = obj
         self.active = not self.consumed if self.tap else True
         if self.active and obj not in self._done_objs:
             if (
@@ -87,6 +87,7 @@ class Collision():
 
         self.consumed = self._active
         self._active = False
+        self.active = False
 
         self._old_objs = self._done_objs
         self._done_objs = []

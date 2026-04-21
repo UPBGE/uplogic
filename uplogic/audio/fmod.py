@@ -5,7 +5,6 @@ from uplogic.console import warning
 from uplogic.console import debug
 from uplogic.utils.math import get_local
 from uplogic.utils.raycasting import raycast
-from uplogic.utils import check_vr_session_status
 from uplogic.utils.visualize import draw_arrow, draw_cube
 from uplogic.events import schedule
 from uplogic.input.vr import VR_HEADSET, VR_STATE
@@ -14,10 +13,6 @@ import bge, bpy
 from bge.types import KX_GameObject
 from mathutils import Vector, Matrix
 
-try:
-    import pyfmodex
-except ImportError:
-    error('"pyfmodex" module missing, please install!')
 
 pypath = sys.executable
 if platform == "linux" or platform == "linux2":
@@ -40,6 +35,10 @@ elif platform == "win32":
         error('One or more FMod Libraries not found, go to "https://www.fmod.com/download" and install FMOD Engine, then from ".../api/core/lib/x64" copy "fmodL.dll" and from ".../api/studio/lib/x64" copy "fmodstudioL.dll" to your local "python/dlls" installation.')
         sys.exit(0)
     else:
+        try:
+            import pyfmodex
+        except ImportError:
+            error('"pyfmodex" module missing, please install!')
         os.environ["PYFMODEX_STUDIO_DLL_PATH"] = fmodstudioL
         os.environ["PYFMODEX_DLL_PATH"] = fmodL
         success('FMod libraries successfully loaded. Please check license at "https://www.fmod.com/licensing".')
@@ -140,8 +139,8 @@ class Event(Sound):
     def __init__(self, name, position=Vector((0, 0, 0)), channel='default') -> None:
         self._orientation = Matrix()
         self.channel = FMod.channels.get(channel, None)
-        self.evt = FMod.studio.get_event(name).create_instance()
-        print('START')
+        evt = FMod.studio.get_event(name)
+        self.evt = evt.create_instance()
         self.occlusion_mask = self.channel.occlusion_mask
         self.evt.start()
         self.velocity = Vector((0, 0, 0))
@@ -216,16 +215,14 @@ class Event(Sound):
             self._caster,
             self.position + direction * self.occlusion_near_clipping,
             FMod.listener.worldPosition,
-            mask=self.occlusion_mask,
-            visualize=True
+            mask=self.occlusion_mask
         )
         while ray.obj and not ray.obj.blenderObject.get('sound_occluder', True):
             ray = raycast(
                 ray.obj,
                 ray.point,
                 FMod.listener.worldPosition,
-                mask=self.occlusion_mask,
-                visualize=True
+                mask=self.occlusion_mask
             )
         return ray.obj is not None
             

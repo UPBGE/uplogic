@@ -46,17 +46,16 @@ void main()
 """
 
     def __init__(self, texture: bpy.types.Image = None, opacity: float = 1.0, pos=Vector((0, 0)), size=Vector((1, 1)), idx: int = None) -> None:
-        texture = bpy.data.images.get(str(texture), texture)
-        if not isinstance(texture, bpy.types.Image):
-            error("'Texture': first argument requires an object of type 'bpy.types.Image'!")
-            return
-        texture.gl_load()
+        texture_ = bpy.data.images.get(str(texture), texture)
+        if not isinstance(texture_, bpy.types.Image):
+            texture_ = bpy.data.images.load(texture)
+        texture_.gl_load()
         self.free_textures = True
-        self.uniforms = {'tex': texture, 'opacity': float(opacity), 'pos': Vector(pos), 'size': Vector(size)}
+        self.uniforms = {'tex': texture_, 'opacity': float(opacity), 'pos': Vector(pos), 'size': Vector(size)}
         super().__init__(self.glsl, idx, {'tex': self.uniforms, 'opacity': self.uniforms, 'pos': self.uniforms, 'size': self.uniforms})
 
     @property
-    def texture(self):
+    def texture(self) -> bpy.types.Image:
         return self.uniforms['tex']
 
     @texture.setter

@@ -1,6 +1,6 @@
 try:
     from .button import Button, LabelButton, SpriteButton, ImageButton
-    from .cursor import Cursor, remove_custom_cursor
+    from .cursor import Cursor, remove_custom_cursor, set_custom_cursor
     from .image import Image
     from .image import Sprite
     from .image import Video
@@ -15,6 +15,7 @@ try:
     from .views import ScrollView
     from .widget import Widget
     from .canvas import Canvas
+    from .canvas import get_canvas
     from .slider import Slider
     from .slider import FrameSlider
     from .slider import ProgressSlider

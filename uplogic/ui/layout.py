@@ -61,7 +61,8 @@ class Layout(Widget):
         self._border_width = int(val)
 
     def draw(self):
-        self._setup_draw()
+        if self._rebuild:
+            self._setup_draw()
         gpu.state.line_width_set(self.border_width)
         gpu.state.point_size_set(self.border_width)
         col = self.bg_color.copy()
@@ -110,6 +111,10 @@ class FloatLayout(Layout):
     def pos_abs(self):
         return [0, 0]
 
+    @property
+    def pos_pixel(self):
+        return [0, 0]
+
 
 class ArrangedLayout(RelativeLayout):
     """Metaclass"""
@@ -134,7 +139,7 @@ class ArrangedLayout(RelativeLayout):
         self._arrange_evt = val
 
     @property
-    def parent(self):
+    def parent(self) -> 'Widget':
         return self._parent
 
     @parent.setter
@@ -148,6 +153,7 @@ class ArrangedLayout(RelativeLayout):
         self.size = self.size
         for c in self.children:
             c.parent = c.parent
+        self.on_parent()
         self.arrange()
 
     @property
@@ -159,10 +165,9 @@ class ArrangedLayout(RelativeLayout):
         if val != self._show:
             self._show = val
             if val:
-                self._rebuild = True
                 for child in self.children:
                     child.pos = child.pos
-        self.arrange()
+                self.arrange()
 
     def _setup_draw(self):
         if self._rebuild:
@@ -170,9 +175,14 @@ class ArrangedLayout(RelativeLayout):
             self.arrange()
         self._rebuild = False
 
-    def add_widget(self, widget):
+    def _rebuild_tree(self):
+        self.arrange()
+        super()._rebuild_tree()
+
+    def add_widget(self, widget) -> 'Widget':
         super().add_widget(widget)
         self.arrange()
+        return widget
     
     def remove_widget(self, widget):
         super().remove_widget(widget)
@@ -241,7 +251,8 @@ class BoxLayout(ArrangedLayout):
     def _arrange(self):
         inverted = self.inverted
         self.children_align = ['right', 'bottom'] if inverted else ['left', 'top']
-        dsize = self.size_pixel
+        # dsize = self.size_pixel
+        dsize = self.size
         arrange_factor = {
             'left': 0,
             'center': .5,
@@ -273,7 +284,7 @@ class BoxLayout(ArrangedLayout):
                     offset += widget._draw_size[1] + self.spacing
                 else:
                     offset -= widget._draw_size[1] + self.spacing
-        self._rebuild_tree()
+        self._rebuild = True
 
     def evaluate(self):
         if self._do_arrange:
@@ -325,9 +336,8 @@ class ScrollBoxLayout(BoxLayout):
         yd_sizes.extend([c._draw_size[1] + c._draw_pos[1] for c in self.children])
         if yd_sizes:
             self._c_height = max(yd_sizes) - min(yd_sizes)
-            # self._c_height = sum([c._draw_size[1] for c in self.children])
             self._c_count = len(self.children)
-            self._height_diff = self._c_height - self.height_pixel# + len(self.children) * self.spacing - self.spacing
+            self._height_diff = self._c_height - self.height_pixel
             self._height_diff
 
     def evaluate(self):
@@ -372,6 +382,8 @@ class GridLayout(BoxLayout):
         angle=0,
         show=True
     ):
+        self.rows = rows
+        self.cols = cols
         super().__init__(
             orientation=orientation,
             pos=pos,
@@ -387,9 +399,6 @@ class GridLayout(BoxLayout):
             angle=angle,
             show=show
         )
-        self.rows = rows
-        self.cols = cols
-        # self.start()
 
     def add_widget(self, widget):
         max = self.rows * self.cols
@@ -437,6 +446,7 @@ class GridLayout(BoxLayout):
                     _offset_x = max(_widget_sizes)
                     _widget_sizes = []
                     offset = 0
+        self._rebuild = True
 
 
 class PolarLayout(ArrangedLayout):

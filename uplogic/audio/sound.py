@@ -862,6 +862,7 @@ def play_sound_2d(
         lowpass = False,
         ignore_timescale = True,
         mono: bool = False,
+        cache: bool = False,
         aud_sys: str = 'default'
     ):
         sound = Sound2D(
@@ -876,6 +877,8 @@ def play_sound_2d(
         )
         if sound.sound:
             sound.play()
+        if cache:
+            sound.cache()
         return sound
 
 
@@ -894,6 +897,7 @@ def play_sound_3d(
         cone_angle: list[float] = [360, 360],
         cone_outer_volume: float = 0,
         ignore_timescale: bool = False,
+        cache=False,
         aud_sys: str = 'default'
     ):
         sound = Sound3D(
@@ -915,4 +919,6 @@ def play_sound_3d(
         )
         if sound.sound:
             sound.play()
+        if cache:
+            sound.cache()
         return sound

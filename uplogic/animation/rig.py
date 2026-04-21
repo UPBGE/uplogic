@@ -1,5 +1,6 @@
 from bge.types import BL_ArmatureChannel, BL_ArmatureObject
 from bge.logic import ROT_MODE_XYZ
+from bpy.types import Bone
 from uplogic import console
 from uplogic.utils.objects import GameObject
 from mathutils import Vector, Quaternion, Matrix, Euler
@@ -7,9 +8,17 @@ from uplogic.utils.visualize import draw_line
 
 
 class RigBone():
+    """Docstring for __init__
+
+    :param self: Description
+    :param bone: Description
+    :type bone: BL_ArmatureChannel
+    :param armature: Description
+    :type armature: BL_ArmatureObject
+    """
 
     def __init__(self, bone: BL_ArmatureChannel, armature: BL_ArmatureObject) -> None:
-        self.world_space = False
+        self.world_space = True
         self.bone = bone
         self.armature = armature
         self._armature_data = self.armature.blenderObject.data
@@ -74,7 +83,7 @@ class RigBone():
 
     @head.setter
     def head(self, value):
-        self._armature_data.bones[self.bone.name].head = value
+        self._armature_data.bones[self.bone.name].head = self.attr_transform.inverted() @ value
 
     @property
     def head_local(self) -> Vector:
@@ -90,7 +99,7 @@ class RigBone():
 
     @head_pose.setter
     def head_pose(self, val):
-        self._pose.bones[self.bone.name].head = val
+        self._pose.bones[self.bone.name].head = self.attr_transform.inverted() @ val
 
     @property
     def tail(self) -> Vector:
@@ -212,12 +221,15 @@ class RigBone():
 
     @property
     def worldPosition(self):
-        return self.bone.location @ self.bone.pose_matrix.inverted()
+        # w = self.world_space
+        # self.world_space = True
+        # res = self.head_pose
+        # self.world_space = w
+        return self.head_pose
 
     @worldPosition.setter
     def worldPosition(self, val):
-        self.bone.location = self.pose_matrix_cleaned.inverted() @ self.armature.worldTransform.inverted() @ Vector(val)
-        self.armature.blenderObject.update_tag()
+        self.head_pose = val
 
     @property
     def worldOrientation(self):
@@ -262,5 +274,5 @@ class Rig(GameObject):
         for b in self.bones.values():
             st = b.world_space
             b.world_space = True
-            # draw_line(b.head_pose, b.tail_pose, (.4, .88, .88))
+            draw_line(b.head_pose, b.tail_pose, (.4, .88, .88))
             b.world_space = st

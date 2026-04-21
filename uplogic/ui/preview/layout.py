@@ -147,7 +147,7 @@ class ArrangedLayout(Layout):
         if val != self._show:
             self._show = val
             if val:
-                self._rebuild = True
+                self._fetch_vertices = True
                 for child in self.children:
                     child.pos = child.pos
         self.arrange()

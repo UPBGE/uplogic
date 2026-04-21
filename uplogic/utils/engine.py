@@ -8,7 +8,6 @@ class classproperty(object):
     def __get__(self, obj, owner):
         return self.f(owner)
 
-
 # class Engine(object):
 
 #     _pre_draw = None

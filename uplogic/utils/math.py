@@ -293,7 +293,7 @@ def map_range_vector(value: float, in_min: float, in_max: float, out_min: float,
     return outvec
 
 
-def get_local(obj, target) -> Vector:
+def get_local(obj: GameObject, target: Vector) -> Vector:
     return obj.worldTransform.inverted() @ target
 
 
@@ -356,7 +356,9 @@ def rotate_by_axis(origin: Vector, pivot: Vector, angle: float, axis: Vector):
 
     angle = math.radians(angle)
 
-    origin = origin.copy() - pivot
+    pivot = Vector(pivot)
+    axis = Vector(axis)
+    origin = Vector(origin) - pivot
 
     z_null = Vector((axis.x, axis.y))
     if z_null.length:

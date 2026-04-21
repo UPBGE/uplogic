@@ -55,11 +55,11 @@ def draw_arrow_path(points: list, color: list = [1, 1, 1, 1]):
 
 
 
-def draw_cube(origin: Vector, width: float = 1, color: list = [1, 1, 1, 1], centered: bool = False):
+def draw_cube(origin: Vector, width: float = 1, color: list = [1, 1, 1, 1], centered: bool = True):
     draw_box(origin, width, width, width, color, centered)
 
 
-def draw_box(origin: Vector, width: float, length: float, height: float, color: list = [1, 1, 1, 1], centered: bool = False):
+def draw_box(origin: Vector, width: float, length: float, height: float, color: list = [1, 1, 1, 1], centered: bool = True):
     is_obj = isinstance(origin, KX_GameObject)
 
     if is_obj:
@@ -67,6 +67,8 @@ def draw_box(origin: Vector, width: float, length: float, height: float, color: 
         origin = origin.worldPosition.copy()
         origin -= obj.worldPosition
         centered = True
+    else:
+        origin = Vector(origin)
     if centered:
         origin = origin.copy() - Vector((width * .5, length * .5, height * .5))
 
@@ -78,23 +80,23 @@ def draw_box(origin: Vector, width: float, length: float, height: float, color: 
     c6: Vector = origin.copy()
     c7: Vector = origin.copy()
 
-    c1[0] += length
+    c1[0] += width
 
-    c2[0] += length
-    c2[1] += width
+    c2[0] += width
+    c2[1] += length
 
-    c3[1] += width
+    c3[1] += length
 
     c4[2] += height
 
-    c5[0] += length
+    c5[0] += width
     c5[2] += height
 
-    c6[0] += length
-    c6[1] += width
+    c6[0] += width
+    c6[1] += length
     c6[2] += height
 
-    c7[1] += width
+    c7[1] += length
     c7[2] += height
 
     if is_obj:

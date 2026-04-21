@@ -90,7 +90,7 @@ def gamepad_button(
     if tap or released:
         if released:
             tap_cond = _active_buttons[idx].get(button, False)
-            _active_buttons[button] = state
+            _active_buttons[idx][button] = state
             return not state and tap_cond
         tap_cond = not _active_buttons[idx].get(button, False)
         _active_buttons[idx][button] = state

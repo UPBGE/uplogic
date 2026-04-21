@@ -61,7 +61,7 @@ class RenderedTexture(Widget):
                 "pos": vertices,
                 "texCoord": (
                     (.9999, .0001),
-                    (0.0001, 0.0001),
+                    (.0001, .0001),
                     (.9999, .9999),
                     (.0001, .9999)
                 ),

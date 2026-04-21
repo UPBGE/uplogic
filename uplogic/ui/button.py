@@ -43,6 +43,18 @@ class Button(Widget, HoverBehavior):
         self.start()
 
     @property
+    def clicked(self):
+        return self._clicked and self.show
+
+    @property
+    def in_focus(self):
+        return self._hover and self.show
+
+    @property
+    def released(self):
+        return self._released and self.show
+
+    @property
     def border_color(self):
         return self._border_color
 
@@ -107,7 +119,12 @@ class Button(Widget, HoverBehavior):
             self._clicked = True
             self.canvas._click_consumed = True
             self._down = True
-        elif not MOUSE_EVENTS[LMB].active and self._down:
+        elif self._in_focus and MOUSE_EVENTS[RMB].active and not self.canvas._click_consumed and not self._down:
+            self.on_right_click(self)
+            self.on_right_press(self)
+            self.canvas._click_consumed = True
+            self._down = True
+        elif not MOUSE_EVENTS[LMB].active and not MOUSE_EVENTS[RMB].active and self._down:
             self.on_release(self)
             self._down = False
             self._released = True
@@ -122,6 +139,14 @@ class Button(Widget, HoverBehavior):
 
     def on_exit(self, widget):
         """Override this method to react to this event. Signature `def on_exit(self, widget)`."""
+        pass
+
+    def on_right_click(self, widget):
+        """Override this method to react to this event. Signature `def on_click(self, widget)`."""
+        pass
+
+    def on_right_press(self, widget):
+        """Override this method to react to this event. Signature `def on_press(self, widget)`."""
         pass
 
     def on_click(self, widget):

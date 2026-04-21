@@ -11,23 +11,23 @@ from mathutils import Vector
 class Agent(NavContainer):
     """Simple AI Agent implementation that uses a Navigation Mesh.
 
-    :param game_object: The game object acting as the agent.
-    :param speed: The speed this agent will move at towards the target.
-    :param threshold: Reach threshold for Navigation Path points. If none is set, `speed` will be used as theshold.
-    :param bevel: Bevel distance at corners. This will cut corners outside of the navmesh.
-    :param dynamic: Whether to move the agent using forces or pure vectors.
-    :param obstacle_mask: Objects in this collision group will be recognized as obstacles. Set to `65535` for all objects.
-    :param height: Z-Offset for the path calculation.
+    :param KX_GameObject game_object: The game object acting as the agent.
+    :param float speed: The speed this agent will move at towards the target.
+    :param float threshold: Reach threshold for Navigation Path points. If none is set, `speed` will be used as theshold.
+    :param float bevel: Bevel distance at corners. This will cut corners outside of the navmesh.
+    :param bool dynamic: Whether to move the agent using forces or pure vectors.
+    :param int obstacle_mask: Objects in this collision group will be recognized as obstacles. Set to `65535` for all objects.
+    :param float height: Z-Offset for the path calculation.
     """
     def __init__(
             self,
             game_object: KX_GameObject,
             speed: float= .1,
             threshold: float = -1,
-            bevel=0.0,
-            dynamic=False,
-            obstacle_mask=0,
-            height=0.0
+            bevel: float = 0.0,
+            dynamic: bool = False,
+            obstacle_mask: int = 0,
+            height: float = 0.0
         ):
         super().__init__(game_object)
         self.speed = speed
@@ -82,8 +82,15 @@ class Agent(NavContainer):
 
             return self._path[0]
 
-    def find_path(self, target: Vector, navmesh: KX_NavMeshObject = None):
-        """Calculate a path to the current target position."""
+    def find_path(self, target: Vector, navmesh: KX_NavMeshObject | KX_GameObject = None):
+        """
+        Calculate a path to the current target position.
+
+        :param target: World position to find a path to
+        :type target: Vector
+        :param navmesh: Navmesh object to use to find the path
+        :type navmesh: KX_NavMeshObject | KX_GameObject
+        """
         return super().find_path(self.game_object.worldPosition, target, navmesh if navmesh else self.navmesh)
 
     def visualize(self, color=Vector((0, 1, 0))):
@@ -95,7 +102,10 @@ class Agent(NavContainer):
             return super().visualize(color)
 
     def pop(self, idx=0):
-        """Remove a point from the calculated path."""
+        """Remove a point from the calculated path.
+
+        :param idx: Index of the point to be removed.
+        :type idx: int"""
         points = self._path
         if not points:
             return None
@@ -131,8 +141,12 @@ class Agent(NavContainer):
         compare.z = self.next_point.z
         return super().direction(compare)
 
-    def lookat(self, factor=.1):
-        """Rotate the agent to look towards the next point."""
+    def lookat(self, factor: float = .1):
+        """
+        Rotate the agent to look towards the next point.
+
+        :param float factor: Rotation factor. Lower values mean slower rotation.
+        """
         next_point = self.next_point
         if next_point is not None:
             zrot_to(self.game_object, next_point, 1, factor)
@@ -158,7 +172,7 @@ class Agent(NavContainer):
         if not self._path:
             return
         if self.dynamic:
-            print(self.speed)
+            # print(self.speed)
             # self.game_object.applyForce(self.direction * self.speed)
             self.game_object.worldLinearVelocity.xy = (self.direction * self.speed).xy
         else:

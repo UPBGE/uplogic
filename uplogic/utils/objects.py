@@ -86,6 +86,7 @@ def rotate_to(
     :param factor:
     """
     front = front_axis
+    target = Vector(target)
     if front > 2:
         front -= 3
     if rotation_axis == front:
@@ -462,6 +463,7 @@ def evaluate_curve(curve: KX_GameObject, factor: float = .5):
     bobj = curve.blenderObject
     const = eval_obj.constraints.new('FOLLOW_PATH')
     const.target = bobj
+    const.use_curve_follow = True
     time = bobj.data.eval_time
     bobj.data.eval_time = bobj.data.path_duration * factor
     bpy.context.view_layer.update()
@@ -534,6 +536,7 @@ class Curve(GameObject):
             bpy.context.collection.objects.link(eval_obj)
             const = eval_obj.constraints.new('FOLLOW_PATH')
             const.target = self.blenderObject
+            const.use_curve_follow = True
         return eval_obj
 
     def _create_dots(self):
@@ -717,8 +720,11 @@ class Curve(GameObject):
     def time(self, val):
         self.data.eval_time = val
 
-    def evaluate(self, factor):
-        '''Get the world space coordinates on the curve at a given progress.'''
+    def evaluate(self, factor) -> Matrix:
+        '''Get the world space coordinates on the curve at a given progress.
+        
+        :param float factor: Relative position on the curve from 0 (start) to 1 (end).
+        '''
         time = self.blenderObject.data.eval_time
         eval_obj = self.eval_obj
         self.blenderObject.data.eval_time = self.path_duration * factor
@@ -727,8 +733,7 @@ class Curve(GameObject):
         if not self.use_evaluate:
             bpy.data.objects.remove(eval_obj)
         self.blenderObject.data.eval_time = time
-        return Vector((matrix[0][3], matrix[1][3], matrix[2][3]))
-        # return Vector()
+        return matrix
 
 
 class ULCurve(Curve):

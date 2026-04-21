@@ -3,6 +3,7 @@ controlling animations.
 '''
 
 from .actionsystem import ActionSystem  # noqa
+from .actionsystem import get_priority_action  # noqa
 from .action import ACTION_FINISHED  # noqa
 from .action import ACTION_STARTED  # noqa
 from .action import ULAction, Action  # noqa

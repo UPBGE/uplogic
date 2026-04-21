@@ -2,6 +2,18 @@ from .widget import Widget
 from bge import render
 import gpu
 import bge
+from ..data import GlobalDB
+
+
+def get_canvas(name='default', show=True):
+    canvases = GlobalDB.retrieve('uplogic.ui')
+    if canvases.check(name):
+        canvas = canvases.get(name)
+    else:
+        canvas = Canvas(show, name)
+    # if aud_sys.update not in scene.pre_draw:
+    #     scene.pre_draw.append(aud_sys.update)
+    return canvas
 
 
 class Canvas(Widget):
@@ -14,19 +26,20 @@ class Canvas(Widget):
 
     _is_canvas = True
 
-    def __init__(self, show=True):
-        super().__init__((0, 0), (0, 0), show=show)
+    def __init__(self, show=True, name='default'):
         self._hover_consumed = False
         self._click_consumed = False
         self._old_width = bge.render.getWindowWidth()
         self._old_height = bge.render.getWindowHeight()
-        self.use_clipping = False
         self._to_evaluate: list[Widget] = []
+        super().__init__((0, 0), (0, 0), show=show)
+        self.use_clipping = False
         bge.logic.getCurrentScene().onRemove.append(self.unregister)
         self.register()
         self.start()
     
     def register(self):
+        # bge.logic.getCurrentScene().pre_draw.insert(0, self.draw)
         bge.logic.getCurrentScene().post_draw.insert(0, self.draw)
 
     def unregister(self):

@@ -77,6 +77,7 @@ from .constants import PURPLE
 from .constants import TORQUISE
 from .constants import WHITE
 from .constants import BLACK
+from .constants import ORANGE
 from .constants import GREY
 from .constants import FPS_FACTOR
 from .constants import DELTA_TIME
@@ -90,6 +91,14 @@ from os import path, pardir
 import bpy
 import json
 import math
+
+
+# class classproperty(object):
+#     def __init__(self, f):
+#         self.f = f
+
+#     def __get__(self, obj, owner):
+        # return self.f(owner)
 
 
 ###############################################################################
@@ -252,12 +261,6 @@ def check_vr_session_status() -> bool:
     """
     session = bpy.context.window_manager.xr_session_state
     return session is not None
-
-
-def get_project_folder(folder_name, *structure):
-    from uplogic.console import warning
-    warning("'get_project_folder' is deprecated, please use 'get_project_path' instead.")
-    return get_project_path(folder_name, *structure)
 
 
 def get_project_path(folder_name, *structure):

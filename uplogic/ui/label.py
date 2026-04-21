@@ -146,8 +146,9 @@ class Label(Widget):
         return self
 
     def _wrap(self, parsize):
-        if self.dimensions[0] < parsize[0]:
-            return self.text
+        # if self.dimensions[0] < parsize[0]:
+            # print(self.text)
+            # return self.text
         offset = parsize[0] * self.pos[0] if self.relative.get('pos') else self.pos[0]
         max_width = int(parsize[0] - offset)
         text = ''
@@ -161,6 +162,7 @@ class Label(Widget):
             if too_long:
                 w = f'\n{w}'
             text = ' '.join([text, w])
+        # print(text)
         return text[1:]
 
     def draw(self):
@@ -205,7 +207,7 @@ class Label(Widget):
                 elif self.text_valign == ALIGN_CENTER:
                     pos[1] += (.5 * lheight * (len(lines) - 1)) - (.5 * lheight)
                 elif self.text_valign == ALIGN_BOTTOM:
-                    pos[1] += (lheight * (len(lines) -2))
+                    pos[1] += (lheight * (len(lines) -1))
                 if self.parent and self.parent._draw_angle:
                     pos = rotate2d(pos, self.pivot, self.parent.angle)
                 blf.position(font, pos[0], pos[1] - (charsize[1] * (i) * self.line_height), 0)

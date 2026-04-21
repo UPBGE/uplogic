@@ -104,7 +104,6 @@ from .getlogictreeproperty import ULGetLogicTreeProperty  # noqa
 from .resizevector import ResizeVectorNode  # noqa
 from .curveinterpolation import CurveInterpolationNode  # noqa
 from .getcollisiongroup import GetCollisionGroupNode  # noqa
-from .getmasterfolder import GetMasterFolderNode  # noqa
 from .joinpath import JoinPathNode  # noqa
 from .stringoperation import StringOperationNode  # noqa
 from .getobjectbyname import GetObjectByNameNode  # noqa

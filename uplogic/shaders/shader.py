@@ -3,7 +3,7 @@ from mathutils import Vector, Matrix
 from uplogic.utils.errors import PassIndexOccupiedError
 from uplogic.console import debug, warning
 from pathlib import Path
-import bpy, bge
+import bpy, bge, gpu
 
 
 def uniforms(*uniforms):
@@ -162,7 +162,7 @@ class Filter2D():
                     ),
                 )
         elif cls is bpy.types.Image:
-            self._filter.setTexture(0, value.bindcode, name)
+            self._filter.setTexture(name, gpu.texture.from_image(value))
 
 
 class ULFilter(Filter2D):

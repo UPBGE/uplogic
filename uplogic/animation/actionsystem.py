@@ -80,8 +80,9 @@ class ActionSystem():
         for action in layers.values().__reversed__():
             if found:
                 action.disable()
-            elif action.intensity >= 1.0 and action.blend_mode == 0:
+            elif action.intensity >= .5 and action.blend_mode == 0:
                 found = True
+                return action.layer
 
     def update(self):
         """This is called each frame.
@@ -131,3 +132,7 @@ def get_action_system(system_name: str = 'default') -> ActionSystem:
         return act_systems.get(system_name)
     else:
         return ActionSystem(system_name)
+
+
+def get_priority_action(game_object: KX_GameObject, system_name='default'):
+    return get_action_system(system_name)._get_uppermost_layer(game_object)

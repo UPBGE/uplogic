@@ -7,6 +7,7 @@ import bpy
 import uuid
 
 try:
+    from bge import render
     from uplogic.utils.math import rotate2d
 except Exception:
     print('Not in game mode!')
@@ -89,26 +90,42 @@ class Widget():
         self.id = uuid.uuid4()
         self._parent = None
         self._vertices = None  # (Vector((0, 0)), Vector((0, 0)), Vector((0, 0)), Vector((0, 0)))
-        self.halign = halign
-        self.valign = valign
         self._show = show
         self._pos = [0, 0]
         self._size = [0, 0]
-        self._children: list[Widget] = []
-        self.relative = relative
         self._rebuild = True
-        self.size = size
-        self.pos = pos
+        self._z = 0
+        self._clipped = [0, 0]
+        self._active = True
+        self._children: list[Widget] = []
+        self._halign = ALIGNMENTS.get('left')
+        self._valign = ALIGNMENTS.get('bottom')
+        self.child_offset = [0, 0]
+
+        self.halign = halign
+        self.valign = valign
+        self.relative = relative
+        # self.size = size
+        self._size = list(size)
+        # self.pos = pos
+        self._pos = list(pos)
         self.bg_color = bg_color
         self.angle = angle
+        self._shader = None
+        self._get_shader()
         self._build_shader()
-        self._clipped = [0, 0]
         self.use_clipping = False
         self.copy_height = False
         self.copy_width = False
         self.opacity = 1.
-        self._z = 0
-        self._active = True
+
+    @property
+    def idx(self):
+        """The index of this widget amongst its parent's children."""
+        if self.parent:
+            children = self.parent.children
+            return children.index(self)
+        return -1
 
     def move_up(self):
         if self.parent is not None:
@@ -169,8 +186,11 @@ class Widget():
 
     @halign.setter
     def halign(self, val):
-        self._halign = ALIGNMENTS.get(val, val)
-        self._rebuild_tree()
+        alignment = ALIGNMENTS.get(val, val)
+        if val and self.show and alignment != self._halign:
+            self._rebuild = True
+        self._halign = alignment
+        
 
     @property
     def valign(self):
@@ -178,8 +198,10 @@ class Widget():
 
     @valign.setter
     def valign(self, val):
-        self._valign = ALIGNMENTS.get(val, val)
-        self._rebuild_tree()
+        alignment = ALIGNMENTS.get(val, val)
+        if val and self.show and alignment != self._valign:
+            self._rebuild = True
+        self._valign = alignment
 
     @property
     def active(self):
@@ -248,8 +270,9 @@ class Widget():
 
     @angle.setter
     def angle(self, val):
+        if val and self.show and val != self.angle:
+            self._rebuild = True
         self._angle = val
-        self._rebuild_tree()
 
     @property
     def _recurse(self):
@@ -290,26 +313,24 @@ class Widget():
         self._bg_color = val
 
     @property
-    def parent(self):
+    def parent(self) -> 'Widget':
         """The widget whose position and size to use relatively."""
         return self._parent
 
     @parent.setter
     def parent(self, val):
+        if val and self.show and val != self.pos[0]:
+            self._rebuild = True
         if self.parent is not val and self.parent:
             self.parent.remove_widget(self)
         if self.use_clipping is None:
             self.use_clipping = val.use_clipping
-        # val.add_widget(self)
         self._parent = val
-        # self._parent.children.append(self)
         self.pos = self.pos  # noqa
         self.size = self.size  # noqa
         for c in self.children:
             c.parent = c.parent  # noqa
         self.on_parent()
-        # self._build_shader()
-        self._rebuild_tree()
 
     @property
     def pos_pixel(self):
@@ -334,16 +355,18 @@ class Widget():
 
     @pos.setter
     def pos(self, val):
+        val = list(val)
         if self._pos == val:
             return
-        self._pos = list(val)
+        self._pos = val
         if not self.show:
             return
+        self.on_pos()
         if self.parent and self.show:
             self._rebuild = True
-        self._rebuild_tree()
-        # for child in self.children:
-        #     child.pos = child.pos  # noqa
+
+    def on_pos(self):
+        ...
 
     @property
     def x(self):
@@ -352,9 +375,9 @@ class Widget():
 
     @x.setter
     def x(self, val):
+        if self.parent and self.show and val != self.pos[0]:
+            self._rebuild = True
         self._pos = [val, self.pos[1]]
-        self._rebuild = True
-        self._rebuild_tree()
 
     @property
     def y(self):
@@ -363,9 +386,9 @@ class Widget():
 
     @y.setter
     def y(self, val):
+        if self.parent and self.show and val != self.pos[1]:
+            self._rebuild = True
         self._pos = [self._pos[0], val]
-        self._rebuild = True
-        self._rebuild_tree()
 
     @property
     def size(self):
@@ -374,18 +397,15 @@ class Widget():
 
     @size.setter
     def size(self, val):
+        val = list(val)
         if self._size == val:
             return
-        self._size = list(val)
+        self._size = val
         if not self.show:
             return
+        self.on_size()
         if self.parent and self.show:
             self._rebuild = True
-        # for child in self.children:
-        #     child.pos = child.pos  # noqa
-        #     child.size = child.size  # noqa
-        self.on_size()
-        self._rebuild_tree()
 
     def on_size(self):
         ...
@@ -397,10 +417,9 @@ class Widget():
 
     @width.setter
     def width(self, val):
-        self.size = [val, self.size[1]]
-        if self.parent and self.show:
+        if self.parent and self.show and val != self.size[0]:
             self._rebuild = True
-        self._rebuild_tree()
+        self.size = [val, self.size[1]]
 
     @property
     def height(self):
@@ -409,10 +428,9 @@ class Widget():
 
     @height.setter
     def height(self, val):
-        self.size = [self.size[0], val]
-        if self.parent and self.show:
+        if self.parent and self.show and val != self.size[1]:
             self._rebuild = True
-        self._rebuild_tree()
+        self.size = [self.size[0], val]
 
     @property
     def size_pixel(self):
@@ -445,11 +463,11 @@ class Widget():
 
     @use_clipping.setter
     def use_clipping(self, val):
+        if self.parent and self.show and val != self._opacity:
+            self._rebuild = True
         self._use_clipping = val
         for widget in self.childrenRecursive:
             widget._use_clipping = val
-        if self.parent and self.show:
-            self._rebuild = True
 
     @property
     def opacity(self):
@@ -461,13 +479,31 @@ class Widget():
 
     @opacity.setter
     def opacity(self, val):
-        self._opacity = val
-        if self.parent and self.show:
+        if self.parent and self.show and val != self._opacity:
             self._rebuild = True
+        self._opacity = val
 
     @property
-    def child_offset(self):
-        return [0, 0]
+    def content_width(self):
+        widths = []
+        for c in self.children:
+            if not c.show:
+                continue
+            p = c._draw_pos[0]
+            w = c._draw_size[0]
+            widths.extend([p, p + w])
+        return (max(widths) - min(widths)) if len(widths) else 0
+
+    @property
+    def content_height(self):
+        heights = []
+        for c in self.children:
+            if not c.show:
+                continue
+            p = c._draw_pos[1]
+            h = c._draw_size[1]
+            heights.extend([p, p + h])
+        return (max(heights) - min(heights)) if len(heights) else 0
 
     @property
     def clipping(self):
@@ -481,6 +517,10 @@ class Widget():
             pdpos[1]
         ]
 
+    # @property
+    # def _offset(self):
+    #     return self.parent.child_offset
+
     @property
     def _draw_pos(self):
         if self.parent is None:
@@ -491,6 +531,8 @@ class Widget():
             math.floor(self.pos[0] * pdsize[0]),
             math.floor(self.pos[1] * pdsize[1])
         ] if self.relative.get('pos') else self.pos
+        child_offset = self.parent.child_offset if self.parent else [0, 0]
+        pos = [pos[0] + child_offset[0], pos[1] + child_offset[1]]
         if self.parent and self.parent._draw_angle and self._vertices is not None:
             pos = rotate2d(pos, self.parent.pivot - Vector(inherit_pos), self.parent._draw_angle)
         offset = [0, 0]
@@ -536,7 +578,11 @@ class Widget():
         self._build_shader()
 
     def check_inside(self, x, y):
-        from bge import render
+        """Check if pixel position (x, y) is inside this widget's area.
+        
+        :param float x: Screen X position in pixels.
+        :param float y: Screen Y position in pixels.
+        """
         y = render.getWindowHeight() - y
         dpos = self.pos_pixel
         dsize = self.size_pixel
@@ -627,7 +673,7 @@ class Widget():
         #     return gpu.shader.from_builtin('2D_UNIFORM_COLOR')
         # elif bpy.app.version[0] < 5:
         #     return gpu.types.GPUShader(self.vertex_shader, self.fragment_shader)
-        if True:
+        if self._shader is None:
             shader_info = gpu.types.GPUShaderCreateInfo()
 
             for i, vertex_in in enumerate(self.vertex_in):
@@ -655,16 +701,18 @@ class Widget():
             matrix = gpu.matrix.get_projection_matrix()
             shader.uniform_float("ModelViewProjectionMatrix", matrix)
             return shader
+        return self._shader
 
     def _setup_draw(self):
         if self._rebuild:
-            self._build_shader()
+            self._rebuild_tree()
         self._rebuild = False
 
     def _rebuild_tree(self):
         if self.parent:
             self._build_shader()
             for c in self.children:
+                c._rebuild = False
                 c._rebuild_tree()
 
     @property
@@ -703,6 +751,10 @@ class Widget():
                 self.canvas._set_z(-1)
         self.children = sorted(self.children, key=lambda widget: widget._z, reverse=False)
         return widget
+
+    def sort_children(self, key=lambda widget: widget._z, reverse=False):
+        self.children.sort(key=key, reverse=reverse)
+        self._set_z(self._z - 1)
 
     def add_widgets(self, *widgets):
         for w in widgets:

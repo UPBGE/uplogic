@@ -46,12 +46,14 @@ class TextInput(Label):
         multiline=False,
         angle=0
     ):
+        self._edit = False
         self.lines = None
         self.cursor_evt = None
-        self.cursor = Layout(bg_color=(1, 1, 1, 1), size=(0, 0))
+        self.cursor = Layout(bg_color=(1, 1, 1, 1), size=(0, 0), relative={'pos': False})
         self.cursor_flash_time = .5
         Label.__init__(self, pos, relative, text, font, font_color, font_size, line_height, shadow, shadow_offset, shadow_color, halign, valign, wrap, angle)
         self.add_widget(self.cursor)
+        self.cursor.show = False
         self._key_evts = {}
         events = logic.keyboard.inputs.copy()
         for evt in events.values():
@@ -61,7 +63,6 @@ class TextInput(Label):
         self._index = 0
         self.line_index = 0
         self.character_index = 0
-        self.start()
 
     def on_enter(self):
         self.edit = False
@@ -113,7 +114,8 @@ class TextInput(Label):
         if self.cursor_evt:
             self.cursor_evt.cancel()
         self.cursor.show = False
-        self._cursor_visible()
+        if self.edit:
+            self._cursor_visible()
         self._text = str(val)
 
     def move_cursor_to_end(self):
@@ -147,7 +149,7 @@ class TextInput(Label):
     def _set_cursor_position(self):
         dsize = self._current_char_pos
         dim = blf.dimensions(self.font, self.lines[self.line_index])
-        # charsize = blf.dimensions(self.font, 'A')
+        charsize = blf.dimensions(self.font, 'A')
         if self.text_halign == 'center':
             dsize[0] -= dim[0] * .5
         if self.text_halign == 'right':
@@ -157,18 +159,21 @@ class TextInput(Label):
         if self.text_valign == 'top':
             dsize[1] *= -1
         self.cursor.pos[0] = dsize[0]
-        self.cursor.pos[1] = dsize[1] # -charsize[1] * self.line_height * (self.line_index + 1)
-        self.cursor.height = self.font_size
+        self.cursor.pos[1] = 0
+        self.cursor.height = self.font_size * .9
         self.cursor.width = 1
+
+    def on_tab(self):
+        self.edit = False
 
     def _listen(self):
         left_shift = logic.keyboard.inputs[events.LEFTSHIFTKEY].active
         right_shift = logic.keyboard.inputs[events.RIGHTSHIFTKEY].active
         keyboard_events = logic.keyboard.inputs.copy()
         tpf = (1 / (logic.getAverageFrameRate() or 0.01))
+        self._rebuild = True
 
-        for evt in keyboard_events.values():
-
+        for i, evt in keyboard_events.items():
             text = self.text
             if evt.active and self._key_evts[evt] == 0.0:
                 self._key_evts[evt] += tpf
@@ -179,6 +184,9 @@ class TextInput(Label):
                 if not self.multiline and evt.type == 7:
                     self.on_enter()
                     return
+                if evt.type == 57:  # Arrow Left
+                    self.on_tab()
+                    self.edit = False
                 if evt.type == 69:  # Arrow Left
                     self.index -= 1
                     self.edit = True

@@ -46,19 +46,20 @@ class ULCreateUIButton(ULActionNode):
     def _get_click(self):
         w = self._widget
         if w:
-            return w._clicked
+            print(w.show)
+            return w.clicked
         return False
 
     def _get_hover(self):
         w = self._widget
         if w:
-            return w._in_focus
+            return w.in_focus
         return False
 
     def _get_release(self):
         w = self._widget
         if w:
-            return w._released
+            return w.released
         return False
 
     def evaluate(self):

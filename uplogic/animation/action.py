@@ -36,16 +36,24 @@ ACTION_FINISHED = 2
 
 
 class ActionCallback:
+    """
+    A callback that is bound to a certain frame of an animation.
+
+    :param Action action: Description
+    :param Callable callback: Description
+    :param float frame: Description
+    :param list args: Description
+    """
 
     def __init__(self, action, callback, frame, *args):
-        self.action = action
+        action._callbacks.append(self)
         self.frame = frame
         self.callback = callback
         self.consumed = False
         self.args = args
 
 
-class Action():
+class Action:
     '''
     Wrapper class for animated actions that provides additional parameters
     and quick access properties.
@@ -75,8 +83,8 @@ class Action():
         self,
         game_object: GameObject,
         action_name: str,
-        start_frame: int = 0,
-        end_frame: int = 250,
+        start_frame: int = None,
+        end_frame: int = None,
         layer: int = -1,
         priority: int = 0,
         blendin: float = 0,
@@ -101,12 +109,17 @@ class Action():
         self._act_system = get_action_system()
         self.game_object = game_object
         '''The game object the animation is playing on.'''
-        self.name = action_name
+        self._name = action_name
         '''Name of this action.'''
-        '''End Frame of the animation.'''
+        bpy_act = bpy.data.actions.get(action_name)
+        if start_frame is None:
+            start_frame = bpy_act.frame_start
+        if end_frame is None:
+            end_frame = bpy_act.frame_end
         self._start_frame = start_frame
         '''Starting Frame of the animation.'''
         self._end_frame = end_frame
+        '''End Frame of the animation.'''
         self.priority = priority
         '''Priority of this animation; This is only relevant if multiple
         animations are playing on the same layer.'''
@@ -159,6 +172,7 @@ class Action():
         '''Handler for animation playback finish.
         '''
         # schedule(self, 0, ACTION_FINISHED)
+        print('FINISH', self.name)
         ...
 
     def frame_trigger(self, frame, callback, *args):
@@ -166,10 +180,10 @@ class Action():
         current frame has passed the given frame (both forward and reverse).
 
         :param frame: Invoke the callback when action has passed this frame.
-        :param callback: Valid signatures: `def cb(evt)`.
+        :param callback: Valid signatures: `def cb(*args)`.
         :param *args: Arguments to be passed to the callback.
         '''
-        self._callbacks.append(ActionCallback(self, callback, frame, *args))
+        ActionCallback(self, callback, frame, *args)
 
     @property
     def start_frame(self):
@@ -219,7 +233,8 @@ class Action():
         '''Current Frame of the animation.'''
         if self.is_playing:
             return self.game_object.getActionFrame(self.layer)
-        return -1
+        return self.end_frame
+        # return -1
 
     @frame.setter
     def frame(self, value: float):
@@ -236,15 +251,12 @@ class Action():
         if value == self._intensity:
             return
         value = float(value)
+        self._intensity = clamp(value, 0, 1)
         if value <= 0:
             if self.is_playing:
                 self.game_object.stopAction(self.layer)
             return
-        # if not self.is_playing:
-        #     return
-        self._intensity = clamp(value, 0, 1)
         self._restart_action()
-        # self._act_system._get_uppermost_layer(self.game_object)
 
     @property
     def speed(self) -> float:
@@ -261,14 +273,27 @@ class Action():
         if self.intensity > 0:
             self._restart_action()
 
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, value):
+        if value == self.name:
+            return
+        self._name = value
+        self._restart_action()
+
     def _restart_action(self):
         '''Restart action to use updated values.
 
         Not intended for manual use.
         '''
-        if self._locked:
-            return
-        self._locked = True
+        # if self.name == 'jump':
+        #     print('update')
+        # XXX: This lockes eternally for some reason
+        # if self._locked is True:
+        #     return
         layer = self.layer
         game_object = self.game_object
         action_name = self.name
@@ -280,6 +305,8 @@ class Action():
         speed = self.speed * self._fps_factor * logic.getTimeScale()
         blend_mode = self.blend_mode
         frame = self.frame
+        # if not self.is_playing:
+        #     print(self.name)
         reset_frame = (
             start_frame if
             play_mode == logic.KX_ACTION_MODE_LOOP else
@@ -298,7 +325,7 @@ class Action():
             start_frame,
             end_frame,
             layer=layer,
-            priority=0,
+            # priority=0,
             blendin=blendin,
             play_mode=play_mode,
             speed=self.speed,
@@ -306,10 +333,12 @@ class Action():
             blend_mode=blend_mode
         )
         game_object.setActionFrame(next_frame, layer)
+        self._locked = True
 
     def update(self):
         '''This is called each frame.
         '''
+        # print(self.name)
         self._locked = False
         game_object = self.game_object
         if game_object.invalid:
@@ -343,11 +372,15 @@ class Action():
         ):
             if self.play_mode == logic.KX_ACTION_MODE_PLAY:
                 if end_frame > start_frame:
-                    is_near_end = (playing_frame >= (end_frame))
+                    is_at_end = (playing_frame >= (end_frame))
                 else:
-                    is_near_end = (playing_frame <= (end_frame))
-                if is_near_end and not self.keep:
-                    self._act_system.remove(self)
+                    is_at_end = (playing_frame <= (end_frame))
+                if is_at_end:
+                    # self.on_finish()
+                    # self.game_object.stopAction(self.layer)
+                    if not self.keep:
+                        self.stop()
+                        # self._act_system.remove(self)
 
     def remove(self):
         '''Stop and remove this action.
@@ -376,7 +409,7 @@ class Action():
             self._frozen_speed = -1
 
     def stop(self):
-        '''Stop playback of this action.
+        '''Stop playback of this action and free the layer.
         '''
         self._act_system.remove(self)
 
@@ -391,6 +424,7 @@ class Action():
     def restart(self):
         '''Restart this animation with its current parameters.
         '''
+        self._act_system.add(self)
         self.stopped = False
         self.game_object.stopAction(self.layer)
         self.game_object.playAction(
@@ -401,7 +435,7 @@ class Action():
             blendin=self.blendin,
             play_mode=self.play_mode,
             speed=self.speed,
-            layer_weight=1 - self.intensity,
+            layer_weight=1-self.intensity,
             blend_mode=self.blend_mode
         )
 

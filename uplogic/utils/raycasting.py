@@ -86,7 +86,7 @@ def raycast(
     :param face_data: Return additional information about the target polygon.
     :param visualize: Show the raycast.
 
-    :returns: (`obj`, `point`, `normal`, `direction`, `face`, `uv`)
+    :returns: (`obj`, `point`, `normal`, `direction`, `face`, `uv`)w
     """
     if exclude is not None:
         from ..console import warning
@@ -372,7 +372,7 @@ def raycast_screen(
     mask: int = 65535,
     face_data: bool = False
 
-) -> RayCastCameraData[GameObject, Vector, Vector, Vector, KX_PolyProxy, Vector]:
+) -> RayCastData[GameObject, Vector, Vector, Vector, KX_PolyProxy, Vector]:
     """Raycast from any point to any target. Returns additional face data.
 
     :param caster: Caster object, this object will be ignored by the raycast itself
@@ -388,7 +388,9 @@ def raycast_screen(
     """
     # assume screen coordinates
     camera = logic.getCurrentScene().active_camera
-    if isinstance(aim, Vector) and len(aim) == 2:
+    # if aim is not None:
+    #     aim = Vector(aim)
+    if aim is not None and len(aim) == 2:
         vec = 10 * camera.getScreenVect(aim[0], aim[1])
     else:
         mpos = logic.mouse.position

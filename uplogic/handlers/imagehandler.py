@@ -78,6 +78,7 @@ class ImageHandler:
     @texture.setter
     def texture(self, val):
         if val is None:
+            self._texture = None
             return
         texture = bpy.data.images.get(val, None)
         if not texture:

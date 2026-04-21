@@ -38,17 +38,17 @@ class ULCollision(ULConditionNode):
     def get_collision(self):
         return self._collision.active
 
-    def get_point(self):
-        return self._collision.point
-
-    def get_normal(self):
-        return self._collision.normal
-
     def get_target(self):
         return self._collision.target
 
     def get_objects(self):
         return self._collision._objects
+
+    def get_point(self):
+        return self._collision.point
+
+    def get_normal(self):
+        return self._collision.normal
 
     def on_collision(self, obj, point, normal):
         pass
