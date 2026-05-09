@@ -3,7 +3,6 @@
 Provides high-level components for the Blender Game Engine (UPBGE) organised
 into focused subpackages:
 
-- :mod:`~uplogic.ai` — NavMesh-based agent pathfinding
 - :mod:`~uplogic.animation` — action playback and bone-pose helpers
 - :mod:`~uplogic.audio` — spatial and 2-D sound management
 - :mod:`~uplogic.console` — coloured logging with configurable severity levels
@@ -15,6 +14,7 @@ into focused subpackages:
 - :mod:`~uplogic.shaders` — 2-D post-processing filter pipeline
 - :mod:`~uplogic.ui` — canvas-based HUD and widget system
 - :mod:`~uplogic.utils` — math, raycasting, object helpers, pooling, and more
+- :mod:`~uplogic.ai` — NavMesh-based agent pathfinding (import separately)
 
 The runtime subpackages (everything except ``bpy``-only tools) are imported
 inside a ``try/except`` block so that importing uplogic from the Blender
@@ -28,7 +28,6 @@ programmatically with :func:`check_version`.
 __version__ = '5.1.2'
 
 try:
-    from . import ai
     from . import console
     from . import animation
     from . import audio
