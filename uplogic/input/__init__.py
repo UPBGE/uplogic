@@ -1,3 +1,23 @@
+'''Input subsystem for uplogic.
+
+Provides keyboard, mouse, gamepad, and VR input via a unified set of query
+functions and component classes.  All public names are re-exported here for
+convenience.
+
+Typical usage::
+
+    from uplogic import input as uinput
+
+    if uinput.key_tap('SPACE'):
+        jump()
+
+    if uinput.mouse_down(uinput.LMB):
+        fire()
+
+    look = uinput.MouseLook(player_body, player_head, sensitivity=2.0)
+    pad = uinput.Gamepad(idx=0, layout=uinput.XBOX)
+'''
+
 from .gamepad import LS  # noqa
 from .gamepad import RS  # noqa
 from .gamepad import SONY  # noqa

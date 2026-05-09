@@ -1,3 +1,4 @@
+'''Post-processing filter that scales the rendered frame by a uniform brightness multiplier.'''
 from .shader import Filter2D
 
 
@@ -15,6 +16,12 @@ void main() {
 
 
 class Brightness(Filter2D):
+    '''Simple screen-multiply brightness filter that computes ``output = input * brightness``.
+
+    :param brightness: Multiply factor applied to every pixel (``1.0`` = no change,
+        ``>1.0`` = brighter, ``<1.0`` = darker).
+    :param idx: Filter pass index; passed directly to ``Filter2D``.
+    '''
 
     def __init__(self, brightness=1.0, idx: int = None) -> None:
         self.uniforms = {'brightness': float(brightness)}
@@ -22,6 +29,7 @@ class Brightness(Filter2D):
 
     @property
     def brightness(self):
+        '''Screen multiply factor applied to every pixel colour.'''
         return self.uniforms['brightness']
 
     @brightness.setter

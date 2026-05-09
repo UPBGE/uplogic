@@ -301,8 +301,28 @@ void main()
 
 
 class HBAO(Filter2D):
+    '''Horizon-Based Ambient Occlusion (HBAO) post-processing filter.
+
+    Reconstructs view-space normals and positions from the depth buffer, then
+    samples along multiple angular directions and horizon steps to estimate
+    per-pixel occlusion. The result is blended with the rendered frame
+    according to ``power``.
+
+    Camera uniforms (``znear``, ``zfar``, ``fov``) are read from the active
+    camera on construction and refreshed every tick via :meth:`update`.
+    '''
 
     def __init__(self, power=1.0, idx: int = None) -> None:
+        '''Initialise the HBAO filter.
+
+        Reads ``cam.near``, ``cam.far``, and ``cam.fov`` from the currently
+        active camera and registers them as shader uniforms.
+
+        :param power: AO blend intensity. ``0`` leaves the frame unchanged;
+            ``1`` applies full ambient occlusion darkening.
+        :param idx: Filter pass index. ``None`` assigns the next available
+            index automatically.
+        '''
         cam = logic.getCurrentScene().active_camera
         self.uniforms = {
             'power': float(power),
@@ -319,6 +339,10 @@ class HBAO(Filter2D):
 
     @property
     def power(self):
+        '''Blend weight of the AO darkening (``float``).
+
+        ``0`` disables occlusion; ``1`` applies full darkening.
+        '''
         return self.uniforms['power']
 
     @power.setter
@@ -326,6 +350,12 @@ class HBAO(Filter2D):
         self.uniforms['power'] = val
 
     def update(self):
+        '''Refresh camera uniforms and upload them to the shader.
+
+        Reads ``znear``, ``zfar``, and ``fov`` from the currently active
+        camera, stores them in :attr:`uniforms`, then delegates to the parent
+        :meth:`Filter2D.update` to upload all uniforms to the GPU.
+        '''
         super().update()
         cam = logic.getCurrentScene().active_camera
         self.uniforms['znear'] = cam.near

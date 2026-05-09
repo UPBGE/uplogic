@@ -1,3 +1,4 @@
+'''Post-processing filter that adjusts contrast and brightness using average luminance.'''
 from .shader import Filter2D
 
 
@@ -22,6 +23,14 @@ void main(void)
 
 
 class AdaptiveToneMapping(Filter2D):
+    '''Tone-mapping filter that divides input by ``avgL`` for contrast and subtracts
+    ``avgL * power`` for brightness, producing the mapping
+    ``output = (input / avgL) - (avgL * power)``.
+
+    :param power: Brightness subtraction factor applied after the contrast division.
+    :param avgL: Average luminance value used as the contrast divisor and brightness base.
+    :param idx: Filter pass index; passed directly to ``Filter2D``.
+    '''
 
     def __init__(self, power=1.0, avgL=2.0, idx: int = None) -> None:
         self.uniforms = {'power': float(power), 'avgL': float(avgL)}
@@ -29,6 +38,7 @@ class AdaptiveToneMapping(Filter2D):
 
     @property
     def power(self):
+        '''Brightness subtraction multiplier applied after contrast division.'''
         return self.uniforms['power']
 
     @power.setter

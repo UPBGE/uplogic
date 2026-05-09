@@ -1,3 +1,5 @@
+'''[DEPRECATED] Use :mod:`uplogic.utils.visualize` instead. All functions here emit a deprecation warning.
+'''
 # from bge import render, logic
 from bge.render import drawLine
 from mathutils import Vector
@@ -7,6 +9,7 @@ from uplogic import console
 
 
 def draw_line(origin: Vector, target: Vector, color: list = [1, 1, 1, 1]):
+    '''[DEPRECATED] Use :func:`uplogic.utils.visualize.draw_line` instead.'''
     console.warning('Moved from "uplogic.utils.visuals" to "uplogic.utils.visualize"!')
     drawLine(
         origin,
@@ -16,6 +19,7 @@ def draw_line(origin: Vector, target: Vector, color: list = [1, 1, 1, 1]):
 
 
 def draw_path(points: list, color: list = [1, 1, 1, 1]):
+    '''[DEPRECATED] Use :func:`uplogic.utils.visualize.draw_path` instead.'''
     console.warning('Moved from "uplogic.utils.visuals" to "uplogic.utils.visualize"!')
     for i, p in enumerate(points):
         if i < len(points) - 1:
@@ -23,11 +27,13 @@ def draw_path(points: list, color: list = [1, 1, 1, 1]):
 
 
 def draw_cube(origin: Vector, width: float = 1, color: list = [1, 1, 1, 1], centered: bool = False):
+    '''[DEPRECATED] Use :func:`uplogic.utils.visualize.draw_cube` instead.'''
     console.warning('Moved from "uplogic.utils.visuals" to "uplogic.utils.visualize"!')
     draw_box(origin, width, width, width, color, centered)
 
 
 def draw_box(origin: Vector, width: float, length: float, height: float, color: list = [1, 1, 1, 1], centered: bool = False):
+    '''[DEPRECATED] Use :func:`uplogic.utils.visualize.draw_box` instead.'''
     console.warning('Moved from "uplogic.utils.visuals" to "uplogic.utils.visualize"!')
     if centered:
         origin = origin.copy() - Vector((width * .5, length * .5, height * .5))
@@ -76,6 +82,7 @@ def draw_box(origin: Vector, width: float, length: float, height: float, color: 
 
 
 def draw_mesh(game_object: KX_GameObject, color: tuple = (1, 1, 1, 1)):
+    '''[DEPRECATED] Use :func:`uplogic.utils.visualize.draw_mesh` instead.'''
     console.warning('Moved from "uplogic.utils.visuals" to "uplogic.utils.visualize"!')
     mesh: Mesh = game_object.blenderObject.data
     for edge in mesh.edges:

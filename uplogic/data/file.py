@@ -1,3 +1,11 @@
+'''File I/O helpers for uplogic.
+
+Provides :class:`FileWrapper`, a ``dict`` subclass that reads and writes
+``.json`` and ``.ini`` files, and three convenience functions
+(:func:`load_file`, :func:`read_file`, :func:`write_file`) for one-shot
+access.
+'''
+
 import json
 # import toml
 import configparser
@@ -6,11 +14,17 @@ import bpy
 
 
 class FileWrapper(dict):
-    """Wrapper to allow easy access to files. The wrapper can be saved as a variable to modify and save back the file.\n
-    Supports `.ini` and `.json` file formats.
+    '''``dict`` subclass that reads and writes a file on disk.
 
-    :param filepath: Full path to the file.
-    """
+    The file is read on construction and the contents are accessible as
+    dictionary keys.  Call :meth:`write` (or the alias :meth:`save`) to
+    persist any changes back to disk.
+
+    Supports ``.json`` and ``.ini`` file formats; the format is detected from
+    the file extension.
+
+    :param filepath: Blender-relative or absolute path to the file.
+    '''
 
     def __init__(self, filepath):
         self.formats = {
@@ -23,6 +37,10 @@ class FileWrapper(dict):
 
     @property
     def data(self):
+        '''The file contents as a plain ``dict``. Setting this replaces all
+        current entries and also creates matching instance attributes for
+        each key.
+        '''
         return dict(self)
 
     @data.setter
@@ -33,17 +51,27 @@ class FileWrapper(dict):
             setattr(self, key, value)
 
     def read(self):
+        '''Re-read the file from disk, replacing the current contents.
+
+        The format is inferred from the file extension.
+        '''
         ending = self.filepath.split('.')[-1]
         self.formats[ending]['read']()
 
     def write(self):
+        '''Write the current contents back to disk.
+
+        The format is inferred from the file extension.
+        '''
         ending = self.filepath.split('.')[-1]
         self.formats[ending]['write']()
 
     def save(self):
+        '''Alias for :meth:`write`.'''
         self.write()
 
     def _read_json(self):
+        '''Load a JSON file into the wrapper dict.'''
         with open(self.filepath, 'r') as f:
             self.data = json.load(f)
 
@@ -52,6 +80,7 @@ class FileWrapper(dict):
     #         self.data = toml.load(f)
 
     def _read_ini(self):
+        '''Load an INI file; each section becomes a nested ``dict`` entry.'''
         config = configparser.ConfigParser()
         config.read(self.filepath)
         for section in config.sections():
@@ -60,6 +89,7 @@ class FileWrapper(dict):
                 self[section][key] = val
 
     def _write_json(self):
+        '''Write the current dict contents to the JSON file with 2-space indentation.'''
         path = self.filepath
         if os.path.isfile(path):
             with open(path, 'w') as f:
@@ -72,6 +102,7 @@ class FileWrapper(dict):
     #             toml.dump(self.data, f)
 
     def _write_ini(self):
+        '''Write the current dict contents back to the INI file.'''
         config = configparser.ConfigParser()
         config.read_dict(self)
         with open(self.filepath, 'w') as f:
@@ -79,23 +110,15 @@ class FileWrapper(dict):
 
 
 def load_file(filepath) -> FileWrapper:
-    """Read a file and keep it stored for later use.\n
-    Supports `.ini` and `.json` file formats.
+    '''Open a file and return a live :class:`FileWrapper` for it.
 
-    :param filepath: Full path to the file.
-    """
-    if filepath:
-        return FileWrapper(filepath)
-    else:
-        raise FileNotFoundError(f'File {filepath} could not be opened!')
+    The wrapper holds the file contents as a ``dict`` and can be written back
+    to disk with :meth:`~FileWrapper.write`.  Supports ``.json`` and ``.ini``.
 
-
-def read_file(filepath) -> FileWrapper:
-    """Read a file and keep it stored for later use.\n
-    Supports `.ini` and `.json` file formats.
-
-    :param filepath: Full path to the file.
-    """
+    :param filepath: Blender-relative or absolute path to the file.
+    :returns: A :class:`FileWrapper` populated with the file's contents.
+    :raises FileNotFoundError: When *filepath* is falsy.
+    '''
     if filepath:
         return FileWrapper(filepath)
     else:
@@ -103,21 +126,26 @@ def read_file(filepath) -> FileWrapper:
 
 
 def write_file(filepath, data) -> None:
-    """Write data in form of `dict` back into a file.\n
-    Supports `.ini` and `.json` file formats.
+    '''Write *data* to a file, overwriting its current contents.
 
-    :param filepath: Full path to the file, including file ending.
-    :param data: `dict` to save back into the file.
-    """
+    Supports ``.json`` and ``.ini`` file formats; the format is detected from
+    the file extension.
+
+    :param filepath: Blender-relative or absolute path to the file.
+    :param data: ``dict`` to write into the file.
+    '''
     file = FileWrapper(filepath)
     file.data = data
     file.write()
 
 
 def read_file(filepath) -> dict:
-    """Read data in form of `dict` from a file.\n
-    Supports `.ini` and `.json` file formats.
+    '''Read a file and return its contents as a plain ``dict``.
 
-    :param filepath: Full path to the file.
-    """
+    Supports ``.json`` and ``.ini`` file formats; the format is detected from
+    the file extension.
+
+    :param filepath: Blender-relative or absolute path to the file.
+    :returns: ``dict`` of the file's contents.
+    '''
     return FileWrapper(filepath).data

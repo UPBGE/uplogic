@@ -1,4 +1,9 @@
-'''TODO: Documentation
+'''Audio device management for uplogic.
+
+Wraps the BGE ``aud.Device`` into a scene-aware :class:`AudioSystem` that
+tracks the active camera (or a VR headset) as the 3-D listener, manages
+reverb volumes, and applies a master volume and lowpass filter to all active
+sounds. Module-level helpers provide convenient one-call access.
 '''
 
 from bge import logic
@@ -12,10 +17,21 @@ import bpy
 
 
 class AudioCache:
+    '''Global in-memory cache for decoded ``aud.Sound`` objects.
+
+    Avoids reloading the same file from disk when multiple sounds reference
+    the same path.
+    '''
     _sounds = {}
 
     @classmethod
     def get(cls, key, default=None):
+        '''Return the cached sound for *key*, or *default* if not cached.
+
+        :param key: File path used as the cache key.
+        :param default: Value to return when the key is absent.
+        :returns: Cached ``aud.Sound`` or *default*.
+        '''
         return cls._sounds.get(key, default)
 
 
@@ -31,8 +47,13 @@ DISTANCE_MODELS = {
 
 
 def set_lowpass(frequency, system_name='default') -> None:
-    """Set the overall volume of a `AudioSystem`. All sounds played via this
-    system will have their volume multiplied by this value.
+    """Set the lowpass filter cutoff frequency on an :class:`AudioSystem`.
+
+    All sounds currently playing through the system will have their lowpass
+    value updated immediately.
+
+    :param frequency: Cutoff frequency as a factor of 20 000 Hz.
+    :param system_name: Name of the target :class:`AudioSystem`.
     """
     aud_sys = get_audio_system(system_name)
     if aud_sys:
@@ -40,8 +61,13 @@ def set_lowpass(frequency, system_name='default') -> None:
 
 
 def set_master_volume(volume, system_name='default') -> None:
-    """Set the overall volume of a `AudioSystem`. All sounds played via this
-    system will have their volume multiplied by this value.
+    """Set the master volume of an :class:`AudioSystem`.
+
+    All sounds played through the system will have their amplitude multiplied
+    by this value.
+
+    :param volume: Master amplitude multiplier (``1.0`` = unity gain).
+    :param system_name: Name of the target :class:`AudioSystem`.
     """
     aud_sys = get_audio_system(system_name)
     if aud_sys:
@@ -49,8 +75,13 @@ def set_master_volume(volume, system_name='default') -> None:
 
 
 def set_vr_audio(flag, system_name='default') -> None:
-    """Set the audio mode for a `AudioSystem`. If set to `True`, the system
-    will track a VR Headset instead of the active scene camera.
+    """Toggle VR listener mode on an :class:`AudioSystem`.
+
+    When *flag* is ``True`` the system tracks the VR headset position and
+    orientation instead of the active scene camera.
+
+    :param flag: ``True`` to use the VR headset as the listener.
+    :param system_name: Name of the target :class:`AudioSystem`.
     """
     aud_sys = get_audio_system(system_name)
     if aud_sys:
@@ -58,17 +89,18 @@ def set_vr_audio(flag, system_name='default') -> None:
 
 
 def stop_all_audio() -> None:
-    """Stop every `AudioSystem` in this scene.
+    """Shut down every :class:`AudioSystem` registered in the current scene,
+    stopping all sounds immediately.
     """
     for sys in GlobalDB.retrieve('uplogic.audio'):
         sys.shutdown()
 
 
 class AudioSystem(object):
-    '''System for managing sounds started using `Sound2D` or `Sound3D`.
-    
-    :param name: ID of this AudioSystem; must be unique.
-    :param mode: Playback mode for sounds of this system, must be one of `['2D', '3D']`
+    '''System for managing sounds started using :class:`Sound2D` or :class:`Sound3D`.
+
+    :param name: Unique identifier for this system.
+    :param mode: Playback mode; must be one of ``['2D', '3D']``.
     '''
     _deprecated = False
 
@@ -106,6 +138,7 @@ class AudioSystem(object):
 
     @property
     def listener_location(self):
+        '''World position of the audio listener (camera or VR headset).'''
         return self.device.listener_location
 
     @listener_location.setter
@@ -114,6 +147,7 @@ class AudioSystem(object):
 
     @property
     def listener_orientation(self):
+        '''Quaternion orientation of the audio listener.'''
         return self.device.listener_orientation
 
     @listener_orientation.setter
@@ -122,6 +156,7 @@ class AudioSystem(object):
 
     @property
     def listener_velocity(self):
+        '''World-space velocity of the audio listener, used for Doppler.'''
         return self.device.listener_velocity
 
     @listener_velocity.setter
@@ -138,7 +173,7 @@ class AudioSystem(object):
 
     @property
     def volume(self):
-        '''Playback amplitude multiplier for all sounds played through this system'''
+        '''Playback amplitude multiplier for all sounds played through this system.'''
         return self._volume
 
     @volume.setter
@@ -148,9 +183,18 @@ class AudioSystem(object):
             sound.volume = sound.volume  # noqa
 
     def cache(self, sound):
+        '''Store *sound*'s decoded data in the global :class:`AudioCache`.
+
+        :param sound: :class:`~uplogic.audio.sound.ULSound` whose ``soundfile``
+            should be cached under its ``file`` path.
+        '''
         AudioCache._sounds[sound.file] = sound.soundfile
 
     def uncache(self, sound):
+        '''Remove *sound* from the global :class:`AudioCache` if present.
+
+        :param sound: :class:`~uplogic.audio.sound.ULSound` to evict.
+        '''
         if sound.file in self._cached_sounds.keys():
             del AudioCache._sounds[sound.file]
 
@@ -165,7 +209,10 @@ class AudioSystem(object):
             sound.resume()
 
     def setup(self, scene=None):
-        """Get necessary scene data.
+        """Bind this system to *scene*, collect reverb volumes, and register
+        the per-frame update hook.
+
+        :param scene: BGE scene to bind to; defaults to the current scene.
         """
         if scene is None:
             self.scene = logic.getCurrentScene()
@@ -179,7 +226,11 @@ class AudioSystem(object):
         self.scene.pre_draw.append(self.update)
 
     def compute_listener_velocity(self, listener) -> Vector:
-        """Compare positions of the listener to calculate velocity.
+        """Estimate the listener's velocity from its position delta since the
+        last frame, scaled to approximate units per second.
+
+        :param listener: Object with a ``worldPosition`` attribute.
+        :returns: ``mathutils.Vector`` velocity estimate.
         """
         wpos = listener.worldPosition.copy()
         olp = self._old_listener_pos
@@ -192,7 +243,13 @@ class AudioSystem(object):
         return vel
 
     def update(self):
-        """This is called each frame and updates every sound currently playing.
+        """Per-frame update: sync the 3-D listener transform and forward the
+        update call to every active sound.
+
+        In ``'3D'`` mode the listener position, orientation, and velocity are
+        pushed to the ``aud.Device`` each tick. Reverb volumes are evaluated
+        to set the ``reverb`` flag. Called automatically via the scene
+        pre-draw list.
         """
         if self.mode == '3D':
             scene = logic.getCurrentScene()
@@ -239,16 +296,21 @@ class AudioSystem(object):
             s.update()
 
     def add(self, sound):
-        '''Add a `ULSound` to this audio system.'''
+        '''Add a :class:`~uplogic.audio.sound.ULSound` to this audio system.
+
+        :param sound: Sound instance to register.
+        '''
         self._active_sounds.append(sound)
 
     def remove(self, sound):
-        '''Remove a `ULSound` from this audio system.'''
+        '''Remove a :class:`~uplogic.audio.sound.ULSound` from this audio system.
+
+        :param sound: Sound instance to deregister.
+        '''
         self._active_sounds.remove(sound)
 
     def shutdown(self, a=None):
-        '''Stop and remove this audio system. This will stop all sounds playing
-        on this system.'''
+        '''Stop all sounds and remove this system from the scene.'''
         self.device.stopAll()
         # for sound in self._cached_sounds.copy():
         #     self.uncache(sound)
@@ -256,20 +318,22 @@ class AudioSystem(object):
         GlobalDB.retrieve('uplogic.audio').remove(self.name)
 
     def stop_all(self):
+        '''Stop all sounds on the underlying ``aud.Device`` immediately.'''
         self.device.stopAll()
 
 
 class ULAudioSystem(AudioSystem):
+    '''[DEPRECATED] Use :class:`AudioSystem` instead.'''
     _deprecated = True
 
 
 def get_audio_system(system_name: str = 'default', mode: str = '3D') -> AudioSystem:
-    '''Get or create a `AudioSystem` with the given name.
+    '''Get or create an :class:`AudioSystem` with the given name.
 
-    :param system_name: Look for this name.
-    :param mode: Playback mode of `['2D', '3D']`. Only relevant a new system is created.
-
-    :returns: `AudioSystem`, new system is created if none is found.
+    :param system_name: Name of the system to look up.
+    :param mode: Playback mode (``'2D'`` or ``'3D'``); only used when a new
+        system is created.
+    :returns: Existing or newly created :class:`AudioSystem`.
     '''
     scene = logic.getCurrentScene()
     aud_systems = GlobalDB.retrieve('uplogic.audio')

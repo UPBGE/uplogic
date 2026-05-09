@@ -41,6 +41,19 @@ void main()
 
 
 class Eyelids(Filter2D):
+    '''Post-processing filter that masks the screen with curved black eyelid shapes.
+
+    The top and bottom of the screen are covered by a curved black gradient that
+    simulates closing eyelids.  The curvature of each lid is derived from a
+    barrel-distortion factor tied to the horizontal screen position.
+
+    :param power: Blend weight of the lid mask.  ``0`` leaves the frame
+        untouched; ``1`` applies the mask at full strength.  Defaults to
+        ``1.0``.
+    :param factor: Fraction of the screen height hidden by each eyelid (top
+        and bottom independently).  Defaults to ``0.1``.
+    :param idx: Render-pass index used to order filters in the pipeline.
+    '''
 
     def __init__(self, power: float = 1.0, factor: float = 0.1, idx: int = None) -> None:
         self.uniforms = {'power': float(power), 'factor': float(factor)}
@@ -48,14 +61,16 @@ class Eyelids(Filter2D):
 
     @property
     def power(self):
+        '''Blend weight of the lid mask (``0`` = no mask, ``1`` = full mask).'''
         return self.uniforms['power']
 
     @power.setter
     def power(self, val):
         self.uniforms['power'] = float(val)
-    
+
     @property
     def factor(self):
+        '''Fraction of the screen hidden by each eyelid (top and bottom).'''
         return self.uniforms['factor']
 
     @factor.setter

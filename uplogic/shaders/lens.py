@@ -24,6 +24,18 @@ void main(void)
 
 
 class Lens(Filter2D):
+    '''Post-processing filter that applies barrel or pincushion lens distortion.
+
+    Pixels are remapped radially outward from the screen centre according to
+    ``power``.  Positive values produce pincushion distortion (edges pulled
+    inward) while negative values produce barrel distortion (edges pushed
+    outward).  Pixels that map outside the ``[0, 1]`` UV range are filled
+    with black.  A value of ``0`` disables the effect entirely.
+
+    :param power: Distortion strength.  Positive = pincushion, negative =
+        barrel, ``0`` = no distortion.  Defaults to ``0.0``.
+    :param idx: Render-pass index used to order filters in the pipeline.
+    '''
 
     def __init__(self, power=0.0, idx: int = None) -> None:
         self.uniforms = {'power': float(power)}
@@ -31,6 +43,7 @@ class Lens(Filter2D):
 
     @property
     def power(self):
+        '''Lens distortion strength (positive = pincushion, negative = barrel).'''
         return self.uniforms['power']
 
     @power.setter

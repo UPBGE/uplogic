@@ -1,3 +1,24 @@
+'''Data persistence and file I/O for uplogic.
+
+Exports :class:`GlobalDB` and the helper functions :func:`store`,
+:func:`retrieve`, :func:`read_file`, :func:`write_file`, and :func:`load_file`.
+Also registers the built-in serialisers for ``str``, ``float``, ``int``,
+``list``/``tuple``, and :class:`mathutils.Vector`.
+
+Typical usage::
+
+    from uplogic import data
+
+    # persistent global variable (survives game restart)
+    data.store('highscore', 9000, persist=True)
+    score = data.retrieve('highscore', default=0)
+
+    # read / write a JSON config file
+    cfg = data.load_file('//config.json')
+    cfg['volume'] = 0.8
+    cfg.write()
+'''
+
 from .globaldb import GlobalDB
 from .globaldb import retrieve  # noqa
 from .globaldb import store  # noqa
@@ -25,6 +46,18 @@ GlobalDB.serializers[str(type(Vector()))] = (
 
 
 class GameProperty():
+    '''Dynamically add a BGE game-property accessor to a ``KX_GameObject`` or
+    ``KX_PythonComponent`` instance's class.
+
+    When *inst* is a :class:`~bge.types.KX_PythonComponent`, the property
+    delegates to ``self.object[name]``; for plain
+    :class:`~bge.types.KX_GameObject` instances it uses ``self[name]``
+    directly.  If a *default* is provided it is written immediately.
+
+    :param inst: The object or component instance to extend.
+    :param name: Name of the BGE game property to wrap.
+    :param default: Optional initial value to write on construction.
+    '''
 
     def __init__(self, inst, name, default=None):
         
@@ -59,6 +92,14 @@ from uplogic import console
 
 
 def init_glob_cats():
+    '''Load global categories defined on the current Blender scene into
+    their :class:`GlobalDB` instances, mapping all supported value types
+    (float, string, int, bool, file path, vector, colour, object reference,
+    etc.) to their Python equivalents.
+
+    Logs a success message listing the initialised categories and sets
+    ``bpy.types.Scene.nl_globals_initialized`` when done.
+    '''
     # if not hasattr(bpy.types.Scene, 'nl_globals_initialized'):
     scene = logic.getCurrentScene()
     cats = getattr(

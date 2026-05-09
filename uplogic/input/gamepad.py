@@ -1,3 +1,10 @@
+'''Gamepad/joystick input helpers for uplogic.
+
+Provides button, axis, stick, and trigger query functions and the
+:class:`Gamepad` and :class:`GamepadLook` component classes.
+Both XBOX and Sony controller layouts are supported via the :data:`XBOX`
+and :data:`SONY` button-name dictionaries.
+'''
 from bge import logic
 from bge.types import KX_GameObject as GameObject
 from math import pi
@@ -29,9 +36,7 @@ XBOX = {
     'RT': 15,
     'LT': 16
 }
-"""Buttons in [`A`, `B`, `X`, `Y`, `SELECT`, `BACK`, `START`, `MENU`, `LS`,
-`L3`, `RS`, `R3`, `LB`, `RB`, `DPADUP`, `DPADDOWN`, `DPADLEFT`, `DPADRIGHT`,
-`RT`, `LT`]"""
+'''Button-name to index mapping for Xbox-style controllers. Valid keys: ``"A"``, ``"B"``, ``"X"``, ``"Y"``, ``"SELECT"``, ``"BACK"``, ``"START"``, ``"MENU"``, ``"LS"``, ``"L3"``, ``"RS"``, ``"R3"``, ``"LB"``, ``"RB"``, ``"DPADUP"``, ``"DPADDOWN"``, ``"DPADLEFT"``, ``"DPADRIGHT"``, ``"RT"``, ``"LT"``.'''
 
 
 SONY = {
@@ -55,13 +60,13 @@ SONY = {
     'R2': 15,
     'L2': 16
 }
-"""Buttons in [`X`, `CROSS`, `CIRCLE`, `SQUARE`, `TRIANGLE`, `SELECT`, `SHARE`,
-`START`, `MENU`, `L3`, `R3`, `L1`, `R1`, `DPADUP`, `DPADDOWN`, `DPADLEFT`,
-`DPADRIGHT`, `R2`, `L2`]"""
+'''Button-name to index mapping for Sony (PlayStation) controllers. Valid keys: ``"X"``, ``"CROSS"``, ``"CIRCLE"``, ``"SQUARE"``, ``"TRIANGLE"``, ``"SELECT"``, ``"SHARE"``, ``"START"``, ``"MENU"``, ``"L3"``, ``"R3"``, ``"L1"``, ``"R1"``, ``"DPADUP"``, ``"DPADDOWN"``, ``"DPADLEFT"``, ``"DPADRIGHT"``, ``"R2"``, ``"L2"``.'''
 
 
 LS = 15
+'''Axis index constant for the left analogue stick (``15``).'''
 RS = 16
+'''Axis index constant for the right analogue stick (``16``).'''
 
 STICKS = {
     LS: [0, 1],
@@ -79,8 +84,17 @@ def gamepad_button(
     tap: int = False,
     released: int = False
 ) -> bool:
-    '''Retrieve button value.\n
-    Not intended for manual use.
+    '''Query a single button state on the joystick at *idx*.
+
+    Not intended for direct use; call :func:`gamepad_tap`, :func:`gamepad_down`,
+    or :func:`gamepad_up` instead.
+
+    :param button: Button index.
+    :param idx: Joystick device index (default ``0``).
+    :param tap: When ``True``, return ``True`` only on the activation frame.
+    :param released: When ``True``, return ``True`` only on the release frame.
+    :returns: ``True`` when the button matches the requested state, ``False``
+        when no joystick is connected at *idx*.
     '''
     global _active_buttons
     if logic.joysticks[idx] is None:
@@ -105,8 +119,19 @@ def gamepad_axis(
     released: bool = False,
     threshold: float = .07
 ) -> float:
-    '''Retrieve axis value.\n
-    Not intended for manual use.
+    '''Query a single axis value on the joystick at *idx*.
+
+    Not intended for direct use; call :func:`gamepad_stick` or
+    :func:`gamepad_trigger` instead.
+
+    :param axis: Axis index (indices 15/16 are remapped internally).
+    :param idx: Joystick device index.
+    :param tap: When ``True``, return the value only on the first non-zero frame.
+    :param released: When ``True``, return ``1.0`` on the frame the axis returns
+        to zero.
+    :param threshold: Values with absolute magnitude below this are treated as
+        zero.
+    :returns: Axis float value, or ``0.0`` when no joystick is connected.
     '''
     if axis > 5:
         axis -= 11  # for indices 15, 16
@@ -142,15 +167,15 @@ def gamepad_trigger(
     idx: int = 0,
     threshold: float = .1
 ) -> float:
-    """Retrieve gamepad trigger values.
+    '''Return the intensity of a trigger on the gamepad at *idx*.
 
-    :param trigger: Whether to use the left or right trigger;
-    `str` in [`'LT'`, `'RT'`].
-    :param idx: index of the gamepad.
-    :param threshold: Only detect values higher than the threshold.
-
-    :returns: Intensity of the selected trigger.
-    """
+    :param trigger: Which trigger to read — ``"LT"`` for left, ``"RT"`` for
+        right.
+    :param idx: Joystick device index.
+    :param threshold: Minimum value to report; readings below this return
+        ``0.0``.
+    :returns: Trigger intensity as a ``float`` in the range ``[0, 1]``.
+    '''
     return gamepad_axis(15 if trigger == 'LT' else 16, idx, threshold=threshold)
 
 
@@ -160,14 +185,16 @@ def gamepad_stick(
     threshold: float = .1,
     invert: tuple = (False, True)
 ) -> Vector:
-    '''Retrieve stick values.
+    '''Return the X/Y deflection of an analogue stick as a 2D vector.
 
-    :param stick: which stick to use.
-    can bei either `LS` or `RS` from `uplogic.input`.
-    :param idx: gamepad index (default = 0).
-    :param threshold: minimum value for each axis to be valid.
-
-    :returns: set `(x, y)`
+    :param stick: Which stick to query — use :data:`LS` or :data:`RS`, or the
+        strings ``"LS"``/``"RS"``.
+    :param idx: Joystick device index.
+    :param threshold: Per-axis dead-zone; values below this magnitude are
+        clamped to zero.
+    :param invert: ``(invert_x, invert_y)`` flags; by default Y is inverted to
+        match typical first-person conventions.
+    :returns: :class:`mathutils.Vector` of ``(x, y)`` in the range ``[-1, 1]``.
     '''
     if stick == 'LS':
         stick = LS
@@ -186,14 +213,13 @@ def gamepad_tap(
     idx: int = 0,
     layout: dict = XBOX
 ) -> float or bool:
-    '''Detect button tap.
+    '''Return ``True`` on the single frame a button or trigger is first activated.
 
-    :param button: button name as `str` (e.g. `'START'`)
-    :param idx: gamepad index (default = 0).
-    :param layout: gamepad layout,
-    can be either `XBOX` or `SONY` from `uplogic.input`.
-
-    :returns: float or boolean
+    :param button: Button name string (e.g. ``"A"``, ``"START"``) or integer
+        index.
+    :param idx: Joystick device index.
+    :param layout: Button-name dictionary — :data:`XBOX` or :data:`SONY`.
+    :returns: ``True`` on the activation frame.
     '''
     if isinstance(button, str):
         button = layout.get(button.upper(), button.upper())
@@ -208,14 +234,12 @@ def gamepad_down(
     idx: int = 0,
     layout: dict = XBOX
 ) -> float or bool:
-    '''Detect button held down.
+    '''Return ``True`` while a button or trigger is held down.
 
-    :param button: button name as `str` (e.g. `'START'`)
-    :param idx: gamepad index (default = 0).
-    :param layout: gamepad layout,
-    can be either `XBOX` or `SONY` from `uplogic.input`.
-
-    :returns: float or boolean
+    :param button: Button name string or integer index.
+    :param idx: Joystick device index.
+    :param layout: Button-name dictionary — :data:`XBOX` or :data:`SONY`.
+    :returns: ``True`` while the button is active, or the trigger float value.
     '''
     btn_idx = layout.get(button, button)
     if button in [15, 16, 'R2', 'L2', 'RT', 'LT']:
@@ -229,14 +253,12 @@ def gamepad_up(
     idx: int = 0,
     layout: dict = XBOX
 ) -> float or bool:
-    '''Detect button released.
+    '''Return ``True`` on the single frame a button or trigger is released.
 
-    :param button: button name as `str` (e.g. `'START'`)
-    :param idx: gamepad index (default = 0).
-    :param layout: gamepad layout,
-    can be either `XBOX` or `SONY` from `uplogic.input`.
-
-    :returns: float or boolean
+    :param button: Button name string or integer index.
+    :param idx: Joystick device index.
+    :param layout: Button-name dictionary — :data:`XBOX` or :data:`SONY`.
+    :returns: ``True`` on the release frame.
     '''
     btn_idx = layout.get(button, button)
     if button in [15, 16, 'R2', 'L2', 'RT', 'LT']:
@@ -246,12 +268,15 @@ def gamepad_up(
 
 
 def gamepad_vibrate(idx: int = 0, strength: tuple = (.5, .5), time: float = 1.0):
-    """Start the vibrators of the gamepad if available.
+    '''Start the vibration motors on the gamepad at *idx*.
 
-    :param idx: gamepad index (default = 0).
-    :param strength: Intensity of vibration as tuple(`left`, `right`).
-    :param time: Duration of vibration.
-    """
+    Does nothing and logs a debug message when the device has no vibration
+    support.
+
+    :param idx: Joystick device index.
+    :param strength: ``(left_motor, right_motor)`` intensities in ``[0, 1]``.
+    :param time: Vibration duration in seconds.
+    '''
     joystick = logic.joysticks[idx]
     if not joystick or not joystick.hasVibration:
         console.debug(f'Joystick at index {idx} has no vibration!')
@@ -263,14 +288,11 @@ def gamepad_vibrate(idx: int = 0, strength: tuple = (.5, .5), time: float = 1.0)
 
 
 class Gamepad():
-    """Wrapper class for a gamepad/controller. The index determines which connected
-    gamepad to use, the layout determines whether to use XBox or Sony button
-    naming.
-    
-    :param idx: Which gamepad to use.
-    :param layout: Layout determining button names; `str` in [`'XBOX'`,
-    `'SONY'`].
-    """
+    '''Stateful wrapper around a single gamepad/joystick device.
+
+    :param idx: Index of the joystick to use (default ``0``).
+    :param layout: Button-name mapping — use :data:`XBOX` or :data:`SONY`.
+    '''
 
     _deprecated = False
 
@@ -288,18 +310,41 @@ class Gamepad():
         self.device = logic.joysticks[idx]
 
     def button_down(self, button: str):
+        '''Return ``True`` while *button* is held down.
+
+        :param button: Button name string (e.g. ``"A"``) or integer index.
+        '''
         return gamepad_down(button, self.idx, self.layout)
-        
+
     def button_tap(self, button: str):
+        '''Return ``True`` on the single frame *button* is first pressed.
+
+        :param button: Button name string or integer index.
+        '''
         return gamepad_tap(button, self.idx, self.layout)
 
     def button_up(self, button: str):
+        '''Return ``True`` on the single frame *button* is released.
+
+        :param button: Button name string or integer index.
+        '''
         return gamepad_up(button, self.idx, self.layout)
 
     def sticks(self, stick: str = LS, threshold: float = 0.07):
+        '''Return the X/Y deflection of an analogue stick.
+
+        :param stick: :data:`LS` or :data:`RS`.
+        :param threshold: Per-axis dead-zone magnitude.
+        :returns: :class:`mathutils.Vector` of ``(x, y)``.
+        '''
         return gamepad_stick(stick, self.idx, threshold)
-    
+
     def rumble(self, strength: tuple = (.5, .5), time: float = 1.0):
+        '''Activate the vibration motors.
+
+        :param strength: ``(left_motor, right_motor)`` intensities in ``[0, 1]``.
+        :param time: Duration in seconds.
+        '''
         if not self.device.hasVibration:
             console.debug('Joystick at index {} has no vibration!'.format(self.idx))
             return
@@ -310,36 +355,40 @@ class Gamepad():
         self.device.startVibration()
 
     def vibrate(self, strength: tuple = (.5, .5), time: float = 1.0):
+        '''Alias for :meth:`rumble`.'''
         self.rumble(strength, time)
 
 
 class ULGamePad(Gamepad):
+    '''[DEPRECATED] Use :class:`Gamepad` instead.'''
     _deprecated = True
 
 
 class GamepadLook():
-    """Automatically track the mouse movement and translate it to a rotate a
-    body and optionally a head.
+    '''Gamepad-stick-driven first-person look controller.
 
-    This component can be activated/deactivated at any time to keep performance
-    up.
-    
-    :param obj: Main object to rotate around the object's Z axis.
-    :param head: Head object to rotate around the object's X/Y axis.
-    :param sensitivity: Translation factor of mouse movement to rotation.
-    :param use_cap_x: Whether to use capping on the mouse X movement (Z axis
-    rotation).
-    :param cap_x: Minimum and Maximum amount of rotation on the Z axis.
-    :param use_cap_y: Whether to use capping on the mouse Y movement (X/Y axis
-    rotation).
-    :param cap_y: Minimum and Maximum amount of rotation on the X/Y axis.
-    :param invert: Whether to use inverted values for mous X/Y movement.
-    :param smoothing: Amount of movement smoothing.
-    :param local: Whether to use local transform for the body object.
-    :param front: Front axis (traditionally in blender, Y is front).
-    :param active: Whether to start this component in active or inactive mode
-    (can be changed later).
-    """
+    Translates right (or left) stick movement into rotations on a body object
+    (Z axis) and an optional head object (X/Y axis). The controller can be
+    toggled at any time via :attr:`active`.
+
+    :param obj: Primary object to rotate around the Z axis.
+    :param head: Secondary object for vertical rotation; defaults to *obj*.
+    :param sensitivity: Stick deflection to rotation scale factor.
+    :param use_cap_x: Enable rotation clamping on the Z axis.
+    :param cap_x: ``(min, max)`` Z-axis rotation limits in degrees.
+    :param use_cap_y: Enable rotation clamping on the X/Y axis.
+    :param cap_y: ``(min, max)`` X/Y-axis rotation limits in degrees.
+    :param invert: ``(invert_x, invert_y)`` flags for each axis.
+    :param smoothing: Smoothing factor in ``[0, 1)``.
+    :param local: When ``True``, apply rotations in local space.
+    :param front: Front axis index (``1`` = Y, Blender default).
+    :param idx: Joystick device index.
+    :param stick: Which stick to use — ``"RS"`` or ``"LS"``.
+    :param threshold: Stick dead-zone magnitude.
+    :param exponent: Power curve applied to raw stick values for finer control
+        near centre.
+    :param active: Whether to start the component active.
+    '''
     _deprecated = False
     def __init__(
         self,
@@ -392,6 +441,7 @@ class GamepadLook():
 
     @property
     def active(self):
+        '''Whether the per-frame update is registered. Setting to ``False`` removes the update from the scene pre-draw list.'''
         return self._active
 
     @active.setter
@@ -406,6 +456,7 @@ class GamepadLook():
 
     @property
     def rotation(self):
+        '''Tuple of ``(body_world_orientation, head_world_orientation)``. Setting writes both orientations simultaneously.'''
         return self.obj.worldOrientation, self.head.worldOrientation
 
     @rotation.setter
@@ -414,16 +465,24 @@ class GamepadLook():
         self.head.worldOrientation = val[1]
 
     def stop(self):
+        '''Deactivate the controller and reset :attr:`initialized`.'''
         self.active = False
         self.initialized = False
 
     def disable(self):
+        '''Deactivate the controller (alias for setting :attr:`active` to ``False``).'''
         self.active = False
 
     def enable(self):
+        '''Activate the controller (alias for setting :attr:`active` to ``True``).'''
         self.active = True
 
     def reset(self, factor=1):
+        '''Restore both objects to their original orientations captured at construction.
+
+        :param factor: When ``< 1``, lerp smoothly each frame via
+            :func:`~uplogic.events.schedule_callback`; when ``1``, snap immediately.
+        '''
         if factor < 1:
             self.active = False
             if self.reset_factor < 1:
@@ -439,6 +498,7 @@ class GamepadLook():
             self.head.localOrientation = self._defaults[1]
 
     def update(self):
+        '''Per-frame update: read stick values, apply dead-zone, smoothing, power curve, and caps, then rotate both objects. Called automatically via the scene pre-draw list.'''
         game_object_x = self.obj
         game_object_y = self.head
         sensitivity = self.sensitivity
@@ -515,10 +575,17 @@ class GamepadLook():
 
 
 class ULGamepadLook(GamepadLook):
+    '''[DEPRECATED] Use :class:`GamepadLook` instead.'''
     _deprecated = True
 
 
 def gamepad_active(idx) -> bool:
+    '''Return ``True`` when the joystick at *idx* has any active buttons or
+    significant axis deflection.
+
+    :param idx: Joystick device index.
+    :returns: ``True`` if any button is pressed or any axis exceeds ±0.1.
+    '''
     if logic.joysticks[idx]:
         joystick = logic.joysticks[idx]
     else:

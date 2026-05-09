@@ -201,8 +201,31 @@ void main(void)
 
 
 class Droplets(Filter2D):
+    '''Animated rain-drop distortion post-processing filter.
+
+    Droplets appear and fade over time driven by the ``timer`` and ``time``
+    uniforms. The ``time`` uniform is reset to ``0`` by calling
+    :meth:`restart`, which also randomises the ``randomtime`` seed so that
+    each sequence looks different. When ``blur`` is non-zero each droplet acts
+    as a refracted lens using a radial blur kernel.
+
+    The effect plays for up to 10 seconds of ``time``; once ``time`` exceeds
+    10 the shader passes through the rendered frame unmodified until
+    :meth:`restart` is called.
+    '''
 
     def __init__(self, color=(1, 1, 1), speed=1.0, blur=0.0, idx: int = None) -> None:
+        '''Initialise the Droplets filter.
+
+        :param color: RGB tint applied to the droplet refraction as a tuple
+            or ``mathutils.Vector``.
+        :param speed: Playback speed multiplier for ``timer`` and ``time``
+            advancement.
+        :param blur: Per-droplet blur radius. ``0`` samples the frame
+            directly without blurring.
+        :param idx: Filter pass index. ``None`` assigns the next available
+            index automatically.
+        '''
         now = logic.getRealTime()
         self.speed = speed
         self.uniforms = {
@@ -223,6 +246,13 @@ class Droplets(Filter2D):
         })
 
     def update(self):
+        '''Advance time uniforms and upload them to the shader.
+
+        Increments ``timer`` and ``time`` by ``delta_time * speed`` where
+        ``delta_time`` is the wall-clock seconds elapsed since the previous
+        call, then delegates to the parent :meth:`Filter2D.update` to upload
+        all uniforms to the GPU.
+        '''
         now = logic.getRealTime()
         diff = (now - self._last_time) * self.speed
         self.timer += diff
@@ -231,15 +261,27 @@ class Droplets(Filter2D):
         super().update()
 
     def randomize(self):
+        '''Randomise the ``randomtime`` uniform for a varied droplet pattern.
+
+        Generates a new random value in ``[-1, 9]`` and assigns it to
+        ``randomtime`` so the next droplet sequence uses a different noise
+        seed.
+        '''
         self.randomtime = (logic.getRandomFloat()*5)*2.0-1.0
 
     def restart(self):
+        '''Reset the effect and begin a fresh droplet sequence.
+
+        Sets ``time`` and ``timer`` back to ``0`` and calls :meth:`randomize`
+        so that the new sequence uses a different noise seed.
+        '''
         self.randomize()
         self.time = 0.0
         self.timer = 0.0
 
     @property
     def blur(self):
+        '''Per-droplet blur radius (``float``). ``0`` disables blurring.'''
         return self.uniforms['blur']
 
     @blur.setter
@@ -248,6 +290,7 @@ class Droplets(Filter2D):
 
     @property
     def color(self):
+        '''RGB tint applied to the droplet refraction (``mathutils.Vector``).'''
         return self.uniforms['color']
 
     @color.setter
@@ -256,6 +299,7 @@ class Droplets(Filter2D):
 
     @property
     def timer(self):
+        '''Continuously-advancing playback clock uniform (``float``).'''
         return self.uniforms['timer']
 
     @timer.setter
@@ -264,6 +308,7 @@ class Droplets(Filter2D):
 
     @property
     def randomtime(self):
+        '''Noise seed uniform that varies the droplet pattern (``float``).'''
         return self.uniforms['randomtime']
 
     @randomtime.setter
@@ -272,6 +317,7 @@ class Droplets(Filter2D):
 
     @property
     def time(self):
+        '''Effect lifetime clock uniform (``float``). Reset to ``0`` by :meth:`restart`.'''
         return self.uniforms['time']
 
     @time.setter

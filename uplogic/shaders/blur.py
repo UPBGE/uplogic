@@ -1,3 +1,4 @@
+'''Post-processing filter that applies a radial Gaussian-style blur by sampling in a ring pattern.'''
 from .shader import Filter2D
 
 
@@ -24,13 +25,13 @@ void main()
     float Pi = 6.28318530718;
 
     float quality = 9.0;
-   
+
     vec2 radius = power / resolution.xy;
-    
+
     vec2 uv = texcoord;
 
     vec4 color = texture(bgl_RenderedTexture, uv);
-    
+
     // Blur calculations
     for (float d = 0.0; d < Pi; d += Pi / samples)
     {
@@ -45,6 +46,16 @@ void main()
 
 
 class Blur(Filter2D):
+    '''Radial blur filter that samples the rendered texture in a ring pattern around each pixel.
+
+    The blur accumulates ``samples`` angular directions over a full 360-degree sweep,
+    stepping outward in 9 increments up to the radius defined by ``power``.
+
+    :param power: Blur radius in pixels; larger values produce a wider, softer blur.
+    :param samples: Number of angular sample directions per ring (higher values produce
+        a smoother result at the cost of performance).
+    :param idx: Filter pass index; passed directly to ``Filter2D``.
+    '''
 
     def __init__(self, power=1.0, samples=16, idx: int = None) -> None:
        self.uniforms = {'samples': float(samples), 'power': float(power)}
@@ -52,6 +63,7 @@ class Blur(Filter2D):
 
     @property
     def samples(self):
+        '''Number of angular sample directions taken around each ring of the blur.'''
         return self.uniforms['samples']
 
     @samples.setter
@@ -60,6 +72,7 @@ class Blur(Filter2D):
 
     @property
     def power(self):
+        '''Blur radius in pixels controlling how far samples are spread from the centre.'''
         return self.uniforms['power']
 
     @power.setter

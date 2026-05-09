@@ -1,3 +1,26 @@
+'''In-game on-screen console for uplogic.
+
+Provides a :class:`ConsoleLayout` overlay that can be toggled at runtime,
+routes ``stdout`` through it, and exposes typed log helpers (``log``,
+``debug``, ``info``, ``warning``, ``error``, ``critical``).  An optional
+log file is written when :attr:`ConsoleLayout.log_directory` is set.
+
+Typical usage::
+
+    from uplogic import console
+
+    console.enable()          # show overlay; toggle with F12 by default
+    console.info('Ready.')
+    console.warning('Low memory.')
+    console.error('Unhandled exception.')
+
+    # set log level so only warnings and above are shown
+    console.set_log_level(3)
+
+The module is enabled automatically when the ``bge_netlogic`` add-on is
+present and ``use_screen_console`` is set on the scene.
+'''
+
 from bge import logic, render
 from io import StringIO
 from uplogic.ui.canvas import Canvas
@@ -23,11 +46,20 @@ GLOBALS = {}
 
 
 def set_global(key, val):
+    '''Register a name/value pair that will be available inside expressions
+    executed through the on-screen console.
+
+    :param key: Variable name as it will appear in the exec namespace.
+    :param val: Value to bind to that name.
+    '''
     global GLOBALS
     GLOBALS[key] = val
 
 
 def _get_globals():
+    '''Return the exec namespace populated with common BGE/BPY bindings and
+    all current-scene objects, used by :meth:`ConsoleLayout.on_enter`.
+    '''
     scene = logic.getCurrentScene()
     global GLOBALS
     GLOBALS['scene'] = scene
@@ -43,6 +75,15 @@ def _get_globals():
 
 
 def enable(toggle_key='F12', visible=False):
+    '''Activate the on-screen console for the current scene.
+
+    Creates the :class:`ConsoleLayout` overlay if it does not already exist,
+    hooks it into the scene pre-draw list, and redirects ``sys.stdout`` so
+    that ``print()`` output is captured and displayed in the overlay.
+
+    :param toggle_key: Keyboard key name used to show/hide the console.
+    :param visible: Whether the console starts visible.
+    '''
     scene = logic.getCurrentScene()
     c = get_console(True, toggle_key=toggle_key, visible=visible)
     c.scene = scene
@@ -55,6 +96,11 @@ def enable(toggle_key='F12', visible=False):
 
 
 def disable():
+    '''Deactivate the on-screen console.
+
+    Restores ``sys.stdout`` and ``sys.stderr``, stops the
+    :class:`ConsoleLayout`, and removes it from the global registry.
+    '''
     sys.stdout = sys.__stdout__
     sys.stderr = sys.__stderr__
     console = get_console(True)
@@ -65,12 +111,19 @@ def disable():
 
 
 class Console(StringIO):
+    '''``sys.stdout`` replacement that routes all writes through
+    :func:`_print` so they appear in the on-screen console.
+    '''
 
     def write(self, __s: str) -> int:
         _print(__s)
 
 
 class ErrorConsole(StringIO):
+    '''``sys.stderr`` replacement that routes all writes through
+    :func:`error` so they appear in the on-screen console at error level.
+    '''
+
     def write(self, __s: str) -> int:
         error(__s)
 
@@ -83,41 +136,67 @@ COLORS = {
     'CRITICAL': [1, .0, .0, 1],
     'SUCCESS': [.3, 1, .3, 1]
 }
+'''RGBA font colours used by :class:`ConsoleLayout` for each log level.'''
 
 
 class CommandLabel(Label):
+    '''Label variant used to render command-echo lines in the console overlay.'''
     pass
 
 
 def set_log_level(level: int = 2) -> None:
-    """Set the log level for the console. Higher values mean less important messages will be hidden.
+    '''Set the minimum severity level for messages shown in the console.
 
-    - 0: No Restrictions
-    - 1: Debug
-    - 2: Info (Default)
-    - 3: Warning
-    - 4: Error
-    - 5: Critical
+    Messages below the given level are silently discarded.
 
-    Args:
-        level (int): Log Level
-    """
+    ====  ==========
+    0     No restrictions (all messages)
+    1     Debug and above
+    2     Info and above *(default)*
+    3     Warning and above
+    4     Error and above
+    5     Critical only
+    ====  ==========
+
+    :param level: Log level in the range ``[0, 5]``.
+    '''
     get_console().log_level = clamp(level, 0, 5)
 
 
 def set_log_directory(path):
+    '''Set the directory where log files are written.
+
+    A new numbered ``log.<n>.txt`` file is created inside *path* each session.
+    Pass ``None`` to disable file logging.
+
+    :param path: Filesystem path to the log directory, or ``None``.
+    '''
     get_console().log_directory = path
 
 
 class ConsoleLayout(Canvas):
+    '''On-screen console overlay widget.
+
+    Rendered as a :class:`~uplogic.ui.canvas.Canvas` panel that displays
+    timestamped log messages, accepts typed commands through a
+    :class:`~uplogic.ui.textinput.TextInput` widget, and writes output to an
+    optional log file.  Typically created and managed via :func:`enable` and
+    :func:`get_console` rather than instantiated directly.
+
+    :param toggle_key: Keyboard key name used to show/hide the console.
+    :param visible: Whether the console starts visible.
+    '''
+
     opacity = 1
     padding = [5, 10]
     toggle_key = 'F12'
 
-    
     @property
     def log_directory(self):
-        """Path to the log folder. This should be a directory, not a file."""
+        '''Path to the directory where log files are written. Setting this
+        creates the directory if it does not already exist and opens a new
+        numbered log file inside it. Set to ``None`` to disable file logging.
+        '''
         return self._log_directory
 
     @log_directory.setter
@@ -135,6 +214,10 @@ class ConsoleLayout(Canvas):
 
     @property
     def log_file(self):
+        '''Full path of the currently active log file, or ``None`` if file
+        logging is disabled (read-only). Set :attr:`log_directory` to change
+        where logs are written.
+        '''
         return self._log_file
 
     @log_file.setter
@@ -186,6 +269,10 @@ class ConsoleLayout(Canvas):
 
     @property
     def layout(self):
+        '''The inner :class:`~uplogic.ui.layout.RelativeLayout` that holds log
+        message labels. Replacing this widget migrates all existing children
+        to the new layout.
+        '''
         return self._layout
 
     @layout.setter
@@ -196,6 +283,10 @@ class ConsoleLayout(Canvas):
 
     @property
     def info_mode(self):
+        '''When ``True`` the overlay background is always shown and the input
+        field is only hidden (not the whole canvas) when the console is
+        inactive. Toggling this re-applies the :attr:`active` state.
+        '''
         return self._info_mode
 
     @info_mode.setter
@@ -205,6 +296,10 @@ class ConsoleLayout(Canvas):
 
     @property
     def active(self):
+        '''Whether the console is currently open and accepting input. In
+        :attr:`info_mode` the background stays visible and only the input field
+        is toggled; otherwise the entire overlay is shown or hidden.
+        '''
         return self._active
 
     @active.setter
@@ -220,6 +315,10 @@ class ConsoleLayout(Canvas):
 
     @property
     def position(self):
+        '''Docking position of the console panel. Accepted values:
+        ``"bottom"`` *(default)*, ``"top"``, ``"left"``, ``"right"``,
+        ``"center"``. Setting this repositions and resizes the panel immediately.
+        '''
         return self._position
 
     @position.setter
@@ -260,6 +359,9 @@ class ConsoleLayout(Canvas):
 
     @property
     def font_size(self):
+        '''Font size in pixels for all console labels, clamped to ``[5, 30]``.
+        Setting this updates every existing label and triggers a layout pass.
+        '''
         return self._font_size
 
     @font_size.setter
@@ -272,6 +374,12 @@ class ConsoleLayout(Canvas):
         self.arrange()
 
     def on_enter(self):
+        '''Handle the user pressing Enter in the input field.
+
+        Echoes the typed text, looks up a registered :class:`Command`, and
+        falls back to ``exec()`` in the :func:`_get_globals` namespace.
+        Clears the input field afterwards.
+        '''
         if self.input.text:
             self.issued_commands.append(self.input.text)
         sys.__stdout__.write(f'>{self.input.text}\n')
@@ -290,6 +398,9 @@ class ConsoleLayout(Canvas):
         self.input.edit = True
 
     def update_nameplate(self):
+        '''Per-frame nameplate update: cast a ray from the cursor, show the
+        object name under it, and insert the name into the input field on click.
+        '''
         ray = raycast_screen()
         mdown = mouse_down()
         if ray.obj:
@@ -302,6 +413,9 @@ class ConsoleLayout(Canvas):
         self._mouse_down = mdown
 
     def toggle(self):
+        '''Show or hide the console and update mouse visibility accordingly.
+        A guard flag prevents repeated toggling while the key is held.
+        '''
         if not self.show:
             self._mouse_visible = logic.mouse.visible
         if not self._toggle_key:
@@ -310,6 +424,11 @@ class ConsoleLayout(Canvas):
             self._toggle_key = True
 
     def update(self):
+        '''Per-frame update: poll the toggle key, handle up/down arrow history
+        navigation, and sync mouse visibility with the console state.
+
+        Called automatically via the BGE scene pre-draw list.
+        '''
         if self.input.edit != self.show:
             self.input.edit = self.show
         move_goback = key_pulse('UPARROW') - key_pulse('DOWNARROW')
@@ -334,12 +453,28 @@ class ConsoleLayout(Canvas):
         logic.mouse.visible = self.active or self._mouse_visible
 
     def stop(self):
+        '''Remove all log labels and unregister the toggle callback from the
+        scene pre-draw list.
+        '''
         self.clear()
         scene = logic.getCurrentScene()
         if self.toggle in scene.pre_draw:
             scene.pre_draw.remove(self.toggle)
 
     def add_message(self, msg, type='LOG', time=True, command=False):
+        '''Append a log message label to the console overlay.
+
+        Consecutive single-space messages are merged onto the previous label.
+        After adding the label :meth:`arrange` is called to reflow the stack.
+
+        :param msg: Text to display.
+        :param type: One of the keys in :data:`COLORS` (``"LOG"``,
+            ``"INFO"``, ``"DEBUG"``, ``"WARNING"``, ``"ERROR"``,
+            ``"CRITICAL"``, ``"SUCCESS"``).
+        :param time: When ``True`` prefix the message with the current time.
+        :param command: When ``True`` use :class:`CommandLabel` instead of
+            a plain :class:`~uplogic.ui.label.Label`.
+        '''
         if (msg == ' ' or self._prev_msg == ' ') and len(self.layout.children):
             self.layout.children[-1].text += msg
             self._prev_msg = msg
@@ -352,6 +487,10 @@ class ConsoleLayout(Canvas):
         self.arrange()
 
     def arrange(self):
+        '''Reflow all message labels from the bottom of the layout upwards,
+        fade out older labels, and remove any that have scrolled off the top.
+        Also repositions the input field.
+        '''
         blf.size(0, self.font_size)
         dim = blf.dimensions(0, 'A')
         cheight = dim[1]
@@ -373,6 +512,16 @@ class ConsoleLayout(Canvas):
 
 
 def get_console(create=False, toggle_key='F12', visible=False) -> ConsoleLayout:
+    '''Return the active :class:`ConsoleLayout`, optionally creating it.
+
+    :param create: When ``True``, create a new :class:`ConsoleLayout` if one
+        does not already exist in the global registry.
+    :param toggle_key: Toggle key forwarded to :class:`ConsoleLayout` on
+        creation (ignored if the console already exists).
+    :param visible: Initial visibility forwarded on creation.
+    :returns: The :class:`ConsoleLayout` instance, or ``None`` if *create* is
+        ``False`` and no console has been created yet.
+    '''
     consoles = GlobalDB.retrieve('uplogic.consoles')
     console = consoles.get('default')
     if console is None and create:
@@ -383,6 +532,7 @@ def get_console(create=False, toggle_key='F12', visible=False) -> ConsoleLayout:
 
 
 class ansicol:
+    '''ANSI escape-code constants used to colourise system-console output.'''
     RED = '\033[31m\033[1m'
     GREEN = '\033[32m\033[1m'
     YELLOW = '\033[33m'
@@ -392,6 +542,14 @@ class ansicol:
 
 
 def write(*msg, type='LOG'):
+    '''Write one or more values to the console using the given log type.
+
+    Objects that are not strings are converted with ``repr()``.
+
+    :param msg: Values to log (joined with spaces).
+    :param type: One of ``"LOG"``, ``"SUCCESS"``, ``"DEBUG"``, ``"INFO"``,
+        ``"WARNING"``, ``"ERROR"``, ``"CRITICAL"``.
+    '''
     msg = ' '.join([m.__repr__() if not isinstance(m, str) else m for m in msg])
     _f = {
         'LOG': log,
@@ -406,6 +564,9 @@ def write(*msg, type='LOG'):
 
 
 def _create_msg(msg, log_lvl, type: str, color):
+    '''Internal helper: format and route a log message to the overlay and
+    system console if the current log level permits it.
+    '''
     console = get_console(True)
     if console is None:
         print(sysmsg)
@@ -430,6 +591,9 @@ def _create_msg(msg, log_lvl, type: str, color):
 
 
 def _print(msg):
+    '''Internal helper: route a raw ``print()``/``stdout`` write to the
+    overlay and system console without a log-level prefix or colour.
+    '''
     console = get_console(True)
     if console is None:
         print(sysmsg)
@@ -451,61 +615,63 @@ def _print(msg):
 
 
 def log(*msg, type='LOG'):
-    """Write to the console in a generic fashion.
+    '''Write one or more values to the console.
 
-    If `ConsoleLayout.log_directory` is defined, the message will be added to the log file.
+    Always shown regardless of the current log level.  If
+    :attr:`ConsoleLayout.log_directory` is set, also appends to the log file.
 
-    Args:
-        type (str, optional): Message type of ['LOG', 'SUCCESS', 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']. Defaults to 'LOG'.
-    """
+    :param msg: Values to log (joined with spaces; non-strings use ``repr()``).
+    :param type: Message type — one of ``"LOG"``, ``"SUCCESS"``, ``"DEBUG"``,
+        ``"INFO"``, ``"WARNING"``, ``"ERROR"``, ``"CRITICAL"``.
+    '''
     _create_msg(msg, 5, type, '')
 
 
 def success(*msg):
-    """Write to the console with green colors if the `ConsoleLayout.log_level` is 0.
+    '''Write a success message in green. Only shown when :attr:`ConsoleLayout.log_level` is ``0``.
 
-    If `ConsoleLayout.log_directory` is defined, the message will be added to the log file.
-    """
+    :param msg: Values to log.
+    '''
     _create_msg(msg, 0, 'Success', ansicol.GREEN)
 
 
 def debug(*msg):
-    """Write to the console with bright yellow colors if the `ConsoleLayout.log_level` is 1 or less.
+    '''Write a debug message in bright yellow. Shown when :attr:`ConsoleLayout.log_level` is ``1`` or less.
 
-    If `ConsoleLayout.log_directory` is defined, the message will be added to the log file.
-    """
+    :param msg: Values to log.
+    '''
     _create_msg(msg, 1, 'Debug', ansicol.BYELLOW)
 
 
 def info(*msg):
-    """Write to the console with blue colors if the `ConsoleLayout.log_level` is 2 or less.
+    '''Write an info message in blue. Shown when :attr:`ConsoleLayout.log_level` is ``2`` or less.
 
-    If `ConsoleLayout.log_directory` is defined, the message will be added to the log file.
-    """
+    :param msg: Values to log.
+    '''
     _create_msg(msg, 2, 'Info', ansicol.BBLUE)
 
 
 def warning(*msg):
-    """Write to the console with yellow colors if the `ConsoleLayout.log_level` is 3 or less.
+    '''Write a warning message in yellow. Shown when :attr:`ConsoleLayout.log_level` is ``3`` or less.
 
-    If `ConsoleLayout.log_directory` is defined, the message will be added to the log file.
-    """
+    :param msg: Values to log.
+    '''
     _create_msg(msg, 3, 'Warning', ansicol.YELLOW)
 
 
 def error(*msg):
-    """Write to the console with red colors if the `ConsoleLayout.log_level` is 4 or less.
+    '''Write an error message in red. Shown when :attr:`ConsoleLayout.log_level` is ``4`` or less.
 
-    If `ConsoleLayout.log_directory` is defined, the message will be added to the log file.
-    """
+    :param msg: Values to log.
+    '''
     _create_msg(msg, 4, 'Error', ansicol.RED)
 
 
 def critical(*msg):
-    """Write to the console with red colors if the `ConsoleLayout.log_level` is 5 or less.
+    '''Write a critical message in bright red. Shown when :attr:`ConsoleLayout.log_level` is ``5`` or less.
 
-    If `ConsoleLayout.log_directory` is defined, the message will be added to the log file.
-    """
+    :param msg: Values to log.
+    '''
     _create_msg(msg, 5, 'Critical', ansicol.RED)
 
 
@@ -520,48 +686,84 @@ if nodeprefs and getattr(bpy.context.scene, 'use_screen_console', True):
 
 
 class Commands:
+    '''Registry of all :class:`Command` subclasses available in the console.
+
+    Commands are keyed by their :attr:`Command.command` string.
+    '''
+
     commands = {}
+    '''``dict`` mapping command identifiers to their :class:`Command` classes.'''
 
     @classmethod
     def add_command(cls, command):
+        '''Register *command* in the global command table.
+
+        :param command: A :class:`Command` subclass (not an instance).
+        '''
         cls.commands[command.command] = command
 
 
 def add_command(command):
+    '''Register *command* with :class:`Commands` and return it.
+
+    Can be used as a decorator on a :class:`Command` subclass.
+
+    :param command: A :class:`Command` subclass to register.
+    :returns: The same *command* class (for decorator usage).
+    '''
     Commands.add_command(command)
     return command
 
 
 def console_command(command):
+    '''Decorator that registers a :class:`Command` subclass with the console.
+
+    Equivalent to :func:`add_command`.
+
+    :param command: A :class:`Command` subclass to register.
+    :returns: The same *command* class unchanged.
+    '''
     Commands.add_command(command)
     return command
 
 class Command:
-    """
-    Command to be executed via the On-Screen Console.
+    '''Base class for on-screen console commands.
 
-    Set the following attributes on subclass:
-    - `command`: id of the command
-    - `usage`: sequence of argument names (for a command "setres 1920 1080", put "RES_X RES_Y")
-    - `arg_count` (default 0): number of possible arguments
-    - `description`: Shown when executing "help -d" command
+    Subclass this and set the class attributes below, then override
+    :meth:`execute`.  Decorate with ``@console_command`` (or call
+    :func:`add_command`) to register the command so the console can find it.
 
-    Also, override 
-    ```
-    @classmethod
-    def execute(cls, args):
-        ...
-    ```
+    .. code-block:: python
 
-    If decorated with `@console_command`, this command will be added to the Console when imported.
-    """
+        @console_command
+        class MyCommand(Command):
+            command = 'hello'
+            usage = 'NAME'
+            arg_count = 1
+            description = 'Say hello to NAME.'
+
+            @classmethod
+            def execute(cls, args):
+                print(f'Hello, {args[0]}!')
+    '''
+
     command = ''
+    '''Identifier typed in the console to invoke this command.'''
     usage = ''
+    '''Argument placeholder string shown in help output, e.g. ``"RES_X RES_Y"``.'''
     arg_count = 0
+    '''Minimum number of arguments required to invoke the command.'''
     description = ''
+    '''Human-readable description shown by the built-in ``help -d`` command.'''
 
     @classmethod
     def invoke(cls, message):
+        '''Parse *message*, validate the argument count, and call
+        :meth:`execute`. Prints a usage hint if too few arguments are given;
+        reports exceptions via :func:`error`.
+
+        :param message: The full input string including the command name.
+        '''
         args = message.split(' ')
         args = args[1:]
         if len(args) < cls.arg_count:
@@ -574,11 +776,18 @@ class Command:
 
     @classmethod
     def execute(cls, args):
+        '''Execute the command with the given argument list.
+
+        Override this method in subclasses to implement the command logic.
+
+        :param args: List of string arguments (the command name is excluded).
+        '''
         pass
 
 
 @console_command
 class RemoveObjectCommand(Command):
+    '''Console command: ``remove OBJECT_ID`` — end a scene object by name.'''
     command = 'remove'
     arg_count = 1
     usage = 'OBJECT_ID'
@@ -595,6 +804,7 @@ class RemoveObjectCommand(Command):
 
 @console_command
 class DisableCommand(Command):
+    '''Console command: ``disable OBJECT_ID`` — hide and suspend physics for an object.'''
     command = 'disable'
     arg_count = 1
     usage = 'OBJECT_ID'
@@ -614,6 +824,7 @@ class DisableCommand(Command):
 
 @console_command
 class EnableCommand(Command):
+    '''Console command: ``enable OBJECT_ID`` — show and restore physics for an object.'''
     command = 'enable'
     arg_count = 1
     usage = 'OBJECT_ID'
@@ -633,6 +844,7 @@ class EnableCommand(Command):
 
 @console_command
 class ShowInfoCommand(Command):
+    '''Console command: ``showinfo STAGE`` — toggle FPS/profile/property overlays (0–3).'''
     command = 'showinfo'
     arg_count = 1
     usage = 'STAGE(0-3)'
@@ -648,6 +860,7 @@ class ShowInfoCommand(Command):
 
 @console_command
 class QuitCommand(Command):
+    '''Console command: ``quit`` — end the game immediately.'''
     command = 'quit'
     arg_count = 0
     usage = ''
@@ -660,6 +873,7 @@ class QuitCommand(Command):
 
 @console_command
 class RestartCommand(Command):
+    '''Console command: ``restart`` — restart the game.'''
     command = 'restart'
     arg_count = 0
     usage = ''
@@ -672,6 +886,7 @@ class RestartCommand(Command):
 
 @console_command
 class PrintCommand(Command):
+    '''Console command: ``print MESSAGE`` — evaluate and print an expression.'''
     command = 'print'
     arg_count = 1
     usage = 'MESSAGE'
@@ -700,6 +915,7 @@ class PrintCommand(Command):
 
 @console_command
 class HelpCommand(Command):
+    '''Console command: ``help [-d]`` — list all registered commands; ``-d`` includes descriptions.'''
     command = 'help'
     description = 'Print out all available commands.'
 
@@ -719,6 +935,7 @@ class HelpCommand(Command):
 
 @console_command
 class FontSizeCommand(Command):
+    '''Console command: ``fontsize PX_SIZE`` — change the console font size.'''
     command = 'fontsize'
     arg_count = 1
     usage = 'PX_SIZE'
@@ -732,6 +949,7 @@ class FontSizeCommand(Command):
 
 @console_command
 class SetResolutionCommand(Command):
+    '''Console command: ``setres RES_X RES_Y`` — resize the application window.'''
     command = 'setres'
     arg_count = 2
     usage = 'RES_X RES_Y'
@@ -745,6 +963,7 @@ class SetResolutionCommand(Command):
 
 @console_command
 class ToggleDebugCommand(Command):
+    '''Console command: ``debug`` — toggle info-mode (always-visible background).'''
     command = 'debug'
     arg_count = 0
     description = 'Toggle Debug Mode'

@@ -5,7 +5,30 @@ from uplogic import console
 
 
 class SplitScreen:
+    '''Divides the game window into up to four viewports.
+
+    Each viewport is rendered from a different camera. The layout adjusts
+    automatically depending on how many cameras are registered:
+
+    - 1 camera  — full-screen (1×1)
+    - 2 cameras — side-by-side (1×2)
+    - 3–4 cameras — 2×2 grid
+
+    The currently active camera is always added as the first viewport on
+    construction. Additional cameras may be supplied via the constructor
+    parameters or added later with :meth:`add_camera`.
+    '''
+
     def __init__(self, camera2: KX_Camera = None, camera3: KX_Camera=None, camera4: KX_Camera=None) -> None:
+        '''Initialise SplitScreen with up to three additional cameras.
+
+        The currently active ``KX_Camera`` is always registered as the first
+        viewport. Optional cameras are appended in the order provided.
+
+        :param camera2: Optional ``KX_Camera`` for the second viewport.
+        :param camera3: Optional ``KX_Camera`` for the third viewport.
+        :param camera4: Optional ``KX_Camera`` for the fourth viewport.
+        '''
         self.cameras: list[KX_Camera] = []
         cam = self._camera = logic.getCurrentScene().active_camera
         self.add_camera(cam)
@@ -17,16 +40,25 @@ class SplitScreen:
             self.add_camera(camera4)
 
     def disable(self):
+        '''Disable ``useViewport`` on all managed cameras.'''
         for cam in self.cameras:
             cam.useViewport = False
         self._camera.useViewport = False
 
     def enable(self):
+        '''Enable ``useViewport`` on all managed cameras and recalculate viewports.'''
         for cam in self.cameras:
             cam.useViewport = True
         self._arrange()
 
     def add_camera(self, camera: KX_Camera):
+        '''Append a camera and recalculate the viewport arrangement.
+
+        If the four-camera limit has already been reached a warning is logged
+        and the method returns without making any changes.
+
+        :param camera: The ``KX_Camera`` to add as an additional viewport.
+        '''
         cameras = self.cameras
         if len(cameras) == 4:
             console.warning('Maximum amount of cameras reached!')
@@ -37,6 +69,15 @@ class SplitScreen:
         self._arrange()
 
     def remove_camera(self, idx=-1):
+        '''Remove a camera from the list and recalculate viewports.
+
+        The removed camera's viewport is set to an invalid region
+        ``(-1, -1, -1, -1)`` so it stops rendering. Does nothing if the
+        camera list is empty.
+
+        :param idx: List index of the camera to remove. Defaults to ``-1``
+            (the last camera).
+        '''
         if len(self.cameras) == 0:
             return
         cam = self.cameras.pop(idx)
@@ -49,6 +90,13 @@ class SplitScreen:
         self._arrange()
 
     def _arrange(self):
+        '''Recalculate and apply viewport rectangles for all registered cameras.
+
+        Divides the current window into equal regions based on the number of
+        registered cameras: full-screen for one camera, side-by-side for two,
+        and a 2×2 grid for three or four. Viewport coordinates are set via
+        ``setViewport`` and ``useViewport`` is enabled on each camera.
+        '''
         cameras = self.cameras
         cam_amount = len(cameras)
         width = render.getWindowWidth()

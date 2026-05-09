@@ -78,8 +78,30 @@ void main(void)
 
 
 class Mist(Filter2D):
+    '''Depth-based atmospheric mist/fog post-processing filter.
+
+    Reads the depth buffer, linearises it using the camera near/far planes,
+    optionally converts to a radial (spherical) distance, and blends the
+    rendered frame towards ``color`` using exponential falloff. The effect
+    starts at world-space distance ``start`` and grows denser with
+    ``density``.
+
+    Camera parameters (``znear``, ``zfar``, ``fov``, ``aspect``) are read
+    from the active camera on construction and refreshed every tick via
+    :meth:`update`.
+    '''
 
     def __init__(self, start=.1, density=0.5, color=(0.5, 0.7, 0.9), power=1.0, idx: int = None) -> None:
+        '''Initialise the Mist filter.
+
+        :param start: World-space distance at which mist begins to appear.
+        :param density: Mist density; higher values produce thicker mist.
+        :param color: RGB mist colour as a tuple or ``mathutils.Vector``.
+        :param power: Blend weight. ``0`` makes mist fully transparent;
+            ``1`` applies full mist over the frame.
+        :param idx: Filter pass index. ``None`` assigns the next available
+            index automatically.
+        '''
         cam = logic.getCurrentScene().active_camera
         self.uniforms = {
             'start': float(start),
@@ -103,6 +125,13 @@ class Mist(Filter2D):
         })
 
     def update(self):
+        '''Refresh camera and window uniforms and upload them to the shader.
+
+        Reads ``znear``, ``zfar``, and ``fov`` from the currently active
+        camera and recalculates ``aspect`` from the current window dimensions,
+        then delegates to the parent :meth:`Filter2D.update` to upload all
+        uniforms to the GPU.
+        '''
         super().update()
         cam = logic.getCurrentScene().active_camera
         self.uniforms['znear'] = cam.near
@@ -112,6 +141,7 @@ class Mist(Filter2D):
 
     @property
     def start(self):
+        '''World-space distance at which mist begins (``float``).'''
         return self.uniforms['start']
 
     @start.setter
@@ -120,6 +150,7 @@ class Mist(Filter2D):
 
     @property
     def density(self):
+        '''Mist density; higher values produce thicker mist (``float``).'''
         return self.uniforms['density']
 
     @density.setter
@@ -128,6 +159,10 @@ class Mist(Filter2D):
 
     @property
     def power(self):
+        '''Blend weight of the mist over the frame (``float``).
+
+        ``0`` is fully transparent; ``1`` applies the full mist colour.
+        '''
         return self.uniforms['power']
 
     @power.setter
@@ -136,6 +171,7 @@ class Mist(Filter2D):
 
     @property
     def color(self):
+        '''RGB mist colour as a ``mathutils.Vector``.'''
         return self.uniforms['color']
 
     @color.setter

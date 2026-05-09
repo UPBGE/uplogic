@@ -166,6 +166,20 @@ void main(void)
 
 
 class Distort(Filter2D):
+    '''Post-processing filter that applies time-animated screen distortion.
+
+    Distortion is generated from Perlin noise and wave functions in GLSL.  The
+    ``timer`` and ``resettimer`` uniforms are advanced each tick via
+    ``update`` so the distortion evolves continuously over time.  ``speed``
+    scales how fast the timers advance relative to real elapsed time.
+
+    :param power: Blend weight between the original and distorted frame.
+        ``0`` shows the original; ``1`` shows the fully distorted result.
+        Defaults to ``1.0``.
+    :param speed: Animation speed multiplier applied to the timer increment
+        each tick.  Defaults to ``1.0``.
+    :param idx: Render-pass index used to order filters in the pipeline.
+    '''
 
     def __init__(self, power=1.0, speed=1.0, idx: int = None) -> None:
         now = logic.getRealTime()
@@ -175,6 +189,12 @@ class Distort(Filter2D):
         super().__init__(glsl, idx, {'power': self.uniforms, 'timer': self.uniforms, 'resettimer': self.uniforms})
 
     def update(self):
+        '''Advance animation timers and upload uniforms to the shader.
+
+        Increments ``timer`` and ``resettimer`` by ``(delta_time * speed)``
+        where ``delta_time`` is the real time elapsed since the last call, then
+        delegates to the parent ``update`` to push all uniforms to the GPU.
+        '''
         now = logic.getRealTime()
         self.timer += (now - self._last_time) * self.speed
         self._last_time = now
@@ -183,6 +203,7 @@ class Distort(Filter2D):
 
     @property
     def timer(self):
+        '''Elapsed animation time sent to the GLSL shader each tick.'''
         return self.uniforms['timer']
 
     @timer.setter
@@ -191,6 +212,7 @@ class Distort(Filter2D):
 
     @property
     def resettimer(self):
+        '''Secondary timer used for transition effects in the shader.'''
         return self.uniforms['resettimer']
 
     @resettimer.setter
@@ -199,6 +221,7 @@ class Distort(Filter2D):
 
     @property
     def power(self):
+        '''Blend weight between the original and distorted frame (``0``–``1``).'''
         return self.uniforms['power']
 
     @power.setter

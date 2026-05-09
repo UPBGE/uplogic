@@ -1,3 +1,4 @@
+'''Post-processing filter that simulates lens chromatic aberration by separating RGB channels.'''
 from .shader import Filter2D
 
 glsl = """
@@ -24,6 +25,14 @@ void main()
 
 
 class ChromaticAberration(Filter2D):
+    '''Chromatic aberration filter that samples the red, green, and blue channels at
+    progressively different zoom levels away from the screen centre, replicating the
+    colour fringing produced by real lenses.
+
+    :param power: Separation strength; higher values increase the distance between
+        channel samples and produce stronger colour fringing at the edges.
+    :param idx: Filter pass index; passed directly to ``Filter2D``.
+    '''
 
     def __init__(self, power: float = 2.0, idx: int = None) -> None:
         self.uniforms = {'power': float(power)}
@@ -31,6 +40,7 @@ class ChromaticAberration(Filter2D):
 
     @property
     def power(self):
+        '''Channel separation strength; higher values push RGB samples further apart.'''
         return self.uniforms['power']
 
     @power.setter

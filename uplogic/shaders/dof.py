@@ -288,8 +288,26 @@ void main()
 
 
 class DoF(Filter2D):
+    '''Post-processing depth-of-field blur filter.
 
-        
+    Blurs the rendered image using the depth buffer and a multi-ring bokeh
+    sampling pattern.  Supports optional pentagon bokeh shape, chromatic
+    fringing, and auto-focus on the screen centre.
+
+    :param distance: Manual focal distance in camera-space depth units.
+        Ignored when ``autofocus=True``.  Defaults to ``1.0``.
+    :param autofocus: When ``True``, the focus distance is read from the
+        depth value at the screen centre each frame, overriding ``distance``.
+        Defaults to ``False``.
+    :param power: Maximum blur radius; the per-pixel blur amount is clamped
+        to this value.  Defaults to ``1.0``.
+    :param fstop: F-stop value controlling the depth-of-field range.  Smaller
+        values yield a shallower depth of field.  Defaults to ``1``.
+    :param samples: Number of samples per bokeh ring.  Higher values produce
+        smoother bokeh at the cost of performance.  Defaults to ``16``.
+    :param idx: Render-pass index used to order filters in the pipeline.
+    '''
+
     def __init__(self, distance=1.0, autofocus=False, power=1.0, fstop=1, samples=16, idx: int = None) -> None:
         cam = logic.getCurrentScene().active_camera
         self.uniforms = {
@@ -312,6 +330,12 @@ class DoF(Filter2D):
         })
 
     def update(self):
+        '''Advance the filter state and refresh camera clipping planes.
+
+        Calls the parent ``update`` to upload uniforms, then reads ``znear``
+        and ``zfar`` from the active camera so the linearisation in the shader
+        stays in sync when the camera changes.
+        '''
         super().update()
         cam = logic.getCurrentScene().active_camera
         self.uniforms['znear'] = cam.near
@@ -319,6 +343,7 @@ class DoF(Filter2D):
 
     @property
     def distance(self):
+        '''Manual focal distance in camera-space depth units.'''
         return self.uniforms['distance']
 
     @distance.setter
@@ -327,6 +352,7 @@ class DoF(Filter2D):
 
     @property
     def autofocus(self):
+        '''When ``True``, focus distance is derived from the centre pixel's depth.'''
         return self.uniforms['autofocus']
 
     @autofocus.setter
@@ -335,6 +361,7 @@ class DoF(Filter2D):
 
     @property
     def fstop(self):
+        '''F-stop value; smaller values produce a shallower depth of field.'''
         return self.uniforms['fstop']
 
     @fstop.setter
@@ -343,6 +370,7 @@ class DoF(Filter2D):
 
     @property
     def power(self):
+        '''Maximum blur radius applied to out-of-focus pixels.'''
         return self.uniforms['power']
 
     @power.setter
@@ -351,6 +379,7 @@ class DoF(Filter2D):
 
     @property
     def samples(self):
+        '''Number of samples per bokeh ring; higher values give smoother results.'''
         return self.uniforms['samples']
 
     @samples.setter
