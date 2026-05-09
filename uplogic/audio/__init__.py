@@ -1,3 +1,25 @@
+'''Audio subsystem for uplogic.
+
+Provides 2D/3D positional audio, music track management, and optional FMOD
+Studio integration. All playback is driven by the BGE ``aud`` module and the
+uplogic :class:`AudioSystem` device wrapper.
+
+Typical usage::
+
+    from uplogic import audio
+
+    # one-shot 2D sound
+    audio.play_sound_2d('//sfx/click.wav', volume=0.8)
+
+    # looping 3D sound attached to a game object
+    audio.play_sound_3d(my_object, '//sfx/engine.wav', loop_count=-1)
+
+    # music with multiple layers
+    music = audio.Music()
+    music.add_track('//music/bass.wav', 'Bass')
+    music.add_track('//music/melody.wav', 'Melody')
+'''
+
 from .audiosystem import AudioSystem  # noqa
 from .audiosystem import set_master_volume  # noqa
 from .audiosystem import set_lowpass  # noqa

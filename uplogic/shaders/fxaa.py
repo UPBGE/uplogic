@@ -1,3 +1,4 @@
+'''Post-processing filter that applies NVIDIA FXAA 3.11 anti-aliasing at ultra quality preset 39.'''
 from .shader import Filter2D
 
 
@@ -77,14 +78,14 @@ NOTE the other tuning knobs are now in the shader function inputs!
     //
     // Choose the quality preset.
     // This needs to be compiled into the shader as it effects code.
-    // Best option to include multiple presets is to 
+    // Best option to include multiple presets is to
     // in each shader define the preset, then include this file.
     //
     // OPTIONS
     // -----------------------------------------------------------------------
     // 10 to 15 - default medium dither (10=fastest, 15=highest quality)
     // 20 to 29 - less dither, more expensive (20=fastest, 29=highest quality)
-    // 39       - no dither, very expensive 
+    // 39       - no dither, very expensive
     //
     // NOTES
     // -----------------------------------------------------------------------
@@ -93,7 +94,7 @@ NOTE the other tuning knobs are now in the shader function inputs!
     // 23 = closest to FXAA 3.9 visually and performance wise
     //  _ = the lowest digit is directly related to performance
     // _  = the highest digit is directly related to style
-    // 
+    //
     #define FXAA_QUALITY_PRESET 39 // ULTRA QUALITY WARNING
 #endif
 
@@ -373,7 +374,7 @@ vec4 FxaaPixelShader(
     //   0.333 - too little (faster)
     //   0.250 - low quality
     //   0.166 - default
-    //   0.125 - high quality 
+    //   0.125 - high quality
     //   0.063 - overkill (slower)
     float fxaaQualityEdgeThreshold,
     //
@@ -396,7 +397,7 @@ vec4 FxaaPixelShader(
     vec2 posM;
     posM.x = pos.x;
     posM.y = pos.y;
-    
+
     vec4 rgbyM = FxaaTexTop(tex, posM);
     rgbyM.y = CalcLuma(rgbyM.rgb);
     #define lumaM rgbyM.y
@@ -714,7 +715,7 @@ vec4 FxaaPixelShader(
 
 /*============================================================================
                       Urho3D Vertex- and Pixelshader
-                      
+
 ============================================================================*/
 
 
@@ -723,7 +724,7 @@ void main()
 
     vec2 cGBufferInvSize = fxaaQualityRcpFrame;
     vec2 rcpFrame = vec2(cGBufferInvSize.x, cGBufferInvSize.y);
-    
+
     vec2 vScreenPos = bgl_TexCoord.xy;
 
     fragColor = FxaaPixelShader(
@@ -739,6 +740,14 @@ void main()
 
 
 class FXAA(Filter2D):
+    '''NVIDIA FXAA 3.11 anti-aliasing filter running at the ultra quality preset (``39``).
+
+    All quality parameters are compiled into the GLSL shader as preprocessor constants;
+    there are no user-configurable uniforms. The filter runs fixed settings of
+    ``subpix=0.125``, ``edgeThreshold=0.166``, and ``edgeThresholdMin=0.0833``.
+
+    :param idx: Filter pass index; passed directly to ``Filter2D``.
+    '''
 
     def __init__(self, idx: int = None) -> None:
         super().__init__(glsl, idx)

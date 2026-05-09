@@ -1,3 +1,4 @@
+'''TCP server implementation for uplogic networking.'''
 import bge
 import bpy
 import pickle
@@ -9,6 +10,18 @@ import sys
 
 
 class Server:
+    '''Threaded TCP server that accepts multiple simultaneous client connections.
+
+    Messages are serialised with :mod:`pickle`. Override :meth:`on_receive` in a
+    subclass to handle incoming data. The server runs its accept loop in a
+    background ``threading.Thread`` and spawns a further thread per connected
+    client.
+
+    :param ip: Bind address. Defaults to the machine's primary IP via
+        ``socket.gethostbyname(socket.gethostname())``.
+    :param port: TCP port to listen on (default ``8303``).
+    :param start: When ``True``, call :meth:`start` immediately after construction.
+    '''
 
     def __init__(self, ip=None, port=8303, start=False):
         if ip is None:
@@ -24,6 +37,12 @@ class Server:
             self.start()
 
     def start(self):
+        '''Bind the socket and begin accepting connections in a background thread.
+
+        Registers :meth:`shutdown` on the scene ``onRemove`` list when
+        :attr:`shutdown_on_scene_end` is ``True``. Does nothing if the server is
+        already running.
+        '''
         if self.running:
             console.debug('Server already running.')
             return
@@ -50,6 +69,11 @@ class Server:
         console.success('[SERVER RUNNING]')
 
     def shutdown(self):
+        '''Close all client connections and shut down the listening socket.
+
+        Removes the ``onRemove`` hook, closes every connected socket, and clears
+        :attr:`clients`. Safe to call when the server is already stopped.
+        '''
         if not self.running:
             # console.debug(f"{self.ip}:{self.port} offline.")
             return
@@ -75,13 +99,28 @@ class Server:
             console.error('Runtime Exit.')
 
     def restart(self):
+        '''Shut the server down and immediately start it again.'''
         self.shutdown()
         self.start()
 
     def on_receive(self, msg):
+        '''Called in the client thread each time a complete message arrives.
+
+        Override this method in a subclass to handle incoming data.
+
+        :param msg: The deserialised Python object received from the client.
+        '''
         pass
 
     def send(self, msg, subject=''):
+        '''Broadcast *msg* to every connected client.
+
+        When *subject* is provided the data is wrapped in a ``dict`` with
+        ``"subject"`` and ``"content"`` keys before serialisation.
+
+        :param msg: Any :mod:`pickle`-serialisable Python object.
+        :param subject: Optional routing string; wraps *msg* in an envelope dict.
+        '''
         if self.socket and self.running:
             if subject:
                 msg = {
@@ -92,9 +131,17 @@ class Server:
                 conn.send(pickle.dumps(msg))
 
     def threaded_client(self, conn: socket.socket, addr):
+        '''Receive loop for a single client connection, run in its own thread.
+
+        Reads messages in a loop, calls :meth:`on_receive` for each, and removes
+        the connection from :attr:`clients` when the client disconnects or an
+        unrecoverable error occurs.
+
+        :param conn: The accepted :class:`socket.socket` for this client.
+        :param addr: The ``(host, port)`` address tuple of the remote client.
+        '''
         connected = True
         self.clients.append(conn)
-        print(bge.logic.getRealTime())
         while connected and self.running:
             
             try:
@@ -126,6 +173,12 @@ class Server:
         return
 
     def update(self):
+        '''Accept-loop that waits for incoming connections in a background thread.
+
+        For each new connection a :meth:`threaded_client` thread is started.
+        Runs until :attr:`running` is ``False`` or an unrecoverable socket error
+        occurs.
+        '''
         while self.running:
             # print('SERVER RUNNING')
             try:

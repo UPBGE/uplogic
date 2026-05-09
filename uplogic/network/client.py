@@ -1,3 +1,4 @@
+'''TCP client implementation for uplogic networking.'''
 import socket
 import pickle
 import threading
@@ -9,6 +10,17 @@ import sys
 
 
 class Client:
+    '''TCP client that connects to a :class:`~uplogic.network.server.Server`.
+
+    Messages are serialised with :mod:`pickle`. Override :meth:`on_receive` in
+    a subclass to handle data pushed from the server. Incoming messages are
+    processed in a background ``threading.Thread``.
+
+    :param server: IP address or hostname of the server to connect to.
+    :param port: TCP port (default ``8303``).
+    :param connect: When ``True``, call :meth:`connect` immediately after
+        construction.
+    '''
 
     def __init__(self, server, port=8303, connect=False):
         self.scene = bge.logic.getCurrentScene()
@@ -21,6 +33,12 @@ class Client:
             self.connect()
 
     def connect(self):
+        '''Open a TCP connection to the server and start the receive loop.
+
+        Registers :meth:`disconnect` on the scene ``onRemove`` list when
+        :attr:`disconnect_on_scene_end` is ``True``. Does nothing if already
+        connected.
+        '''
         if self.connected:
             # console.debug('Client Already Connected! Aborting.')
             return
@@ -41,6 +59,15 @@ class Client:
             return
 
     def disconnect(self, flag=True):
+        '''Close the connection to the server.
+
+        Sends the disconnect sentinel, shuts down the socket write half, and clears
+        :attr:`connected`. Removes the ``onRemove`` hook if registered.
+
+        :param flag: When ``True`` (default), send the disconnect message and
+            perform a clean socket shutdown before closing. Set to ``False`` when
+            the server has already closed the connection.
+        '''
         if not self.connected or self.socket is None:
             console.debug('Client Not Connected!')
             return
@@ -56,6 +83,15 @@ class Client:
         console.success('[SUCCESS]')
 
     def send(self, msg, subject=''):
+        '''Send *msg* to the server.
+
+        When *subject* is provided the data is wrapped in a ``dict`` with
+        ``"subject"`` and ``"content"`` keys before serialisation. Silently
+        disconnects on socket errors.
+
+        :param msg: Any :mod:`pickle`-serialisable Python object.
+        :param subject: Optional routing string; wraps *msg* in an envelope dict.
+        '''
         if self.connected and self.socket is not None:
             try:
                 if subject:
@@ -76,9 +112,23 @@ class Client:
                 self.disconnect()
 
     def on_receive(self, msg):
+        '''Called in the receive thread each time a complete message arrives from
+        the server.
+
+        Override this method in a subclass to handle incoming data.
+
+        :param msg: The deserialised Python object received from the server.
+        '''
         pass
 
     def update(self):
+        '''Receive loop that runs in a background thread while :attr:`connected` is
+        ``True``.
+
+        Reads messages from the socket, deserialises them with :mod:`pickle`, and
+        calls :meth:`on_receive` for each. Stops when the server sends the
+        disconnect sentinel or the socket raises an exception.
+        '''
         while self.connected and self.socket:
             try:
                 bmsg = self.socket.recv(2048)

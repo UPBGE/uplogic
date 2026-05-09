@@ -1,3 +1,5 @@
+'''BGE collection utilities providing object-group management and state save/restore.
+'''
 from bge import logic
 from bge import constraints
 from bpy.types import Collection as BColl
@@ -7,12 +9,15 @@ from uplogic import events
 
 
 def assign(game_object: bge.types.KX_GameObject, collection: BColl, exclusive=True):
-    """Link an object into a specified collection.
+    '''Link a game object's Blender object into a specified collection.
 
-    :param game_object: Target Object.
-    :param collection: Target Collection.
-    :param exclusive: Remove the object from all other collections.
-    """
+    :param game_object: The ``KX_GameObject`` whose underlying Blender object will be
+        linked into *collection*.
+    :param collection: Target collection; accepts either a ``bpy.types.Collection``
+        instance or a collection name string.
+    :param exclusive: When ``True`` (default), the object is first removed from all its
+        current collections before being linked into *collection*.
+    '''
     if exclusive:
         for coll in game_object.blenderObject.users_collection:
             coll.objects.unlink(game_object.blenderObject)
@@ -23,14 +28,34 @@ def assign(game_object: bge.types.KX_GameObject, collection: BColl, exclusive=Tr
 
 
 class Collection:
+    '''Wraps a ``bpy.types.Collection`` to provide group-level visibility, physics
+    toggling, and state save/restore for all objects in the collection.
+
+    The initial state of every object is snapshotted during construction via
+    :meth:`save`, so calling :meth:`load` at any later point restores the scene to
+    the condition it was in when the wrapper was created.
+
+    :param collection: The collection to wrap; accepts either a ``BColl`` instance or
+        a collection name string.
+    '''
 
     @property
     def game_objects(self):
+        '''All ``KX_GameObject`` instances for the collection's direct members.
+
+        :returns: List of ``KX_GameObject`` corresponding to ``collection.objects``.
+        '''
         scene = logic.getCurrentScene()
         return [scene.getGameObjectFromObject(bobj) for bobj in self.collection.objects]
 
     @property
     def all_game_objects(self):
+        '''All ``KX_GameObject`` instances in the collection, including nested children
+        and group members.
+
+        :returns: List of ``KX_GameObject`` corresponding to ``collection.all_objects``,
+            extended with the members of any group instances found in that set.
+        '''
         scene = logic.getCurrentScene()
         objs = [scene.getGameObjectFromObject(bobj) for bobj in self.collection.all_objects]
         for o in objs:
@@ -40,10 +65,18 @@ class Collection:
 
     @property
     def objects(self):
+        '''Raw ``bpy.types.Object`` list of direct collection members (no recursion).
+
+        :returns: ``bpy.types.Collection.objects``
+        '''
         return self.collection.objects
 
     @property
     def all_objects(self):
+        '''Raw ``bpy.types.Object`` list including all nested and descendant objects.
+
+        :returns: ``bpy.types.Collection.all_objects``
+        '''
         return self.collection.all_objects
 
     def __init__(self, collection: BColl) -> None:
@@ -58,12 +91,29 @@ class Collection:
         self.save()
 
     def set_frozen(self, state):
+        '''Suspend or restore physics and dynamics for every game object in the
+        collection.
+
+        Group instances (objects whose ``groupMembers`` is not ``None`` and whose
+        ``groupObject`` is ``None``) are skipped.
+
+        :param state: ``True`` to suspend physics and dynamics; ``False`` to restore
+            them.
+        '''
         for obj in self.all_game_objects:
             if not (obj.groupMembers is not None and obj.groupObject is None):
                 obj.suspendPhysics() if state else obj.restorePhysics()
                 obj.suspendDynamics() if state else obj.restoreDynamics()
 
     def set_visible(self, state=True, physics=True):
+        '''Show or hide all objects in the collection, optionally toggling physics.
+
+        Group instances are always force-hidden regardless of *state*.
+
+        :param state: ``True`` to make objects visible; ``False`` to hide them.
+        :param physics: When ``True``, physics and dynamics are also restored on show
+            or suspended on hide alongside the visibility change.
+        '''
         for obj in self.all_game_objects:
             if obj.groupMembers is not None and obj.groupObject is None:
                 # Is groupInstance
@@ -76,15 +126,41 @@ class Collection:
         bpy.context.scene.update_tag()
 
     def enable(self):
+        '''Show all objects in the collection.
+
+        Convenience wrapper for ``set_visible(True)``.
+        '''
         self.set_visible(True)
 
     def disable(self):
+        '''Hide all objects in the collection.
+
+        Convenience wrapper for ``set_visible(False)``.
+        '''
         self.set_visible(False)
 
     def get_game_vec(self, data):
+        '''Convert a mapping with ``x``/``y``/``z`` keys to an ``Euler``.
+
+        :param data: Dictionary with float values keyed by ``'x'``, ``'y'``, and
+            ``'z'``.
+        :returns: ``mathutils.Euler`` built from the three components.
+        '''
         return Euler((data['x'], data['y'], data['z']))
 
     def load(self):
+        '''Restore all snapshotted state from ``_collection_state`` back to the
+        corresponding game objects.
+
+        World and local transforms are applied to every recorded object.
+        Additionally:
+
+        - Rigid-body objects have their ``worldLinearVelocity`` and
+          ``worldAngularVelocity`` restored.
+        - Character-physics objects have their ``walkDirection`` restored.
+        - Game properties that were recorded during :meth:`save` are written back to
+          each object.
+        '''
         scene = logic.getCurrentScene()
         for obj in self.all_objects:
             data = self._collection_state['objects'].get(obj.name, None)
@@ -99,7 +175,7 @@ class Collection:
             wPos = self.get_game_vec(data['data']['worldPosition'])
             wOri = self.get_game_vec(data['data']['worldOrientation'])
             wSca = self.get_game_vec(data['data']['worldScale'])
-            
+
             game_obj.worldPosition = wPos
             game_obj.worldOrientation = wOri.to_matrix()
             game_obj.worldScale = wSca
@@ -135,6 +211,23 @@ class Collection:
                 game_obj[prop['name']] = prop['value']
 
     def save(self, properties=True):
+        '''Snapshot the current transform, velocity, physics type, and optionally game
+        properties of every game object into ``_collection_state``.
+
+        The physics type of each object determines which additional fields are stored:
+
+        - ``RIGID_BODY``: world/local transform plus world linear and angular velocity.
+        - Character (``constraints.getCharacter`` returns a controller): world/local
+          transform plus ``walkDirection``.
+        - All other types (static): world/local transform only.
+
+        Properties whose names start with ``NL__`` or whose values are ``Vector``
+        instances are excluded.  The default camera object (``__default__cam__``) is
+        skipped entirely.
+
+        :param properties: When ``True`` (default), game properties are included in the
+            snapshot.
+        '''
         self._collection_state = {
             'objects': {}
         }
@@ -156,11 +249,11 @@ class Collection:
                     prop_set['name'] = prop
                     prop_set['value'] = obj[prop]
                     prop_list.append(prop_set)
-            
+
             locloc = obj.localPosition
             locrot = obj.localOrientation.to_euler()
             locsca = obj.localScale
-            
+
             loc = obj.worldPosition
             rot = obj.worldOrientation.to_euler()
             sca = obj.worldScale
@@ -300,4 +393,3 @@ class Collection:
                         }
                     }
             self._collection_state['objects'] = objs
-            

@@ -32,6 +32,16 @@ void main (void)
 """
 
 class Levels(Filter2D):
+    '''Post-processing filter that applies a per-channel colour tint.
+
+    Each RGB channel of the rendered image is multiplied by the corresponding
+    component of ``color``.  At ``(1, 1, 1)`` the image is passed through
+    unchanged.
+
+    :param color: Per-channel RGB multiplier supplied as a tuple or
+        ``Vector``.  Defaults to ``(1., 1., 1.)`` (no tint).
+    :param idx: Render-pass index used to order filters in the pipeline.
+    '''
 
     def __init__(self, color=(1., 1., 1.), idx: int = None) -> None:
         self.uniforms = {'color': Vector(color)}
@@ -39,6 +49,7 @@ class Levels(Filter2D):
 
     @property
     def color(self):
+        '''Per-channel colour multiplier as a ``Vector``.'''
         return self.uniforms.get('color', Vector((0, 0, 0)))
 
     @color.setter

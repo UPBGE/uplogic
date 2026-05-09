@@ -1,3 +1,4 @@
+'''Post-processing filter that sharpens the rendered frame using an unsharp-mask technique.'''
 from .shader import Filter2D
 from bge import logic
 
@@ -23,7 +24,7 @@ uniform float bgl_RenderedTextureHeight;
 
 void main(void)
 {
-    float width = 1.0 /  bgl_RenderedTextureWidth; 
+    float width = 1.0 /  bgl_RenderedTextureWidth;
     float height = 1.0 / bgl_RenderedTextureHeight;
 
     vec4 Total = vec4(0.0);
@@ -34,16 +35,16 @@ void main(void)
     float Hoffs = 1.5 * width;
     float Voffs = 1.5 * height;
 
-    vec2 UV1 = bgl_TexCoord.xy + vec2(Hoffs,Voffs);  
+    vec2 UV1 = bgl_TexCoord.xy + vec2(Hoffs,Voffs);
     Total += texture(bgl_RenderedTexture, UV1);
 
-    vec2 UV2 = bgl_TexCoord.xy + vec2(-Hoffs,Voffs);  
+    vec2 UV2 = bgl_TexCoord.xy + vec2(-Hoffs,Voffs);
     Total += texture(bgl_RenderedTexture, UV2);
 
-    vec2 UV3 = bgl_TexCoord.xy + vec2(-Hoffs,-Voffs);  
+    vec2 UV3 = bgl_TexCoord.xy + vec2(-Hoffs,-Voffs);
     Total += texture(bgl_RenderedTexture, UV3);
 
-    vec2 UV4 = bgl_TexCoord.xy + vec2(Hoffs,-Voffs);  
+    vec2 UV4 = bgl_TexCoord.xy + vec2(Hoffs,-Voffs);
     Total += texture(bgl_RenderedTexture, UV4);
 
     Total *= .15;
@@ -51,16 +52,16 @@ void main(void)
     Hoffs = 2.5 * width;
     Voffs = 2.5 * height;
 
-    vec2 UV5 = bgl_TexCoord.xy + vec2(Hoffs,0.0);  
+    vec2 UV5 = bgl_TexCoord.xy + vec2(Hoffs,0.0);
     Total += texture(bgl_RenderedTexture, UV5) *.1;
 
-    vec2 UV6 = bgl_TexCoord.xy + vec2(0.0,Voffs);  
+    vec2 UV6 = bgl_TexCoord.xy + vec2(0.0,Voffs);
     Total += texture(bgl_RenderedTexture, UV6) *.1;
 
-    vec2 UV7 = bgl_TexCoord.xy + vec2(-Hoffs,0.0);  
+    vec2 UV7 = bgl_TexCoord.xy + vec2(-Hoffs,0.0);
     Total += texture(bgl_RenderedTexture, UV7) *.1;
 
-    vec2 UV8 = bgl_TexCoord.xy + vec2(0.0,-Voffs);  
+    vec2 UV8 = bgl_TexCoord.xy + vec2(0.0,-Voffs);
     Total += texture(bgl_RenderedTexture, UV8) *.1;
 
     vec4 Final = (1 + sharpness) * Msample - Total * sharpness;
@@ -72,6 +73,16 @@ void main(void)
 
 
 class Sharpen(Filter2D):
+    '''Unsharp-mask sharpening filter that enhances edges by subtracting a blurred
+    neighbourhood average from the centre pixel.
+
+    Eight neighbours are sampled at 1.5 px and 2.5 px offsets and averaged; the result
+    is then combined as ``output = (1 + sharpness) * centre - total * sharpness``.
+
+    :param sharpness: Sharpening factor (``0.0`` = no effect; higher values increase
+        edge enhancement).
+    :param idx: Filter pass index; passed directly to ``Filter2D``.
+    '''
 
     def __init__(self, sharpness=0.0, idx: int = None) -> None:
         self.uniforms = {'sharpness': float(sharpness)}
@@ -79,6 +90,7 @@ class Sharpen(Filter2D):
 
     @property
     def sharpness(self):
+        '''Edge enhancement factor; higher values subtract more of the blurred average.'''
         return self.uniforms['sharpness']
 
     @sharpness.setter

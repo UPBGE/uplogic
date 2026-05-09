@@ -1,3 +1,4 @@
+'''Post-processing filter that converts the rendered frame towards grayscale using BT.601 luminance weights.'''
 from .shader import Filter2D
 
 
@@ -25,6 +26,14 @@ void main()
 
 
 class Grayscale(Filter2D):
+    '''Grayscale filter that blends the rendered frame with its BT.601 luminance value.
+
+    At ``power=1.0`` the output is fully grey; at ``power=0.0`` the original colours
+    are preserved unchanged.
+
+    :param power: Desaturation strength (``0.0`` = no effect, ``1.0`` = fully grey).
+    :param idx: Filter pass index; passed directly to ``Filter2D``.
+    '''
 
     def __init__(self, power: float = 1.0, idx: int = None) -> None:
         self.uniforms = {'power': float(power)}
@@ -32,6 +41,7 @@ class Grayscale(Filter2D):
 
     @property
     def power(self):
+        '''Desaturation blend factor; ``1.0`` produces a fully grey output.'''
         return self.uniforms['power']
 
     @power.setter

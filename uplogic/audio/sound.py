@@ -1,4 +1,11 @@
-'''TODO: Documentation
+'''Sound playback classes for uplogic.
+
+Provides :class:`Sound2D` / :class:`Sound3D` for non-spatial and positional
+audio respectively, :class:`Sample2D` / :class:`Sample3D` for time-limited
+clips, and :class:`Speaker2D` / :class:`Speaker3D` convenience wrappers that
+read their parameters directly from a BGE speaker object. All classes
+integrate with the uplogic :class:`~uplogic.audio.audiosystem.AudioSystem`
+for master volume, lowpass, and per-frame updates.
 '''
 
 from os.path import isfile
@@ -17,7 +24,12 @@ import aud
 
 
 class ULReverb():
-    """Reverb sound added by `Sound3D` on demand.
+    """Simulated reverb for a :class:`Sound3D` by playing up to 30 delayed
+    copies of the source sound behind the listener.
+
+    Created automatically by :class:`Sound3D` when ``reverb=True``. The
+    volume of each sample fades in when the listener enters a reverb volume
+    tagged in the scene, and fades out otherwise.
     """
 
     volume: float
@@ -36,6 +48,13 @@ class ULReverb():
         schedule_callback(self.add_sample, 1/60, sound)
 
     def add_sample(self, sound):
+        '''Play one more delayed reverb copy of *sound* and mirror the source
+        handle's spatial attributes onto it.
+
+        Schedules itself recursively until 30 samples have been created.
+
+        :param sound: ``aud.Sound`` to play as a reverb sample.
+        '''
         handle = self.handle
         sample = self.aud_system.device.play(sound)
         self.samples.append(sample)
@@ -59,6 +78,10 @@ class ULReverb():
             schedule_callback(self.add_sample, 1/60, sound)
 
     def update(self):
+        '''Per-frame update: adjust each reverb sample's volume and spatial
+        attributes based on the current reverb state and occlusion of the
+        parent :class:`Sound3D`.
+        '''
         sample_count = self.aud_system.bounces
         use_reverb = (
             self.aud_system.reverb
@@ -110,18 +133,22 @@ def dummy():
 
 
 class ULSound():
-    """Base class for 2D and 3D Sounds"""
+    """Base class for 2D and 3D sounds.
+
+    Subclasses must set up ``self.sound`` (an ``aud`` handle) and register
+    themselves with an :class:`~uplogic.audio.audiosystem.AudioSystem`.
+    """
 
     sound = None
-    """Internal `aud.Sound` instance."""
+    """Internal ``aud`` playback handle."""
     finished: bool
-    """True if the sound has played to its end."""
+    """``True`` once the sound has played to its end or been stopped."""
     pitch: float
-    """Pitch (Frequency Shift)."""
+    """Playback frequency shift (``1.0`` = normal speed)."""
     volume: float
-    """Volume (Amplitude)."""
+    """Playback amplitude (``1.0`` = unity gain)."""
     aud_system: AudioSystem
-    """Audio System this sound is playing on."""
+    """The :class:`~uplogic.audio.audiosystem.AudioSystem` this sound plays on."""
 
     @property
     def position(self):
@@ -152,12 +179,27 @@ class ULSound():
         self.sound.resume()
 
     def cache(self):
+        '''Store this sound's decoded data in the global
+        :class:`~uplogic.audio.audiosystem.AudioCache`.
+        '''
         self.aud_system.cache(self)
 
     def uncache(self):
+        '''Remove this sound from the global
+        :class:`~uplogic.audio.audiosystem.AudioCache`.
+        '''
         self.aud_system.uncache(self)
 
     def _get_soundpath(self, file):
+        '''Resolve *file* to an absolute file-system path.
+
+        Accepts a plain path string, a Blender data-block name, or a
+        ``//``-relative path. Logs an error and returns ``None`` if the
+        resolved file does not exist.
+
+        :param file: Sound file path or Blender data-block name.
+        :returns: Absolute path string, or ``None`` on failure.
+        '''
         soundpath = file
         if not isinstance(soundpath, bpy.types.Sound):
             soundpath = bpy.data.sounds.get(file, None)
@@ -172,29 +214,39 @@ class ULSound():
 
     @property
     def keep(self):
+        '''When ``True`` the ``aud`` handle is kept alive after playback ends,
+        allowing the sound to be resumed.
+        '''
         return self.sound.keep
-    
+
     @keep.setter
     def keep(self, val):
         self.sound.keep = val
 
     def on_finish(self):
-        '''Standart callback to be called when the sound finishes or is stopped.'''
+        '''Callback invoked when the sound finishes playback or is stopped.
+
+        Override this method to react to the sound ending. The default
+        implementation is a no-op.
+        '''
         pass
 
 
 class Sound2D(ULSound):
-    '''
-    Non-spacial sound, e.g. Music or Voice-Overs.\n
-    This class allows for modification of pitch and volume while playing.
+    '''Non-spatial sound, e.g. music or voice-overs.
+
+    Pitch and volume can be modified at any time during playback.
 
     :param file: Path to the sound file.
-    :param volume: Initial volume.
-    :param pitch: Initial pitch.
-    :param loop_count: Plays the sound this many times (0 for once, -1 for endless).
-    :param lowpass: Play this effect with a lowpass filter applied.
-    :param ignore_timescale: Play the sound using `Sound2D.pitch`, regardless of the current timescale.
-    :param aud_sys: Audiosystem to play this sound on.
+    :param volume: Initial amplitude (``1.0`` = unity).
+    :param pitch: Initial frequency shift (``1.0`` = normal speed).
+    :param loop_count: Extra repeats after the first play; ``-1`` loops forever.
+    :param lowpass: Lowpass cutoff frequency, or ``False`` to disable.
+    :param ignore_timescale: When ``True``, pitch is unaffected by the game
+        time scale.
+    :param mono: Down-mix to mono before playback.
+    :param aud_sys: Name of the :class:`~uplogic.audio.audiosystem.AudioSystem`
+        to play on.
     '''
 
     _deprecated = False
@@ -242,9 +294,10 @@ class Sound2D(ULSound):
 
     @property
     def panning(self):
-        """Pan a mono sound from left (-1) to right (1).
+        '''Pan position of this sound, from ``-1`` (left) to ``1`` (right).
 
-        Note that this only works for mono sounds."""
+        Only effective on mono sounds.
+        '''
         return self.sound.location[0]
 
     @panning.setter
@@ -279,7 +332,9 @@ class Sound2D(ULSound):
 
     @property
     def lowpass(self):
-        '''Frequency cutoff as a factor of 20.000.'''
+        '''Lowpass filter cutoff as a factor of 20 000 Hz. ``False`` disables
+        the filter.
+        '''
         return self._lowpass
 
     @lowpass.setter
@@ -299,7 +354,9 @@ class Sound2D(ULSound):
         self.sound = sound
 
     def update(self):
-        '''This function is called each frame and updates the attributes of the sound according to the scene.'''
+        '''Per-frame update: detect when the underlying handle has finished
+        and fire :meth:`on_finish`, then remove from the audio system.
+        '''
         if self.volume == 0:
             return
         handle = self.sound
@@ -311,34 +368,28 @@ class Sound2D(ULSound):
 
 
 class ULSound2D(Sound2D):
-    '''[DEPRECATED] Use `uplogic.audio.Sound2D` instead
-
-    Non-spacial sound, e.g. Music or Voice-Overs.\n
-    This class allows for modification of pitch and volume while playing.
-
-    :param file: Path to the sound file.
-    :param volume: Initial volume.
-    :param pitch: Initial pitch.
-    :param loop_count: Plays the sound this many times (0 for once, -1 for endless).
-    :param aud_sys: Audiosystem to play this sound on.
-    '''
+    '''[DEPRECATED] Use :class:`Sound2D` instead.'''
 
     _deprecated = True
 
 
 class Sample2D(Sound2D):
-    '''Non-spacial sample, e.g. Music or Voice-Overs.\n
-    This class allows for modification of pitch and volume while playing.
-    The played audio file can be limited to a start and end time.
+    '''Non-spatial sound with an optional time-range clip window.
+
+    Pitch and volume can be modified at any time during playback.
 
     :param file: Path to the sound file.
-    :param sample: Tuple containing the "start" and "end" timestamp.
-    :param volume: Initial volume.
-    :param pitch: Initial pitch.
-    :param loop_count: Plays the sound this many times (0 for once, -1 for endless).
-    :param lowpass: Play this effect with a lowpass filter applied.
-    :param ignore_timescale: Play the sound using `Sample2D.pitch`, regardless of the current timescale.
-    :param aud_sys: Audiosystem to play this sound on.
+    :param sample: ``(start, end)`` timestamps in seconds; ``end=0`` plays
+        the whole file.
+    :param volume: Initial amplitude (``1.0`` = unity).
+    :param pitch: Initial frequency shift (``1.0`` = normal speed).
+    :param loop_count: Extra repeats after the first play; ``-1`` loops forever.
+    :param lowpass: Lowpass cutoff frequency, or ``False`` to disable.
+    :param ignore_timescale: When ``True``, pitch is unaffected by the game
+        time scale.
+    :param mono: Down-mix to mono before playback.
+    :param aud_sys: Name of the :class:`~uplogic.audio.audiosystem.AudioSystem`
+        to play on.
     '''
 
     _deprecated = False
@@ -395,29 +446,40 @@ class Sample2D(Sound2D):
 
 
 class Sound3D(ULSound):
-    '''Spacial sound, e.g. World Effects or Voices.\n
-    
-    :param speaker: Play the sound at a `Vector` or use a `KX_GameObject`.
+    '''Spatial sound, e.g. world effects or voices.
+
+    Position, orientation, and velocity are tracked automatically when a
+    ``KX_GameObject`` is used as the speaker. Optionally supports occlusion
+    ray-casting and reverb volumes.
+
+    :param speaker: ``KX_GameObject`` that acts as the source, or a fixed
+        ``Vector`` world position.
     :param file: Path to the sound file.
-    :param occlusion: Muffle sounds behind walls (can be bad for performance).
-    :param transition_speed: Fading speed from regular to muffled.
-    :param cutoff_frequency: Cutoff for muffled version as a factor of 20.000.
-    :param loop_count: The amount of times the sound should be played. -1 is looped.
-    :param pitch: Initial pitch.
-    :param volume: Initial volume.
-    :param reverb: Use conditional reverberation (performance intense).
-    :param attenuation: Distance fade factor.
-    :param distance_ref: Distance at which the sound is audible at 100% volume.
-    :param cone_angle: Cone spread for directional sounds. Cone is aligned to the -Z axis.
-    :param cone_outer_volume: Volume outside of the cone.
-    :param ignore_timescale: Play the sound using `Sound3D.pitch`, regardless of the current timescale.
-    :param aud_sys: Audiosystem to play this sound on.
+    :param occlusion: When ``True``, cast rays to muffle sounds behind walls.
+    :param transition_speed: Interpolation speed between clear and muffled.
+    :param cutoff_frequency: Lowpass cutoff for the muffled version as a
+        factor of 20 000 Hz.
+    :param loop_count: Extra repeats after the first play; ``-1`` loops forever.
+    :param pitch: Initial frequency shift (``1.0`` = normal speed).
+    :param volume: Initial amplitude (``1.0`` = unity).
+    :param reverb: When ``True``, simulate reverb via
+        :class:`ULReverb` (performance-intensive).
+    :param attenuation: Distance fade factor for the ``aud`` device.
+    :param distance_ref: Distance at which the sound plays at full volume.
+    :param cone_angle: ``[inner, outer]`` cone angles in degrees; aligned to
+        the speaker's ``-Z`` axis.
+    :param cone_outer_volume: Volume multiplier outside the outer cone.
+    :param ignore_timescale: When ``True``, pitch is unaffected by the game
+        time scale.
+    :param aud_sys: Name of the :class:`~uplogic.audio.audiosystem.AudioSystem`
+        to play on.
     '''
 
     _deprecated = False
 
     @property
     def position(self):
+        '''Playback position of this sound in seconds.'''
         if self.handles:
             return self.handles[1][0].position
 
@@ -532,7 +594,13 @@ class Sound3D(ULSound):
             sound.resume()
 
     def update(self, init=False):
-        '''This function is called each frame and updates the attributes of the sound according to the scene.'''
+        '''Per-frame update: sync the sound's spatial attributes (location,
+        orientation, velocity) to the speaker object and handle occlusion
+        ray-casting when enabled.
+
+        :param init: When ``True`` occlusion transitions are applied
+            instantaneously rather than interpolated.
+        '''
         aud_system = self.aud_system
         speaker = self.speaker
         if not self._is_vector and (not speaker or speaker.invalid):
@@ -635,44 +703,55 @@ class Sound3D(ULSound):
             self.reverb_samples.update()
 
     def pause(self):
+        '''Pause all handles of this sound, suppressing the finish callback.'''
         self.on_finish = dummy
         for sound in self.handles[1]:
             sound.pause()
 
     def resume(self):
+        '''Resume all handles of this sound, suppressing the finish callback.'''
         self.on_finish = dummy
         for sound in self.handles[1]:
             sound.resume()
 
     def stop(self):
+        '''Stop all handles of this sound, suppressing the finish callback.'''
         self.on_finish = dummy
         for sound in self.handles[1]:
             sound.stop()
 
 
 class ULSound3D(Sound3D):
+    '''[DEPRECATED] Use :class:`Sound3D` instead.'''
     _deprecated = True
 
 
 class Sample3D(Sound3D):
-    '''Spacial sound, e.g. World Effects or Voices.\n
-    
-    :param speaker: Play the sound at a `Vector` or use a `KX_GameObject`.
+    '''Spatial sound with an optional time-range clip window.
+
+    Behaves like :class:`Sound3D` but trims playback to a ``(start, end)``
+    range within the source file.
+
+    :param speaker: ``KX_GameObject`` or fixed ``Vector`` world position.
     :param file: Path to the sound file.
-    :param sample: Tuple containing the "start" and "end" timestamp.
-    :param occlusion: Muffle sounds behind walls (can be bad for performance).
-    :param transition_speed: Fading speed from regular to muffled.
-    :param cutoff_frequency: Cutoff for muffled version as a factor of 20.000.
-    :param loop_count: The amount of times the sound should be played. -1 is looped.
-    :param pitch: Initial pitch.
-    :param volume: Initial volume.
-    :param reverb: Use conditional reverberation (performance intense).
-    :param attenuation: Distance fade factor.
-    :param distance_ref: Distance at which the sound is audible at 100% volume.
-    :param cone_angle: Cone spread for directional sounds. Cone is aligned to the -Z axis.
-    :param cone_outer_volume: Volume outside of the cone.
-    :param ignore_timescale: Play the sound using `Sample3D.pitch`, regardless of the current timescale.
-    :param aud_sys: Audiosystem to play this sound on.
+    :param sample: ``(start, end)`` timestamps in seconds; ``end=0`` plays
+        the whole file.
+    :param occlusion: When ``True``, cast rays to muffle sounds behind walls.
+    :param transition_speed: Interpolation speed between clear and muffled.
+    :param cutoff_frequency: Lowpass cutoff for the muffled version as a
+        factor of 20 000 Hz.
+    :param loop_count: Extra repeats after the first play; ``-1`` loops forever.
+    :param pitch: Initial frequency shift (``1.0`` = normal speed).
+    :param volume: Initial amplitude (``1.0`` = unity).
+    :param reverb: When ``True``, simulate reverb via :class:`ULReverb`.
+    :param attenuation: Distance fade factor for the ``aud`` device.
+    :param distance_ref: Distance at which the sound plays at full volume.
+    :param cone_angle: ``[inner, outer]`` cone angles in degrees.
+    :param cone_outer_volume: Volume multiplier outside the outer cone.
+    :param ignore_timescale: When ``True``, pitch is unaffected by the game
+        time scale.
+    :param aud_sys: Name of the :class:`~uplogic.audio.audiosystem.AudioSystem`
+        to play on.
     '''
 
     _deprecated = False
@@ -764,13 +843,18 @@ class Sample3D(Sound3D):
 
 
 class Speaker2D(Sound2D):
-    '''Start a speaker object using its properties.\n
-    
-    :param speaker: `KX_GameObject` of speaker type.
-    :param loop_count: The amount of times the sound should be played. -1 is looped.
-    :param lowpass: Play this effect with a lowpass filter applied.
-    :param ignore_timescale: Play the sound using `Speaker2D.pitch`, regardless of the current timescale.
-    :param aud_sys: Audiosystem to play this sound on.
+    '''Non-spatial sound driven by a BGE speaker object's properties.
+
+    Reads the sound file, volume, and pitch directly from the speaker's
+    Blender data-block.
+
+    :param speaker: ``KX_GameObject`` of speaker type.
+    :param loop_count: Extra repeats after the first play; ``-1`` loops forever.
+    :param lowpass: Lowpass cutoff frequency, or ``False`` to disable.
+    :param ignore_timescale: When ``True``, pitch is unaffected by the game
+        time scale.
+    :param aud_sys: Name of the :class:`~uplogic.audio.audiosystem.AudioSystem`
+        to play on.
     '''
 
     _deprecated = False
@@ -799,20 +883,27 @@ class Speaker2D(Sound2D):
 
 
 class ULSpeaker2D(Speaker2D):
+    '''[DEPRECATED] Use :class:`Speaker2D` instead.'''
     _deprecated = True
 
 
 class Speaker3D(Sound3D):
-    '''Start a speaker object using its properties.\n
-    
-    :param speaker: `KX_GameObject` of speaker type.
-    :param occlusion: Muffle sounds behind walls (can be bad for performance).
-    :param transition_speed: Fading speed from regular to muffled.
-    :param cutoff_frequency: Cutoff for muffled version as a factor of 20.000.
-    :param loop_count: The amount of times the sound should be played. -1 is looped.
-    :param reverb: Use conditional reverberation (performance intense).
-    :param ignore_timescale: Play the sound using `Speaker3D.pitch`, regardless of the current timescale.
-    :param aud_sys: Audiosystem to play this sound on.
+    '''Spatial sound driven by a BGE speaker object's properties.
+
+    Reads the sound file, volume, pitch, attenuation, distance reference, and
+    cone settings directly from the speaker's Blender data-block.
+
+    :param speaker: ``KX_GameObject`` of speaker type.
+    :param occlusion: When ``True``, cast rays to muffle sounds behind walls.
+    :param transition_speed: Interpolation speed between clear and muffled.
+    :param cutoff_frequency: Lowpass cutoff for the muffled version as a
+        factor of 20 000 Hz.
+    :param loop_count: Extra repeats after the first play; ``-1`` loops forever.
+    :param reverb: When ``True``, simulate reverb via :class:`ULReverb`.
+    :param ignore_timescale: When ``True``, pitch is unaffected by the game
+        time scale.
+    :param aud_sys: Name of the :class:`~uplogic.audio.audiosystem.AudioSystem`
+        to play on.
     '''
 
     _deprecated = False
@@ -851,6 +942,7 @@ class Speaker3D(Sound3D):
 
 
 class ULSpeaker3D(Speaker3D):
+    '''[DEPRECATED] Use :class:`Speaker3D` instead.'''
     _deprecated = True
 
 
@@ -865,21 +957,36 @@ def play_sound_2d(
         cache: bool = False,
         aud_sys: str = 'default'
     ):
-        sound = Sound2D(
-            file=file,
-            volume=volume,
-            pitch=pitch,
-            loop_count=loop_count,
-            lowpass=lowpass,
-            ignore_timescale=ignore_timescale,
-            mono=mono,
-            aud_sys=aud_sys
-        )
-        if sound.sound:
-            sound.play()
-        if cache:
-            sound.cache()
-        return sound
+    '''Create and immediately start a :class:`Sound2D`.
+
+    :param file: Path to the sound file.
+    :param volume: Playback amplitude (``1.0`` = unity).
+    :param pitch: Playback frequency shift (``1.0`` = normal speed).
+    :param loop_count: Number of extra repeats; ``-1`` loops forever.
+    :param lowpass: Lowpass cutoff frequency, or ``False`` to disable.
+    :param ignore_timescale: When ``True`` pitch is unaffected by the game
+        time scale.
+    :param mono: Down-mix to mono before playback.
+    :param cache: Store the decoded sound in :class:`~uplogic.audio.audiosystem.AudioCache`.
+    :param aud_sys: Name of the :class:`~uplogic.audio.audiosystem.AudioSystem`
+        to play on.
+    :returns: The :class:`Sound2D` instance.
+    '''
+    sound = Sound2D(
+        file=file,
+        volume=volume,
+        pitch=pitch,
+        loop_count=loop_count,
+        lowpass=lowpass,
+        ignore_timescale=ignore_timescale,
+        mono=mono,
+        aud_sys=aud_sys
+    )
+    if sound.sound:
+        sound.play()
+    if cache:
+        sound.cache()
+    return sound
 
 
 def play_sound_3d(
@@ -900,25 +1007,49 @@ def play_sound_3d(
         cache=False,
         aud_sys: str = 'default'
     ):
-        sound = Sound3D(
-            speaker=speaker,
-            file=file,
-            occlusion=occlusion,
-            transition_speed=transition_speed,
-            cutoff_frequency=cutoff_frequency,
-            loop_count=loop_count,
-            pitch=pitch,
-            volume=volume,
-            reverb=reverb,
-            attenuation=attenuation,
-            distance_ref=distance_ref,
-            cone_angle=cone_angle,
-            cone_outer_volume=cone_outer_volume,
-            ignore_timescale=ignore_timescale,
-            aud_sys=aud_sys
-        )
-        if sound.sound:
-            sound.play()
-        if cache:
-            sound.cache()
-        return sound
+    '''Create and immediately start a :class:`Sound3D`.
+
+    :param speaker: ``KX_GameObject`` or ``Vector`` position for the source.
+    :param file: Path to the sound file.
+    :param occlusion: When ``True``, cast rays to muffle sounds behind walls.
+    :param transition_speed: Interpolation speed between clear and muffled.
+    :param cutoff_frequency: Lowpass cutoff for the muffled version as a
+        factor of 20 000 Hz.
+    :param loop_count: Number of extra repeats; ``-1`` loops forever.
+    :param pitch: Playback frequency shift (``1.0`` = normal speed).
+    :param volume: Playback amplitude (``1.0`` = unity).
+    :param reverb: When ``True``, add reverb samples via :class:`ULReverb`.
+    :param attenuation: Distance fade factor for the ``aud`` device.
+    :param distance_ref: Distance at which the sound plays at full volume.
+    :param cone_angle: ``[inner, outer]`` cone angles in degrees; cone is
+        aligned to the speaker's ``-Z`` axis.
+    :param cone_outer_volume: Volume multiplier outside the outer cone.
+    :param ignore_timescale: When ``True`` pitch is unaffected by the game
+        time scale.
+    :param cache: Store the decoded sound in :class:`~uplogic.audio.audiosystem.AudioCache`.
+    :param aud_sys: Name of the :class:`~uplogic.audio.audiosystem.AudioSystem`
+        to play on.
+    :returns: The :class:`Sound3D` instance.
+    '''
+    sound = Sound3D(
+        speaker=speaker,
+        file=file,
+        occlusion=occlusion,
+        transition_speed=transition_speed,
+        cutoff_frequency=cutoff_frequency,
+        loop_count=loop_count,
+        pitch=pitch,
+        volume=volume,
+        reverb=reverb,
+        attenuation=attenuation,
+        distance_ref=distance_ref,
+        cone_angle=cone_angle,
+        cone_outer_volume=cone_outer_volume,
+        ignore_timescale=ignore_timescale,
+        aud_sys=aud_sys
+    )
+    if sound.sound:
+        sound.play()
+    if cache:
+        sound.cache()
+    return sound

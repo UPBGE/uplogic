@@ -1,3 +1,26 @@
+'''Class decorators for BGE component and game-object classes.
+
+Each decorator in this module injects Python ``property`` descriptors into a
+``KX_PythonComponent`` or ``KX_GameObject`` subclass so that attribute reads
+and writes are transparently routed to the underlying BGE data store
+(game properties, Blender custom attributes, scene dictionary, etc.) rather
+than to plain Python instance attributes.
+
+The setter side of every generated property also calls a corresponding
+``on_<name>(value)`` hook method if it exists on the class, giving
+subclasses a clean way to react to value changes.
+
+Typical usage::
+
+    from uplogic.decorators import game_property, attribute, scene_property
+
+    @game_property('health', 'speed')
+    class Player(KX_PythonComponent):
+        def on_health(self, value):
+            if value <= 0:
+                self.die()
+'''
+
 from uplogic.events import receive, Event
 from uplogic.console import warning
 from uplogic.utils.errors import TypeMismatchError
@@ -8,16 +31,27 @@ import bpy
 
 
 class Unset:
+    '''Sentinel used to detect missing game-property entries without
+    conflicting with ``None`` as a valid stored value.
+    '''
     pass
 
 
 def listener(original_class: KX_PythonComponent) -> KX_PythonComponent:
-    """`KX_PythonComponent` Class Decorator
+    '''``KX_PythonComponent`` class decorator that registers the component as
+    an event listener.
 
-    Makes the decorated class listen for events that have the component's
-    `object` attribute as ID.
-    Executes the component's `on_object` function when an event is detected
-    """
+    After decoration, each instance automatically watches for uplogic
+    :class:`~uplogic.events.Event` objects whose ID matches the component's
+    ``object`` attribute.  When such an event arrives, the component's
+    ``on_object(event)`` method is called.
+
+    :param original_class: The :class:`~bge.types.KX_PythonComponent` subclass
+        to decorate.
+    :returns: The decorated class with the listener injected.
+    :raises TypeMismatchError: When *original_class* is not a
+        :class:`~bge.types.KX_PythonComponent` subclass.
+    '''
     if not issubclass(original_class, KX_PythonComponent):
         raise TypeMismatchError('Decorator only viable for KX_PythonComponent subclasses!')
     orig_init = original_class.__init__
@@ -37,13 +71,19 @@ def listener(original_class: KX_PythonComponent) -> KX_PythonComponent:
 
 
 def state_machine(cls: KX_PythonComponent) -> KX_PythonComponent:
-    """`KX_PythonComponent` Class Decorator.
+    '''``KX_PythonComponent`` class decorator that adds a ``state`` game-property
+    accessor and a ``set_state`` helper.
 
-    Automatically adds a `state` property to the `KX_GameObject` of the Component
-    that can be accessed by `KX_PythonComponent.state` as well.
+    The injected ``state`` property reads and writes ``self.object["state"]``.
+    On every write the ``on_state(new_state)`` hook is called if the value
+    actually changed.  This does not conflict with the built-in BGE
+    ``KX_GameObject.state`` bitmask attribute.
 
-    This does not interfere with the built-in `state` attribute of `KX_GameObject`.
-    """
+    :param cls: The :class:`~bge.types.KX_PythonComponent` subclass to decorate.
+    :returns: The decorated class.
+    :raises TypeMismatchError: When *cls* is not a
+        :class:`~bge.types.KX_PythonComponent` subclass.
+    '''
 
     def deco(cls: KX_PythonComponent) -> KX_PythonComponent:
         if not issubclass(cls, KX_PythonComponent):
@@ -75,14 +115,16 @@ def state_machine(cls: KX_PythonComponent) -> KX_PythonComponent:
 
 
 def game_props(*prop_names) -> KX_PythonComponent:
-    """[DEPRECATED] Use @game_property instead!
-    Decorator for `KX_PythonComponent` or `KX_GameObject` classes and subclasses.
+    '''[DEPRECATED] Use :func:`game_property` instead.
 
-    Automatically adds property handlers for this class to use the `game_object[prop]`
-    syntax instead of saving values on the instance itself.
+    Injects game-property accessors that delegate to ``game_object[name]``
+    (component) or ``self[name]`` (game object).
 
-    :param prop_names: Names of game properties as a list.
-    """
+    :param prop_names: One or more BGE game-property names to wrap.
+    :returns: A class decorator that adds the properties.
+    :raises TypeMismatchError: When applied to an incompatible class or when
+        *prop_names* is not a list or tuple.
+    '''
 
     def on_attr(self, val):
         pass
@@ -124,13 +166,20 @@ def game_props(*prop_names) -> KX_PythonComponent:
 
 
 def game_property(*prop_names) -> KX_PythonComponent:
-    """Decorator for `KX_PythonComponent` or `KX_GameObject` classes and subclasses.
+    '''Decorator that routes named attributes through BGE game properties.
 
-    Automatically adds property handlers for this class to use the `game_object[prop]`
-    syntax instead of saving values on the instance itself.
+    For each name in *prop_names* a Python ``property`` is added to the
+    decorated class.  Reads go to ``self.object[name]``
+    (``KX_PythonComponent``) or ``self[name]`` (``KX_GameObject``); writes
+    first call ``self.on_<name>(value)`` then update the game property.  A
+    no-op ``on_<name>`` stub is added automatically if the class does not
+    already define one.
 
-    :param prop_names: Names of game properties as a list.
-    """
+    :param prop_names: One or more BGE game-property names to wrap.
+    :returns: A class decorator that adds the properties.
+    :raises TypeMismatchError: When applied to an incompatible class or when
+        *prop_names* is not a list or tuple.
+    '''
 
     def on_attr(self, val):
         pass
@@ -177,14 +226,16 @@ def game_property(*prop_names) -> KX_PythonComponent:
 
 
 def instance_props(*prop_names) -> KX_PythonComponent:
-    """[DEPRECATED] Use @instance_property instead!
-    Decorator for `KX_PythonComponent` or `KX_GameObject` classes and subclasses.
+    '''[DEPRECATED] Use :func:`instance_property` instead.
 
-    Automatically adds property handlers for this class to use the `game_object.GroupObject[prop]`
-    syntax instead of saving values on the instance itself. 
+    Injects property accessors that delegate to ``self.object.groupObject[name]``
+    (component) or ``self.groupObject[name]`` (game object).
 
-    :param prop_names: Names of game properties as a list.
-    """
+    :param prop_names: One or more property names to wrap.
+    :returns: A class decorator that adds the properties.
+    :raises TypeMismatchError: When applied to an incompatible class or when
+        *prop_names* is not a list or tuple.
+    '''
 
     def on_attr(self, val):
         pass
@@ -226,13 +277,19 @@ def instance_props(*prop_names) -> KX_PythonComponent:
 
 
 def instance_property(*prop_names) -> KX_PythonComponent:
-    """Decorator for `KX_PythonComponent` or `KX_GameObject` classes and subclasses.
+    '''Decorator that routes named attributes through the group-instance object.
 
-    Automatically adds property handlers for this class to use the `game_object.GroupObject[prop]`
-    syntax instead of saving values on the instance itself.
+    For each name in *prop_names* a Python ``property`` is added that reads
+    from and writes to ``self.object.groupObject[name]``, falling back to
+    ``self.object[name]`` when no group object is present.  Writes call
+    ``self.on_<name>(value)`` before updating the property.  A no-op stub is
+    added automatically when the class does not already define the hook.
 
-    :param prop_names: Names of game properties as a list.
-    """
+    :param prop_names: One or more property names to wrap.
+    :returns: A class decorator that adds the properties.
+    :raises TypeMismatchError: When applied to an incompatible class or when
+        *prop_names* is not a list or tuple.
+    '''
 
     def on_attr(self, val):
         pass
@@ -281,15 +338,17 @@ def instance_property(*prop_names) -> KX_PythonComponent:
 
 
 def bl_attrs(*attr_names) -> KX_PythonComponent:
-    """[DEPRECATED] Use @attribute instead!
-    Decorator for `KX_PythonComponent` or `KX_GameObject` classes and subclasses.
+    '''[DEPRECATED] Use :func:`attribute` instead.
 
-    Automatically adds attribute handlers for this class to use the
-    `game_object.blenderObject[attribute]` syntax instead of saving values on the
-    instance itself.
+    Injects attribute accessors that delegate to
+    ``self.object.blenderObject[name]`` (component) or
+    ``self.blenderObject[name]`` (game object).
 
-    :param attr_names: Names of custom attributes as a list.
-    """
+    :param attr_names: One or more Blender custom-attribute names to wrap.
+    :returns: A class decorator that adds the attributes.
+    :raises TypeMismatchError: When applied to an incompatible class or when
+        *attr_names* is not a list or tuple.
+    '''
 
     def on_attr(self, val):
         pass
@@ -333,14 +392,20 @@ def bl_attrs(*attr_names) -> KX_PythonComponent:
 
 
 def attribute(*attr_names) -> KX_PythonComponent:
-    """Decorator for `KX_PythonComponent` or `KX_GameObject` classes and subclasses.
+    '''Decorator that routes named attributes through Blender custom properties.
 
-    Automatically adds attribute handlers for this class to use the
-    `game_object.blenderObject[attribute]` syntax instead of saving values on the
-    instance itself.
+    For each name in *attr_names* a Python ``property`` is added that reads
+    from and writes to ``self.object.blenderObject[name]`` (component) or
+    ``self.blenderObject[name]`` (game object).  Writes call
+    ``self.on_<name>(value)`` and then invoke ``update_tag()`` to notify
+    Blender of the change.  A no-op stub is added when the class does not
+    already define the hook.
 
-    :param attr_names: Names of custom attributes as a list.
-    """
+    :param attr_names: One or more Blender custom-attribute names to wrap.
+    :returns: A class decorator that adds the attributes.
+    :raises TypeMismatchError: When applied to an incompatible class or when
+        *attr_names* is not a list or tuple.
+    '''
 
     def on_attr(self, val):
         pass
@@ -383,14 +448,18 @@ def attribute(*attr_names) -> KX_PythonComponent:
 
 
 def scene_attribute(*attr_names) -> KX_PythonComponent:
-    """Decorator for `KX_PythonComponent` or `KX_GameObject` classes and subclasses.
+    '''Decorator that routes named attributes through Blender scene custom properties.
 
-    Automatically adds attribute handlers for this class to use the
-    `Scene[attribute]` syntax instead of saving values on the
-    instance itself.
+    For each name in *attr_names* a Python ``property`` is added that reads
+    from ``bpy.data.scenes[scene.name][name]`` and writes back to it, calling
+    ``self.on_<name>(value)`` before each write.  A no-op stub is added when
+    the class does not already define the hook.
 
-    :param attr_names: Names of custom attributes as a list.
-    """
+    :param attr_names: One or more Blender scene-attribute names to wrap.
+    :returns: A class decorator that adds the attributes.
+    :raises TypeMismatchError: When applied to an incompatible class or when
+        *attr_names* is not a list or tuple.
+    '''
 
     def on_attr(self, val):
         pass
@@ -433,11 +502,17 @@ def scene_attribute(*attr_names) -> KX_PythonComponent:
 
 
 def global_dict(*prop_names):
-    """Automatically adds property handlers for this class to use the `bge.logic.globalDict[key]`
-    syntax instead of saving values on the instance itself.
+    '''Decorator that routes named attributes through ``bge.logic.globalDict``.
 
-    :param prop_names: Keys as a list.
-    """
+    For each name in *prop_names* a Python ``property`` is added that reads
+    from and writes to ``logic.globalDict[name]``.  Unlike the other
+    decorators in this module, no ``on_<name>`` hook is generated and there
+    is no class-type restriction.
+
+    :param prop_names: One or more ``globalDict`` keys to expose as properties.
+    :returns: A class decorator that adds the properties.
+    :raises TypeMismatchError: When *prop_names* is not a list or tuple.
+    '''
     def deco(cls):
         if not (isinstance(prop_names, list) or isinstance(prop_names, tuple)):
             raise TypeMismatchError('Expected property names as a list or tuple!')
@@ -457,14 +532,16 @@ def global_dict(*prop_names):
 
 
 def scene_props(*prop_names):
-    """[DEPRECATED] Use @scene_property instead!
-    Decorator for `KX_PythonComponent` or `KX_GameObject` classes and subclasses.
+    '''[DEPRECATED] Use :func:`scene_property` instead.
 
-    Automatically adds property handlers for this class to use the `game_object.scene[prop]`
-    syntax instead of saving values on the instance itself.
+    Injects property accessors that delegate to ``self.object.scene[name]``
+    (component) or ``self.scene[name]`` (game object / :class:`CustomLoop`).
 
-    :param prop_names: Names of properties as a list.
-    """
+    :param prop_names: One or more scene-property names to wrap.
+    :returns: A class decorator that adds the properties.
+    :raises TypeMismatchError: When applied to an incompatible class or when
+        *prop_names* is not a list or tuple.
+    '''
     def deco(cls: KX_PythonComponent) -> KX_PythonComponent:
         warning('@scene_props decorator is deprecated, use @scene_property instead.')
         if not (issubclass(cls, KX_PythonComponent) or issubclass(cls, KX_GameObject) or issubclass(cls, CustomLoop)):
@@ -498,12 +575,15 @@ def scene_props(*prop_names):
 
 
 def scene_property(*prop_names):
-    """
-    Automatically adds property handlers for this class to use the `logic.getCurrentScene()[prop]`
-    syntax instead of saving values on the instance itself.
+    '''Decorator that routes named attributes through the current BGE scene dictionary.
 
-    :param prop_names: Names of properties as a list.
-    """
+    For each name in *prop_names* a Python ``property`` is added that reads
+    from and writes to ``logic.getCurrentScene()[name]``.  There is no
+    class-type restriction and no ``on_<name>`` hook is generated.
+
+    :param prop_names: One or more scene-dictionary keys to expose as properties.
+    :returns: A class decorator that adds the properties.
+    '''
     def deco(cls):
         for scene_prop in prop_names:
 

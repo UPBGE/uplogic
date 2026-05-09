@@ -8,14 +8,13 @@ from uplogic.utils.visualize import draw_line
 
 
 class RigBone():
-    """Docstring for __init__
+    '''Convenience wrapper around a single ``BL_ArmatureChannel`` that exposes
+    position, orientation, and Blender pose/rest-bone data through a unified
+    property interface.
 
-    :param self: Description
-    :param bone: Description
-    :type bone: BL_ArmatureChannel
-    :param armature: Description
-    :type armature: BL_ArmatureObject
-    """
+    :param bone: The BGE armature channel for this bone.
+    :param armature: The ``BL_ArmatureObject`` that owns the bone.
+    '''
 
     def __init__(self, bone: BL_ArmatureChannel, armature: BL_ArmatureObject) -> None:
         self.world_space = True
@@ -26,10 +25,16 @@ class RigBone():
 
     @property
     def attr_transform(self):
+        '''World transform of the owning armature when :attr:`world_space` is
+        ``True``, or an identity matrix otherwise (read-only).
+        '''
         return self.armature.worldTransform if self.world_space else Matrix()
 
     @property
     def armature(self):
+        '''The ``BL_ArmatureObject`` that owns this bone. Setting this also
+        updates the internal Blender data and pose references.
+        '''
         return self._armature
 
     @armature.setter
@@ -39,6 +44,9 @@ class RigBone():
 
     @property
     def name(self):
+        '''Name of this bone as reported by the BGE channel. Setting renames
+        the underlying Blender bone.
+        '''
         return self.bone.name
 
     @name.setter
@@ -47,10 +55,14 @@ class RigBone():
 
     @property
     def constraints(self):
+        '''Constraint collection for this bone's pose bone (read-only).'''
         return self._pose.bones[self.bone.name].constraints
 
     @property
     def location(self):
+        '''Pose-space location offset of this bone. Setting writes directly to
+        the Blender pose bone.
+        '''
         return self._pose.bones[self.bone.name].location
 
     @location.setter
@@ -59,6 +71,12 @@ class RigBone():
 
     @property
     def pose_rotation_euler(self):
+        '''Euler rotation of this bone in pose space, always read in ``XYZ``
+        order regardless of the bone's current rotation mode. Setting restores
+        the original mode after writing.
+
+        :returns: :class:`mathutils.Euler` in ``XYZ`` order.
+        '''
         bone = self._pose.bones[self.bone.name]
         _mode = bone.rotation_mode
         # bone.rotation_mode = ROT_MODE_XYZ
@@ -79,6 +97,9 @@ class RigBone():
 
     @property
     def head(self) -> Vector:
+        '''Rest-pose head position in world space (or armature space when
+        :attr:`world_space` is ``False``).
+        '''
         return self.attr_transform @ self._armature_data.bones[self.bone.name].head
 
     @head.setter
@@ -87,6 +108,7 @@ class RigBone():
 
     @property
     def head_local(self) -> Vector:
+        '''Rest-pose head position in the bone's local coordinate system.'''
         return self._armature_data.bones[self.bone.name].head_local
 
     @head_local.setter
@@ -95,6 +117,9 @@ class RigBone():
 
     @property
     def head_pose(self) -> Vector:
+        '''Posed head position in world space (or armature space when
+        :attr:`world_space` is ``False``).
+        '''
         return self.attr_transform @ self._pose.bones[self.bone.name].head
 
     @head_pose.setter
@@ -103,6 +128,9 @@ class RigBone():
 
     @property
     def tail(self) -> Vector:
+        '''Rest-pose tail position in world space (or armature space when
+        :attr:`world_space` is ``False``).
+        '''
         return self.attr_transform @ self._armature_data.bones[self.bone.name].tail
 
     @tail.setter
@@ -111,6 +139,7 @@ class RigBone():
 
     @property
     def tail_local(self) -> Vector:
+        '''Rest-pose tail position in the bone's local coordinate system.'''
         return self._armature_data.bones[self.bone.name].tail_local
 
     @tail_local.setter
@@ -119,6 +148,9 @@ class RigBone():
 
     @property
     def tail_pose(self) -> Vector:
+        '''Posed tail position in world space (or armature space when
+        :attr:`world_space` is ``False``).
+        '''
         return self.attr_transform @ self._pose.bones[self.bone.name].tail
 
     @tail_pose.setter
@@ -127,6 +159,9 @@ class RigBone():
 
     @property
     def center(self) -> Vector:
+        '''Midpoint between :attr:`head` and :attr:`tail` in world (or armature)
+        space (read-only).
+        '''
         return self.head.lerp(self.tail, .5)
 
     @center.setter
@@ -135,6 +170,9 @@ class RigBone():
 
     @property
     def center_local(self) -> Vector:
+        '''Midpoint between :attr:`head_local` and :attr:`tail_local` in local
+        bone space (read-only).
+        '''
         return self.head_local.lerp(self.tail_local, .5)
 
     @center_local.setter
@@ -143,6 +181,9 @@ class RigBone():
 
     @property
     def center_pose(self) -> Vector:
+        '''Midpoint between :attr:`head_pose` and :attr:`tail_pose` in world
+        (or armature) space (read-only).
+        '''
         return self.head_pose.lerp(self.tail_pose, .5)
 
     @center_pose.setter
@@ -151,6 +192,7 @@ class RigBone():
 
     @property
     def inherit_rotation(self):
+        '''Whether this bone inherits rotation from its parent (``use_inherit_rotation``).'''
         return self._armature_data.bones[self.bone.name].use_inherit_rotation
 
     @inherit_rotation.setter
@@ -159,6 +201,7 @@ class RigBone():
 
     @property
     def inherit_scale(self):
+        '''Scale inheritance mode from the parent bone (``inherit_scale``).'''
         return self._armature_data.bones[self.bone.name].inherit_scale
 
     @inherit_scale.setter
@@ -167,6 +210,7 @@ class RigBone():
 
     @property
     def connected(self):
+        '''Whether this bone is connected to its parent (``use_connect``).'''
         return self._armature_data.bones[self.bone.name].use_connect
 
     @connected.setter
@@ -175,6 +219,7 @@ class RigBone():
 
     @property
     def deform(self):
+        '''Whether this bone contributes to mesh deformation (``use_deform``).'''
         return self._armature_data.bones[self.bone.name].use_deform
 
     @deform.setter
@@ -183,6 +228,7 @@ class RigBone():
 
     @property
     def use_local_location(self):
+        '''Whether the bone's location is in local rather than parent space.'''
         return self._armature_data.bones[self.bone.name].use_local_location
 
     @use_local_location.setter
@@ -191,6 +237,7 @@ class RigBone():
 
     @property
     def use_relative_parent(self):
+        '''Whether the bone uses relative parent transformation.'''
         return self._armature_data.bones[self.bone.name].use_relative_parent
 
     @use_relative_parent.setter
@@ -199,6 +246,7 @@ class RigBone():
 
     @property
     def use_scale_easing(self):
+        '''Whether scale easing is enabled for this bone.'''
         return self._armature_data.bones[self.bone.name].use_scale_easing
 
     @use_scale_easing.setter
@@ -207,11 +255,18 @@ class RigBone():
 
     @property
     def pose_matrix_cleaned(self):
+        '''Pose matrix with the bone's own location and rotation offset removed,
+        leaving only the contribution of parent transforms (read-only).
+        '''
         offset_m4 = (Matrix.Translation(self.bone.location) @ Quaternion(self.bone.rotation_quaternion).to_matrix().to_4x4())
         return self.bone.pose_matrix @ offset_m4.inverted()
 
     @property
     def localPosition(self):
+        '''Position of the bone in its parent's local space. Setting converts
+        the supplied world-space value back through the armature and pose
+        transforms and triggers a Blender data update.
+        '''
         return self.bone.location @ self.bone.channel_matrix.inverted()
 
     @localPosition.setter
@@ -221,6 +276,9 @@ class RigBone():
 
     @property
     def worldPosition(self):
+        '''World-space position of the bone's posed head. Equivalent to
+        :attr:`head_pose` with :attr:`world_space` enabled.
+        '''
         # w = self.world_space
         # self.world_space = True
         # res = self.head_pose
@@ -233,6 +291,12 @@ class RigBone():
 
     @property
     def worldOrientation(self):
+        '''World-space orientation of the bone as an ``XYZ`` Euler, read from
+        the BGE channel. The rotation mode is temporarily switched to
+        ``ROT_MODE_XYZ`` and restored afterwards.
+
+        :returns: :class:`mathutils.Euler` in ``XYZ`` order.
+        '''
         _mode = self.bone.rotation_mode
         self.bone.rotation_mode = ROT_MODE_XYZ
         res = self.bone.rotation_euler
@@ -249,10 +313,20 @@ class RigBone():
 
 
 class RigBones(dict):
+    '''Typed ``dict`` mapping bone names to :class:`RigBone` instances.
+
+    Inherits the full ``dict`` interface; no additional behaviour is added.
+    '''
     pass
 
 
 class Rig(GameObject):
+    '''High-level wrapper around a ``BL_ArmatureObject`` that builds a
+    :class:`RigBones` dictionary of :class:`RigBone` instances on construction
+    and exposes helpers for driving bone positions and orientations at runtime.
+
+    :param armature: The ``BL_ArmatureObject`` to wrap.
+    '''
 
     def __init__(
         self,
@@ -264,13 +338,27 @@ class Rig(GameObject):
             self.bones[bone.name] = RigBone(bone, armature)
 
     def set_bone_pos(self, bone: str, pos: Vector):
+        '''Set the world-space position of a bone by name.
+
+        :param bone: Name of the bone to move.
+        :param pos: Target world-space position.
+        '''
         self.bones[bone].worldPosition = pos
 
     def set_bone_rot(self, bone: str, rot: Quaternion):
+        '''Set the rotation of a bone by name, converting the supplied
+        quaternion into the bone's local pose space.
+
+        :param bone: Name of the bone to rotate.
+        :param rot: Target rotation as a :class:`mathutils.Quaternion`.
+        '''
         bone = self.game_object.channels[bone]
         bone.rotation_quaternion = bone.pose_matrix.inverted() @ Quaternion(rot)
 
     def visualize(self):
+        '''Draw a debug line from the posed head to the posed tail of every
+        bone in the rig using :func:`~uplogic.utils.visualize.draw_line`.
+        '''
         for b in self.bones.values():
             st = b.world_space
             b.world_space = True

@@ -83,8 +83,8 @@ class GameObj(dict):
         # self['worldPosition'] = Vec3(game_obj.worldPosition)
         # self['worldOrientation'] = Mat3(game_obj.worldOrientation)
         # self['worldScale'] = Vec3(game_obj.worldScale)
-        # self['worldLinearVelocity'] = Vec3(game_obj.worldLinearVelocity)
-        # self['worldAngularVelocity'] = Vec3(game_obj.worldAngularVelocity)
+        self['worldLinearVelocity'] = Vec3(game_obj.worldLinearVelocity)
+        self['worldAngularVelocity'] = Vec3(game_obj.worldAngularVelocity)
         self['worldTransform'] = Mat4(game_obj.worldTransform)
 
         # self['localPosition'] = Vec3(game_obj.localPosition)

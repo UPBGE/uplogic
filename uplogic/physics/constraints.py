@@ -19,6 +19,9 @@ CONSTRAINT_TYPES = {
     'conetwist': 3,
     'generic6dof': 4
 }
+'''Mapping of human-readable constraint type names to the integer IDs expected
+by ``bge.constraints.createConstraint()``.
+'''
 
 
 def create_constraint(
@@ -30,16 +33,29 @@ def create_constraint(
     linked_collision: bool = True,
     local: bool = True
 ) -> GameConstraint:
-    """Wrapper function for `bge.constraints.createConstraint()`. Creates a constraint
+    '''Wrapper for ``bge.constraints.createConstraint()``.
 
-    :param obj: Object the constraint will be applied to.
-    :param target: Target for the constraint.
-    :param constraint_type: Type of the constraint. One of `['point', 'hinge', 'angular', 'conetwist', 'generic6dof']`.
-    :param pivot: Point of application for the constraint.
-    :param limit: Limit movement of the object (Like a doorstop).
-    :param linked_collision: Enable/Disable collision between obj and target.
-    :param local: Use obj's local space.
-    """
+    Creates a physics constraint between ``obj`` and ``target``.  The
+    ``constraint_type`` may be given as an integer or as one of the string
+    keys defined in :data:`CONSTRAINT_TYPES` (``'point'``, ``'hinge'``,
+    ``'angular'``, ``'conetwist'``, ``'generic6dof'``).
+
+    :param obj: The game object the constraint is applied to.
+    :param target: The game object the constraint connects to.
+    :param constraint_type: Type of constraint as an integer ID or a string
+        key from :data:`CONSTRAINT_TYPES`.  Defaults to ``0`` (point
+        constraint).
+    :param pivot: World-space (or local-space when ``local=True``) point of
+        application for the constraint.
+    :param limit: Axis-limit values passed to ``createConstraint()`` (e.g.
+        acting as a doorstop on the constrained axes).
+    :param linked_collision: When ``True``, collision between ``obj`` and
+        ``target`` remains enabled.  Set to ``False`` to disable it.
+    :param local: When ``True`` the ``pivot`` coordinates are interpreted in
+        ``obj``'s local space.  When ``False`` they are converted from world
+        space by subtracting ``obj.worldPosition``.
+    :returns: The created ``KX_ConstraintWrapper`` instance.
+    '''
     if not local:
         pivot[0] -= obj.worldPosition.x
         pivot[1] -= obj.worldPosition.y
@@ -59,14 +75,33 @@ def create_constraint(
 
 
 def remove_constraint(constraint: GameConstraint) -> None:
-    """Wrapper function for `bge.constraints.removeConstraint()`. Creates a constraint
+    '''Wrapper for ``bge.constraints.removeConstraint()``.
 
-    :param constraint: The constraint to remove.
-    """
+    Removes an existing physics constraint from the simulation.
+
+    :param constraint: The ``KX_ConstraintWrapper`` to remove.
+    '''
     constraints.removeConstraint(constraint.getConstraintId())
 
 
 class TrackTo():
+    '''Continuously rotates a game object to face a target point or object.
+
+    On each frame the chosen rotation function (``xrot_to``, ``yrot_to``, or
+    ``zrot_to``) is called via the ``pre_draw`` callback to orient
+    ``game_object`` toward ``target``.  Setting the ``axis`` property
+    re-registers the update callback, so the axis can be changed at runtime.
+
+    :param game_object: The object to rotate.
+    :param target: The point or object to track.  A list or tuple is converted
+        to a ``Vector``; a ``Vector`` is used directly.
+    :param axis: Local axis to align toward the target.  ``0`` = X, ``1`` = Y,
+        ``2`` = Z (default).
+    :param front: Local axis index that should face the target (passed directly
+        to the underlying rotation helper).
+    :param factor: Tracking speed factor passed to the rotation helper as the
+        interpolation strength.
+    '''
 
     _deprecated = False
 
@@ -78,6 +113,21 @@ class TrackTo():
         front: int = 1,
         factor: float = 1
     ) -> None:
+        '''Initialise the TrackTo constraint and register the update callback.
+
+        Setting ``self.axis`` in the constructor is intentionally side-effecting:
+        it selects the rotation function and appends ``self.update`` to the
+        scene's ``pre_draw`` list.
+
+        :param game_object: The object to rotate each frame.
+        :param target: Point or object to track.  Lists and tuples are
+            converted to ``Vector``.
+        :param axis: Local axis index (0/1/2) to align toward the target.
+        :param front: Local axis that should point toward the target, passed
+            to the underlying rotation helper.
+        :param factor: Interpolation strength / tracking speed forwarded to
+            the rotation helper.
+        '''
         if self._deprecated:
             console.warning('ULTrackTo class will be renamed to "TrackTo" in future releases!')
         self._axis = None
@@ -90,10 +140,22 @@ class TrackTo():
 
     @property
     def target(self):
+        '''The world-space point or object currently being tracked.
+
+        :returns: A ``Vector`` representing the tracked position.
+        '''
         return self._target
 
     @target.setter
     def target(self, val):
+        '''Set the tracking target.
+
+        Converts a ``list`` or ``tuple`` to a ``Vector``.  Accepts a
+        ``Vector`` directly.  Logs an error and leaves the target unchanged
+        for any other type.
+
+        :param val: New target value — ``list``, ``tuple``, or ``Vector``.
+        '''
         if isinstance(val, list) or isinstance(val, tuple):
             self._target = Vector(val)
         elif isinstance(val, Vector):
@@ -103,10 +165,23 @@ class TrackTo():
 
     @property
     def axis(self):
+        '''The local axis index currently used to face the target.
+
+        :returns: Integer axis index (``0`` = X, ``1`` = Y, ``2`` = Z).
+        '''
         return self._axis
 
     @axis.setter
     def axis(self, val):
+        '''Set the tracking axis and (re-)register the ``update`` callback.
+
+        Selects ``xrot_to``, ``yrot_to``, or ``zrot_to`` based on ``val``
+        (``0``, ``1``, or ``2`` respectively).  Any other value disables
+        rotation.  Appends ``self.update`` to the current scene's ``pre_draw``
+        list as a side effect.
+
+        :param val: Axis index — ``0`` for X, ``1`` for Y, ``2`` for Z.
+        '''
         if val == 0:
             self.rotate_func = xrot_to
         elif val == 1:
@@ -119,34 +194,61 @@ class TrackTo():
         logic.getCurrentScene().pre_draw.append(self.update)
 
     def remove(self):
+        '''Unregister the per-frame update callback and stop tracking.
+        '''
         logic.getCurrentScene().pre_draw.remove(self.update)
 
     def update(self):
+        '''Per-frame update called via ``pre_draw``.
+
+        Calls the selected rotation function to orient ``game_object`` toward
+        ``target``.  Does nothing when no rotation function is set.
+        '''
         if self.rotate_func:
             self.rotate_func(self.game_object, self.target, self.front, self.speed)
 
 
 class ULTrackTo(TrackTo):
+    '''[DEPRECATED] Use :class:`TrackTo` instead.'''
     _deprecated = True
 
 
 class Spring():
-    """Spring Physics Constraint. The two objects connected by the string will
-    be pulled towards each other if the string is streched, optionally they will
-    be pushed apart when the spring is being compacted.
+    '''Spring physics constraint connecting two objects or points.
 
-    :param origin: First connection point of the spring.
-    :param target: Second connection point of the spring.
-    :param rigid_body_origin: Object to be influenced by the spring (optional).
-    :param rigid_body_target: Object to be influenced by the spring (optional).
-    :param stiffness: Amount the spring will bounce back.
-    :param max_force: Maximum force the spring will use.
-    :param use_push: Push the objects apart when spring is compressed.
-    :param use_breaking: Remove the constraint when spring is pulled too much.
-    :param break_threshold: Amount of strain the spring will endure.
-    :param curve: Set a curve object to fit the spring.
-    :param visualize: Enable a visual representation of the spring.
-    """
+    The two endpoints are pulled toward each other when the spring is
+    stretched beyond its rest ``distance``.  Optionally they are also pushed
+    apart when the spring is compressed (``use_push=True``).  The spring can
+    be set to break automatically when the force exceeds ``break_threshold``
+    (``use_breaking=True``).  A debug line can be drawn each frame
+    (``visualize=True``) and an optional curve object can be deformed to
+    follow the spring (``curve``).
+
+    :param origin: First connection point of the spring (``GameObject`` or
+        coordinate sequence).
+    :param target: Second connection point of the spring (``GameObject`` or
+        coordinate sequence).
+    :param rigid_body_origin: Object to receive impulses at the origin end.
+        Defaults to ``origin`` when not provided.
+    :param rigid_body_target: Object to receive impulses at the target end.
+        Defaults to ``target`` when not provided.
+    :param stiffness: Spring stiffness constant — scales the force produced
+        per unit of displacement from the rest distance.
+    :param max_force: Upper bound on the spring force per frame.  A value of
+        ``-1`` (default) disables the cap.
+    :param distance: Rest length of the spring.  Defaults to the current
+        distance between ``origin`` and ``target`` at construction time.
+    :param use_push: When ``True``, also apply a repulsive force when the
+        spring is compressed below the rest distance.
+    :param use_breaking: When ``True``, remove the spring from ``pre_draw``
+        once the computed force exceeds ``break_threshold``.
+    :param break_threshold: Force threshold at which the spring breaks when
+        ``use_breaking`` is enabled.
+    :param curve: Optional curve object whose control points are repositioned
+        each frame to follow the spring endpoints.
+    :param visualize: When ``True``, draw a debug line between the endpoints
+        each frame, coloured by the current force magnitude.
+    '''
 
     _deprecated = False
 
@@ -165,6 +267,31 @@ class Spring():
         curve: GameObject or None = None,
         visualize: bool = False
     ) -> None:
+        '''Initialise the spring, compute the rest distance, run an initial
+        update, and register the per-frame callback.
+
+        If ``use_breaking`` is ``True`` and the initial distance already
+        exceeds ``distance``, the spring is not registered and never fires.
+
+        :param origin: First endpoint — ``GameObject`` or coordinate sequence
+            converted to ``Vector``.
+        :param target: Second endpoint — ``GameObject`` or coordinate sequence
+            converted to ``Vector``.
+        :param rigid_body_origin: Rigid body to impulse at the origin end;
+            falls back to ``origin``.
+        :param rigid_body_target: Rigid body to impulse at the target end;
+            falls back to ``target``.
+        :param stiffness: Force-per-unit-displacement constant.
+        :param max_force: Maximum force magnitude.  ``-1`` means unlimited.
+        :param distance: Explicit rest length.  When ``None`` the distance
+            between ``origin`` and ``target`` at construction time is used.
+        :param use_push: Enable repulsive force when compressed.
+        :param use_breaking: Automatically remove the spring when force
+            exceeds ``break_threshold``.
+        :param break_threshold: Force at which the spring breaks.
+        :param curve: Curve object to deform along the spring each frame.
+        :param visualize: Draw a debug line between the endpoints each frame.
+        '''
         if self._deprecated:
             console.warning('ULSpring class will be renamed to "Spring" in future releases!')
         self.force = 0
@@ -191,14 +318,26 @@ class Spring():
 
     @property
     def points(self):
+        '''Current world positions of the two spring endpoints.
+
+        Read-only.  Returns ``[origin.worldPosition, target.worldPosition]``.
+
+        :returns: A list of two ``Vector`` objects.
+        '''
         return [self.origin.worldPosition, self.target.worldPosition]
-    
+
     @points.setter
     def points(self, val):
         console.debug("Attribute 'points' is read-only")
 
     @property
     def active(self):
+        '''Whether the spring is currently exerting a non-zero force.
+
+        Read-only.  ``True`` when ``self.force != 0``.
+
+        :returns: ``True`` if the spring force is non-zero, ``False`` otherwise.
+        '''
         return self.force != 0
 
     @active.setter
@@ -206,11 +345,28 @@ class Spring():
         console.debug("Attribute 'active' is read-only")
 
     def remove(self):
+        '''Unregister the per-frame update callback and deactivate the spring.
+        '''
         pre_draw = logic.getCurrentScene().pre_draw
         if self.update in pre_draw:
             pre_draw.remove(self.update)
 
     def update(self):
+        '''Per-frame update called via ``pre_draw``.
+
+        Computes ``force = (current_distance - rest_distance) * stiffness``,
+        then optionally clamps it to ``max_force`` and suppresses negative
+        (compressive) force when ``use_push`` is ``False``.  If
+        ``use_breaking`` is enabled and ``force`` exceeds ``break_threshold``
+        the spring removes itself and returns immediately.
+
+        When ``visualize`` is ``True``, a debug line is drawn between the
+        endpoints coloured by force magnitude.  When ``curve`` is set, its
+        control points are updated to match :attr:`points`.  Finally, impulses
+        proportional to ``force`` are applied to ``rigid_body_origin`` (toward
+        the target) and ``rigid_body_target`` (toward the origin), provided
+        each has a valid ``blenderObject`` with mesh data.
+        '''
         o = self.origin
         t = self.target
         force = (o.getDistanceTo(t) - self.distance) * self.stiffness
@@ -242,4 +398,5 @@ class Spring():
 
 
 class ULSpring(Spring):
+    '''[DEPRECATED] Use :class:`Spring` instead.'''
     _deprecated = True

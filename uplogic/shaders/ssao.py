@@ -185,8 +185,27 @@ void main(void)
 
 
 class SSAO(Filter2D):
+    '''Screen-Space Ambient Occlusion (SSAO) post-processing filter.
+
+    Uses a spiral sampling method to estimate per-pixel occlusion from the
+    depth buffer. Samples are Gaussian-weighted and blended with luminance
+    before being mixed with the rendered frame according to ``power``.
+
+    Camera uniforms (``znear``, ``zfar``) are read from the active camera on
+    construction and refreshed every tick via :meth:`update`.
+    '''
 
     def __init__(self, power=1.0, idx: int = None) -> None:
+        '''Initialise the SSAO filter.
+
+        Reads ``cam.near`` and ``cam.far`` from the currently active camera
+        and registers them as shader uniforms.
+
+        :param power: AO blend intensity. ``0`` leaves the frame unchanged;
+            ``1`` applies full ambient occlusion darkening.
+        :param idx: Filter pass index. ``None`` assigns the next available
+            index automatically.
+        '''
         cam = logic.getCurrentScene().active_camera
         self.uniforms = {
 			'power': float(power),
@@ -201,6 +220,10 @@ class SSAO(Filter2D):
 
     @property
     def power(self):
+        '''AO blend strength (``float``).
+
+        ``0`` disables occlusion; ``1`` applies full darkening.
+        '''
         return self.uniforms['power']
 
     @power.setter
@@ -208,6 +231,12 @@ class SSAO(Filter2D):
         self.uniforms['power'] = val
 
     def update(self):
+        '''Refresh camera uniforms and upload them to the shader.
+
+        Reads ``znear`` and ``zfar`` from the currently active camera, stores
+        them in :attr:`uniforms`, then delegates to the parent
+        :meth:`Filter2D.update` to upload all uniforms to the GPU.
+        '''
         super().update()
         cam = logic.getCurrentScene().active_camera
         self.uniforms['znear'] = cam.near

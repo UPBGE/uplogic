@@ -1,3 +1,5 @@
+'''Game object utilities for uplogic: rotation helpers, curve creation and manipulation, a ``GameObject`` wrapper base class, and object-spawning helpers.
+'''
 from bge import logic
 from bge.types import KX_GameObject
 import bpy
@@ -25,6 +27,19 @@ def xrot_to(
     front_axis_code=1,
     factor=1
 ):
+    '''Rotate *rotating_object* around its local X-axis to face *target_pos*.
+
+    Projects the direction to *target_pos* onto the object's local Y-Z plane,
+    then computes the signed angle between that projection and the configured
+    front direction and applies it as a local-space rotation.
+
+    :param rotating_object: The ``KX_GameObject`` to rotate.
+    :param target_pos: World-space position the object should face.
+    :param front_axis_code: Integer code selecting the front axis direction
+        (matches constants in ``FRONT_AXIS_VECTOR_SIGNED``). Default is ``1``.
+    :param factor: Fraction of the computed angle to apply each call,
+        allowing gradual interpolation. Default is ``1`` (instant).
+    '''
     local = get_local(rotating_object, target_pos)
     front = Vector((1, 0)) if front_axis_code in [1, 4] else Vector((0, 1))
     if front_axis_code > 2:
@@ -42,6 +57,19 @@ def yrot_to(
     front_axis_code=1,
     factor=1
 ):
+    '''Rotate *rotating_object* around its local Y-axis to face *target_pos*.
+
+    Projects the direction to *target_pos* onto the object's local X-Z plane,
+    then computes the signed angle between that projection and the configured
+    front direction and applies it as a local-space rotation.
+
+    :param rotating_object: The ``KX_GameObject`` to rotate.
+    :param target_pos: World-space position the object should face.
+    :param front_axis_code: Integer code selecting the front axis direction
+        (matches constants in ``FRONT_AXIS_VECTOR_SIGNED``). Default is ``1``.
+    :param factor: Fraction of the computed angle to apply each call,
+        allowing gradual interpolation. Default is ``1`` (instant).
+    '''
     local = get_local(rotating_object, target_pos)
     front = Vector((1, 0)) if front_axis_code in [0, 3] else Vector((0, 1))
     if front_axis_code > 2:
@@ -59,6 +87,19 @@ def zrot_to(
     front_axis_code=1,
     factor=1
 ):
+    '''Rotate *rotating_object* around its local Z-axis to face *target_pos*.
+
+    Projects the direction to *target_pos* onto the object's local X-Y plane,
+    then computes the signed angle between that projection and the configured
+    front direction and applies it as a local-space rotation.
+
+    :param rotating_object: The ``KX_GameObject`` to rotate.
+    :param target_pos: World-space position the object should face.
+    :param front_axis_code: Integer code selecting the front axis direction
+        (matches constants in ``FRONT_AXIS_VECTOR_SIGNED``). Default is ``1``.
+    :param factor: Fraction of the computed angle to apply each call,
+        allowing gradual interpolation. Default is ``1`` (instant).
+    '''
     local = get_local(rotating_object, target_pos)
     front = Vector((1, 0)) if front_axis_code in [0, 3] else Vector((0, 1))
     if front_axis_code > 2:
@@ -77,14 +118,22 @@ def rotate_to(
     front_axis: int = 1,
     factor:float = 1
 ):
-    """Rotate an object around a local axis towards a point
-    
-    :param object:
-    :param target:
-    :param rotation_axis:
-    :param front_axis:
-    :param factor:
-    """
+    '''Rotate an object around a chosen local axis to face a target point.
+
+    Dispatches to :func:`xrot_to`, :func:`yrot_to`, or :func:`zrot_to`
+    depending on *rotation_axis*. When *rotation_axis* equals *front_axis*
+    (after normalising negative-direction codes) the function is a no-op, as
+    rotating around the axis that already points at the target is undefined.
+
+    :param object: The ``KX_GameObject`` to rotate.
+    :param target: World-space position the object should face.
+    :param rotation_axis: Local axis around which to rotate: ``0`` = X,
+        ``1`` = Y, ``2`` = Z. Default is ``2``.
+    :param front_axis: Integer code identifying the object's current forward
+        direction (matches ``FRONT_AXIS_VECTOR_SIGNED``). Default is ``1``.
+    :param factor: Fraction of the computed angle to apply each call.
+        Default is ``1`` (instant).
+    '''
     front = front_axis
     target = Vector(target)
     if front > 2:
@@ -115,6 +164,20 @@ def rotate_to(
 
 
 def move_to(game_object: KX_GameObject, target: Vector, speed: float, stop_distance=0):
+    '''Move *game_object* toward *target* by *speed* units per tick.
+
+    When the remaining distance is less than ``speed + stop_distance`` the
+    object is snapped to the offset position (``target + direction *
+    stop_distance``) and the function returns ``True`` to signal arrival.
+
+    :param game_object: The ``KX_GameObject`` to move.
+    :param target: Destination world-space position as a ``Vector``.
+    :param speed: Distance to travel per logic tick.
+    :param stop_distance: Minimum distance at which the object is considered
+        to have arrived and is snapped into place. Default is ``0``.
+    :returns: ``True`` when the object has reached (or is within
+        *stop_distance* of) *target*, otherwise ``None``.
+    '''
     distance = (game_object.worldPosition - target)
     direction = distance.normalized()
     if distance.length < speed + stop_distance:
@@ -132,6 +195,27 @@ def _move_to(
     distance,
     snap=True
 ):
+    '''Internal movement implementation supporting both dynamic and static objects.
+
+    Not intended for direct use; call :func:`move_to` instead.
+
+    For dynamic objects the horizontal velocity is set directly on the physics
+    body while preserving the current Z velocity. For static objects the
+    world position is incremented by a frame-time-scaled displacement.
+
+    :param moving_object: The ``KX_GameObject`` to move.
+    :param destination_point: Target world-space ``Vector``.
+    :param speed: Movement speed in units per second.
+    :param time_per_frame: Elapsed time for the current frame (delta time).
+    :param dynamic: When ``True``, moves by setting ``worldLinearVelocity``
+        (physics body); when ``False``, moves by directly updating
+        ``worldPosition``.
+    :param distance: Arrival threshold; the object stops when it is within
+        this distance of *destination_point*.
+    :param snap: When ``True`` and the object has arrived, snaps it exactly
+        onto *destination_point*. Default is ``True``.
+    :returns: ``True`` when the object has arrived, ``False`` otherwise.
+    '''
     if dynamic:
         direction = (
             destination_point -
@@ -165,6 +249,19 @@ def _move_to(
 
 
 def controller_brick_status(owner, controller_name):
+    '''Evaluate the logic state of a named BGE controller brick.
+
+    Reads the controller type (AND / OR / NAND / NOR / XOR / XNOR) from the
+    Blender game data and applies the corresponding boolean reduction over the
+    ``positive`` states of all connected sensors.
+
+    :param owner: The ``KX_GameObject`` that owns the controller.
+    :param controller_name: String name of the controller brick to evaluate.
+    :returns: ``True`` if the controller's logic condition is satisfied,
+        ``False`` otherwise.
+    :raises LogicControllerNotSupportedError: If the controller type is not
+        one of the six supported logic types.
+    '''
     cont = owner.controllers[controller_name]
     state = (
         owner
@@ -201,29 +298,55 @@ def controller_brick_status(owner, controller_name):
 
 
 class ControllerBrick(tuple):
+    '''Named-accessor wrapper around a controller result tuple.
+
+    Inherits from ``tuple`` so the underlying data can be iterated or indexed
+    like a plain sequence. The four positional elements are exposed as
+    read-only properties for convenient attribute access.
+
+    Element layout: ``(brick, positive, sensors, actuators)``.
+    '''
 
     @property
     def brick(self):
+        '''The raw BGE controller object (``self[0]``).'''
         return self[0]
 
     @property
     def name(self):
+        '''Name of the controller brick (``self[0].name``).'''
         return self[0].name
 
     @property
     def positive(self):
+        '''Evaluated boolean logic state of the controller (``self[1]``).'''
         return self[1]
 
     @property
     def sensors(self):
+        '''List of sensors connected to the controller (``self[2]``).'''
         return self[2]
 
     @property
     def actuators(self):
+        '''List of actuators connected to the controller (``self[3]``).'''
         return self[3]
 
 
 def controller_brick(owner, controller_name):
+    '''Return a :class:`ControllerBrick` for a named BGE controller.
+
+    Like :func:`controller_brick_status` but packages the result together with
+    the controller object and its sensor / actuator lists into a
+    :class:`ControllerBrick` tuple for structured access.
+
+    :param owner: The ``KX_GameObject`` that owns the controller.
+    :param controller_name: String name of the controller brick to evaluate.
+    :returns: A :class:`ControllerBrick` containing
+        ``(controller, evaluated_state, sensors, actuators)``.
+    :raises LogicControllerNotSupportedError: If the controller type is not
+        one of the six supported logic types.
+    '''
     cont = owner.controllers[controller_name]
     state = (
         owner
@@ -266,17 +389,26 @@ def create_curve(
     material: str or Material = None,
     collection: str = None
 ) -> KX_GameObject:
-    """Create a `KX_GameObject` containing a `bpy.types.Curve` object.
+    '''Create a ``KX_GameObject`` containing a ``bpy.types.Curve`` object.
 
-    :param name: Name of the new `KX_GameObject`.
-    :param bevel_depth: Define the "thickness" of the curve. This will add
-    geometry along the spline.
-    :param dimensions: Set the coordinate space in which to calculate the
-    curve.
-    :param material: The material to use for bevel geometry.
-    :param collection: The collection to which to add the curve. Leave at
-    `None` to use scene collection.
-    """
+    A new Blender curve data-block and object are created, optionally given a
+    material and linked into *collection*, then converted to a live
+    ``KX_GameObject`` via ``logic.getCurrentScene().convertBlenderObject``.
+
+    :param name: Name for both the curve data-block and the new object.
+    :param bevel_depth: Diameter of the bevel geometry added along the spline.
+        ``0.0`` produces a bare spline with no mesh thickness. Default is
+        ``0.0``.
+    :param dimensions: Coordinate space for the curve: ``2`` for 2-D or ``3``
+        for 3-D. Default is ``3``.
+    :param material: Material to assign to the bevel geometry. Accepts a
+        material name string or a ``bpy.types.Material`` instance. Pass
+        ``None`` to leave the curve unshaded. Default is ``None``.
+    :param collection: Collection into which the new object is linked. Accepts
+        a collection name string. Pass ``None`` to link into the active scene
+        collection. Default is ``None``.
+    :returns: The newly created ``KX_GameObject``.
+    '''
     bcurve = bpy.data.curves.new(name, 'CURVE')
     bcurve.bevel_depth = bevel_depth
     bcurve.dimensions = f'{dimensions}D'
@@ -302,11 +434,22 @@ def set_curve_points(
     loop: bool = False,
     type: str = 'POLY'
 ) -> None:
-    """Set the curve points of a `KX_GameObject` containing a `bpy.types.Curve` object.
+    '''Replace all splines on *curve* with a single new spline built from *points*.
 
-    :param curve: `KX_GameObject`
-    :param points: A list of points to use for the curve.
-    """
+    All existing splines are removed before the new one is added. Each point
+    in *points* is converted from world space into the curve's local space by
+    subtracting the curve's current ``worldPosition``.
+
+    :param curve: ``KX_GameObject`` whose underlying ``bpy.types.Curve`` data
+        will be modified.
+    :param points: Sequence of 3-component positions (world space) that define
+        the new spline.
+    :param loop: When ``True``, the spline is closed (cyclic). Default is
+        ``False``.
+    :param type: Spline interpolation type passed to
+        ``bpy.types.Curve.splines.new()``, e.g. ``'POLY'``, ``'BEZIER'``, or
+        ``'NURBS'``. Default is ``'POLY'``.
+    '''
     bcurve = curve.blenderObject.data
     for spline in bcurve.splines:
         bcurve.splines.remove(spline)
@@ -324,36 +467,62 @@ def set_curve_points(
 
 
 class GameObject:
+    '''Thin wrapper around a ``KX_GameObject`` exposing common transform and
+    hierarchy attributes as plain Python properties.
+
+    All property reads and writes delegate to the underlying
+    ``self.game_object`` so that this class can be used as a drop-in
+    substitute wherever a ``KX_GameObject`` is expected via composition.
+
+    :param game_object: The ``KX_GameObject`` instance to wrap.
+    '''
 
     def __init__(self, game_object: KX_GameObject) -> None:
+        '''Initialise the wrapper and cache the Blender mesh data reference.
+
+        :param game_object: The ``KX_GameObject`` to wrap.
+        '''
         self.game_object: KX_GameObject = game_object
         self.data = self.game_object.blenderObject.data
 
     @property
     def blenderObject(self) -> Object:
+        '''The underlying ``bpy.types.Object`` linked to this game object.'''
         return self.game_object.blenderObject
 
     @property
     def parent(self) -> KX_GameObject:
+        '''Parent ``KX_GameObject`` in the scene hierarchy, or ``None``.'''
         return self.game_object.parent
 
     @parent.setter
     def parent(self, val: KX_GameObject):
+        '''Set the parent by calling ``setParent`` on the wrapped object.
+
+        :param val: New parent ``KX_GameObject``.
+        '''
         self.game_object.setParent(val)
 
     def set_parent(self, parent):
+        '''Set the parent ``KX_GameObject`` explicitly.
+
+        :param parent: New parent ``KX_GameObject``.
+        '''
         self.game_object.setParent(parent)
 
     @property
     def children(self):
+        '''Direct children of this game object.'''
         return self.game_object.children
 
     @property
     def children_recursive(self):
+        '''All descendants of this game object (recursive).'''
         return self.game_object.childrenRecursive
 
     @property
     def mass(self):
+        '''Physics mass of the object. Returns ``0`` if not applicable.'''
         return getattr(self.game_object, 'mass', 0)
 
     @mass.setter
@@ -362,6 +531,7 @@ class GameObject:
 
     @property
     def worldPosition(self) -> Vector:
+        '''World-space position as a ``Vector``.'''
         return self.game_object.worldPosition
 
     @worldPosition.setter
@@ -370,6 +540,7 @@ class GameObject:
 
     @property
     def localPosition(self) -> Vector:
+        '''Position relative to the parent object as a ``Vector``.'''
         return self.game_object.localPosition
 
     @localPosition.setter
@@ -378,6 +549,7 @@ class GameObject:
 
     @property
     def worldOrientation(self) -> Matrix:
+        '''World-space orientation as a 3x3 rotation ``Matrix``.'''
         return self.game_object.worldOrientation
 
     @worldOrientation.setter
@@ -386,6 +558,7 @@ class GameObject:
 
     @property
     def localOrientation(self) -> Matrix:
+        '''Orientation relative to the parent as a 3x3 rotation ``Matrix``.'''
         return self.game_object.localOrientation
 
     @localOrientation.setter
@@ -394,6 +567,7 @@ class GameObject:
 
     @property
     def worldScale(self) -> Vector:
+        '''World-space scale as a ``Vector``.'''
         return self.game_object.worldScale
 
     @worldScale.setter
@@ -402,6 +576,7 @@ class GameObject:
 
     @property
     def localScale(self) -> Vector:
+        '''Scale relative to the parent as a ``Vector``.'''
         return self.game_object.localScale
 
     @localScale.setter
@@ -410,6 +585,7 @@ class GameObject:
 
     @property
     def worldLinearVelocity(self) -> Vector:
+        '''Linear velocity in world space as a ``Vector``.'''
         return self.game_object.worldLinearVelocity
 
     @worldLinearVelocity.setter
@@ -418,6 +594,7 @@ class GameObject:
 
     @property
     def localLinearVelocity(self) -> Vector:
+        '''Linear velocity in local (object) space as a ``Vector``.'''
         return self.game_object.localLinearVelocity
 
     @localLinearVelocity.setter
@@ -426,6 +603,7 @@ class GameObject:
 
     @property
     def worldAngularVelocity(self) -> Vector:
+        '''Angular velocity in world space as a ``Vector``.'''
         return self.game_object.worldAngularVelocity
 
     @worldAngularVelocity.setter
@@ -434,6 +612,7 @@ class GameObject:
 
     @property
     def localAngularVelocity(self) -> Vector:
+        '''Angular velocity in local (object) space as a ``Vector``.'''
         return self.game_object.localAngularVelocity
 
     @localAngularVelocity.setter
@@ -442,22 +621,52 @@ class GameObject:
 
     @property
     def worldTransform(self) -> Matrix:
+        '''World-space 4x4 transform ``Matrix`` (position + orientation + scale).'''
         return self.game_object.worldTransform
 
     @worldTransform.setter
     def worldTransform(self, val: Matrix):
         self.game_object.worldTransform = val
-    
+
     def move_to(self, target, speed):
+        '''Move this object toward *target* by *speed* per tick.
+
+        Delegates to the module-level :func:`move_to` function.
+
+        :param target: Destination world-space position as a ``Vector``.
+        :param speed: Distance to travel per logic tick.
+        :returns: ``True`` when the object has arrived at *target*.
+        '''
         return move_to(self, target, speed)
 
 
 def get_curve_length(curve: KX_GameObject):
+    '''Return the total arc length of all splines on *curve*.
+
+    Evaluates the dependency graph to obtain the final (modifier-applied) mesh
+    data and sums ``calc_length()`` over every spline.
+
+    :param curve: ``KX_GameObject`` whose underlying ``bpy.types.Curve`` data
+        is measured.
+    :returns: Total arc length as a ``float``.
+    '''
     depsgraph = bpy.context.evaluated_depsgraph_get()
     return sum(s.calc_length() for s in curve.blenderObject.evaluated_get(depsgraph).data.splines)
 
 
 def evaluate_curve(curve: KX_GameObject, factor: float = .5):
+    '''Return the world-space position on *curve* at the given *factor*.
+
+    Creates a temporary empty object, attaches a ``FOLLOW_PATH`` constraint
+    targeting *curve*, advances ``eval_time`` to ``path_duration * factor``,
+    forces a view-layer update, reads the resulting local matrix, then cleans
+    up the temporary object and restores the original ``eval_time``.
+
+    :param curve: ``KX_GameObject`` whose path is evaluated.
+    :param factor: Normalised position along the curve: ``0.0`` = start,
+        ``1.0`` = end. Default is ``0.5``.
+    :returns: World-space ``Vector`` at the requested position.
+    '''
     eval_obj = bpy.data.objects.new(f'{curve.name}_eval_obj', object_data=None)
     bpy.context.collection.objects.link(eval_obj)
     bobj = curve.blenderObject
@@ -474,17 +683,30 @@ def evaluate_curve(curve: KX_GameObject, factor: float = .5):
 
 
 class Curve(GameObject):
-    """Wrapper class for creating and handling curves more easily.
+    '''High-level wrapper for creating and manipulating BGE curve objects.
 
-    :param name: Name of this curve object.
-    :param bevel_depth: Define the "thickness" of the curve. This will add
-    geometry along the spline.
-    :param dimensions: Set the coordinate space in which to calculate the
-    curve.
-    :param material: The material to use for bevel geometry.
-    :param collection: The collection to which to add the curve. Leave at
-    `None` to use scene collection.
-    """
+    When *name* is a string a new ``bpy.types.Curve`` object is created via
+    :func:`create_curve` and converted to a ``KX_GameObject``. When *name* is
+    already a ``KX_GameObject`` the existing object is wrapped instead.
+
+    :param name: Name string for a new curve, or an existing ``KX_GameObject``
+        to wrap.
+    :param bevel_depth: Diameter of the bevel geometry along the spline.
+        Default is ``0.0``.
+    :param dimensions: Coordinate space: ``2`` for 2-D or ``3`` for 3-D.
+        Default is ``3``.
+    :param material: Material for bevel geometry — a name string or
+        ``bpy.types.Material`` instance. Default is ``None``.
+    :param collection: Collection name to link the new object into. Default is
+        ``None`` (active scene collection).
+    :param loop: When ``True`` the spline is closed (cyclic). Default is
+        ``False``.
+    :param type: Spline type, e.g. ``'POLY'``, ``'BEZIER'``, ``'NURBS'``.
+        Default is ``'POLY'``.
+    :param use_evaluate: When ``True``, the evaluation helper object is kept
+        alive between calls to :meth:`evaluate` rather than being recreated
+        each time. Default is ``False``.
+    '''
 
     _deprecated = False
 
@@ -530,6 +752,11 @@ class Curve(GameObject):
 
     @property
     def eval_obj(self):
+        '''Persistent evaluation helper object used by :meth:`evaluate`.
+
+        Creates and links a new empty with a ``FOLLOW_PATH`` constraint the
+        first time it is accessed; subsequent calls return the cached object.
+        '''
         eval_obj = bpy.data.objects.get(f'{self.name}_eval_obj', None)
         if eval_obj is None:
             eval_obj = bpy.data.objects.new(f'{self.name}_eval_obj', object_data=None)
@@ -540,6 +767,7 @@ class Curve(GameObject):
         return eval_obj
 
     def _create_dots(self):
+        '''Build a UV-sphere array object that renders dots along the curve.'''
         bpy.context.scene.cursor.location = (0, 0, 0)
         self.data.twist_mode = 'Z_UP'
         bpy.ops.mesh.primitive_uv_sphere_add(segments=16, ring_count=8, radius=self.bevel_depth)
@@ -551,6 +779,7 @@ class Curve(GameObject):
         self._make_array()
 
     def _create_dashes(self):
+        '''Build a cylinder array object that renders dashes along the curve.'''
         bpy.context.scene.cursor.location = (0, 0, 0)
         self.data.twist_mode = 'Z_UP'
         bpy.ops.mesh.primitive_cylinder_add(vertices=8, radius=self.bevel_depth, rotation=(0, math.pi * .5, 0), depth=self.dash_length)
@@ -562,12 +791,14 @@ class Curve(GameObject):
         self._make_array()
 
     def _remove_style(self):
+        '''Remove the current array style object and restore plain bevel rendering.'''
         if self._array_object is not None:
             bpy.data.objects.remove(self._array_object)
         self._array_object = None
         self.data.bevel_depth = self.bevel_depth
 
     def _make_array(self):
+        '''Attach ``ARRAY`` and ``CURVE`` modifiers to the active style object.'''
         self._remove_style()
         dot = bpy.context.object
         if self.material:
@@ -585,6 +816,7 @@ class Curve(GameObject):
         self._array_object = dot
 
     def _restyle(self):
+        '''Rebuild the style geometry to match the current :attr:`style` value.'''
         if self.style == "dots":
             self._create_dots()
         if self.style == "dashes":
@@ -595,6 +827,7 @@ class Curve(GameObject):
 
     @property
     def style_spacing(self):
+        '''Gap between repeated style elements (dots or dashes) along the curve.'''
         return self._style_spacing
 
     @style_spacing.setter
@@ -604,6 +837,7 @@ class Curve(GameObject):
 
     @property
     def style(self):
+        '''Rendering style of the curve: ``'line'``, ``'dots'``, or ``'dashes'``.'''
         return self._style
 
     @style.setter
@@ -615,6 +849,7 @@ class Curve(GameObject):
 
     @property
     def dash_length(self):
+        '''Length of each dash element when :attr:`style` is ``'dashes'``.'''
         return self._dash_length
 
     @dash_length.setter
@@ -624,6 +859,7 @@ class Curve(GameObject):
 
     @property
     def material(self):
+        '''First material slot of the curve's Blender object, or ``None``.'''
         if len(self.blenderObject.data.materials):
             return self.blenderObject.data.materials[0]
 
@@ -637,7 +873,7 @@ class Curve(GameObject):
 
     @property
     def name(self):
-        """Name of the game object (Read-Only)."""
+        '''Name of the underlying game object (read-only).'''
         return self.game_object.name
 
     @name.setter
@@ -646,7 +882,7 @@ class Curve(GameObject):
 
     @property
     def loop(self):
-        """Name of the game object (Read-Only)."""
+        '''Whether the curve spline is closed (cyclic).'''
         return self._loop
 
     @loop.setter
@@ -656,7 +892,7 @@ class Curve(GameObject):
 
     @property
     def points(self):
-        """Points of the curve in global space."""
+        '''Control points of the first spline in global space.'''
         splines = self.data.splines
         return (
             splines[0].bezier_points if len(splines) > 0 else []
@@ -671,7 +907,7 @@ class Curve(GameObject):
 
     @property
     def bevel_depth(self):
-        """Thickness of the curve geometry as diameter."""
+        '''Thickness of the curve geometry as a diameter value.'''
         return self._bevel_depth
 
     @bevel_depth.setter
@@ -687,7 +923,7 @@ class Curve(GameObject):
 
     @property
     def length(self):
-        '''Length of the curve (read-only).'''
+        '''Total arc length of the curve (read-only).'''
         depsgraph = bpy.context.evaluated_depsgraph_get()
         return sum(s.calc_length() for s in self.blenderObject.evaluated_get(depsgraph).data.splines)
 
@@ -697,7 +933,7 @@ class Curve(GameObject):
 
     @property
     def path_duration(self):
-        '''The number of frames that are needed to traverse the path, defining the maximum value for the "Evaluation Time" setting.'''
+        '''Number of frames required to traverse the full path (``path_duration``).'''
         return self.blenderObject.data.path_duration
 
     @path_duration.setter
@@ -706,6 +942,7 @@ class Curve(GameObject):
 
     @property
     def resolution(self):
+        '''Curve resolution (``resolution_u``) controlling spline subdivision.'''
         return self.data.resolution_u
 
     @resolution.setter
@@ -714,6 +951,7 @@ class Curve(GameObject):
 
     @property
     def time(self):
+        '''Current evaluation time (``eval_time``) along the curve path.'''
         return self.data.eval_time
 
     @time.setter
@@ -721,9 +959,17 @@ class Curve(GameObject):
         self.data.eval_time = val
 
     def evaluate(self, factor) -> Matrix:
-        '''Get the world space coordinates on the curve at a given progress.
-        
-        :param float factor: Relative position on the curve from 0 (start) to 1 (end).
+        '''Return the world-space matrix on the curve at the given progress.
+
+        Temporarily sets ``eval_time`` to ``path_duration * factor``, forces a
+        view-layer update, reads the local matrix of the evaluation helper
+        object, then restores the original ``eval_time``. The helper object is
+        removed unless :attr:`use_evaluate` is ``True``.
+
+        :param factor: Normalised position along the curve: ``0.0`` = start,
+            ``1.0`` = end.
+        :returns: Local-space ``Matrix`` of the evaluation helper at the
+            requested position.
         '''
         time = self.blenderObject.data.eval_time
         eval_obj = self.eval_obj
@@ -737,15 +983,30 @@ class Curve(GameObject):
 
 
 class ULCurve(Curve):
+    '''[DEPRECATED] Use :class:`Curve` instead.'''
     _deprecated = True
 
 
 class Mesh():
+    '''Minimal wrapper around a ``bpy.types.Mesh`` for direct mesh data manipulation.
+
+    :param mesh: The ``bpy.types.Mesh`` data-block to wrap.
+    '''
 
     def __init__(self, mesh: bpy.types.Mesh):
         self.blenderMesh: bpy.types.Mesh = mesh
 
     def applyRotation(self, rotation, local=False):
+        '''Transform the mesh vertex data by *rotation*.
+
+        Converts *rotation* (a 3-component Euler angle sequence) to a 4x4
+        matrix and passes it to ``bpy.types.Mesh.transform`` to permanently
+        rotate the mesh geometry.
+
+        :param rotation: Sequence of three Euler angles (radians) describing
+            the rotation to apply.
+        :param local: Unused; reserved for future local-space support.
+        '''
         rot = Euler(rotation)
         self.blenderMesh.transform(
             rot.to_matrix().to_4x4()
@@ -753,6 +1014,26 @@ class Mesh():
 
 
 def add_object(name: str | KX_GameObject, ref: str | KX_GameObject = None, time = 0, dupli = False):
+    '''Copy a Blender object and add it to the current BGE scene.
+
+    The original object is looked up by name in ``bpy.data.objects``, a copy
+    is made, the copy is linked into the scene collection, and then converted
+    to a ``KX_GameObject``. Optionally the new object's world transform is
+    matched to a reference object and/or its lifetime is capped.
+
+    :param name: Name of the Blender object to copy, or an existing
+        ``KX_GameObject`` whose name is used.
+    :param ref: Optional reference object whose world transform is applied to
+        the new object. Accepts a name string or a ``KX_GameObject``.
+        Default is ``None``.
+    :param time: If greater than ``0``, schedules ``endObject`` to be called
+        after *time* seconds. Default is ``0``.
+    :param dupli: When ``True``, the mesh data is also copied (full duplicate).
+        When ``False``, the copy shares the original's mesh. Default is
+        ``False``.
+    :returns: The newly created ``KX_GameObject``, or ``None`` if the source
+        object was not found.
+    '''
     scene = logic.getCurrentScene()
     if isinstance(name, KX_GameObject):
         name = name.name
@@ -777,6 +1058,22 @@ def add_object(name: str | KX_GameObject, ref: str | KX_GameObject = None, time 
 
 
 def add_object_copy(name: str | KX_GameObject, position=Vector((0, 0, 0)), rotation=Vector((0, 0, 0)), scale=Vector((1, 1, 1))):
+    '''Copy a Blender object and place it at an explicit world transform.
+
+    Like :func:`add_object` but sets *position*, *rotation*, and *scale*
+    directly on the new ``KX_GameObject`` instead of aligning to a reference
+    object. The mesh data is shared with the original (no full duplicate).
+
+    :param name: Name of the Blender object to copy.
+    :param position: World-space position for the new object. Default is the
+        origin ``(0, 0, 0)``.
+    :param rotation: World-space orientation (Euler angles or matrix) for the
+        new object. Default is no rotation ``(0, 0, 0)``.
+    :param scale: World-space scale for the new object. Default is uniform
+        scale ``(1, 1, 1)``.
+    :returns: The newly created ``KX_GameObject``, or ``None`` if the source
+        object was not found.
+    '''
     orig_ob = bpy.data.objects.get(name, name)
     if orig_ob is None:
         return
@@ -792,6 +1089,22 @@ def add_object_copy(name: str | KX_GameObject, position=Vector((0, 0, 0)), rotat
 
 
 def add_object_from_mesh(name: str | KX_GameObject, position=Vector((0, 0, 0)), rotation=Vector((0, 0, 0)), scale=Vector((1, 1, 1))):
+    '''Create a new Blender object that shares the named object's mesh data.
+
+    Rather than copying the full object, a brand-new ``bpy.types.Object`` is
+    created with the original's mesh data-block, giving a lightweight instance
+    that does not duplicate mesh memory.
+
+    :param name: Name of the source Blender object whose mesh data is reused.
+    :param position: World-space position for the new object. Default is the
+        origin ``(0, 0, 0)``.
+    :param rotation: World-space orientation (Euler angles or matrix) for the
+        new object. Default is no rotation ``(0, 0, 0)``.
+    :param scale: World-space scale for the new object. Default is uniform
+        scale ``(1, 1, 1)``.
+    :returns: The newly created ``KX_GameObject``, or ``None`` if the source
+        object was not found.
+    '''
     orig_ob = bpy.data.objects.get(name, None)
     if orig_ob is None:
         return

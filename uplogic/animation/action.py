@@ -1,4 +1,8 @@
-'''yes
+'''Action playback classes for uplogic.
+
+Wraps the BGE ``playAction`` / ``stopAction`` API into the :class:`Action`
+class, which integrates with the :class:`~uplogic.animation.actionsystem.ActionSystem`
+for automatic layer management and per-frame callbacks.
 '''
 
 from bge import logic
@@ -20,14 +24,19 @@ PLAY_MODES = {
     'pingpong': logic.KX_ACTION_MODE_PING_PONG,
     'loop': logic.KX_ACTION_MODE_LOOP
 }
-"""Available play modes of [`"play"`, `"pingpong"`, `"loop"`]"""
+'''Mapping from string play-mode names to BGE constants.
 
+Valid keys: ``"play"``, ``"pingpong"``, ``"loop"``.
+'''
 
 BLEND_MODES = {
     'blend': logic.KX_ACTION_BLEND_BLEND,
     'add': logic.KX_ACTION_BLEND_ADD
 }
-"""Available blending modes of [`"blend"`, `"add"`]"""
+'''Mapping from string blend-mode names to BGE constants.
+
+Valid keys: ``"blend"``, ``"add"``.
+'''
 
 
 ACTION_STARTED = 0
@@ -36,14 +45,17 @@ ACTION_FINISHED = 2
 
 
 class ActionCallback:
-    """
-    A callback that is bound to a certain frame of an animation.
+    '''Callback bound to a specific frame of an :class:`Action`.
 
-    :param Action action: Description
-    :param Callable callback: Description
-    :param float frame: Description
-    :param list args: Description
-    """
+    When the action's playhead passes :attr:`frame` (in either direction) the
+    callback is invoked with the supplied arguments. It resets automatically
+    so it fires again on subsequent passes.
+
+    :param action: The :class:`Action` to attach to.
+    :param callback: Callable invoked when the frame is passed.
+    :param frame: Frame number that triggers the callback.
+    :param args: Extra positional arguments forwarded to the callback.
+    '''
 
     def __init__(self, action, callback, frame, *args):
         action._callbacks.append(self)
@@ -54,27 +66,27 @@ class ActionCallback:
 
 
 class Action:
-    '''
-    Wrapper class for animated actions that provides additional parameters
-    and quick access properties.
+    '''Wrapper for a BGE ``playAction`` call with live property control.
 
-    :param game_object: The `KX_GameObject` on which to play the action.
-    :param action_name: The name of the action  of `bpy.data.actions`.
-    :param start_frame: The first frame of the action.
-    :param end_frame: The last frame of the action.
-    :param layer: The layer on which to play the action. Leave at -1 for
-    auto-selection.
-    :param priority: [Disabled] | The priority with which to play the action (only relevant
-    for actions on the same layer).
-    :param blendin: Use this many frames to "blend into" the animation.
-    :param play_mode: Playback mode of [`'play'`, `'loop'`, `'pingpong'`].
-    :param speed: Playback speed.
-    :param intensity: "Intensity" of the action; Use this to blend
-    animations on different layers together.
-    :param blend_mode: Mode of blending of [`'blend'`, `'add'`]
-    :param keep: Whether to keep the animation cached after playback has
-    finished. This is useful for setting animation frames regardless of the
-    action state.
+    Registers itself with the :class:`~uplogic.animation.actionsystem.ActionSystem`
+    for per-frame updates, manages layer allocation automatically when
+    ``layer=-1``, and supports per-frame callbacks via
+    :meth:`frame_trigger`.
+
+    :param game_object: The ``KX_GameObject`` on which to play the action.
+    :param action_name: Name of the action in ``bpy.data.actions``.
+    :param start_frame: First frame; defaults to the action's own start.
+    :param end_frame: Last frame; defaults to the action's own end.
+    :param layer: Animation layer. Pass ``-1`` for automatic selection.
+    :param priority: Priority within a layer (currently disabled).
+    :param blendin: Number of frames to blend in from the previous pose.
+    :param play_mode: One of ``"play"``, ``"loop"``, or ``"pingpong"``.
+    :param speed: Playback speed multiplier.
+    :param intensity: Layer weight (``1.0`` = fully override lower layers).
+    :param blend_mode: One of ``"blend"`` or ``"add"``.
+    :param keep: When ``True``, keep the action alive after it finishes so
+        the final pose is held.
+    :param on_start: Optional callable invoked when the action starts.
     '''
 
     _deprecated = False
@@ -102,38 +114,37 @@ class Action:
         self._speed = speed
         self._frozen_speed = -1
         self.stopped = False
-        '''Finish state of the animation.'''
+        '''``True`` once the action has reached its end frame and stopped.'''
         self.keep = keep
-        '''Whether to keep or free animation data after playback has finished.'''
+        '''When ``True``, the action data is retained after playback ends.'''
         self._intensity = intensity
         self._act_system = get_action_system()
         self.game_object = game_object
-        '''The game object the animation is playing on.'''
+        '''The ``KX_GameObject`` this action is playing on.'''
         self._name = action_name
-        '''Name of this action.'''
+        '''Name of this action in ``bpy.data.actions``.'''
         bpy_act = bpy.data.actions.get(action_name)
         if start_frame is None:
             start_frame = bpy_act.frame_start
         if end_frame is None:
             end_frame = bpy_act.frame_end
         self._start_frame = start_frame
-        '''Starting Frame of the animation.'''
+        '''First frame of the animation range.'''
         self._end_frame = end_frame
-        '''End Frame of the animation.'''
+        '''Last frame of the animation range.'''
         self.priority = priority
-        '''Priority of this animation; This is only relevant if multiple
-        animations are playing on the same layer.'''
+        '''Layer priority (currently disabled).'''
         if priority != 0:
             from uplogic.console import debug
             debug("'uplogic.animation.Action' attribute 'priority' is disabled.")
         self.blendin = blendin
-        '''The amount of blending frames when starting the animation.'''
+        '''Number of frames used to blend in from the previous pose.'''
         self.layer = layer
-        '''The layer the animation is playing on.'''
+        '''Animation layer index this action occupies.'''
         self.play_mode = play_mode = PLAY_MODES.get(play_mode, play_mode)
-        '''Playback mode of the animation.'''
+        '''BGE play-mode constant for this action.'''
         self.blend_mode = blend_mode = BLEND_MODES.get(blend_mode, blend_mode)
-        '''Blending Mode of the animation.'''
+        '''BGE blend-mode constant for this action.'''
         if layer == -1:
             ActionSystem.find_free_layer(self)
         layer = self.layer
@@ -163,30 +174,37 @@ class Action:
             self._act_system.add(self)
 
     def on_start(self):
-        '''Handler for animation playback start.
+        '''Called once when the action begins playing.
+
+        Override this method to react to the action starting.
         '''
         # schedule(self, 0, ACTION_STARTED)
         ...
 
     def on_finish(self):
-        '''Handler for animation playback finish.
+        '''Called once when the action reaches its end frame.
+
+        Override this method to react to the action finishing.
         '''
         # schedule(self, 0, ACTION_FINISHED)
         print('FINISH', self.name)
         ...
 
     def frame_trigger(self, frame, callback, *args):
-        '''Bind a callback to a specific frame of the animation. The callback will be invoked once the
-        current frame has passed the given frame (both forward and reverse).
+        '''Bind a callback to a specific frame of this action.
 
-        :param frame: Invoke the callback when action has passed this frame.
-        :param callback: Valid signatures: `def cb(*args)`.
-        :param *args: Arguments to be passed to the callback.
+        The callback fires each time the playhead passes *frame* in either
+        direction, then resets so it can fire again on the next pass.
+
+        :param frame: Frame number that triggers the callback.
+        :param callback: Callable with signature ``def cb(*args)``.
+        :param args: Extra arguments forwarded to the callback.
         '''
         ActionCallback(self, callback, frame, *args)
 
     @property
     def start_frame(self):
+        '''First frame of the playback range. Setting this restarts the action.'''
         return self._start_frame
 
     @start_frame.setter
@@ -198,6 +216,7 @@ class Action:
 
     @property
     def end_frame(self):
+        '''Last frame of the playback range. Setting this restarts the action.'''
         return self._end_frame
 
     @end_frame.setter
@@ -211,7 +230,7 @@ class Action:
 
     @property
     def is_playing(self) -> bool:
-        '''Check if the animation is being played (Read-Only).'''
+        '''``True`` if the action is currently playing on its layer (read-only).'''
         if self.game_object.invalid:
             return False
         return self.game_object.isPlayingAction(self.layer)
@@ -222,15 +241,17 @@ class Action:
 
     @property
     def started(self):
+        '''``True`` during the first frame of playback.'''
         return self.frame - self.start_frame < self.speed * FRAMETIME_COMPARE
 
     @property
     def finished(self):
+        '''``True`` when the playhead is within one frame of the end.'''
         return self.end_frame - self.frame < 1
 
     @property
     def frame(self) -> float:
-        '''Current Frame of the animation.'''
+        '''Current playhead position in frames.'''
         if self.is_playing:
             return self.game_object.getActionFrame(self.layer)
         return self.end_frame
@@ -242,8 +263,9 @@ class Action:
 
     @property
     def intensity(self) -> float:
-        '''Intensity of the animation. Higher layers can be blended over lower
-        ones.'''
+        '''Layer weight in the range ``[0, 1]``. Higher layers blend over lower
+        ones; setting to ``0`` stops the action.
+        '''
         return self._intensity
 
     @intensity.setter
@@ -260,7 +282,7 @@ class Action:
 
     @property
     def speed(self) -> float:
-        '''Playback speed of the animation.'''
+        '''Playback speed multiplier (``1.0`` = normal speed).'''
         return self._speed
 
     @speed.setter
@@ -275,6 +297,9 @@ class Action:
 
     @property
     def name(self):
+        '''Name of the action in ``bpy.data.actions``. Setting this switches
+        to a different action and restarts playback.
+        '''
         return self._name
 
     @name.setter
@@ -285,9 +310,8 @@ class Action:
         self._restart_action()
 
     def _restart_action(self):
-        '''Restart action to use updated values.
-
-        Not intended for manual use.
+        '''Restart the BGE action to apply changed parameters (speed, frames,
+        intensity, name). Not intended for direct use.
         '''
         # if self.name == 'jump':
         #     print('update')
@@ -336,7 +360,10 @@ class Action:
         self._locked = True
 
     def update(self):
-        '''This is called each frame.
+        '''Per-frame update: fire any due :class:`ActionCallback` entries and
+        stop the action when it reaches the end frame in ``"play"`` mode.
+
+        Called automatically by the :class:`~uplogic.animation.actionsystem.ActionSystem`.
         '''
         # print(self.name)
         self._locked = False
@@ -383,37 +410,35 @@ class Action:
                         # self._act_system.remove(self)
 
     def remove(self):
-        '''Stop and remove this action.
-        '''
+        '''Stop this action and remove it from the action system.'''
         self._act_system.remove(self)
 
     def pause(self):
-        '''Pause this action.
-        '''
+        '''Freeze playback by setting speed to zero; the pose is held.'''
         if self._frozen_speed < 0:
             self._frozen_speed = self.speed
             self.speed = 0
 
     def unpause(self):
-        '''Resume this action from pause.
-        '''
+        '''Resume playback at the speed that was active before :meth:`pause`.'''
         if self._frozen_speed >= 0:
             self.speed = self._frozen_speed
             self._frozen_speed = -1
 
     def resume(self):
-        '''Resume this action from pause.
-        '''
+        '''Resume playback at the speed that was active before :meth:`pause`.'''
         if self._frozen_speed >= 0:
             self.speed = self._frozen_speed
             self._frozen_speed = -1
 
     def stop(self):
-        '''Stop playback of this action and free the layer.
-        '''
+        '''Stop playback of this action and free its layer.'''
         self._act_system.remove(self)
 
     def disable(self):
+        '''Stop the BGE action on this layer without removing the action from
+        the system.
+        '''
         self.game_object.stopAction(self.layer)
 
     def _stop(self):
@@ -422,8 +447,7 @@ class Action:
         self.game_object.stopAction(self.layer)
 
     def restart(self):
-        '''Restart this animation with its current parameters.
-        '''
+        '''Restart this action from its start frame using current parameters.'''
         self._act_system.add(self)
         self.stopped = False
         self.game_object.stopAction(self.layer)
@@ -440,10 +464,10 @@ class Action:
         )
 
     def randomize_frame(self, min: float = -1, max: float = -1):
-        '''Randomize the frame of this animation.
+        '''Jump to a random frame within the given range.
 
-        :param min: Min range of randomization.
-        :param max: Max range of randomization.
+        :param min: Lower bound; defaults to :attr:`start_frame`.
+        :param max: Upper bound; defaults to :attr:`end_frame`.
         '''
         if min == -1:
             min = self.start_frame
@@ -453,43 +477,23 @@ class Action:
         self.frame = frame
 
     def randomize_speed(self, min: float = .9, max: float = 1.1):
-        '''Randomize the speed of this animation.
+        '''Set a random playback speed within the given range.
 
-        :param min: Min range of randomization.
-        :param max: Max range of randomization.
+        :param min: Lower bound for the speed multiplier.
+        :param max: Upper bound for the speed multiplier.
         '''
         delta = max - min
         self.speed = min + (delta * random())
 
     def set_frame(self, frame: float):
-        '''Set the frame of this action.
+        '''Seek to *frame* on this action's layer.
+
+        :param frame: Target frame number.
         '''
         self.frame = frame
 
 class ULAction(Action):
-    '''
-    [DEPRECATED] Use `uplogic.animation.Action` instead.
-
-    Wrapper class for animated actions that provides additional parameters
-    and quick access properties.
-
-    :param game_object: The `KX_GameObject` on which to play the action.
-    :param action_name: The name of the action  of `bpy.data.actions`.
-    :param start_frame: The first frame of the action.
-    :param end_frame: The last frame of the action.
-    :param layer: The layer on which to play the action. Leave at -1 for
-    auto-selection.
-    :param priority: The priority with which to play the action (only relevant
-    for actions on the same layer).
-    :param blendin: Use this many frames to "blend into" the animation.
-    :param play_mode: Playback mode of [`'play'`, `'loop'`, `'pingpong'`].
-    :param speed: Playback speed.
-    :param intensity: "Intensity" of the action; Use this to blend
-    animations on different layers together.
-    :param blend_mode: Mode of blending of [`'blend'`, `'add'`]
-    :param keep: Whether to keep the animation cached after playback has
-    finished. This is useful for setting animation frames regardless of the
-    action state.'''
+    '''[DEPRECATED] Use :class:`Action` instead.'''
     _deprecated = True
 
 
@@ -508,18 +512,24 @@ def start_action(
         keep: bool = False,
         on_start = None
     ):
-        return Action(
-            game_object=game_object,
-            action_name=action_name,
-            start_frame=start_frame,
-            end_frame=end_frame,
-            layer=layer,
-            priority=priority,
-            blendin=blendin,
-            play_mode=play_mode,
-            speed=speed,
-            intensity=intensity,
-            blend_mode=blend_mode,
-            keep=keep,
-            on_start=on_start
-        )
+    '''Create and start an :class:`Action` on *game_object*.
+
+    All parameters mirror :class:`Action.__init__`.
+
+    :returns: The new :class:`Action` instance.
+    '''
+    return Action(
+        game_object=game_object,
+        action_name=action_name,
+        start_frame=start_frame,
+        end_frame=end_frame,
+        layer=layer,
+        priority=priority,
+        blendin=blendin,
+        play_mode=play_mode,
+        speed=speed,
+        intensity=intensity,
+        blend_mode=blend_mode,
+        keep=keep,
+        on_start=on_start
+    )

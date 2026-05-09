@@ -1,3 +1,4 @@
+'''Post-processing filter that darkens the screen edges with a smooth vignette mask.'''
 from .shader import Filter2D
 from mathutils import Vector
 
@@ -26,6 +27,14 @@ void main( )
 
 
 class Vignette(Filter2D):
+    '''Vignette filter that mixes the rendered frame with a flat edge ``color`` using a
+    smooth radial mask, darkening the corners and borders of the screen.
+
+    :param power: Vignette falloff exponent controlling the sharpness of the edge
+        darkening (higher values produce a sharper, more abrupt transition).
+    :param color: RGB colour used for the vignette edges (default black ``(0, 0, 0)``).
+    :param idx: Filter pass index; passed directly to ``Filter2D``.
+    '''
 
     def __init__(self, power: float = 0.25, color=(0., 0., 0.), idx: int = None) -> None:
         self.uniforms = {'power': float(power), 'color': Vector(color)}
@@ -33,6 +42,7 @@ class Vignette(Filter2D):
 
     @property
     def power(self):
+        '''Falloff exponent controlling the sharpness of the vignette edge transition.'''
         return self.uniforms['power']
 
     @power.setter
@@ -41,6 +51,7 @@ class Vignette(Filter2D):
 
     @property
     def color(self):
+        '''RGB colour blended into the screen edges to create the vignette effect.'''
         return self.uniforms['color']
 
     @color.setter

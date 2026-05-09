@@ -1,3 +1,8 @@
+'''Collision callback utilities for BGE game objects.
+
+Provides the :class:`Collision` handler and the :func:`on_collision` convenience
+function for binding per-frame collision callbacks to ``KX_GameObject`` instances.
+'''
 from typing import Callable
 from bge import logic
 from bge.types import KX_GameObject as GameObject
@@ -5,14 +10,25 @@ from ..console import error
 
 
 class Collision():
-    """Callback handler for game object collisions.
+    '''Callback handler for game object collisions.
 
-    :param obj: Object whose collision detection will be monitored.
-    :param callback: Callback to be called when collision occurs. Must have arguments `(obj, point, normal)`.
-    :param prop: Only look for objects that have this property.
-    :param material: Only look for objects that have this material applied.
-    :param tap: Only validate the first frame of the collision.
-    """
+    Registers itself on the owner object's ``collisionCallbacks`` list and on
+    the scene's ``pre_draw`` list so that :meth:`reset` is called once per
+    frame to clear per-frame state.
+
+    :param game_object: Object whose collision detection will be monitored.
+    :param callback: Callable invoked when a collision is validated.
+        Must accept arguments ``(obj, point, normal)``.
+    :param prop: When non-empty, only collisions with objects that have this
+        game property are forwarded to ``callback``.
+    :param mat: When non-empty, only collisions with objects that have this
+        material name applied are forwarded to ``callback``.
+    :param tap: When ``True``, the callback fires only on the first frame of
+        each new collision rather than every frame the objects touch.
+    :param post_call: When ``True``, ``callback`` is invoked with
+        ``(None, None, None)`` for every object that was colliding last frame
+        but is no longer colliding this frame.
+    '''
 
     _deprecated = False
 
@@ -47,6 +63,17 @@ class Collision():
         self.register()
 
     def collision(self, obj, point, normal):
+        '''Internal collision callback registered on ``game_object.collisionCallbacks``.
+
+        Filters the colliding object against the configured ``mat`` and ``prop``
+        constraints, then invokes :attr:`callback` when the collision group and
+        mask bits match.  Called automatically by the BGE physics system; do not
+        call this method directly.
+
+        :param obj: The other game object involved in the collision.
+        :param point: World-space contact point of the collision.
+        :param normal: World-space contact normal of the collision.
+        '''
         if obj in self._objects:
             return
         material = self.mat
@@ -80,6 +107,14 @@ class Collision():
         self._done_objs.append(obj)
 
     def reset(self):
+        '''Per-frame reset registered on ``scene.pre_draw``.
+
+        Promotes ``_done_objs`` to ``_old_objs``, clears per-frame tracking
+        state, and—when :attr:`post_call` is ``True``—fires :attr:`callback`
+        with ``(None, None, None)`` for any object that was present last frame
+        but absent this frame.  Called automatically by the BGE scene; do not
+        call this method directly.
+        '''
         if self.post_call:
             for obj in self._old_objs:
                 if obj not in self._done_objs:
@@ -97,17 +132,30 @@ class Collision():
         self.target = None
 
     def register(self):
+        '''Register :meth:`collision` and :meth:`reset` on the BGE scene hooks.
+
+        Appends :meth:`collision` to ``game_object.collisionCallbacks`` and
+        :meth:`reset` to the current scene's ``pre_draw`` list, guarding
+        against duplicate registration.
+        '''
         if self.collision not in self.game_object.collisionCallbacks:
             self.game_object.collisionCallbacks.append(self.collision)
         if self.reset not in logic.getCurrentScene().pre_draw:
             logic.getCurrentScene().pre_draw.append(self.reset)
 
     def remove(self):
+        '''Unregister this handler from all BGE scene hooks.
+
+        Removes :meth:`collision` from ``game_object.collisionCallbacks`` and
+        :meth:`reset` from the current scene's ``pre_draw`` list.  Call this
+        when the handler is no longer needed to prevent stale callbacks.
+        '''
         self.game_object.collisionCallbacks.remove(self.collision)
         logic.getCurrentScene().pre_draw.remove(self.reset)
 
 
 class ULCollision(Collision):
+    '''[DEPRECATED] Use :class:`Collision` instead.'''
     _deprecated = True
 
 
@@ -119,14 +167,28 @@ def on_collision(
     tap: bool = False,
     post_call: bool = False
 ) -> Collision:
-    """Bind a callback to an object's collision detection.
+    '''Bind a callback to an object's collision detection.
+
+    Convenience wrapper that validates ``obj`` and constructs a
+    :class:`Collision` instance.
 
     :param obj: Object whose collision detection will be monitored.
-    :param callback: Callback to be called when collision occurs. Must have arguments `(obj, point, normal)`.
-    :param prop: Only look for objects that have this property.
-    :param material: Only look for objects that have this material applied.
-    :param tap: Only validate the first frame of the collision.
-    """
+        Must be a ``KX_GameObject`` instance.
+    :param callback: Callable invoked when a collision is validated.
+        Must accept arguments ``(obj, point, normal)``.
+    :param prop: When non-empty, only collisions with objects that have this
+        game property are forwarded to ``callback``.
+    :param material: When non-empty, only collisions with objects that have
+        this material name applied are forwarded to ``callback``.
+    :param tap: When ``True``, the callback fires only on the first frame of
+        each new collision.
+    :param post_call: When ``True``, ``callback`` is invoked with
+        ``(None, None, None)`` for objects that stopped colliding this frame.
+    :returns: The registered :class:`Collision` handler, or ``None`` if
+        ``obj`` is not a valid ``KX_GameObject``.
+    :raises: Logs an error via :func:`uplogic.console.error` when ``obj`` is
+        not a ``KX_GameObject``; does not raise an exception.
+    '''
     if not isinstance(obj, GameObject):
         error("'on_collision()' Argument 0: Expected 'KX_GameObject' type!")
         return

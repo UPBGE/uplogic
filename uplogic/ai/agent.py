@@ -1,3 +1,10 @@
+'''NavMesh-based AI agent for uplogic.
+
+:class:`Agent` wraps a ``KX_GameObject``, computes a :class:`NavPath` via the
+BGE NavMesh API, optionally steers around physics obstacles using raycasts,
+and moves the object along the resulting waypoints each game tick.
+'''
+
 from ..utils.visualize import draw_line
 from .navigation import NavContainer
 from bge.types import KX_GameObject
@@ -9,20 +16,34 @@ from mathutils import Vector
 
 
 class Agent(NavContainer):
-    """Simple AI Agent implementation that uses a Navigation Mesh.
+    '''NavMesh-based AI agent that walks a ``KX_GameObject`` along a computed path.
 
-    :param KX_GameObject game_object: The game object acting as the agent.
-    :param float speed: The speed this agent will move at towards the target.
-    :param float threshold: Reach threshold for Navigation Path points. If none is set, `speed` will be used as theshold.
-    :param float bevel: Bevel distance at corners. This will cut corners outside of the navmesh.
-    :param bool dynamic: Whether to move the agent using forces or pure vectors.
-    :param int obstacle_mask: Objects in this collision group will be recognized as obstacles. Set to `65535` for all objects.
-    :param float height: Z-Offset for the path calculation.
-    """
+    Each tick, call :meth:`find_path` once (or only when the destination
+    changes), then call :meth:`move` to advance the object along the path.
+    Call :meth:`lookat` to face the next waypoint.
+
+    :param game_object: The BGE game object acting as the agent.
+    :param speed: Movement speed in world units per tick.  Defaults to ``0.1``.
+    :param threshold: Distance at which a waypoint is considered reached.
+        Negative values (default ``-1``) cause the threshold to be derived
+        automatically from *speed* or from the current velocity for dynamic
+        agents.
+    :param bevel: Corner-rounding distance applied during path computation.
+        ``0.0`` (default) means sharp corners.
+    :param dynamic: When ``True`` the agent is pushed by setting
+        ``worldLinearVelocity``; when ``False`` (default) ``applyMovement``
+        is used instead.
+    :param obstacle_mask: Collision-group bitmask for obstacle-avoidance
+        raycasts.  ``0`` (default) disables obstacle avoidance; ``65535``
+        tests against all objects.
+    :param height: Z offset added to every computed waypoint, useful when the
+        agent origin sits above ground level.
+    '''
+
     def __init__(
             self,
             game_object: KX_GameObject,
-            speed: float= .1,
+            speed: float = .1,
             threshold: float = -1,
             bevel: float = 0.0,
             dynamic: bool = False,
@@ -39,19 +60,32 @@ class Agent(NavContainer):
         self.dynamic = dynamic
 
     def set_navmesh(self, navmesh: KX_GameObject):
-        """Define what navmesh object should be used to calculate a path."""
+        '''Set the navigation mesh used for path calculations.
+
+        :param navmesh: BGE game object with a generated NavMesh.
+        '''
         self.navmesh = navmesh
 
     @property
     def position(self):
-        """Current horizontal world position of this object. Z is set to 0 for distance calculation """
+        '''World-space XY position of the agent with Z forced to ``0``.
+
+        Used internally so that distance calculations remain horizontal.
+        '''
         pos = self.game_object.worldPosition.copy()
         pos.z = 0
         return pos
 
     @property
     def next_point(self) -> Vector:
-        """World position of next point to approach."""
+        '''World-space position of the next waypoint to move towards.
+
+        When :attr:`obstacle_mask` is non-zero a short raycast is fired towards
+        the first waypoint.  If an obstacle is detected, detour waypoints are
+        inserted around its bounding radius so the agent steers clear.
+
+        Returns ``None`` when the path is empty.
+        '''
         if self._path:
             if self.obstacle_mask:
                 pathpoints = self._path
@@ -60,7 +94,7 @@ class Agent(NavContainer):
                     rad = dat.obj.blenderObject.game.obstacle_radius * 1.5
                     while (pathpoints[0] - dat.obj.worldPosition).length < rad:
                         self.pop()
-                    
+
                     n = dat.normal.copy()
                     n.z = 0
                     next_direction = (pathpoints[0] - dat.obj.worldPosition).normalized()
@@ -83,18 +117,20 @@ class Agent(NavContainer):
             return self._path[0]
 
     def find_path(self, target: Vector, navmesh: KX_NavMeshObject | KX_GameObject = None):
-        """
-        Calculate a path to the current target position.
+        '''Calculate a path from the agent's current position to *target*.
 
-        :param target: World position to find a path to
-        :type target: Vector
-        :param navmesh: Navmesh object to use to find the path
-        :type navmesh: KX_NavMeshObject | KX_GameObject
-        """
+        :param target: World-space destination.
+        :param navmesh: NavMesh object to use.  Falls back to :attr:`navmesh`
+            when ``None``.
+        :returns: The computed :class:`~uplogic.ai.navigation.NavPath`.
+        '''
         return super().find_path(self.game_object.worldPosition, target, navmesh if navmesh else self.navmesh)
 
     def visualize(self, color=Vector((0, 1, 0))):
-        """Draw a line showing the currently calculated path."""
+        '''Draw the current path as a sequence of line segments.
+
+        :param color: RGB draw colour.  Defaults to green ``(0, 1, 0)``.
+        '''
         if self._path:
             compare = self.game_object.worldPosition.copy()
             compare.z = self.next_point.z
@@ -102,28 +138,36 @@ class Agent(NavContainer):
             return super().visualize(color)
 
     def pop(self, idx=0):
-        """Remove a point from the calculated path.
+        '''Remove and return the waypoint at *idx* from the current path.
 
-        :param idx: Index of the point to be removed.
-        :type idx: int"""
+        :param idx: Index of the waypoint to remove.  Defaults to ``0``
+            (the next point).
+        :returns: The removed :class:`~mathutils.Vector`, or ``None`` if the
+            path is already empty.
+        '''
         points = self._path
         if not points:
             return None
         return points.pop(idx)
 
     def clean(self):
-        """Clean all points too close to the agent."""
+        '''Discard all waypoints closer than ``0.3`` world units to the agent.'''
         while self.next_point and self.distance < .3:
-           self.pop()
+            self.pop()
 
     @property
     def idle(self):
-        """True if agent has no path to follow."""
+        '''``True`` when the agent has no remaining waypoints to follow.'''
         return not self._path
 
     @property
     def distance(self):
-        """Horizontal distance from agent to the next point."""
+        '''Horizontal distance from the agent to the next waypoint.
+
+        The agent's Z coordinate is matched to the waypoint's Z before
+        measuring so only the XY plane is taken into account.  Returns ``0``
+        when the path is empty.
+        '''
         compare = self.game_object.worldPosition.copy()
         np = self.next_point
         if np is None:
@@ -133,7 +177,11 @@ class Agent(NavContainer):
 
     @property
     def direction(self):
-        """Horizontal direction from agent to the next point."""
+        '''Horizontal unit vector from the agent towards the next waypoint.
+
+        Z is matched to the waypoint before the direction is normalised.
+        Returns the zero vector when the path is empty.
+        '''
         compare = self.game_object.worldPosition.copy()
         np = self.next_point
         if np is None:
@@ -142,18 +190,23 @@ class Agent(NavContainer):
         return super().direction(compare)
 
     def lookat(self, factor: float = .1):
-        """
-        Rotate the agent to look towards the next point.
+        '''Rotate the agent to face the next waypoint.
 
-        :param float factor: Rotation factor. Lower values mean slower rotation.
-        """
+        :param factor: Interpolation factor applied each tick.  Smaller values
+            produce slower, smoother turns.  Defaults to ``0.1``.
+        '''
         next_point = self.next_point
         if next_point is not None:
             zrot_to(self.game_object, next_point, 1, factor)
 
     @property
     def threshold(self):
-        """Reach threshold. If set to 0, an appropriate threshold is calculated automatically."""
+        '''Distance at which the current waypoint is considered reached.
+
+        When the stored value is negative the threshold is derived
+        automatically: ``worldLinearVelocity.length * FPS_FACTOR()`` for
+        dynamic agents, or :attr:`speed` for kinematic agents.
+        '''
         if self._threshold >= 0:
             return self._threshold
         elif self.dynamic:
@@ -166,7 +219,13 @@ class Agent(NavContainer):
         self._threshold = val
 
     def move(self):
-        """Move the agent to the target along the calculated path."""
+        '''Advance the agent along its current path by one tick.
+
+        Waypoints within :attr:`threshold` distance are popped before moving.
+        For dynamic agents the XY component of ``worldLinearVelocity`` is set
+        directly; for kinematic agents ``applyMovement`` is called with the
+        scaled :attr:`direction`.
+        '''
         while self._path and self.distance < self.threshold:
             self.pop()
         if not self._path:

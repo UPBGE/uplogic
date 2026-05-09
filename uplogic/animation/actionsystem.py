@@ -4,9 +4,12 @@ from uplogic.data import GlobalDB
 
 
 class ActionSystem():
-    '''System for managing actions started using `Action`. This class is
-    usually addressed indirectly through `Action` and is not intended for
-    manual use.
+    '''Per-scene manager for all active :class:`~uplogic.animation.action.Action`
+    instances.
+
+    Handles layer allocation, per-frame updates, and clean shutdown. Usually
+    accessed indirectly through :class:`~uplogic.animation.action.Action`
+    rather than used directly.
     '''
     layers: dict[KX_GameObject, dict] = {}
 
@@ -20,30 +23,33 @@ class ActionSystem():
 
     @classmethod
     def lock_layer(cls, action):
-        """Lock a layer according to a `Action`.
+        '''Mark the layer of *action* as occupied so it is not reused.
 
-        :param action: The `Action` whose layer will be locked.
-        """
+        :param action: :class:`~uplogic.animation.action.Action` whose layer
+            should be locked.
+        '''
         layers = cls.layers.get(action.game_object, {})
         layers[str(action.layer)] = action
         cls.layers[action.game_object] = layers
 
     @classmethod
     def free_layer(cls, action):
-        """Allow for the layer of the given action to be used again.
+        '''Release the layer of *action* so it can be reused.
 
-        :param action: The `Action` whose layer will be freed.
-        """
+        :param action: :class:`~uplogic.animation.action.Action` whose layer
+            should be freed.
+        '''
         layers = cls.layers.get(action.game_object, {})
         layers.pop(str(action.layer), None)
         cls.layers[action.game_object] = layers
 
     @classmethod
     def find_free_layer(cls, action):
-        """Incrementally find the next free layer for an `Action`.
+        '''Assign the lowest unused layer index to *action*.
 
-        :param action: The `Action` for which to find a free layer.
-        """
+        :param action: :class:`~uplogic.animation.action.Action` that needs a
+            free layer; its ``layer`` attribute is updated in-place.
+        '''
         layers = cls.layers.get(action.game_object, {})
         action.layer = 0
         while str(action.layer) in layers.keys():
@@ -51,30 +57,34 @@ class ActionSystem():
 
     @classmethod
     def check_layer(cls, action):
-        """Check if the layer for this `Action` is free.
+        '''Check whether the layer of *action* is already occupied.
 
-        :param action: The `Action` whose layer to check.
-
-        :return: `True` if the layer is occupied, `False` if not
-        """
+        :param action: :class:`~uplogic.animation.action.Action` to check.
+        :returns: ``True`` if the layer is occupied, ``False`` if it is free.
+        '''
         layers = cls.layers.get(action.game_object, {})
         return str(action.layer) in layers.keys()
     
     @classmethod
     def get_layer(cls, game_object: KX_GameObject, layer: int = 0):
-        """Get the `Action` of an object on the given layer.
+        '''Return the :class:`~uplogic.animation.action.Action` playing on
+        *layer* of *game_object*, or ``None`` if the layer is empty.
 
-        :param game_object: The `KX_GameObject` on which the action is
-        playing.
-        :param layer: The layer on which the action is playing.
-
-        :return: `Action` if layer is occupied, else `None`
-        """
+        :param game_object: The ``KX_GameObject`` to query.
+        :param layer: Layer index to look up.
+        :returns: :class:`~uplogic.animation.action.Action` or ``None``.
+        '''
         action = cls.layers.get(game_object, {}).get(str(layer))
         return action
 
     @classmethod
     def _get_uppermost_layer(cls, object):
+        '''Return the highest-priority layer index whose action has intensity
+        ≥ 0.5 and uses ``"blend"`` mode, disabling all layers above it.
+
+        :param object: ``KX_GameObject`` to query.
+        :returns: Layer index, or ``None`` if no qualifying action was found.
+        '''
         layers = cls.layers.get(object, {})
         found = False
         for action in layers.values().__reversed__():
@@ -85,24 +95,26 @@ class ActionSystem():
                 return action.layer
 
     def update(self):
-        """This is called each frame.
-        """
+        '''Per-frame update: forward the update call to every active action.
+
+        Called automatically via the BGE scene pre-draw list.
+        '''
         for action in self.actions:
             action.update()
 
     def add(self, action):
-        '''Add a `Action` to this system.
+        '''Register *action* with this system and lock its layer.
 
-        :param action: `Action` to add.
+        :param action: :class:`~uplogic.animation.action.Action` to add.
         '''
         self.actions.append(action)
         self.actions.sort(key=lambda action: action.layer, reverse=True)
         ActionSystem.lock_layer(action)
 
     def remove(self, action):
-        '''Remove a `Action` from this system.
+        '''Stop *action*, deregister it from this system, and free its layer.
 
-        :param action: `Action` which to remove.
+        :param action: :class:`~uplogic.animation.action.Action` to remove.
         '''
         if not action.game_object.invalid:
             action._stop()
@@ -111,8 +123,9 @@ class ActionSystem():
         ActionSystem.free_layer(action)
 
     def shutdown(self):
-        '''Shutdown and remove this action system. This will stop all actions
-        playing in this system.'''
+        '''Stop all actions, unregister the update hook, and remove this system
+        from the global registry.
+        '''
         self.scene.pre_draw.remove(self.update)
         for action in self.actions.copy():
             self.remove(action)
@@ -120,13 +133,13 @@ class ActionSystem():
 
 
 def get_action_system(system_name: str = 'default') -> ActionSystem:
-    """Get or create a `ActionSystem` with the given name. Using more than one
-    action system is highly discouraged.
+    '''Get or create an :class:`ActionSystem` with the given name.
 
-    :param system_name: Look for this name.
+    Using more than one action system per scene is strongly discouraged.
 
-    :returns: `ActionSystem`, new system is created if none is found.
-    """
+    :param system_name: Name of the system to look up.
+    :returns: Existing or newly created :class:`ActionSystem`.
+    '''
     act_systems = GlobalDB.retrieve('uplogic.animation')
     if act_systems.check(system_name):
         return act_systems.get(system_name)
@@ -135,4 +148,11 @@ def get_action_system(system_name: str = 'default') -> ActionSystem:
 
 
 def get_priority_action(game_object: KX_GameObject, system_name='default'):
+    '''Return the layer index of the highest-priority blending action on
+    *game_object*, disabling any layers above it.
+
+    :param game_object: ``KX_GameObject`` to query.
+    :param system_name: Name of the :class:`ActionSystem` to use.
+    :returns: Layer index, or ``None``.
+    '''
     return get_action_system(system_name)._get_uppermost_layer(game_object)

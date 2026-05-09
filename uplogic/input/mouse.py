@@ -1,3 +1,5 @@
+'''Mouse input helpers for uplogic. Wraps ``bge.logic.mouse.inputs`` into boolean query functions and provides :class:`Mouse` and :class:`MouseLook` component classes.
+'''
 from math import pi
 from bge import logic
 from bge import events
@@ -11,21 +13,33 @@ from uplogic import console
 
 
 MOUSE_EVENTS = logic.mouse.inputs
-'''Reference to `bge.logic.mouse.inputs`
-'''
+'''Reference to ``bge.logic.mouse.inputs``.'''
 
 LMB = events.LEFTMOUSE
+'''Left mouse button event constant (``bge.events.LEFTMOUSE``).'''
+
 RMB = events.RIGHTMOUSE
+'''Right mouse button event constant (``bge.events.RIGHTMOUSE``).'''
+
 MMB = events.MIDDLEMOUSE
+'''Middle mouse button event constant (``bge.events.MIDDLEMOUSE``).'''
 
 MOUSE_BUTTONS = {
     'LMB': LMB,
     'RMB': RMB,
     'MMB': MMB
 }
+'''Mapping from string names ``"LMB"``, ``"RMB"``, ``"MMB"`` to their ``bge.events`` constants.'''
 
 
 def mouse_over(game_object: GameObject) -> bool:
+    '''Return ``True`` if the mouse cursor is hovering over *game_object*.
+
+    Casts a screen ray from the active camera using the current mouse position.
+
+    :param game_object: The :class:`~bge.types.KX_GameObject` to test.
+    :returns: ``True`` when the ray target matches *game_object*.
+    '''
     scene = game_object.scene
     camera = scene.active_camera
     distance = 2.0 * camera.getDistanceTo(game_object)
@@ -40,6 +54,12 @@ def mouse_over(game_object: GameObject) -> bool:
 
 
 def set_mouse_position(x: int, y: int, absolute: bool = False) -> None:
+    '''Move the mouse cursor to (*x*, *y*).
+
+    :param x: Horizontal position. Normalised 0–1 unless *absolute* is ``True``.
+    :param y: Vertical position. Normalised 0–1 unless *absolute* is ``True``.
+    :param absolute: When ``True``, treat *x*/*y* as pixel coordinates.
+    '''
     if absolute:
         render.setMousePosition(x, y)
         return
@@ -50,6 +70,12 @@ def set_mouse_position(x: int, y: int, absolute: bool = False) -> None:
 
 
 def get_mouse_position(absolute: bool = False) -> Vector:
+    '''Return the current mouse cursor position.
+
+    :param absolute: When ``True``, return pixel coordinates; otherwise return
+        normalised 0–1 values.
+    :returns: :class:`mathutils.Vector` of ``(x, y)``.
+    '''
     pos = logic.mouse.position
     if absolute:
         return Vector((
@@ -60,11 +86,11 @@ def get_mouse_position(absolute: bool = False) -> Vector:
 
 
 def mouse_moved(tap: bool = False) -> bool:
-    '''Detect mouse movement.
+    '''Return ``True`` when the mouse cursor has moved.
 
-    :param tap: Only use the first consecutive `True` output
-
-    :returns: boolean
+    :param tap: When ``True``, return ``True`` only on the first consecutive
+        frame of movement (activation frame only).
+    :returns: ``True`` if the mouse is moving (or was activated this frame).
     '''
     if tap:
         return (
@@ -81,11 +107,12 @@ def mouse_moved(tap: bool = False) -> bool:
 
 
 def mouse_tap(button=events.LEFTMOUSE) -> bool:
-    '''Detect mouse button tap.
+    '''Return ``True`` on the single frame a mouse button is first pressed.
 
-    :param button: can be either `LMB`, `RMB` or `MMB` from `uplogic.input`
-
-    :returns: boolean
+    :param button: Button constant — use :data:`LMB`, :data:`RMB`, or
+        :data:`MMB` from :mod:`uplogic.input`, or the string ``"LMB"``,
+        ``"RMB"``, ``"MMB"``.
+    :returns: ``True`` on the activation frame.
     '''
     button = MOUSE_BUTTONS.get(button, button)
     return (
@@ -95,11 +122,10 @@ def mouse_tap(button=events.LEFTMOUSE) -> bool:
 
 
 def mouse_down(button=events.LEFTMOUSE) -> bool:
-    '''Detect mouse button held down.
+    '''Return ``True`` while a mouse button is held down (including the first frame).
 
-    :param button: can be either `LMB`, `RMB` or `MMB` from `uplogic.input`
-
-    :returns: boolean
+    :param button: Button constant or string name (``"LMB"``, ``"RMB"``, ``"MMB"``).
+    :returns: ``True`` while the button is active or activated.
     '''
     button = MOUSE_BUTTONS.get(button, button)
     return (
@@ -111,11 +137,12 @@ def mouse_down(button=events.LEFTMOUSE) -> bool:
 
 
 def mouse_press(button=events.LEFTMOUSE, down=False) -> bool:
-    '''Detect mouse button tap or held down.
+    '''Return ``True`` when a mouse button is tapped, or (when *down* is ``True``) also
+    while it is held.
 
-    :param button: can be either `LMB`, `RMB` or `MMB` from `uplogic.input`
-
-    :returns: boolean
+    :param button: Button constant or string name (``"LMB"``, ``"RMB"``, ``"MMB"``).
+    :param down: When ``True``, also return ``True`` while the button is held.
+    :returns: ``True`` on activation, or while active when *down* is ``True``.
     '''
     button = MOUSE_BUTTONS.get(button, button)
     return (
@@ -130,37 +157,27 @@ def mouse_press(button=events.LEFTMOUSE, down=False) -> bool:
 
 
 def mouse_up(button=events.LEFTMOUSE) -> bool:
-    '''Detect mouse button released.
+    '''Return ``True`` on the single frame a mouse button is released.
 
-    :param button: can be either `LMB`, `RMB` or `MMB` from `uplogic.input`
-
-    :returns: boolean
+    :param button: Button constant or string name (``"LMB"``, ``"RMB"``, ``"MMB"``).
+    :returns: ``True`` on the release frame.
     '''
     button = MOUSE_BUTTONS.get(button, button)
     return (
         MOUSE_EVENTS[button].released
     )
-    
+
 
 _buttons_active = {}
 
 
 def mouse_pulse(button=events.LEFTMOUSE, time: float = .4) -> bool:
-    '''Detect key tapped, then held down after `time` has passed.
+    '''Return ``True`` on the first press and again once the button has been held
+    for more than *time* seconds (useful for auto-repeat).
 
-    :param key: key as `str` of
-    [`'A'`, `'B'`, `'C'`, `'D'`, `'E'`, `'F'`, `'G'`, `'H'`, `'I'`, `'J'`, `'K'`, `'L'`, `'M'`, `'N'`, `'O'`, `'P'`, `'Q'`,
-    `'R'`, `'S'`, `'T'`, `'U'`, `'V'`, `'W'`, `'X'`, `'Y'`, `'Z'`, `'ZERO'`, `'ONE'`, `'TWO'`, `'THREE'`, `'FOUR'`, `'FIVE'`,
-    `'SIX'`, `'SEVEN'`, `'EIGHT'`, `'NINE'`, `'CAPSLOCK'`, `'LEFTCTRL'`, `'LEFTSHIFT'` `'LEFTARROW'`, `'DOWNARROW'`, `'RIGHTARROW'`,
-    `'UPARROW'`, `'0'`, `'1'`, `'2'`, `'3'`, `'4'`, `'5'`, `'6'`, `'7'`, `'8'`, `'9'`, `'PADPERIOD'`, `'PADSLASH'`, `'PADASTER'`,
-    `'PADMINUS'`, `'PADENTER'`, `'PADPLUS'`, `'F1'`, `'F2'`, `'F3'`, `'F4'`, `'F5'`, `'F6'`, `'F7'`, `'F8'`, `'F9'`, `'F10'`,
-    `'F11'`, `'F12'`, `'F13'`, `'F14'`, `'F15'`, `'F16'`, `'F17'`, `'F18'`, `'F19'`, `'ACCENTGRAVE'`, `'BACKSLASH'`,
-    `'BACKSPACE'`, `'COMMA'`, `'DEL'`, `'END'`, `'EQUAL'`, `'ESC'`, `'HOME'`, `'INSERT'`, `'LEFTBRACKET'`, `'RIGHTBRACKET'`,
-    `'LINEFEED'`, `'MINUS'`, `'PAGEDOWN'`, `'PAGEUP'`, `'PAUSE'`, `'PERIOD'`, `'QUOTE'`, `'RET'`, `'ENTER'`, `'SEMICOLON'`,
-    `'SLASH'`, `'SPACE'`, `'TAB'`]
-    :param time: timeout for key down
-
-    :returns: boolean
+    :param button: Button constant or string name (``"LMB"``, ``"RMB"``, ``"MMB"``).
+    :param time: Hold duration in seconds before continuous activation begins.
+    :returns: ``True`` on the tap frame or while held past *time*.
     '''
     button = MOUSE_BUTTONS.get(button, button)
     evt = MOUSE_EVENTS[button]
@@ -175,11 +192,11 @@ def mouse_pulse(button=events.LEFTMOUSE, time: float = .4) -> bool:
 
 
 def mouse_wheel(tap: bool = False) -> int:
-    '''Detect mouse wheel activity.
+    '''Return the mouse wheel direction this frame.
 
-    :param tap: Only use the first consecutive `True` output
-
-    :returns: -1 if wheel down, 0 if idle, 1 if wheel up
+    :param tap: When ``True``, only return a non-zero value on the activation
+        frame; otherwise return non-zero while the wheel is scrolling.
+    :returns: ``1`` if scrolled up, ``-1`` if scrolled down, ``0`` if idle.
     '''
     if tap:
         return (
@@ -199,7 +216,12 @@ def mouse_wheel(tap: bool = False) -> int:
 
 
 class Mouse():
-    """Mouse Wrapper for accessing mouse data."""
+    '''Stateful mouse wrapper that tracks cursor position and frame-to-frame
+    movement delta.
+
+    Registers itself in the scene ``pre_draw`` list when :attr:`enabled` is
+    ``True`` (the default).
+    '''
 
     _deprecated = False
 
@@ -208,14 +230,14 @@ class Mouse():
             from uplogic.console import warning
             warning('Warning: ULMouse class will be renamed to "Mouse" in future releases!')
         self._position = get_mouse_position()
-        """Staggered updated mouse position for pos difference calculation."""
+        '''Staggered updated mouse position for pos difference calculation.'''
         self.movement = (0, 0)
-        """Movement of the mouse as a tuple `(x, y)`."""
+        '''Movement of the mouse as a tuple ``(x, y)``.'''
         self.enabled = True
 
     @property
     def enabled(self):
-        """Tracking state of this component."""
+        '''Whether the per-frame position-tracking update is active. Setting to ``False`` removes the update from the scene pre-draw list.'''
         return self.update in logic.getCurrentScene().pre_draw
 
     @enabled.setter
@@ -228,8 +250,7 @@ class Mouse():
 
     @property
     def position(self):
-        """Position of the mouse as a tuple of `(x, y)` ranging from 0-1 on both
-        axis."""
+        '''Cursor position as a :class:`mathutils.Vector` of normalised ``(x, y)`` values in the range ``[0, 1]``. Setting this moves the cursor.'''
         return get_mouse_position()
 
     @position.setter
@@ -242,7 +263,7 @@ class Mouse():
 
     @property
     def moved(self):
-        """`True` if the mouse is moved, `False` if idle."""
+        '''``True`` if the cursor moved this frame (read-only).'''
         return mouse_moved()
 
     @moved.setter
@@ -251,9 +272,7 @@ class Mouse():
 
     @property
     def wheel(self):
-        """Mouse wheel difference.
-        
-        -1 if scolled down, 0 if idle, 1 if scrolled up."""
+        '''Mouse wheel direction this frame: ``1`` up, ``-1`` down, ``0`` idle (read-only).'''
         return mouse_wheel()
 
     @wheel.setter
@@ -261,7 +280,7 @@ class Mouse():
         console.debug('Mouse.wheel is read-only!')
 
     def update(self) -> None:
-        """This is executed each frame if component is active."""
+        '''Per-frame update: compute the cursor movement delta and store it in :attr:`movement`. Called automatically via the scene pre-draw list.'''
         old_pos = self._position
         new_pos = self.position
         self.movement = (
@@ -271,28 +290,32 @@ class Mouse():
         self._position = new_pos
 
     def button_down(self, button: str = 'LMB'):
-        """Check if a button on the mouse is held down.
-        
-        :param button: The button to check for; `str` of [`'LMB'`, `'MMB'`,
-        `'RMB'`]"""
+        '''Return ``True`` while *button* is held down.
+
+        :param button: ``"LMB"``, ``"MMB"``, or ``"RMB"``.
+        :returns: ``True`` while the button is active.
+        '''
         return mouse_down(MOUSE_BUTTONS[button])
 
     def button_up(self, button: str = 'LMB'):
-        """Check if a button on the mouse is released.
-        
-        :param button: The button to check for; `str` of [`'LMB'`, `'MMB'`,
-        `'RMB'`]"""
+        '''Return ``True`` on the single frame *button* is released.
+
+        :param button: ``"LMB"``, ``"MMB"``, or ``"RMB"``.
+        :returns: ``True`` on the release frame.
+        '''
         return mouse_up(MOUSE_BUTTONS[button])
 
     def button_tap(self, button: str = 'LMB'):
-        """Check if a button on the mouse is pressed once.
-        
-        :param button: The button to check for; `str` of [`'LMB'`, `'MMB'`,
-        `'RMB'`]"""
+        '''Return ``True`` on the single frame *button* is first pressed.
+
+        :param button: ``"LMB"``, ``"MMB"``, or ``"RMB"``.
+        :returns: ``True`` on the activation frame.
+        '''
         return mouse_tap(MOUSE_BUTTONS[button])
 
 
 class ULMouse(Mouse):
+    '''[DEPRECATED] Use :class:`Mouse` instead.'''
     _deprecated = True
 
 
@@ -300,28 +323,26 @@ MOUSE = Mouse()
 
 
 class MouseLook():
-    """Automatically track the mouse movement and translate it to a rotate a
-    body and optionally a head.
+    '''Mouse-driven first-person look controller.
 
-    This component can be activated/deactivated at any time to keep performance
-    up.
+    Translates mouse cursor movement into rotations applied to a body object
+    (Z axis) and an optional head object (X/Y axis).  The controller can be
+    toggled at any time via :attr:`enabled`.
 
-    :param obj: Main object to rotate around the object's Z axis.
-    :param head: Head object to rotate around the object's X/Y axis.
-    :param sensitivity: Translation factor of mouse movement to rotation.
-    :param use_cap_x: Whether to use capping on the mouse X movement (Z axis
-    rotation).
-    :param cap_x: Minimum and Maximum amount of rotation on the Z axis.
-    :param use_cap_y: Whether to use capping on the mouse Y movement (X/Y axis
-    rotation).
-    :param cap_y: Minimum and Maximum amount of rotation on the X/Y axis.
-    :param invert: Whether to use inverted values for mous X/Y movement.
-    :param smoothing: Amount of movement smoothing.
-    :param local: Whether to use local transform for the body object.
-    :param front: Front axis (traditionally in blender, Y is front).
-    :param active: Whether to start this component in active or inactive mode
-    (can be changed later).
-    """
+    :param obj: Primary object to rotate around the Z axis.
+    :param head: Secondary object for vertical rotation; defaults to *obj*.
+    :param sensitivity: Mouse movement to rotation scale factor.
+    :param use_cap_x: Enable rotation clamping on the Z axis.
+    :param cap_x: ``(min, max)`` Z-axis rotation limits in degrees.
+    :param use_cap_y: Enable rotation clamping on the X/Y axis.
+    :param cap_y: ``(min, max)`` X/Y-axis rotation limits in degrees.
+    :param invert: ``(invert_x, invert_y)`` flags for each axis.
+    :param smoothing: Movement smoothing factor in ``[0, 1)``.
+    :param local: When ``True``, apply rotations in local space.
+    :param front: Front axis index (``1`` = Y, ``0`` = X; Blender default is ``1``).
+    :param center_mouse: When ``True``, keep the cursor locked to screen centre.
+    :param enabled: Whether to start the component active.
+    '''
 
     _deprecated = False
 
@@ -376,6 +397,7 @@ class MouseLook():
 
     @property
     def active(self):
+        '''Whether the look controller is currently processing mouse input. Setting to ``False`` freezes rotation without stopping the update loop.'''
         return self._active
 
     @active.setter
@@ -387,7 +409,7 @@ class MouseLook():
 
     @property
     def enabled(self):
-        """State of this component."""
+        '''Whether the per-frame update is registered. Setting to ``False`` also resets :attr:`initialized`.'''
         return self.update in logic.getCurrentScene().pre_draw
 
     @enabled.setter
@@ -401,7 +423,7 @@ class MouseLook():
 
     @property
     def rotation(self):
-        """Global body and head orientation."""
+        '''Tuple of ``(body_world_orientation, head_world_orientation)``. Setting writes both orientations simultaneously.'''
         return self.obj.worldOrientation, self.head.worldOrientation
 
     @rotation.setter
@@ -410,21 +432,21 @@ class MouseLook():
         self.head.worldOrientation = val[1]
 
     def stop(self, reset: bool = False):
-        """Stop this component.
-        
-        :param reset: Reset the orientation of objects to their original
-        state."""
+        '''Stop the controller and optionally reset both objects to their original orientations.
+
+        :param reset: When ``True``, call :meth:`reset` before stopping.
+        '''
         self.enabled = False
         if reset:
             self.reset()
         self.initialized = False
 
     def disable(self):
-        """Set this component to inactive."""
+        '''Deactivate the controller (alias for setting :attr:`enabled` to ``False``).'''
         self.enabled = False
 
     def enable(self):
-        """Set this component to active."""
+        '''Activate the controller (alias for setting :attr:`enabled` to ``True``).'''
         self.enabled = True
 
     @property
@@ -432,11 +454,12 @@ class MouseLook():
         return Vector((self._x, self._y))
 
     def reset(self, factor=1):
-        """Reset the orientation of the objects in this component to their
-        original state.
-        
-        :param factor: Smoothing factor of the reset. If < 1, component will
-        be reset smoothly."""
+        '''Restore both objects to their original orientations captured at construction.
+
+        :param factor: When ``< 1``, lerp towards the default orientation each
+            frame using :func:`~uplogic.events.schedule_callback` for a smooth
+            reset; when ``1``, snap immediately.
+        '''
         if factor < 1:
             self.enabled = False
             if self.reset_factor < 1:
@@ -452,9 +475,7 @@ class MouseLook():
             self.head.localOrientation = self._defaults[1]
 
     def get_data(self):
-        """Get data for this component.
-        
-        Not intended for manual use."""
+        '''Initialise screen-centre coordinates from the current window dimensions. Not intended for manual use.'''
         self.mouse = logic.mouse
         if self.center_mouse:
             self.x = render.getWindowWidth()//2
@@ -468,7 +489,7 @@ class MouseLook():
         self.center = Vector(self.screen_center)
 
     def update(self):
-        """This is executed each frame if component is active."""
+        '''Per-frame update: compute the mouse offset, apply smoothing, enforce caps, and rotate both objects. Called automatically via the scene pre-draw list.'''
         # self.get_data()
         if not self.initialized and self.center_mouse:
             self.mouse.position = self.screen_center
@@ -548,4 +569,5 @@ class MouseLook():
 
 
 class ULMouseLook(MouseLook):
+    '''[DEPRECATED] Use :class:`MouseLook` instead.'''
     _deprecated = True

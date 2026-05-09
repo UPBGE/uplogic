@@ -27,7 +27,8 @@ class ULMusicEffect():
     def fade_out(self, factor=.02):
         '''Fade out this sound using linear interpolation.
 
-        :param factor: Speed of interpolation.'''
+        :param factor: Speed of interpolation.
+        '''
         self.volume = interpolate(self.volume, 0, factor)
         if self._fade_event:
             self._fade_event.cancel()
@@ -38,7 +39,8 @@ class ULMusicEffect():
     def fade_in(self, factor=.01):
         '''Fade in this sound using linear interpolation.
 
-        :param factor: Speed of interpolation.'''
+        :param factor: Speed of interpolation.
+        '''
         self.volume = interpolate(self.volume, 1, factor)
         if self._fade_event:
             self._fade_event.cancel()
@@ -48,10 +50,12 @@ class ULMusicEffect():
 
 
 class Music(ULMusicEffect):
-    '''
-    Management class for controlling multiple music tracks.
+    '''Management class for controlling multiple music tracks.
 
-    :param name: Name of this music.'''
+    :param name: Name of this music; a UUID is generated when omitted.
+    :param audio_system: Name of the :class:`~uplogic.audio.audiosystem.AudioSystem`
+        to play tracks on.
+    '''
     _deprecated = False
 
     def __init__(
@@ -69,8 +73,9 @@ class Music(ULMusicEffect):
 
     @property
     def position(self):
-        '''Playback position of the first track of the music (and consequently
-        all other tracks).'''
+        '''Playback position of the first track (and consequently all others),
+        in seconds. Returns ``0.0`` when there are no tracks.
+        '''
         if not self.tracks:
             return 0.0
         return self.tracks[0].sound.position
@@ -114,10 +119,13 @@ class Music(ULMusicEffect):
         track_name: str = ''
     ):
         '''Add a track to this music. A track is typically one instrument or
-        effect.
-        
-        :param sound: Path to the sound file or `Sound2D` instance.
-        :param name: Name of this track (e.g. "Drums")'''
+        effect layer.
+
+        :param sound: Path to the sound file or a :class:`Sound2D` instance.
+        :param track_name: Name of this track (e.g. ``"Drums"``); a UUID is
+            generated when omitted.
+        :returns: The new :class:`MusicTrack`.
+        '''
         if not track_name:
             track_name = uuid4()
         track = ULMusicTrack(self, sound, track_name)
@@ -129,8 +137,9 @@ class Music(ULMusicEffect):
         track: int or str = 0,
     ):
         '''Remove a track from this music.
-        
-        :param track: Index or name of the track to be removed.'''
+
+        :param track: Integer index or name string of the track to remove.
+        '''
         if isinstance(track, str):
             for t in self.tracks:
                 if t.name == track:
@@ -141,9 +150,11 @@ class Music(ULMusicEffect):
             self.tracks[track].remove()
 
     def get_track(self, name):
-        '''Get track by name.
-        
-        :param name: Name of the track.'''
+        '''Get a track by name.
+
+        :param name: Name of the track to find.
+        :returns: :class:`MusicTrack` with the given name, or ``None``.
+        '''
         for track in self.tracks:
             if track.name == name:
                 return track
@@ -154,7 +165,7 @@ class Music(ULMusicEffect):
             track.sound.pause()
 
     def resume(self):
-        '''Rasume this music (all tracks).'''
+        '''Resume this music (all tracks).'''
         for track in self.tracks:
             track.sound.resume()
 
@@ -172,12 +183,12 @@ class ULMusic(Music):
 
 
 class MusicTrack(ULMusicEffect):
+    '''Individual audio layer within a :class:`Music` object.
+
+    :param music: The :class:`Music` object this track belongs to.
+    :param sound: Path to the sound file or a :class:`Sound2D` instance.
+    :param name: Name of this track (e.g. ``"Drums"``).
     '''
-    Track to be played on a `Music` instance.
-    
-    :param music: The music object this track will be played on.
-    :param sound: Path to the soundfile of this track.
-    :param name: Name of this track (e.g. "Drums).'''
     _deprecated = False
 
     def __init__(
@@ -232,10 +243,11 @@ class MusicTrack(ULMusicEffect):
         self.sound.pitch = val * self.music.pitch
 
     def remove(self):
-        '''Stop and remove this track from its `ULMusic` object.'''
+        '''Stop this track's sound and remove it from the parent :class:`Music`.'''
         self.sound.stop()
         self.music.tracks.remove(self)
 
 
 class ULMusicTrack(MusicTrack):
+    '''[DEPRECATED] Use :class:`MusicTrack` instead.'''
     _deprecated = True

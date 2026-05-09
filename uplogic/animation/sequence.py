@@ -12,22 +12,27 @@ from uplogic.utils import clamp
 
 
 class Sequence():
-    '''
-    Play an image animation through a material node.
+    '''Drive a sprite-sheet or image-sequence animation through a Blender
+    material node, updated in real-time via the scene ``pre_draw`` callback.
 
-    :param material: Name of the material to play the animation on.
-    Each Object with this material applied will play the animation.
-    :param node: Name of the node the image animation is loaded on.
-    :param start_frame: Starting frame of the animation.
-    :param end_frame: End frame of the animation.
-    :param fps: Frames per second.
-    :param mode: Animation mode, `str` of [`play`, `loop`, `pingpong`]
+    Supports ``ShaderNodeSpritesAnimation`` and ``ShaderNodeTexImage`` nodes.
+    All objects sharing the material will display the same frame.
+
+    :param material: Name of the ``bpy.data.materials`` entry to animate.
+    :param node: Name of the shader node that holds the image animation.
+    :param start_frame: First frame of the playback range.
+    :param end_frame: Last frame of the playback range.
+    :param fps: Playback speed in frames per second.
+    :param mode: One of ``"play"``, ``"loop"``, or ``"pingpong"``.
     '''
 
     _deprecated = False
 
     @property
     def frame(self):
+        '''Current frame index shown on the node. Setting writes through to the
+        node and calls ``material.update_tag()`` to flush the change.
+        '''
         if self._node_type:
             return self.player.frame_offset
         return round(self.player.inputs[0].default_value)
@@ -42,6 +47,7 @@ class Sequence():
 
     @property
     def player(self):
+        '''The ``image_user`` of the underlying shader node (read-only).'''
         self._node.image_user
 
     def __init__(
@@ -58,25 +64,24 @@ class Sequence():
             warning('Warning: ULSequence class will be renamed to "ULSequence" in future releases!')
 
         self.material = bpy.data.materials[material]
-        """The material this sequence is played on."""
+        '''The Blender material this sequence is played on.'''
         self.node = node
-        """Name of the node the image animation is loaded on."""
+        '''Name of the shader node that drives the image animation.'''
         self.start_frame = start_frame
-        """Starting frame of the animation."""
+        '''First frame of the playback range.'''
         self.end_frame = end_frame - .01  # .01 because the sprite node shows the next frame when numer is round
-        """End frame of the animation."""
+        '''Last frame of the playback range (offset by -0.01 to avoid showing the next frame).'''
         self.fps = fps
-        """Frames per second."""
+        '''Playback speed in frames per second.'''
         self.mode = mode
-        """Animation mode, `str` of [`play`, `loop`, `pingpong`]"""
+        '''Playback mode: ``"play"``, ``"loop"``, or ``"pingpong"``.'''
         self.time = 0.0
-        """Animation progress."""
+        '''Accumulated real-time seconds used to advance frames.'''
         # self.frame = 0
-        """Current frame of the animation."""
         self.on_start = False
-        """`True` when animation started."""
+        '''``True`` on the frame when the animation (re-)starts.'''
         self.on_finish = False
-        """`True` when animation finished this frame."""
+        '''``True`` on the frame when the animation finishes.'''
         self._initialized = False
         self._reverse = False
         self._running = True
@@ -102,26 +107,35 @@ class Sequence():
         logic.getCurrentScene().pre_draw.append(self.update)
 
     def stop(self):
-        '''Stop this animation completely.'''
+        '''Stop playback and remove the update hook from the scene pre-draw list.'''
         self.on_finish = True
         logic.getCurrentScene().pre_draw.remove(self.update)
 
     def pause(self):
-        '''Pause this animation.'''
+        '''Freeze the animation on the current frame without removing it from
+        the update loop.
+        '''
         self._pause = True
         self._running = False
 
     def restart(self):
-        '''Restart this animation.'''
+        '''Reset the animation so that :meth:`update` restarts from the first
+        frame on the next tick.
+        '''
         self._initialized = False
 
     def unpause(self):
-        '''Continue this animation.'''
+        '''Resume a paused animation from the frame it was frozen on.'''
         self._pause = False
         self._running = True
 
     def update(self):
-        '''This is called each frame.'''
+        '''Advance the animation by the elapsed real-time since the last call,
+        handle loop/ping-pong wrap-around, and stop the action when it reaches
+        the end in ``"play"`` mode.
+
+        Called automatically via the BGE scene pre-draw list.
+        '''
         now = time.time()
         self.time += now - self._time_then
         self._time_then = now
@@ -192,17 +206,5 @@ class Sequence():
 
 
 class ULSequence(Sequence):
-
-    '''[DEPRECATED] Use `uplogic.animation.Sequence` instead
-
-    Play an image animation through a material node.
-
-    :param material: Name of the material to play the animation on.
-    Each Object with this material applied will play the animation.
-    :param node: Name of the node the image animation is loaded on.
-    :param start_frame: Starting frame of the animation.
-    :param end_frame: End frame of the animation.
-    :param fps: Frames per second.
-    :param mode: Animation mode, `str` of [`play`, `loop`, `pingpong`]
-    '''
+    '''[DEPRECATED] Use :class:`Sequence` instead.'''
     _deprecated = True

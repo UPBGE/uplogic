@@ -8,19 +8,38 @@ from mathutils import Vector
 from uplogic.utils.constants import VEHICLE
 
 FWD = 'FRONT'
-"""Front Wheel Drive\n
-This will adress wheel indices starting in the front."""
+'''Front Wheel Drive. Addresses wheel indices starting in the front.'''
 
 RWD = 'REAR'
-"""Rear Wheel Drive\n
-This will adress wheel indices starting in the back."""
+'''Rear Wheel Drive. Addresses wheel indices starting in the back.'''
 
 FOURWD = 'ALL'
-"""Four Wheel Drive\n
-This will adress all wheels on the vehicle."""
+'''Four Wheel Drive. Addresses all wheels on the vehicle.'''
 
 
 class Vehicle():
+    '''BGE physics vehicle controller built on top of a Bullet vehicle constraint.
+
+    On construction the class scans all children of ``body`` recursively
+    (sorted by name) for objects whose name contains ``FWheel`` (front,
+    steering) or ``RWheel`` (rear, non-steering), detaches each from its
+    parent, and registers it with the BGE vehicle constraint. Body
+    orientation is temporarily zeroed to ``(0, 0, 0)`` during this
+    process and restored afterwards.
+
+    The ``drive``, ``brakes`` and ``steer_axle`` attributes accept one of
+    the module-level constants ``FWD``, ``RWD`` or ``FOURWD``.
+
+    :param body: The rigid-body ``KX_GameObject`` that acts as the chassis.
+    :param suspension: Suspension compression length applied to all wheels.
+    :param stiffness: Suspension stiffness applied to all wheels.
+    :param damping: Suspension damping applied to all wheels.
+    :param friction: Tyre friction coefficient applied to all wheels.
+    :param wheel_size: Multiplier for the auto-detected wheel radius.
+    :param drive: Drive axle constant (``FWD``, ``RWD`` or ``FOURWD``).
+    :param steer_axle: Steering axle constant (``FWD``, ``RWD`` or ``FOURWD``).
+    '''
+
     _deprecated = False
 
     def __init__(
@@ -34,6 +53,19 @@ class Vehicle():
         drive: str = FWD,
         steer_axle: str = FWD
     ) -> None:
+        '''Initialise the vehicle constraint and register the pre-draw reset callback.
+
+        :param body: Chassis ``KX_GameObject``. Children named ``FWheel*``
+            and ``RWheel*`` are automatically discovered and added as wheels.
+        :param suspension: Initial suspension compression for all wheels.
+        :param stiffness: Initial suspension stiffness for all wheels.
+        :param damping: Initial suspension damping for all wheels.
+        :param friction: Initial tyre friction for all wheels.
+        :param wheel_size: Radius multiplier applied to each wheel's
+            auto-detected size.
+        :param drive: Drive axle; one of ``FWD``, ``RWD`` or ``FOURWD``.
+        :param steer_axle: Steering axle; one of ``FWD``, ``RWD`` or ``FOURWD``.
+        '''
         if self._deprecated:
             from uplogic.console import warning
             warning('Warning: ULVehicle class will be renamed to "Vehicle" in future releases!')
@@ -101,14 +133,30 @@ class Vehicle():
         logic.getCurrentScene().pre_draw.append(self.reset)
 
     def rebuild(self):
+        '''Placeholder for rebuilding the vehicle constraint. Not yet implemented.'''
         pass
 
     def visualize(self):
+        '''Draw debug geometry for all wheels and the chassis mesh.
+
+        Each wheel is drawn as a blue cube via ``draw_cube`` and the
+        chassis is drawn via ``draw_mesh``.
+        '''
         for wheel in self.wheels:
             draw_cube(wheel, color=(0, 0, 1, 1))
         draw_mesh(self.body)
 
     def add_wheel(self, wheel, steering=False):
+        '''Add an additional wheel to the vehicle constraint at runtime.
+
+        Body orientation is temporarily zeroed to ``(0, 0, 0)`` before
+        calling ``car.addWheel`` and restored afterwards, mirroring the
+        constructor behaviour.
+
+        :param wheel: The ``KX_GameObject`` to register as a wheel. If it
+            has a parent it is detached first.
+        :param steering: Whether the wheel should be a steering wheel.
+        '''
         body = self.body
         car = self.constraint
         orig_ori = body.localOrientation.copy()
@@ -130,6 +178,13 @@ class Vehicle():
         body.localOrientation = orig_ori
 
     def reset(self):
+        '''Pre-draw callback that zeroes inputs not set during the current tick.
+
+        If ``is_accelerating``, ``is_braking`` or ``is_steering`` was not
+        set to ``True`` this tick the corresponding value is reset to ``0``
+        and the flag is cleared. Called automatically each frame via
+        ``pre_draw``.
+        '''
         if self.active:
             if not self.is_accelerating:
                 self.acceleration = 0
@@ -142,17 +197,26 @@ class Vehicle():
             self.is_steering = False
 
     def destroy(self):
+        '''Disable the vehicle and remove the pre-draw reset callback.'''
         self.disable()
         logic.getCurrentScene().pre_draw.remove(self.reset)
 
     def enable(self):
+        '''Enable the vehicle so that inputs are processed.'''
         self.active = True
 
     def disable(self):
+        '''Disable the vehicle so that all inputs are ignored.'''
         self.active = False
 
     @property
     def acceleration(self):
+        '''Engine force applied this tick, scaled by chassis mass.
+
+        Setting this property calls ``applyEngineForce`` on the configured
+        drive wheels. The value is multiplied by ``body.mass`` before being
+        passed to the constraint. Does nothing when the vehicle is disabled.
+        '''
         return self._acceleration
 
     @acceleration.setter
@@ -178,6 +242,14 @@ class Vehicle():
 
     @property
     def braking(self):
+        '''Brake force applied this tick, scaled by chassis mass.
+
+        Setting this property first clears braking on all wheels by calling
+        ``applyBraking(0, wheel)``, then applies the new force to the
+        configured brake wheels. The value is multiplied by ``body.mass``
+        before being passed to the constraint. Does nothing when the vehicle
+        is disabled.
+        '''
         return self._braking
 
     @braking.setter
@@ -206,6 +278,11 @@ class Vehicle():
 
     @property
     def steering(self):
+        '''Steering angle applied this tick in radians.
+
+        Setting this property calls ``setSteeringValue`` on the configured
+        steering-axle wheels. Does nothing when the vehicle is disabled.
+        '''
         return self._steering
 
     @steering.setter
@@ -230,6 +307,7 @@ class Vehicle():
 
     @property
     def suspension(self):
+        '''Suspension compression length applied to all wheels immediately on set.'''
         return self._suspension
 
     @suspension.setter
@@ -240,6 +318,7 @@ class Vehicle():
 
     @property
     def stiffness(self):
+        '''Suspension stiffness applied to all wheels immediately on set.'''
         return self._stiffness
 
     @stiffness.setter
@@ -250,6 +329,13 @@ class Vehicle():
 
     @property
     def speed(self):
+        '''Current forward speed in km/h (read-only).
+
+        Computed as ``localLinearVelocity.y * 3.6``. Attempting to set
+        this property logs a debug message and has no effect.
+
+        :returns: Forward speed in km/h as a ``float``.
+        '''
         return self.body.localLinearVelocity.y * 3.6
 
     @speed.setter
@@ -258,6 +344,7 @@ class Vehicle():
 
     @property
     def damping(self):
+        '''Suspension damping applied to all wheels immediately on set.'''
         return self._damping
 
     @damping.setter
@@ -268,6 +355,7 @@ class Vehicle():
 
     @property
     def friction(self):
+        '''Tyre friction coefficient applied to all wheels immediately on set.'''
         return self._friction
 
     @friction.setter
@@ -278,6 +366,7 @@ class Vehicle():
 
     @property
     def roll_influence(self):
+        '''Roll influence factor applied to all wheels immediately on set.'''
         return self._roll_influence
 
     @roll_influence.setter
@@ -287,18 +376,50 @@ class Vehicle():
             self.constraint.setRollInfluence(value, wheel)
 
     def set_wheel_suspension(self, wheel, suspension):
+        '''Set suspension compression for a single wheel by index.
+
+        :param wheel: Zero-based index of the target wheel.
+        :param suspension: Suspension compression length to apply.
+        '''
         self.constraint.setSuspensionCompression(suspension, wheel)
 
     def set_wheel_stiffness(self, wheel, stiffness):
+        '''Set suspension stiffness for a single wheel by index.
+
+        :param wheel: Zero-based index of the target wheel.
+        :param stiffness: Suspension stiffness value to apply.
+        '''
         self.constraint.setSuspensionStiffness(stiffness, wheel)
 
     def set_wheel_damping(self, wheel, damping):
+        '''Set suspension damping for a single wheel by index.
+
+        :param wheel: Zero-based index of the target wheel.
+        :param damping: Suspension damping value to apply.
+        '''
         self.constraint.setSuspensionDamping(damping, wheel)
 
     def set_wheel_friction(self, wheel, friction):
+        '''Set tyre friction for a single wheel by index.
+
+        :param wheel: Zero-based index of the target wheel.
+        :param friction: Tyre friction coefficient to apply.
+        '''
         self.constraint.setTyreFriction(friction, wheel)
 
     def accelerate(self, power: float = 1, drive='', wheelcount: int = None):
+        '''Apply engine force to the vehicle, optionally changing the drive axle.
+
+        This is the primary public API for acceleration. It optionally
+        updates ``drive`` and ``acc_wheels`` before assigning to the
+        ``acceleration`` property.
+
+        :param power: Normalised engine force (``1.0`` = full throttle).
+        :param drive: If non-empty and different from the current ``drive``,
+            overrides the drive axle (``FWD``, ``RWD`` or ``FOURWD``).
+        :param wheelcount: If provided and different from ``acc_wheels``,
+            overrides the number of driven wheels.
+        '''
         if drive != self.drive and drive:
             self.drive = drive
         if wheelcount and wheelcount != self.acc_wheels:
@@ -306,6 +427,18 @@ class Vehicle():
         self.acceleration = power
 
     def brake(self, power: float = .1, brakes: str = '', wheelcount: int = None):
+        '''Apply brake force to the vehicle, optionally changing the brake axle.
+
+        This is the primary public API for braking. It optionally updates
+        ``brakes`` and ``brake_wheels`` before assigning to the ``braking``
+        property.
+
+        :param power: Normalised brake force (``0.1`` by default).
+        :param brakes: If non-empty and different from the current ``brakes``,
+            overrides the brake axle (``FWD``, ``RWD`` or ``FOURWD``).
+        :param wheelcount: If provided and different from ``brake_wheels``,
+            overrides the number of braked wheels.
+        '''
         if brakes != self.brakes and brakes:
             self.brakes = brakes
         if wheelcount and wheelcount != self.brake_wheels:
@@ -313,6 +446,19 @@ class Vehicle():
         self.braking = power
 
     def steer(self, power: float = 0, steer_axle: str = '', wheelcount: int = None):
+        '''Apply steering angle to the vehicle, optionally changing the steer axle.
+
+        This is the primary public API for steering. It optionally updates
+        ``steer_axle`` and ``steer_wheels`` before assigning to the
+        ``steering`` property.
+
+        :param power: Steering angle in radians (positive = left).
+        :param steer_axle: If non-empty and different from the current
+            ``steer_axle``, overrides the steering axle (``FWD``, ``RWD``
+            or ``FOURWD``).
+        :param wheelcount: If provided and different from ``steer_wheels``,
+            overrides the number of steered wheels.
+        '''
         if steer_axle != self.steer_axle and steer_axle:
             self.steer_axle = steer_axle
         if wheelcount and wheelcount != self.steer_wheels:
@@ -321,4 +467,6 @@ class Vehicle():
 
 
 class ULVehicle(Vehicle):
+    '''[DEPRECATED] Use :class:`Vehicle` instead.'''
+
     _deprecated = True
