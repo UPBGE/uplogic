@@ -111,6 +111,7 @@ class Widget():
         self._size = [0, 0]
         self._rebuild = True
         self._z = 0
+        self._angle = 0
         self._clipped = [0, 0]
         self._cached_draw_pos = None
         self._cached_draw_size = None
@@ -128,6 +129,7 @@ class Widget():
         # self.size = size
         self._size = list(size)
         # self.pos = pos
+        # breakpoint()
         self._pos = list(pos)
         self.bg_color = bg_color
         self.angle = angle
@@ -254,7 +256,11 @@ class Widget():
     @property
     def canvas(self):
         """Find the canvas this widget is attached to."""
-        return self._canvas
+        # return self._canvas
+        pa = self
+        while pa.parent is not None:
+            pa = pa.parent
+        return pa if pa._is_canvas else None
 
     @property
     def pivot(self):
@@ -342,7 +348,8 @@ class Widget():
         if self.use_clipping is None:
             self.use_clipping = val.use_clipping
         self._parent = val
-        self._update_inherited()
+        # self._update_inherited()
+        self._cascade_inherited()
         self._mark_for_rebuild()
         self.pos = self.pos  # noqa
         self.size = self.size  # noqa
