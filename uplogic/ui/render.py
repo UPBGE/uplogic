@@ -15,7 +15,7 @@ class RenderedTexture(Widget):
         self.buffer = Buffer()
         self.start()
 
-    def _build_shader(self):
+    def _build_shader(self, force=False):
         size = self._draw_size
         self.view = gpu.types.GPUOffScreen(size[0], size[1])
 

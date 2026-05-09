@@ -44,7 +44,7 @@ class Camera(Widget):
         self.camera.useViewport = self.parent is not None and self.parent.show and self.show
         super().draw()
 
-    def _build_shader(self):
+    def _build_shader(self, force=False):
         if self.camera is None:
             return
         pos = self._draw_pos

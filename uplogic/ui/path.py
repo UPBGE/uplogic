@@ -59,7 +59,7 @@ class Path(Widget):
         self._points = val
         self._build_shader()
 
-    def _build_shader(self):
+    def _build_shader(self, force=False):
         if self.parent is None:
             return
         pos = self._draw_pos

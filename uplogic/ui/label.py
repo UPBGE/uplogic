@@ -165,6 +165,43 @@ class Label(Widget):
         # print(text)
         return text[1:]
 
+    def _get_shader(self):
+        import gpu
+        if self._shader is None:
+            # shader_info = gpu.types.GPUShaderCreateInfo()
+
+            # for i, vertex_in in enumerate(self.vertex_in):
+            #     shader_info.vertex_in(i, vertex_in[0], vertex_in[1])
+
+            # for i, interface in enumerate(self.interfaces):
+            #     vert_out = gpu.types.GPUStageInterfaceInfo(f'{interface[1]}_interface')
+            #     vert_out.smooth(interface[0], interface[1])
+            #     shader_info.vertex_out(vert_out)
+
+            # for constant in self.constants:
+            #     shader_info.push_constant(constant[0], constant[1])
+
+            # for i, sampler in enumerate(self.samplers):
+            #     shader_info.sampler(i, sampler[0], sampler[1])
+
+            # shader_info.push_constant('MAT4', "ModelViewProjectionMatrix")
+            # shader_info.fragment_out(0, 'VEC4', "FragColor")
+
+            # shader_info.vertex_source(self.vertex_shader)
+            # shader_info.fragment_source(self.fragment_shader)
+
+            # shader = gpu.shader.create_from_info(shader_info)
+
+            # matrix = gpu.matrix.get_projection_matrix()
+            # shader.uniform_float("ModelViewProjectionMatrix", matrix)
+            shader = gpu.shader.from_builtin('UNIFORM_COLOR')
+            return shader
+        return self._shader
+
+    def _build_shader(self, force=True):
+        # return super()._build_shader(force)
+        pass
+
     def draw(self):
         self._setup_draw()
         if self.parent is None:
@@ -183,7 +220,7 @@ class Label(Widget):
         if self.parent.use_clipping:
             verts = self.parent._vertices
             blf.enable(font, blf.CLIPPING)
-            blf.clipping(font, verts[0][0], verts[0][1], verts[2][0], verts[2][1] - charsize[1]*2)
+            blf.clipping(font, verts[1][0], verts[1][1], verts[2][0], verts[2][1] - charsize[1]*2)
         else:
             blf.disable(font, blf.CLIPPING)
         if self.shadow:

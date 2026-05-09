@@ -34,7 +34,6 @@ class ULCreateUILabel(ULActionNode):
         return self._widget
 
     def evaluate(self):
-        print('WOW')
         if not self.get_condition():
             return
         ipt = self.get_input

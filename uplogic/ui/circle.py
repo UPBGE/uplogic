@@ -65,7 +65,7 @@ class Circle(Widget):
         if self.parent and self.show:
             self._rebuild = True
 
-    def _build_shader(self):
+    def _build_shader(self, force=False):
         pos = self._draw_pos
         size = self._draw_size
         _resolution = 64

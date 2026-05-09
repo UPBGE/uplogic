@@ -125,11 +125,11 @@ class Slider(RelativeLayout):
         self.size = self.size
         self._build_shader()
 
-    def _build_shader(self):
+    def _build_shader(self, force=False):
         super()._build_shader()
         if self.bar and self.knob:
-            self.bar._build_shader()
-            self.knob._build_shader()
+            self.bar._build_shader(force)
+            self.knob._build_shader(force)
         # if self.parent:
         #     self.value = self.value
 

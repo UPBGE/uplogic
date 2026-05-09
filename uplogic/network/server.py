@@ -5,7 +5,7 @@ import socket
 import threading
 from uplogic.utils.constants import DISCONNECT_MSG
 from uplogic import console
-import time
+import sys
 
 
 class Server:
@@ -14,7 +14,7 @@ class Server:
         if ip is None:
             ip = socket.gethostbyname(socket.gethostname())
         self.ip = ip
-        self.clients = []
+        self.clients: list[socket.socket] = []
         self.port = port
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.scene = bge.logic.getCurrentScene()
@@ -53,7 +53,7 @@ class Server:
         if not self.running:
             # console.debug(f"{self.ip}:{self.port} offline.")
             return
-        # console.debug(f'Stopping Server: IP={self.ip} Port={self.port}')
+        console.debug(f'Stopping Server: IP={self.ip} Port={self.port}')
         scene = bge.logic.getCurrentScene()
         if self.shutdown in scene.onRemove:
             scene.onRemove.remove(self.shutdown)
@@ -65,14 +65,14 @@ class Server:
                 self.socket.shutdown(socket.SHUT_WR)
             self.clients = []
             self.socket.close()
-            # console.success('[SERVER STOPPED]')
-            print('[SERVER STOPPED]')
+            console.success('[SERVER STOPPED]')
+            # print('[SERVER STOPPED]')
         except Exception as e:
             self.running = False
             self.clients = []
             self.socket.close()
-            # console.error(e)
-            # console.error('Runtime Exit.')
+            console.error(e)
+            console.error('Runtime Exit.')
 
     def restart(self):
         self.shutdown()
@@ -91,35 +91,38 @@ class Server:
             for conn in self.clients:
                 conn.send(pickle.dumps(msg))
 
-    def threaded_client(self, conn, addr):
+    def threaded_client(self, conn: socket.socket, addr):
         connected = True
         self.clients.append(conn)
+        print(bge.logic.getRealTime())
         while connected and self.running:
+            
             try:
                 bmsg = conn.recv(2**14)
                 msg = pickle.loads(bmsg)
                 if not bmsg or msg == DISCONNECT_MSG:
-                    # console.debug('Client disconnected.')
+                    console.debug('Client disconnected.')
                     connected = False
                 else:
                     self.on_receive(msg)
             except ConnectionResetError:
-                # console.error(f'{e.__class__.__name__}: {e}')
+                console.error(f'{e.__class__.__name__}: {e}')
                 connected = False
             except socket.error as e:
-                # console.error(f'{e.__class__.__name__}: {e}')
+                console.error(f'{e.__class__.__name__}: {e}')
                 connected = False
             except pickle.UnpicklingError as e:
                 pass
             except Exception as e:
-                # console.error(f'{e.__class__.__name__}: {e}')
-                # console.error('Threaded Client Error')
+                console.error(f'{e.__class__.__name__}: {e}')
+                console.error('Threaded Client Error')
                 connected = False
         self.clients.remove(conn)
         conn.send(pickle.dumps(DISCONNECT_MSG))
-        # console.debug('Closing Connection...')
+        console.debug('Closing Connection...')
         conn.close()
-        # console.debug(f'[ACTIVE CONNECTIONS] {len(self.clients)}')
+        # print(f'[ACTIVE CONNECTIONS] {len(self.clients)}')
+        console.debug(f'[ACTIVE CONNECTIONS] {len(self.clients)}')
         return
 
     def update(self):
@@ -127,11 +130,11 @@ class Server:
             # print('SERVER RUNNING')
             try:
                 conn, add = self.socket.accept()
-                # console.debug(f"Established connection to: {add}")
+                console.debug(f"Established connection to: {add}")
                 # print(f"Established connection to: {add}")
                 thread = threading.Thread(target=self.threaded_client, args=(conn, add))
                 thread.start()
-                # console.debug(f'[ACTIVE CONNECTIONS] {len(self.clients)}')
+                console.debug(f'[ACTIVE CONNECTIONS] {len(self.clients)}')
             except BlockingIOError:
                 pass
             except socket.timeout:
@@ -143,6 +146,6 @@ class Server:
                 self.running = False
                 self.shutdown()
             except Exception as e:
-                # console.debug(e, 'Exception')
+                console.debug(e, 'Exception')
                 self.running = False
                 self.shutdown()

@@ -23,7 +23,7 @@ class WorldPath(Path):
         self.line_width = line_width
         self.start()
     
-    def _build_shader(self):
+    def _build_shader(self, force=False):
         if self.parent is None:
             return
         points = []
@@ -52,7 +52,7 @@ class ObjectPath(Path):
         self.line_width = line_width
         self.start()
 
-    def _build_shader(self):
+    def _build_shader(self, force=False):
         if self.parent is None:
             return
         points = []

@@ -65,8 +65,8 @@ class Layout(Widget):
         self._shader.uniform_float("color", col)
         self._batch.draw(self._shader)
         self._shader.uniform_float("color", bcol)
-        self._batch_line.draw(self._shader)
-        self._batch_points.draw(self._shader)
+        # self._batch_line.draw(self._shader)
+        # self._batch_points.draw(self._shader)
         super().draw()
 
 

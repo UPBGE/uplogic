@@ -36,10 +36,10 @@ class Layout(Widget):
         angle=0,
         show=True
     ):
-        self.border_width = border_width
-        self.border_color = border_color
         self._inverted = False
         super().__init__(pos, size, bg_color, relative, halign=halign, valign=valign, angle=angle, show=show)
+        self.border_width = border_width
+        self.border_color = border_color
         self.start()
 
     @property
@@ -60,20 +60,32 @@ class Layout(Widget):
             val = 1
         self._border_width = int(val)
 
+    # TODO: re-implement border_color using frag shader code
+    # def _build_shader(self, force=True):
+    #     self._batch = batch_for_shader(self._shader, 'TRI_STRIP', {
+    #         "position": vertices,
+    #         "coords": (
+    #             (1, 0),
+    #             (0, 0),
+    #             (1, 1),
+    #             (0, 1)
+    #         )
+    #     })
+
     def draw(self):
         if self._rebuild:
             self._setup_draw()
-        gpu.state.line_width_set(self.border_width)
-        gpu.state.point_size_set(self.border_width)
-        col = self.bg_color.copy()
-        col[3] *= self.opacity
-        bcol = self.border_color.copy()
-        bcol[3] *= self.opacity
-        self._shader.uniform_float("color", col)
+        # gpu.state.line_width_set(self.border_width)
+        # gpu.state.point_size_set(self.border_width)
+        # col = self.bg_color.copy()
+        # col[3] *= self.opacity
+        # bcol = self.border_color.copy()
+        # bcol[3] *= self.opacity
+        # self._shader.uniform_float("color", col)
         self._batch.draw(self._shader)
-        self._shader.uniform_float("color", bcol)
-        self._batch_line.draw(self._shader)
-        self._batch_points.draw(self._shader)
+        # self._shader.uniform_float("color", bcol)
+        # self._batch_line.draw(self._shader)
+        # self._batch_points.draw(self._shader)
         super().draw()
 
 
@@ -165,7 +177,7 @@ class ArrangedLayout(RelativeLayout):
         if val != self._show:
             self._show = val
             if val:
-                for child in self.children:
+                for child in self.children_visible:
                     child.pos = child.pos
                 self.arrange()
 

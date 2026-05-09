@@ -85,18 +85,11 @@ class Button(Widget, HoverBehavior):
     def draw(self):
         self._setup_draw()
         self._released = False
-        gpu.state.line_width_set(self.border_width)
-        gpu.state.point_size_set(self.border_width)
         col = self.override_color if self.override_color is not None else self.current_color
         col[3] *= self.opacity
-        bcol = self.border_color.copy()
-        bcol[3] *= self.opacity
         self._shader.uniform_float("color", col)
         self._clicked = False
         self._batch.draw(self._shader)
-        self._shader.uniform_float("color", bcol)
-        self._batch_line.draw(self._shader)
-        self._batch_points.draw(self._shader)
         super().draw()
 
     def evaluate(self):

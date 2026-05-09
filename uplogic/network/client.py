@@ -5,6 +5,8 @@ import bge
 from uplogic.utils.constants import DISCONNECT_MSG
 from uplogic import console
 from uplogic.serialize import *
+import sys
+
 
 class Client:
 
@@ -22,7 +24,7 @@ class Client:
         if self.connected:
             # console.debug('Client Already Connected! Aborting.')
             return
-        # console.debug(f'Connecting to {self.server}...')
+        console.debug(f'Connecting to {self.server}...')
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             if self.disconnect_on_scene_end:
@@ -32,24 +34,26 @@ class Client:
             self.connected = True
             thread = threading.Thread(target=self.update)
             thread.start()
-            # console.success('[SUCCESS]')
+            console.success('[SUCCESS]')
         except socket.error as e:
-            # console.error('[ERROR]')
-            # console.error(e)
+            console.error('[ERROR]')
+            console.error(e)
             return
 
     def disconnect(self, flag=True):
         if not self.connected or self.socket is None:
-            # console.debug('Client Not Connected!')
+            console.debug('Client Not Connected!')
             return
-        # console.debug(f'Disconnecting from {self.server}...')
+        console.debug(f'Disconnecting from {self.server}...')
         if flag:
             self.socket.send(pickle.dumps(DISCONNECT_MSG))
             self.socket.shutdown(socket.SHUT_WR)
             self.socket.close()
         self.socket = None
         self.connected = False
-        # console.success('[SUCCESS]')
+        if self.disconnect in self.scene.onRemove:
+            self.scene.onRemove.remove(self.disconnect)
+        console.success('[SUCCESS]')
 
     def send(self, msg, subject=''):
         if self.connected and self.socket is not None:
@@ -85,5 +89,5 @@ class Client:
                     self.on_receive(msg)
             except Exception as e:
                 self.connected = False
-        self.disconnect(False)
+        # self.disconnect(False)
         # console.debug('Closing')

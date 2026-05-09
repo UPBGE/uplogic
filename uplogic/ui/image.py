@@ -129,16 +129,14 @@ class Image(Widget):
         
         float power = clamp(saturation, 0.0, 1.0);
 
-        float grey = 0.21 * color.r + 0.71 * color.g + 0.07 * color.b;
+        float grey = (color.r + color.g + color.b) * .33;
         color = vec4(
             color.r * power + grey * (1.0 - power),
             color.g * power + grey * (1.0 - power),
             color.b * power + grey * (1.0 - power),
-            color.a
+            color.a * alpha
         );
-        color = mix(vec4(0.0), color, alpha);
         FragColor = pow(color, vec4(0.5));
-
     }
     """
 
@@ -156,7 +154,7 @@ class Image(Widget):
     ):
         self._texture = None
         self.use_aspect_ratio = use_aspect_ratio
-        self._uv: _UV[_UV_Point] = _UV((_UV_Point((0.001, .999)), _UV_Point((0.001, .999)), self))
+        self._uv: _UV[_UV_Point] = _UV((_UV_Point((0.01, .99)), _UV_Point((0.01, .99)), self))
         self._opacity = 1
         self._saturation = 1
         self._load_image(texture)
@@ -260,57 +258,25 @@ class Image(Widget):
         y0 = Vector(v[3])
         return Vector(self._get_pivot(x0, x1, y0, y1))
 
-    def _build_shader(self):
+    def _get_vertices(self, pos, size):
+        return super()._get_vertices(pos, size)
+
+    def _get_uvs(self):
+        return [self.uv.x.copy(), self.uv.y.copy()]
+
+    def _build_shader(self, force=True):
         pos = self._draw_pos
         size = self._draw_size
-        x0 = Vector((pos[0], pos[1]))
-        x1 = Vector((pos[0] + size[0], pos[1]))
-        y1 = Vector((pos[0] + size[0], pos[1] + size[1]))
-        y0 = Vector((pos[0], pos[1] + size[1]))
-        pivot = self._get_pivot(x0, x1, y0, y1)
-
-        if self._draw_angle and self._vertices is not None:
-            x0 = rotate2d(x0, pivot, self._draw_angle)
-            x1 = rotate2d(x1, pivot, self._draw_angle)
-            y0 = rotate2d(y0, pivot, self._draw_angle)
-            y1 = rotate2d(y1, pivot, self._draw_angle)
-        v = [x0, x1, y0, y1]
-        uvs = [self.uv.x.copy(), self.uv.y.copy()]
-        parent = self.parent
-        if parent and parent.use_clipping:
-            clip = self.clipping
-            for vert in v:
-                if vert[0] < clip[0]:
-                    self._clipped[0] = clip[0] - vert[0]
-                    if size[0] != 0:
-                        uvs[0][0] = self._clipped[0] / size[0]
-                    vert[0] = clip[0]
-                elif vert[0] > clip[1]:
-                    self._clipped[0] = vert[1] - clip[1]
-                    if size[0] != 0:
-                        uvs[0][1] = 1 - self._clipped[0] / size[0]
-                    vert[0] = clip[1]
-                if vert[1] < clip[3]:
-                    self._clipped[1] = clip[3] - vert[1]
-                    if size[1] != 0:
-                        uvs[1][0] = self._clipped[1] / size[1]
-                    vert[1] = clip[3]
-                elif vert[1] > clip[2]:
-                    self._clipped[1] = vert[1] - clip[2]
-                    if size[1] != 0:
-                        uvs[1][1] = 1 - self._clipped[1] / size[1]
-                    vert[1] = clip[2]
-        vertices = self._vertices = (
-            x1, x0, y1, y0
-        )
 
         self._shader = self._get_shader()
-
+        self._vertices = self._get_vertices(pos, size)
+        uvs = self._get_uvs()
+        self._set_uniforms()
 
         self._batch = batch_for_shader(
             self._shader, 'TRI_STRIP',
             {
-                "position": vertices,
+                "position": self._vertices,
                 "texCoord": (
                     (uvs[0][1], uvs[1][0]),
                     (uvs[0][0], uvs[1][0]),
@@ -319,9 +285,10 @@ class Image(Widget):
                 ),
             },
         )
-        if bpy.app.version[0] >= 4:
-            self._shader.uniform_float("alpha", self.opacity)
-            self._shader.uniform_float("saturation", self.saturation)
+    
+    def _set_uniforms(self):
+        self._shader.uniform_float("alpha", self.opacity)
+        self._shader.uniform_float("saturation", self.saturation)
 
     def draw(self):
         gpu.state.blend_set("ALPHA")

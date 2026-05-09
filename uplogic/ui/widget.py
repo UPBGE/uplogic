@@ -52,34 +52,46 @@ class Widget():
     '''
 
     vertex_in: list[tuple[str, str]] = [
+        ('VEC2', 'texCoord'),
         ('VEC3', "position")
     ]
     """Data for the vertex shader."""
 
     interfaces: list[tuple[str, str]] = [
-        ('VEC3', "pos")
+        ('VEC3', "pos"),
+        ('VEC2', "uv")
     ]
     """Interfaces are passed from the vertex shader to the fragment shader under the same name."""
 
     constants: list[tuple[str, str]] = [
-        ('VEC4', "color")
+        ('VEC2', "resolution"),
+        ('VEC4', "color"),
+        ('VEC4', "border_color"),
+        ('FLOAT', "border_width")
     ]
     """Constant Data."""
 
     samplers: list[tuple[str, str]] = []
     """Constant Data."""
 
-    vertex_shader = '''
+    vertex_shader: str = '''
         void main()
         {
+            uv = texCoord;
             pos = position;
             gl_Position = ModelViewProjectionMatrix * vec4(position, 1.0f);
         }
     '''
 
-    fragment_shader = '''
+    fragment_shader: str = '''
         void main()
         {
+            float x_border = border_width / resolution.x;
+            float y_border = border_width / resolution.y;
+            if (uv.x < x_border || uv.x > 1-x_border || uv.y < y_border || uv.y > 1-y_border){
+                FragColor = mix(color, border_color, border_color.a);
+                return;
+            }
             FragColor = color;
         }
     '''
@@ -101,6 +113,8 @@ class Widget():
         self._halign = ALIGNMENTS.get('left')
         self._valign = ALIGNMENTS.get('bottom')
         self.child_offset = [0, 0]
+        self.border_color = (0, 0, 0, 0)
+        self.border_width = 0
 
         self.halign = halign
         self.valign = valign
@@ -303,6 +317,11 @@ class Widget():
         self._children = val
 
     @property
+    def children_visible(self):
+        """Immediate visible children of this widget."""
+        return [c for c in self._children if c.show]
+
+    @property
     def bg_color(self):
         """Background color of this widget. Colors the whole area of the widget in a rectangular shape."""
         return self._bg_color
@@ -337,7 +356,7 @@ class Widget():
         """The absolute position of this widget from the bottom left corner of the screen in pixels."""
         if self._vertices is None:
             return [0, 0]
-        pos = self._vertices[0]
+        pos = self._vertices[1]
         return [
             pos[0],# - self._clipped[0],
             pos[1] #- self._clipped[1]
@@ -436,7 +455,7 @@ class Widget():
     def size_pixel(self):
         if self._vertices is None:
             return [0, 0]
-        bottom_left = self._vertices[0]
+        bottom_left = self._vertices[1]
         top_right = self._vertices[2]
         return [top_right[0] - bottom_left[0], top_right[1] - bottom_left[1]]
 
@@ -516,6 +535,24 @@ class Widget():
             pdpos[1] + pdsize[1],
             pdpos[1]
         ]
+
+    @property
+    def next_widget(self):
+        if self.parent is not None and self in self.parent.children_visible:
+            idx = self.parent.children_visible.index(self)
+            if idx == len(self.parent.children_visible) - 1:
+                return None
+            return self.parent.children_visible[idx + 1]
+        return None
+
+    @property
+    def previous_widget(self):
+        if self.parent is not None and self in self.parent.children_visible:
+            idx = self.parent.children_visible.index(self)
+            if idx == 0:
+                return None
+            return self.parent.children_visible[idx - 1]
+        return None
 
     # @property
     # def _offset(self):
@@ -621,25 +658,21 @@ class Widget():
             return y1
         return x0
 
-    def _build_shader(self):
-        if self.parent is None:
-            return
-        pos = self._draw_pos
-        size = self._draw_size
+    def _get_vertices(self, pos, size):
         x0 = Vector([pos[0], pos[1]])
         x1 = Vector([pos[0] + size[0], pos[1]])
         y0 = Vector([pos[0], pos[1] + size[1]])
         y1 = Vector([pos[0] + size[0], pos[1] + size[1]])
+        pivot = self._get_pivot(x0, x1, y0, y1)
         if self._draw_angle and self._vertices is not None:
-            pivot = self._get_pivot(x0, x1, y0, y1)
             x0 = rotate2d(x0, pivot, self._draw_angle)
             x1 = rotate2d(x1, pivot, self._draw_angle)
             y0 = rotate2d(y0, pivot, self._draw_angle)
             y1 = rotate2d(y1, pivot, self._draw_angle)
-        v = [x0, x1, y0, y1]
-        if self.parent.use_clipping:
+        vertices = [x1, x0, y1, y0]
+        if self.parent and self.parent.use_clipping:
             clip = self.clipping
-            for vert in v:
+            for vert in vertices:
                 if vert[0] < clip[0]:
                     self._clipped[0] = clip[0] - vert[0]
                     vert[0] = clip[0]
@@ -650,29 +683,43 @@ class Widget():
                     vert[1] = clip[3]
                 elif vert[1] > clip[2]:
                     vert[1] = clip[2]
-        vertices = self._vertices = (
-            Vector(x0),
-            Vector(x1),
-            Vector(y1),
-            Vector(y0),
-            Vector(x0)
-        )
-        indices = (
-            (0, 1, 2), (2, 3, 0)
-        )
+        return vertices
+
+    def _build_shader(self, force=True):
+        if self.parent is None:
+            return
+        pos = self._draw_pos
+        size = self._draw_size
+
         self._shader = self._get_shader()
+        vertices = self._vertices = self._get_vertices(pos, size)
+        self._set_uniforms()
 
-        self._shader.uniform_float("color", self.bg_color)
+        _line_vertices = [
+            vertices[1], vertices[0], vertices[2], vertices[3], vertices[1]
+        ]
 
-        self._batch = batch_for_shader(self._shader, 'TRIS', {"position": vertices}, indices=indices)
-        self._batch_line = batch_for_shader(self._shader, 'LINE_STRIP', {"position": vertices})
-        self._batch_points = batch_for_shader(self._shader, 'POINTS', {"position": vertices})
+        self._batch = batch_for_shader(self._shader, 'TRI_STRIP', {
+            "position": vertices,
+            "texCoord": (
+                (1, 0),
+                (0, 0),
+                (1, 1),
+                (0, 1)
+            )
+        })
+
+    def _set_uniforms(self):
+        bg_color = self.bg_color.copy()
+        border_color = self.border_color.copy()
+        bg_color[3] *= self.opacity
+        border_color[3] *= self.opacity
+        self._shader.uniform_float("resolution", (self.width_pixel, self.height_pixel))
+        self._shader.uniform_float("border_color", border_color)
+        self._shader.uniform_float("border_width", int(self.border_width))
+        self._shader.uniform_float("color", bg_color)
 
     def _get_shader(self):
-        # if bpy.app.version[0] < 4:
-        #     return gpu.shader.from_builtin('2D_UNIFORM_COLOR')
-        # elif bpy.app.version[0] < 5:
-        #     return gpu.types.GPUShader(self.vertex_shader, self.fragment_shader)
         if self._shader is None:
             shader_info = gpu.types.GPUShaderCreateInfo()
 
