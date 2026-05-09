@@ -82,5 +82,5 @@ class ScrollView(RelativeLayout):
     def scroll(self, difference):
         if difference != 0:
             self.target_position = clamp(self.target_position - difference * self.scroll_speed, 0, self._height_diff)
-            self.scroll_bar._rebuild = True
+            self.scroll_bar._mark_for_rebuild()
         

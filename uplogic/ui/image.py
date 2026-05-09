@@ -42,7 +42,7 @@ class _UV(list):
     @x.setter
     def x(self, val):
         self[0] = _UV_Point(val)
-        self.owner._build_shader()
+        self.owner._mark_for_rebuild()
 
     @property
     def x_min(self) -> _UV_Point:
@@ -51,7 +51,7 @@ class _UV(list):
     @x_min.setter
     def x_min(self, val):
         self.x.lower = val
-        self.owner._build_shader()
+        self.owner._mark_for_rebuild()
 
     @property
     def x_max(self) -> _UV_Point:
@@ -60,7 +60,7 @@ class _UV(list):
     @x_max.setter
     def x_max(self, val):
         self.x.upper = val
-        self.owner._build_shader()
+        self.owner._mark_for_rebuild()
 
     @property
     def y(self) -> _UV_Point:
@@ -69,7 +69,7 @@ class _UV(list):
     @y.setter
     def y(self, val):
         self[1] = _UV_Point(val)
-        self.owner._build_shader()
+        self.owner._mark_for_rebuild()
 
     @property
     def y_min(self) -> _UV_Point:
@@ -78,7 +78,7 @@ class _UV(list):
     @y_min.setter
     def y_min(self, val):
         self.y.lower = val
-        self.owner._build_shader()
+        self.owner._mark_for_rebuild()
 
     @property
     def y_max(self) -> _UV_Point:
@@ -87,7 +87,7 @@ class _UV(list):
     @y_max.setter
     def y_max(self, val):
         self.y.upper = val
-        self.owner._build_shader()
+        self.owner._mark_for_rebuild()
 
 
 class Image(Widget):
@@ -153,12 +153,22 @@ class Image(Widget):
         show=True
     ):
         self._texture = None
-        self.use_aspect_ratio = use_aspect_ratio
+        self._use_aspect_ratio = use_aspect_ratio
         self._uv: _UV[_UV_Point] = _UV((_UV_Point((0.01, .99)), _UV_Point((0.01, .99)), self))
         self._opacity = 1
         self._saturation = 1
         self._load_image(texture)
         super().__init__(pos, size, relative=relative, halign=halign, valign=valign, angle=angle, show=show)
+
+    @property
+    def use_aspect_ratio(self):
+        return self._use_aspect_ratio
+
+    @use_aspect_ratio.setter
+    def use_aspect_ratio(self, val):
+        if val != self._use_aspect_ratio:
+            self._use_aspect_ratio = val
+            self._mark_for_rebuild()
 
     @property
     def saturation(self):
@@ -169,7 +179,7 @@ class Image(Widget):
         if val == self._saturation:
             return
         self._saturation = clamp(val, 0, 1)
-        self._rebuild = True
+        self._mark_for_rebuild()
 
     @property
     def uv(self):
@@ -178,7 +188,7 @@ class Image(Widget):
     @uv.setter
     def uv(self, val):
         self._uv = val
-        self._build_shader()
+        self._mark_for_rebuild()
 
     @property
     def image(self):
@@ -212,8 +222,10 @@ class Image(Widget):
 
     @property
     def _draw_size(self):
-        size = self.size.copy()
-        use_aspect_ratio = self.use_aspect_ratio
+        if self._cached_draw_size is not None:
+            return self._cached_draw_size
+        size = list(self._size)
+        use_aspect_ratio = self._use_aspect_ratio
         if self.parent is None:
             return size
         if use_aspect_ratio and self.image:
@@ -224,6 +236,7 @@ class Image(Widget):
                 size[0] * pdsize[0],
                 size[1] * (pdsize[0] if use_aspect_ratio else pdsize[1])
             ]
+        self._cached_draw_size = size
         return size
 
     @texture.setter
@@ -287,7 +300,7 @@ class Image(Widget):
         )
     
     def _set_uniforms(self):
-        self._shader.uniform_float("alpha", self.opacity)
+        self._shader.uniform_float("alpha", self._opacity_effective)
         self._shader.uniform_float("saturation", self.saturation)
 
     def draw(self):

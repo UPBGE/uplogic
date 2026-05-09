@@ -143,9 +143,9 @@ class SliderPreview(RelativeLayout):
         if self.use_clipping is None:
             self.use_clipping = val.use_clipping
         self._parent = val
+        self._mark_for_rebuild()
         self.pos = self.pos
         self.size = self.size
-        self._build_shader()
 
     def _build_shader(self, force=False):
         super()._build_shader()

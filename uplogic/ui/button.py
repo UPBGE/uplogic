@@ -44,15 +44,15 @@ class Button(Widget, HoverBehavior):
 
     @property
     def clicked(self):
-        return self._clicked and self.show
+        return self._clicked and self._show_effective
 
     @property
     def in_focus(self):
-        return self._hover and self.show
+        return self._hover and self._show_effective
 
     @property
     def released(self):
-        return self._released and self.show
+        return self._released and self._show_effective
 
     @property
     def border_color(self):
@@ -86,7 +86,7 @@ class Button(Widget, HoverBehavior):
         self._setup_draw()
         self._released = False
         col = self.override_color if self.override_color is not None else self.current_color
-        col[3] *= self.opacity
+        col[3] *= self._opacity_effective
         self._shader.uniform_float("color", col)
         self._clicked = False
         self._batch.draw(self._shader)

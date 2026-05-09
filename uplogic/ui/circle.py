@@ -50,8 +50,7 @@ class Circle(Widget):
     @width.setter
     def width(self, val):
         self._width = val
-        if self.parent and self.show:
-            self._rebuild = True
+        self._mark_for_rebuild()
 
     @property
     def radius(self):
@@ -62,8 +61,6 @@ class Circle(Widget):
     def radius(self, val):
         self._radius = val
         self.size = (val, val)
-        if self.parent and self.show:
-            self._rebuild = True
 
     def _build_shader(self, force=False):
         pos = self._draw_pos
@@ -84,7 +81,7 @@ class Circle(Widget):
         gpu.state.line_width_set(self.width)
         # col = self.line_color.copy()
         col = Vector((0, 1, 0, 1))
-        col[3] *= self.opacity
+        col[3] *= self._opacity_effective
         self._shader.uniform_float("color", col)
         self._batch_line.draw(self._shader)
         super().draw()

@@ -211,7 +211,7 @@ class Label(Widget):
         font = self.font
         blf.size(font, parsize[1] * self.font_size if relative else self.font_size)
         col = self.font_color
-        blf.color(font, col[0], col[1], col[2], col[3] * self.opacity)
+        blf.color(font, col[0], col[1], col[2], col[3] * self._opacity_effective)
         charsize = blf.dimensions(font, 'A')
 
         if self.angle or self.parent._draw_angle:
@@ -226,7 +226,7 @@ class Label(Widget):
         if self.shadow:
             col = self.shadow_color
             blf.enable(font, blf.SHADOW)
-            blf.shadow(font, 0, col[0], col[1], col[2], col[3] * self.opacity)
+            blf.shadow(font, 0, col[0], col[1], col[2], col[3] * self._opacity_effective)
             blf.shadow_offset(font, int(self.shadow_offset[0]), int(self.shadow_offset[1]))
         txt = self._wrap(parsize) if self.wrap else self.text
         lines = txt.split('\n')

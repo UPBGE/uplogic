@@ -103,11 +103,17 @@ class Widget():
         self._parent = None
         self._vertices = None  # (Vector((0, 0)), Vector((0, 0)), Vector((0, 0)), Vector((0, 0)))
         self._show = show
+        self._show_effective = show
+        self._opacity = 1.0
+        self._opacity_effective = 1.0
+        self._canvas = None
         self._pos = [0, 0]
         self._size = [0, 0]
         self._rebuild = True
         self._z = 0
         self._clipped = [0, 0]
+        self._cached_draw_pos = None
+        self._cached_draw_size = None
         self._active = True
         self._children: list[Widget] = []
         self._halign = ALIGNMENTS.get('left')
@@ -131,7 +137,6 @@ class Widget():
         self.use_clipping = False
         self.copy_height = False
         self.copy_width = False
-        self.opacity = 1.
 
     @property
     def idx(self):
@@ -201,10 +206,10 @@ class Widget():
     @halign.setter
     def halign(self, val):
         alignment = ALIGNMENTS.get(val, val)
-        if val and self.show and alignment != self._halign:
-            self._rebuild = True
+        if alignment != self._halign:
+            self._mark_for_rebuild()
         self._halign = alignment
-        
+
 
     @property
     def valign(self):
@@ -213,8 +218,8 @@ class Widget():
     @valign.setter
     def valign(self, val):
         alignment = ALIGNMENTS.get(val, val)
-        if val and self.show and alignment != self._valign:
-            self._rebuild = True
+        if alignment != self._valign:
+            self._mark_for_rebuild()
         self._valign = alignment
 
     @property
@@ -233,17 +238,14 @@ class Widget():
     @property
     def show(self):
         """If `False`, this widget and its children will not be rendered."""
-        pshow = self.parent.show if self.parent is not None else True
-        return self._show and pshow
+        return self._show
 
     @show.setter
     def show(self, val):
         if val != self._show:
             self._show = val
-            if val:
-                self._rebuild = True
-                for child in self.children:
-                    child.pos = child.pos  # noqa
+            self._cascade_inherited()
+            self._mark_for_rebuild()
 
     @property
     def _children_reversed(self):
@@ -252,10 +254,7 @@ class Widget():
     @property
     def canvas(self):
         """Find the canvas this widget is attached to."""
-        pa = self
-        while pa.parent is not None:
-            pa = pa.parent
-        return pa if pa._is_canvas else None
+        return self._canvas
 
     @property
     def pivot(self):
@@ -284,8 +283,8 @@ class Widget():
 
     @angle.setter
     def angle(self, val):
-        if val and self.show and val != self.angle:
-            self._rebuild = True
+        if val != self._angle:
+            self._mark_for_rebuild()
         self._angle = val
 
     @property
@@ -319,7 +318,7 @@ class Widget():
     @property
     def children_visible(self):
         """Immediate visible children of this widget."""
-        return [c for c in self._children if c.show]
+        return [c for c in self._children if c._show_effective]
 
     @property
     def bg_color(self):
@@ -338,13 +337,13 @@ class Widget():
 
     @parent.setter
     def parent(self, val):
-        if val and self.show and val != self.pos[0]:
-            self._rebuild = True
         if self.parent is not val and self.parent:
             self.parent.remove_widget(self)
         if self.use_clipping is None:
             self.use_clipping = val.use_clipping
         self._parent = val
+        self._update_inherited()
+        self._mark_for_rebuild()
         self.pos = self.pos  # noqa
         self.size = self.size  # noqa
         for c in self.children:
@@ -378,11 +377,9 @@ class Widget():
         if self._pos == val:
             return
         self._pos = val
-        if not self.show:
-            return
-        self.on_pos()
-        if self.parent and self.show:
-            self._rebuild = True
+        self._mark_for_rebuild()
+        if self._show_effective:
+            self.on_pos()
 
     def on_pos(self):
         ...
@@ -394,9 +391,9 @@ class Widget():
 
     @x.setter
     def x(self, val):
-        if self.parent and self.show and val != self.pos[0]:
-            self._rebuild = True
-        self._pos = [val, self.pos[1]]
+        if val != self._pos[0]:
+            self._mark_for_rebuild()
+        self._pos = [val, self._pos[1]]
 
     @property
     def y(self):
@@ -405,8 +402,8 @@ class Widget():
 
     @y.setter
     def y(self, val):
-        if self.parent and self.show and val != self.pos[1]:
-            self._rebuild = True
+        if val != self._pos[1]:
+            self._mark_for_rebuild()
         self._pos = [self._pos[0], val]
 
     @property
@@ -420,11 +417,9 @@ class Widget():
         if self._size == val:
             return
         self._size = val
-        if not self.show:
-            return
-        self.on_size()
-        if self.parent and self.show:
-            self._rebuild = True
+        self._mark_for_rebuild()
+        if self._show_effective:
+            self.on_size()
 
     def on_size(self):
         ...
@@ -436,8 +431,6 @@ class Widget():
 
     @width.setter
     def width(self, val):
-        if self.parent and self.show and val != self.size[0]:
-            self._rebuild = True
         self.size = [val, self.size[1]]
 
     @property
@@ -447,8 +440,6 @@ class Widget():
 
     @height.setter
     def height(self, val):
-        if self.parent and self.show and val != self.size[1]:
-            self._rebuild = True
         self.size = [self.size[0], val]
 
     @property
@@ -482,8 +473,7 @@ class Widget():
 
     @use_clipping.setter
     def use_clipping(self, val):
-        if self.parent and self.show and val != self._opacity:
-            self._rebuild = True
+        self._mark_for_rebuild()
         self._use_clipping = val
         for widget in self.childrenRecursive:
             widget._use_clipping = val
@@ -491,22 +481,20 @@ class Widget():
     @property
     def opacity(self):
         """Opacity for this widget, but not its children."""
-        op = self._opacity
-        if self.parent:
-            op *= self.parent.opacity
-        return op
+        return self._opacity
 
     @opacity.setter
     def opacity(self, val):
-        if self.parent and self.show and val != self._opacity:
-            self._rebuild = True
-        self._opacity = val
+        if val != self._opacity:
+            self._opacity = val
+            self._cascade_inherited()
+            self._mark_for_rebuild()
 
     @property
     def content_width(self):
         widths = []
         for c in self.children:
-            if not c.show:
+            if not c._show_effective:
                 continue
             p = c._draw_pos[0]
             w = c._draw_size[0]
@@ -517,7 +505,7 @@ class Widget():
     def content_height(self):
         heights = []
         for c in self.children:
-            if not c.show:
+            if not c._show_effective:
                 continue
             p = c._draw_pos[1]
             h = c._draw_size[1]
@@ -560,46 +548,44 @@ class Widget():
 
     @property
     def _draw_pos(self):
+        if self._cached_draw_pos is not None:
+            return self._cached_draw_pos
         if self.parent is None:
             return [0, 0]
-        inherit_pos = self.parent._draw_pos if self.parent else [0, 0]
-        pdsize = self.parent._draw_size
-        pos = [
-            math.floor(self.pos[0] * pdsize[0]),
-            math.floor(self.pos[1] * pdsize[1])
-        ] if self.relative.get('pos') else self.pos
-        child_offset = self.parent.child_offset if self.parent else [0, 0]
-        pos = [pos[0] + child_offset[0], pos[1] + child_offset[1]]
-        if self.parent and self.parent._draw_angle and self._vertices is not None:
-            pos = rotate2d(pos, self.parent.pivot - Vector(inherit_pos), self.parent._draw_angle)
-        offset = [0, 0]
+        parent = self.parent
+        inherit_pos = parent._draw_pos
+        pdsize = parent._draw_size
+        if self.relative.get('pos'):
+            pos = [math.floor(self._pos[0] * pdsize[0]), math.floor(self._pos[1] * pdsize[1])]
+        else:
+            pos = list(self._pos)
+        pos[0] += parent.child_offset[0]
+        pos[1] += parent.child_offset[1]
+        if parent._draw_angle and self._vertices is not None:
+            pos = rotate2d(pos, parent.pivot - Vector(inherit_pos), parent._draw_angle)
         dsize = self._draw_size
-        if self.halign == ALIGN_CENTER:
-            offset[0] += dsize[0] * .5
-        elif self.halign == ALIGN_RIGHT:
-            offset[0] += dsize[0]
-        if self.valign == ALIGN_CENTER:
-            offset[1] += dsize[1] * .5
-        elif self.valign == ALIGN_TOP:
-            offset[1] += dsize[1]
-        pos = [pos[0] + inherit_pos[0] - offset[0], pos[1] + inherit_pos[1] - offset[1]]
-        return pos
+        ox = dsize[0] * (.5 if self.halign == ALIGN_CENTER else 1 if self.halign == ALIGN_RIGHT else 0)
+        oy = dsize[1] * (.5 if self.valign == ALIGN_CENTER else 1 if self.valign == ALIGN_TOP else 0)
+        result = [pos[0] + inherit_pos[0] - ox, pos[1] + inherit_pos[1] - oy]
+        self._cached_draw_pos = result
+        return result
 
     @property
     def _draw_size(self):
-        size = self.size
+        if self._cached_draw_size is not None:
+            return self._cached_draw_size
         if self.parent is None:
-            return self.size
+            return self._size
         if self.relative.get('size'):
             pdsize = self.parent._draw_size
-            size = [
-                math.floor(self.size[0] * pdsize[0]),
-                math.floor(self.size[1] * pdsize[1])
-            ]
+            size = [math.floor(self._size[0] * pdsize[0]), math.floor(self._size[1] * pdsize[1])]
+        else:
+            size = list(self._size)
         if self.copy_width:
             size[1] = size[0]
         elif self.copy_height:
             size[0] = size[1]
+        self._cached_draw_size = size
         return size
 
     @property
@@ -685,9 +671,32 @@ class Widget():
                     vert[1] = clip[2]
         return vertices
 
+    def _mark_for_rebuild(self):
+        self._rebuild = True
+        self._cached_draw_pos = None
+        self._cached_draw_size = None
+
+    def _update_inherited(self):
+        parent = self._parent
+        if parent is None:
+            self._canvas = None
+            self._show_effective = self._show
+            self._opacity_effective = self._opacity
+        else:
+            self._canvas = parent if parent._is_canvas else parent._canvas
+            self._show_effective = self._show and parent._show_effective
+            self._opacity_effective = self._opacity * parent._opacity_effective
+
+    def _cascade_inherited(self):
+        self._update_inherited()
+        for c in self._children:
+            c._cascade_inherited()
+
     def _build_shader(self, force=True):
         if self.parent is None:
             return
+        self._cached_draw_pos = None
+        self._cached_draw_size = None
         pos = self._draw_pos
         size = self._draw_size
 
@@ -712,8 +721,8 @@ class Widget():
     def _set_uniforms(self):
         bg_color = self.bg_color.copy()
         border_color = self.border_color.copy()
-        bg_color[3] *= self.opacity
-        border_color[3] *= self.opacity
+        bg_color[3] *= self._opacity_effective
+        border_color[3] *= self._opacity_effective
         self._shader.uniform_float("resolution", (self.width_pixel, self.height_pixel))
         self._shader.uniform_float("border_color", border_color)
         self._shader.uniform_float("border_width", int(self.border_width))
@@ -764,7 +773,7 @@ class Widget():
 
     @property
     def _render_needed(self):
-        return self.show and (self.height_pixel > 0 or self.width_pixel > 0)
+        return self._show_effective and (self.height_pixel > 0 or self.width_pixel > 0)
 
     def draw(self):
         """This is called each frame if the widget is part of a canvas. It can be called manually,
@@ -773,7 +782,7 @@ class Widget():
         gpu.state.blend_set('ALPHA')
         self.canvas._to_evaluate.append(self)
         for widget in self.children:
-            if widget.show:
+            if widget._show_effective:
                 widget.draw()
 
     def evaluate(self):

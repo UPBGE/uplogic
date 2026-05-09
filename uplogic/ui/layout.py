@@ -276,7 +276,7 @@ class BoxLayout(ArrangedLayout):
         yalign = self.children_align[1]
         if self.orientation == 'horizontal':
             offset = dsize[0] if inverted else 0
-            for widget in filter(lambda widget: widget.show is True, self.children):
+            for widget in filter(lambda widget: widget._show_effective, self.children):
                 widget.halign = xalign
                 widget.valign = yalign
                 widget.relative['pos'] = False
@@ -287,7 +287,7 @@ class BoxLayout(ArrangedLayout):
                     offset += widget._draw_size[0] + self.spacing
         if self.orientation == 'vertical':
             offset = 0 if inverted else dsize[1]
-            for widget in filter(lambda widget: widget.show is True, self.children):
+            for widget in filter(lambda widget: widget._show_effective, self.children):
                 widget.halign = xalign
                 widget.valign = yalign
                 widget.relative['pos'] = False
@@ -296,7 +296,7 @@ class BoxLayout(ArrangedLayout):
                     offset += widget._draw_size[1] + self.spacing
                 else:
                     offset -= widget._draw_size[1] + self.spacing
-        self._rebuild = True
+        self._mark_for_rebuild()
 
     def evaluate(self):
         if self._do_arrange:
@@ -426,7 +426,7 @@ class GridLayout(BoxLayout):
             _offset_y = 0
             row = 0
             offset = 0
-            for widget in filter(lambda widget: widget.show is True, self.children):
+            for widget in filter(lambda widget: widget._show_effective, self.children):
                 offset_y = _offset_y + (self.spacing if row else 0)
                 widget.relative['pos'] = False
                 wsize = widget._draw_size
@@ -444,7 +444,7 @@ class GridLayout(BoxLayout):
             _offset_x = 0
             col = 0
             offset = 0
-            for widget in filter(lambda widget: widget.show is True, self.children):
+            for widget in filter(lambda widget: widget._show_effective, self.children):
                 offset_x = _offset_x + (self.spacing if col else 0)
                 widget.relative['pos'] = False
                 wsize = widget._draw_size
@@ -458,7 +458,7 @@ class GridLayout(BoxLayout):
                     _offset_x = max(_widget_sizes)
                     _widget_sizes = []
                     offset = 0
-        self._rebuild = True
+        self._mark_for_rebuild()
 
 
 class PolarLayout(ArrangedLayout):
@@ -526,7 +526,7 @@ class PolarLayout(ArrangedLayout):
         step = 360 / len(self.children)
         _angle = self.starting_angle
         pos = Vector((self.radius, 0))
-        for widget in filter(lambda widget: widget.show is True, self.children):
+        for widget in filter(lambda widget: widget._show_effective, self.children):
             widget.relative['pos'] = False
             widget.pos = rotate2d(pos, (0, 0), _angle)
             _angle += step

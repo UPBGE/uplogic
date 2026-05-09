@@ -59,9 +59,9 @@ class Layout(Widget):
         gpu.state.line_width_set(self.border_width)
         gpu.state.point_size_set(self.border_width)
         col = self.bg_color.copy()
-        col[3] *= self.opacity
+        col[3] *= self._opacity_effective
         bcol = self.border_color.copy()
-        bcol[3] *= self.opacity
+        bcol[3] *= self._opacity_effective
         self._shader.uniform_float("color", col)
         self._batch.draw(self._shader)
         self._shader.uniform_float("color", bcol)
@@ -296,7 +296,7 @@ class GridLayout(BoxLayout):
             _offset_y = 0
             row = 0
             offset = 0
-            for widget in filter(lambda widget: widget.show is True, self.children):
+            for widget in filter(lambda widget: widget._show_effective, self.children):
                 offset_y = _offset_y + (self.spacing if row else 0)
                 widget.relative['pos'] = False
                 wsize = widget._draw_size
@@ -314,7 +314,7 @@ class GridLayout(BoxLayout):
             _offset_x = 0
             col = 0
             offset = 0
-            for widget in filter(lambda widget: widget.show is True, self.children):
+            for widget in filter(lambda widget: widget._show_effective, self.children):
                 offset_x = _offset_x + (self.spacing if col else 0)
                 widget.relative['pos'] = False
                 wsize = widget._draw_size
@@ -330,7 +330,7 @@ class GridLayout(BoxLayout):
                     offset = 0
             # col = 0
             # offset = dsize[1]
-            # for widget in filter(lambda widget: widget.show is True, self.children):
+            # for widget in filter(lambda widget: widget._show_effective, self.children):
             #     offset_x = (self._draw_size[0] / (self.cols) + self.spacing) * col
             #     offset -= widget._draw_size[0]
             #     widget.relative['pos'] = False

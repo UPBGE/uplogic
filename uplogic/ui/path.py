@@ -39,7 +39,7 @@ class Path(Widget):
     @line_color.setter
     def line_color(self, val):
         self._line_color = list(val)
-        self._build_shader()
+        self._mark_for_rebuild()
 
     @property
     def line_width(self) -> float:
@@ -48,7 +48,7 @@ class Path(Widget):
     @line_width.setter
     def line_width(self, val):
         self._line_width = val
-        self._build_shader()
+        self._mark_for_rebuild()
 
     @property
     def points(self) -> list:
@@ -57,7 +57,7 @@ class Path(Widget):
     @points.setter
     def points(self, val):
         self._points = val
-        self._build_shader()
+        self._mark_for_rebuild()
 
     def _build_shader(self, force=False):
         if self.parent is None:
@@ -81,7 +81,7 @@ class Path(Widget):
         self._setup_draw()
         gpu.state.line_width_set(self.line_width)
         col = self.line_color.copy()
-        col[3] *= self.opacity
+        col[3] *= self._opacity_effective
         self._shader.uniform_float("color", col)
         self._batch_line.draw(self._shader)
         super().draw()

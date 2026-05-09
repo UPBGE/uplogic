@@ -26,10 +26,10 @@ class Camera(Widget):
         if self.use_clipping is None:
             self.use_clipping = val.use_clipping
         self._parent = val
+        self._mark_for_rebuild()
         self.pos = self.pos
         self.size = self.size
-        self.camera.useViewport = val is not None and val.show and self.show
-        self._build_shader()
+        self.camera.useViewport = val is not None and val._show_effective and self._show_effective
 
     @property
     def camera(self) -> KX_Camera:
@@ -41,7 +41,7 @@ class Camera(Widget):
 
     def draw(self):
         self._setup_draw()
-        self.camera.useViewport = self.parent is not None and self.parent.show and self.show
+        self.camera.useViewport = self.parent is not None and self.parent._show_effective and self._show_effective
         super().draw()
 
     def _build_shader(self, force=False):

@@ -109,7 +109,7 @@ class Canvas(Widget):
             self.fetch_size()
         self._old_width = width
         self._old_height = height
-        if not self.show:
+        if not self._show_effective:
             return
         gpu.state.blend_set('ALPHA')
         super().draw()
@@ -182,8 +182,8 @@ class Layer(Widget):
         if self.use_clipping is None:
             self.use_clipping = val.use_clipping
         self._parent = val
+        self._mark_for_rebuild()
         self.pos = self.pos
         self.size = self.size
         for c in self.children:
             c.parent = c.parent
-        self._build_shader()

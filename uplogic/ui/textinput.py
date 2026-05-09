@@ -171,7 +171,7 @@ class TextInput(Label):
         right_shift = logic.keyboard.inputs[events.RIGHTSHIFTKEY].active
         keyboard_events = logic.keyboard.inputs.copy()
         tpf = (1 / (logic.getAverageFrameRate() or 0.01))
-        self._rebuild = True
+        self._mark_for_rebuild()
 
         for i, evt in keyboard_events.items():
             text = self.text

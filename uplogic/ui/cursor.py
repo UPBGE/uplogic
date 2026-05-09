@@ -57,7 +57,7 @@ class Cursor(Sprite):
         self._batch.draw(self._shader)
 
     def _draw_custom_cursor(self):
-        if self.show:
+        if self._show_effective:
             self.pos = MOUSE.position
             self._build_shader()
             self.draw()
