@@ -1,3 +1,5 @@
+'''Circular outline widget for uplogic UI.'''
+
 from .widget import Widget
 import gpu
 import bge, bpy
@@ -8,6 +10,15 @@ from mathutils import Vector
 
 
 class Circle(Widget):
+    '''Widget that draws a circular outline using 64 ``LINE_STRIP`` segments.
+
+    :param pos: Centre position in pixels or factor.
+    :param radius: Circle radius in pixels.
+    :param width: Stroke thickness in pixels.
+    :param relative: Relative positioning/sizing flags.
+    :param halign: Horizontal alignment.
+    :param valign: Vertical alignment.
+    '''
 
     vertex_shader = """
     in vec2 texCoord;
@@ -44,7 +55,7 @@ class Circle(Widget):
 
     @property
     def width(self):
-        """Horizontal size of this widget in either pixels or factor relative to its parent."""
+        '''Stroke thickness of the circle outline in pixels.'''
         return self._width
 
     @width.setter
@@ -55,7 +66,7 @@ class Circle(Widget):
 
     @property
     def radius(self):
-        """Horizontal size of this widget in either pixels or factor relative to its parent."""
+        '''Circle radius in pixels.  Setting this also updates :attr:`size`.'''
         return self._radius
 
     @radius.setter

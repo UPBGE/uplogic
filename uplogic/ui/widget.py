@@ -1,3 +1,5 @@
+'''Base widget class and alignment constants for the uplogic UI system.'''
+
 import gpu
 from gpu_extras.batch import batch_for_shader
 
@@ -20,10 +22,19 @@ except Exception:
 
 
 ALIGN_CENTER = 0
+'''Centre alignment (horizontal or vertical).'''
+
 ALIGN_LEFT = 1
+'''Left horizontal alignment.'''
+
 ALIGN_RIGHT = 2
+'''Right horizontal alignment.'''
+
 ALIGN_BOTTOM = 3
+'''Bottom vertical alignment.'''
+
 ALIGN_TOP = 4
+'''Top vertical alignment.'''
 
 
 ALIGNMENTS = {
@@ -33,35 +44,39 @@ ALIGNMENTS = {
     'bottom': ALIGN_BOTTOM,
     'top': ALIGN_TOP,
 }
+'''Mapping from alignment name strings to their integer constants.'''
 
 
 class Widget():
-    '''The widget Base class. a Widget has all the basic logic about
-    sizing and positioning, but has no visual representation.
+    '''Base class for all uplogic UI elements.
 
-    This class is intended to be used as a base for inheriting from
-    for custom widgets.
+    Handles sizing, positioning, alignment, rotation, opacity, clipping, and
+    the GPU shader lifecycle.  Has no visual representation on its own; subclass
+    it to draw something or use one of the built-in subclasses.
 
-    :param pos: Initial position of this widget in either pixels or factor.
-    :param size: Initial size of this widget in either pixels or factor.
-    :param bg_color: Color to draw in the area of the widget.
-    :param relative: Whether to use pixels or factor for size or pos; example: `{'pos': True, 'size': True}`.
-    :param halign: Horizontal alignment of the widget, can be (`left`, `center`, `right`).
-    :param valign: Vertical alignment of the widget, can be (`bottom`, `center`, `top`).
-    :param angle: Rotation in degrees of this widget around the pivot defined by the alignment.
+    :param pos: Position in pixels or factor relative to the parent.
+    :param size: Size ``[width, height]`` in pixels or factor.
+    :param bg_color: RGBA background fill colour.
+    :param relative: Dict controlling coordinate interpretation.  Supported
+        keys: ``'pos'`` and ``'size'`` (``True`` = factor of parent size,
+        ``False`` = pixels); ``'font_size'`` for :class:`~uplogic.ui.label.Label`.
+    :param halign: Horizontal alignment pivot: ``'left'``, ``'center'``, or ``'right'``.
+    :param valign: Vertical alignment pivot: ``'bottom'``, ``'center'``, or ``'top'``.
+    :param angle: Rotation in degrees around the alignment pivot.
+    :param show: Initial visibility.
     '''
 
     vertex_in: list[tuple[str, str]] = [
         ('VEC2', 'texCoord'),
         ('VEC3', "position")
     ]
-    """Data for the vertex shader."""
+    '''Vertex-shader input attributes: UV texture coordinates and world position.'''
 
     interfaces: list[tuple[str, str]] = [
         ('VEC3', "pos"),
         ('VEC2', "uv")
     ]
-    """Interfaces are passed from the vertex shader to the fragment shader under the same name."""
+    '''Variables interpolated from the vertex shader to the fragment shader.'''
 
     constants: list[tuple[str, str]] = [
         ('VEC2', "resolution"),
@@ -69,10 +84,10 @@ class Widget():
         ('VEC4', "border_color"),
         ('FLOAT', "border_width")
     ]
-    """Constant Data."""
+    '''Push-constant uniforms: widget resolution, fill colour, border colour, and border width.'''
 
     samplers: list[tuple[str, str]] = []
-    """Constant Data."""
+    '''Texture sampler declarations (none for the base Widget).'''
 
     vertex_shader: str = '''
         void main()
@@ -82,6 +97,7 @@ class Widget():
             gl_Position = ModelViewProjectionMatrix * vec4(position, 1.0f);
         }
     '''
+    '''GLSL vertex shader source string.'''
 
     fragment_shader: str = '''
         void main()
@@ -95,6 +111,7 @@ class Widget():
             FragColor = color;
         }
     '''
+    '''GLSL fragment shader: solid fill with an optional inset border.'''
 
     _is_canvas = False
 
@@ -135,13 +152,14 @@ class Widget():
 
     @property
     def idx(self):
-        """The index of this widget amongst its parent's children."""
+        '''Index of this widget among its parent's children, or ``-1`` if unparented.'''
         if self.parent:
             children = self.parent.children
             return children.index(self)
         return -1
 
     def move_up(self):
+        '''Swap this widget one position higher in the parent's draw order (drawn later/on top).'''
         if self.parent is not None:
             children = self.parent.children
             idx = children.index(self)
@@ -149,6 +167,7 @@ class Widget():
                 children[idx], children[idx + 1] = children[idx + 1], children[idx]
 
     def move_down(self):
+        '''Swap this widget one position lower in the parent's draw order (drawn earlier/behind).'''
         if self.parent is not None:
             children = self.parent.children
             idx = children.index(self)
@@ -156,38 +175,47 @@ class Widget():
                 children[idx], children[idx - 1] = children[idx - 1], children[idx]
 
     def move_to_top(self):
+        '''Move this widget to the end of the parent's children list (drawn last/on top).'''
         if self.parent is not None:
             children = self.parent.children
             children.remove(self)
             children.append(self)
 
     def move_to_bottom(self):
+        '''Move this widget to the beginning of the parent's children list (drawn first/behind everything).'''
         if self.parent is not None:
             children = self.parent.children
             children.remove(self)
             children.insert(0, self)
 
     def register(self):
+        '''Override to add custom logic when the widget is attached to a parent.  Default is a no-op.'''
         pass
 
     def toggle(self, *args):
-        """Toggle the widget on/off."""
+        '''Toggle :attr:`show` between ``True`` and ``False``.'''
         self.show = not self.show
 
     def set_visible(self, flag=True):
+        '''Set :attr:`show` to *flag*.
+
+        :param flag: Visibility state to apply.  Defaults to ``True``.
+        '''
         self.show = flag
 
     def set_invisible(self):
+        '''Set :attr:`show` to ``False``.'''
         self.show = False
 
     def make_floating(self, pos=True, size=True, halign='center', valign='center'):
-        """Quickly set the attributes of this widget to use relative data.
+        '''Convenience: set relative positioning and alignment in one call.
 
-        :param pos: Use relative position.
-        :param size: Use relative size.
-        :param halign: The horizontal alignment.
-        :param valign: The vertical alignment.
-        """
+        :param pos: Use relative (factor) position.  Defaults to ``True``.
+        :param size: Use relative (factor) size.  Defaults to ``True``.
+        :param halign: Horizontal alignment.  Defaults to ``'center'``.
+        :param valign: Vertical alignment.  Defaults to ``'center'``.
+        :returns: ``self`` for chaining.
+        '''
         self.relative['pos'] = pos
         self.relative['size'] = size
         self.halign = halign
@@ -196,6 +224,10 @@ class Widget():
 
     @property
     def halign(self):
+        '''Horizontal alignment pivot: ``'left'``, ``'center'``, or ``'right'``.
+
+        Accepts a string name and stores the corresponding :data:`ALIGN_*` integer.
+        '''
         return self._halign
 
     @halign.setter
@@ -204,10 +236,14 @@ class Widget():
         if val and self.show and alignment != self._halign:
             self._rebuild = True
         self._halign = alignment
-        
+
 
     @property
     def valign(self):
+        '''Vertical alignment pivot: ``'bottom'``, ``'center'``, or ``'top'``.
+
+        Accepts a string name and stores the corresponding :data:`ALIGN_*` integer.
+        '''
         return self._valign
 
     @valign.setter
@@ -219,6 +255,10 @@ class Widget():
 
     @property
     def active(self):
+        '''``True`` when this widget and every ancestor have ``_active`` set.
+
+        Setting to ``False`` effectively disables the widget without hiding it.
+        '''
         parent = self
         while parent is not None:
             if not parent._active:
@@ -232,7 +272,10 @@ class Widget():
 
     @property
     def show(self):
-        """If `False`, this widget and its children will not be rendered."""
+        '''``False`` hides this widget and all its children from rendering.
+        Inherits the parent's visibility: if the parent is hidden this returns
+        ``False`` regardless of the local flag.
+        '''
         pshow = self.parent.show if self.parent is not None else True
         return self._show and pshow
 
@@ -251,7 +294,11 @@ class Widget():
 
     @property
     def canvas(self):
-        """Find the canvas this widget is attached to."""
+        '''Root :class:`~uplogic.ui.canvas.Canvas` this widget is attached to.
+
+        Walks the parent chain to the root.  Returns ``None`` when the widget
+        has not been added to a canvas.
+        '''
         pa = self
         while pa.parent is not None:
             pa = pa.parent
@@ -259,7 +306,11 @@ class Widget():
 
     @property
     def pivot(self):
-        """Rotation point for this widget."""
+        '''Screen-space rotation pivot point derived from the widget's alignment.
+
+        Returns a zero vector when the widget has no parent or the vertex
+        buffer has not yet been built.
+        '''
         if self.parent is None:
             return Vector((0, 0))
         v = self._vertices
@@ -279,7 +330,9 @@ class Widget():
 
     @property
     def angle(self):
-        """The angle this widget is rotated by."""
+        '''Local rotation in degrees.  Positive values rotate counter-clockwise.
+        Combines with parent rotations when computing :attr:`_draw_angle`.
+        '''
         return self._angle
 
     @angle.setter
@@ -301,7 +354,7 @@ class Widget():
 
     @property
     def children_recursive(self) -> list:
-        """All children and children's children of this widget."""
+        '''Flat list of all descendants (children, grandchildren, …) in draw order.'''
         widgets = []
         for w in self.children:
             widgets.extend(w._recurse)
@@ -309,7 +362,7 @@ class Widget():
 
     @property
     def children(self):
-        """Immediate children of this widget."""
+        '''Immediate children of this widget in draw order.'''
         return self._children
 
     @children.setter
@@ -318,12 +371,12 @@ class Widget():
 
     @property
     def children_visible(self):
-        """Immediate visible children of this widget."""
+        '''Immediate children of this widget that are currently visible.'''
         return [c for c in self._children if c.show]
 
     @property
     def bg_color(self):
-        """Background color of this widget. Colors the whole area of the widget in a rectangular shape."""
+        '''RGBA background fill colour for the full rectangular area of this widget.'''
         return self._bg_color
 
     @bg_color.setter
@@ -333,7 +386,11 @@ class Widget():
 
     @property
     def parent(self) -> 'Widget':
-        """The widget whose position and size to use relatively."""
+        '''Parent widget that provides the coordinate and size reference for this widget.
+
+        Setting re-parents the widget, removes it from the old parent, and
+        triggers a full geometry rebuild.
+        '''
         return self._parent
 
     @parent.setter
@@ -353,7 +410,10 @@ class Widget():
 
     @property
     def pos_pixel(self):
-        """The absolute position of this widget from the bottom left corner of the screen in pixels."""
+        '''Absolute bottom-left corner position of this widget in screen pixels.
+
+        Returns ``[0, 0]`` before the first draw call.
+        '''
         if self._vertices is None:
             return [0, 0]
         pos = self._vertices[1]
@@ -364,12 +424,16 @@ class Widget():
 
     @property
     def pos_abs(self):
-        """The absolute position of this widget from the bottom left corner of the screen in pixels."""
+        '''Alias for :attr:`pos_pixel`.'''
         return self.pos_pixel
 
     @property
     def pos(self):
-        """Position of this widget relative to its parent in either pixels or factor."""
+        '''Position of this widget relative to its parent.
+
+        Interpreted as pixels when ``relative['pos']`` is ``False``, or as a
+        factor of the parent's draw size when ``True``.
+        '''
         return self._pos
 
     @pos.setter
@@ -389,7 +453,7 @@ class Widget():
 
     @property
     def x(self):
-        """Horizontal position of this widget relative to its parent in either pixels or factor."""
+        '''Horizontal component of :attr:`pos`.'''
         return self._pos[0]
 
     @x.setter
@@ -400,7 +464,7 @@ class Widget():
 
     @property
     def y(self):
-        """Vertical position of this widget relative to its parent in either pixels or factor."""
+        '''Vertical component of :attr:`pos`.'''
         return self._pos[1]
 
     @y.setter
@@ -411,7 +475,11 @@ class Widget():
 
     @property
     def size(self):
-        """Size of this widget in either pixels or factor relative to its parent."""
+        '''Size ``[width, height]`` of this widget.
+
+        Interpreted as pixels when ``relative['size']`` is ``False``, or as a
+        factor of the parent's draw size when ``True``.
+        '''
         return self._size
 
     @size.setter
@@ -431,7 +499,7 @@ class Widget():
 
     @property
     def width(self):
-        """Horizontal size of this widget in either pixels or factor relative to its parent."""
+        '''Horizontal component of :attr:`size`.'''
         return self.size[0]
 
     @width.setter
@@ -442,7 +510,7 @@ class Widget():
 
     @property
     def height(self):
-        """Vertical size of this widget in either pixels or factor relative to its parent."""
+        '''Vertical component of :attr:`size`.'''
         return self.size[1]
 
     @height.setter
@@ -453,6 +521,10 @@ class Widget():
 
     @property
     def size_pixel(self):
+        '''Actual rendered size ``[width, height]`` in screen pixels.
+
+        Derived from the vertex buffer; returns ``[0, 0]`` before the first draw.
+        '''
         if self._vertices is None:
             return [0, 0]
         bottom_left = self._vertices[1]
@@ -461,10 +533,12 @@ class Widget():
 
     @property
     def width_pixel(self):
+        '''Rendered width in screen pixels.'''
         return self.size_pixel[0]
 
     @property
     def height_pixel(self):
+        '''Rendered height in screen pixels.'''
         return self.size_pixel[1]
 
     @property
@@ -477,7 +551,11 @@ class Widget():
 
     @property
     def use_clipping(self):
-        """Whether to draw outside of the parent's bounds."""
+        '''When ``True``, drawing is scissored to the parent's pixel bounds.
+
+        Automatically inherits the parent's value: if any ancestor enables
+        clipping all descendants are clipped too.
+        '''
         return True if self.parent and self.parent.use_clipping else self._use_clipping
 
     @use_clipping.setter
@@ -490,7 +568,11 @@ class Widget():
 
     @property
     def opacity(self):
-        """Opacity for this widget, but not its children."""
+        '''Alpha multiplier for this widget's own draw call (``0.0``–``1.0``).
+
+        Multiplied with the parent's opacity so that hiding a parent dims
+        all descendants proportionally.
+        '''
         op = self._opacity
         if self.parent:
             op *= self.parent.opacity
@@ -504,6 +586,11 @@ class Widget():
 
     @property
     def content_width(self):
+        '''Pixel span of all visible children along the X axis.
+
+        Computed as the distance between the leftmost and rightmost child
+        edges.  Returns ``0`` when there are no visible children.
+        '''
         widths = []
         for c in self.children:
             if not c.show:
@@ -515,6 +602,11 @@ class Widget():
 
     @property
     def content_height(self):
+        '''Pixel span of all visible children along the Y axis.
+
+        Computed as the distance between the bottommost and topmost child
+        edges.  Returns ``0`` when there are no visible children.
+        '''
         heights = []
         for c in self.children:
             if not c.show:
@@ -526,7 +618,11 @@ class Widget():
 
     @property
     def clipping(self):
-        """Clipping boundaries. If clipping is enabled, don't draw outside of these boundaries."""
+        '''Scissor rectangle ``[left, right, top, bottom]`` in screen pixels.
+
+        Derived from the parent's pixel position and size.  Used when
+        :attr:`use_clipping` is ``True`` to constrain vertex positions.
+        '''
         pdpos = self.parent.pos_pixel
         pdsize = self.parent.size_pixel
         return [
@@ -538,6 +634,7 @@ class Widget():
 
     @property
     def next_widget(self):
+        '''Next visible sibling in the parent's draw order, or ``None``.'''
         if self.parent is not None and self in self.parent.children_visible:
             idx = self.parent.children_visible.index(self)
             if idx == len(self.parent.children_visible) - 1:
@@ -547,6 +644,7 @@ class Widget():
 
     @property
     def previous_widget(self):
+        '''Previous visible sibling in the parent's draw order, or ``None``.'''
         if self.parent is not None and self in self.parent.children_visible:
             idx = self.parent.children_visible.index(self)
             if idx == 0:
@@ -604,6 +702,7 @@ class Widget():
 
     @property
     def dimensions(self):
+        '''``[bottom_left, top_right]`` corners in screen pixels as a pair of vectors.'''
         pos = self._draw_pos
         size = self._draw_size
         return [
@@ -612,14 +711,16 @@ class Widget():
         ]
 
     def refresh(self):
+        '''Force a full shader and geometry rebuild on the next draw call.'''
         self._build_shader()
 
     def check_inside(self, x, y):
-        """Check if pixel position (x, y) is inside this widget's area.
-        
-        :param float x: Screen X position in pixels.
-        :param float y: Screen Y position in pixels.
-        """
+        '''Return ``True`` when screen pixel ``(x, y)`` falls inside this widget.
+
+        :param x: Screen X position in pixels (origin bottom-left).
+        :param y: Screen Y position in pixels (origin bottom-left, Y is flipped internally).
+        :returns: ``True`` if the point is within the widget bounds.
+        '''
         y = render.getWindowHeight() - y
         dpos = self.pos_pixel
         dsize = self.size_pixel
@@ -629,8 +730,7 @@ class Widget():
         )
 
     def start(self):
-        """Put your custom startup logic here.
-        """
+        '''Override to add one-time initialisation logic after the widget is fully constructed.'''
         pass
 
     def _get_pivot(self, x0, x1, y0, y1):
@@ -767,9 +867,11 @@ class Widget():
         return self.show and (self.height_pixel > 0 or self.width_pixel > 0)
 
     def draw(self):
-        """This is called each frame if the widget is part of a canvas. It can be called manually,
-        but it will result in a higher logic load.
-        """
+        '''Draw this widget and recurse into visible children.
+
+        Called automatically each frame by the owning :class:`~uplogic.ui.canvas.Canvas`.
+        Calling it manually is valid but increases per-frame GPU work.
+        '''
         gpu.state.blend_set('ALPHA')
         self.canvas._to_evaluate.append(self)
         for widget in self.children:
@@ -777,19 +879,18 @@ class Widget():
                 widget.draw()
 
     def evaluate(self):
-        """Logic evaluation
-        """
+        '''Override to add per-frame logic that runs after the draw call (e.g. input handling).'''
         ...
 
     def update(self):
-        """Put your custom update logic here.
-        """
+        '''Override to add per-frame update logic (called every frame regardless of visibility).'''
         ...
 
     def add_widget(self, widget):
-        '''Add a `Widget` to this widget as child.
+        '''Attach *widget* as a child of this widget.
 
-        :param widget `Widget` to add.
+        :param widget: The :class:`Widget` to add.
+        :returns: *widget* for chaining.
         '''
         if widget not in self.children:
             widget.parent = self
@@ -800,14 +901,24 @@ class Widget():
         return widget
 
     def sort_children(self, key=lambda widget: widget._z, reverse=False):
+        '''Sort the children list in-place and refresh Z ordering.
+
+        :param key: Sort key function; defaults to each widget's ``_z`` value.
+        :param reverse: Reverse the sort direction.
+        '''
         self.children.sort(key=key, reverse=reverse)
         self._set_z(self._z - 1)
 
     def add_widgets(self, *widgets):
+        '''Attach multiple widgets as children in one call.
+
+        :param widgets: Any number of :class:`Widget` instances to add.
+        '''
         for w in widgets:
             self.add_widget(w)
 
     def on_parent(self):
+        '''Override to react when this widget is assigned to a new parent.'''
         ...
 
     def _set_z(self, _z):
@@ -818,20 +929,21 @@ class Widget():
         return _z
 
     def remove_widget(self, widget):
-        '''Remove a `Widget` from this widget.
+        '''Detach *widget* from this widget's children list.
 
-        :param widget: `Widget` to remove.
+        :param widget: The :class:`Widget` to remove.  No-op if not a child.
         '''
         if widget in self.children:
             self.children.remove(widget)
             widget.parent = None
 
     def remove(self):
+        '''Remove this widget from its parent.  No-op when unparented.'''
         if self.parent:
             self.parent.remove_widget(self)
 
     def clear(self):
-        """Remove all widgets from this widget."""
+        '''Detach all children from this widget.'''
         to_remove = self.children.copy()
         for child in to_remove:
             self.remove_widget(child)

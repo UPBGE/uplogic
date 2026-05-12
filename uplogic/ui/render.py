@@ -1,3 +1,5 @@
+'''Off-screen render target widget for uplogic UI.'''
+
 from .widget import Widget
 import gpu
 import bge, bpy
@@ -9,6 +11,14 @@ from uplogic.shaders import Buffer
 
 
 class RenderedTexture(Widget):
+    '''Widget that blits an off-screen render :class:`~uplogic.shaders.Buffer`
+    into the canvas.
+
+    Allocates a ``GPUOffScreen`` sized to the widget's draw dimensions and
+    renders the ``Buffer`` texture into it using a custom pass-through shader.
+    No constructor parameters are required; position and size are inherited
+    from the parent widget.
+    '''
 
     def __init__(self):
         super().__init__()
@@ -67,7 +77,6 @@ class RenderedTexture(Widget):
                 ),
             },
         )
-
 
     def draw(self):
         self._shader.uniform_sampler("renderedTexture", self.buffer.texture)

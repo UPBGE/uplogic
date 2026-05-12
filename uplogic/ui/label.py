@@ -13,22 +13,28 @@ import math
 
 
 class Label(Widget):
-    '''Widget for displaying text
+    '''Widget for displaying text.
 
-    :param pos: Initial position of this widget in either pixels or factor.
-    :param relative: Whether to use pixels or factor for size or pos; example: `{'pos': True, 'size': True}`.
-    :param text: Initial text for this label.
-    :param font: Font name.
-    :param font_color: Color in RGBA.
-    :param font_size: Font size in pt or factor.
-    :param line_height: Total line height relative to character size (1 is same as character height).
-    :param shadow: Draw a shadow behind the text.
-    :param shadow_offset: Relative position of the shadow in px.
-    :param shadow_color: Shadow color in RGBA.
-    :param halign: Horizontal alignment of the widget, can be (`left`, `center`, `right`).
-    :param valign: Vertical alignment of the widget, can be (`bottom`, `center`, `top`).
-    :param wrap: Split lines that are too long for the containing widget.
-    :param angle: Rotation in degrees of this widget around the pivot defined by the alignment.
+    Text is rendered via Blender's ``blf`` module and supports optional word
+    wrap, drop shadow, and rotation.
+
+    :param pos: Position in pixels or factor.
+    :param relative: Relative positioning flags; ``'font_size'`` key makes the
+        font size relative to the parent's height.
+    :param text: Initial text content.
+    :param font: Font file path, or empty string for the default font.
+    :param font_color: RGBA text colour.
+    :param font_size: Font size in pt (or as a factor when ``relative['font_size']`` is set).
+    :param line_height: Line spacing factor relative to character height.
+        ``1.5`` (default) gives 50 % extra space between lines.
+    :param shadow: Enable drop shadow.
+    :param shadow_offset: ``[x, y]`` pixel offset of the shadow.
+    :param shadow_color: RGBA shadow colour.
+    :param halign: Horizontal widget alignment: ``'left'``, ``'center'``, ``'right'``.
+    :param valign: Vertical widget alignment: ``'bottom'``, ``'center'``, ``'top'``.
+    :param wrap: Break long lines to fit inside the parent's width.
+    :param angle: Rotation in degrees around the alignment pivot.
+    :param show: Initial visibility.
     '''
 
     def __init__(
@@ -69,6 +75,7 @@ class Label(Widget):
 
     @property
     def text(self):
+        '''Current label text.  Always stored as a string.'''
         return self._text
 
     @text.setter
@@ -77,6 +84,7 @@ class Label(Widget):
 
     @property
     def text_halign(self):
+        '''Horizontal text alignment within the label: ``'left'``, ``'center'``, or ``'right'``.'''
         return self._text_halign
 
     @text_halign.setter
@@ -85,6 +93,7 @@ class Label(Widget):
 
     @property
     def text_valign(self):
+        '''Vertical text alignment within the label: ``'bottom'``, ``'center'``, or ``'top'``.'''
         return self._text_valign
 
     @text_valign.setter
@@ -97,6 +106,9 @@ class Label(Widget):
 
     @property
     def font(self):
+        '''blf font id used for rendering.  Accepts a file path string or a
+        ``bpy.types.VectorFont``; an empty string uses the default font (id 0).
+        '''
         return self._font
 
     @font.setter
@@ -107,6 +119,7 @@ class Label(Widget):
 
     @property
     def font_color(self):
+        '''RGBA text colour.'''
         return self._font_color
 
     @font_color.setter
@@ -116,6 +129,7 @@ class Label(Widget):
 
     @property
     def color(self):
+        '''Alias for :attr:`font_color`.'''
         return self.font_color
 
     @color.setter
@@ -124,6 +138,11 @@ class Label(Widget):
 
     @property
     def dimensions(self):
+        '''Pixel dimensions of the rendered text as a ``Vector(width, height)``.
+
+        Uses the longest line for width measurement and scales height by
+        ``line_count * line_height``.
+        '''
         text = self.text
         if len(self.lines):
             text = max(self.lines, key=len)

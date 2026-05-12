@@ -10,23 +10,29 @@ from uplogic.events import schedule
 
 
 class TextInput(Label):
-    '''Widget for displaying text
+    '''Editable text widget.
 
-    :param pos: Initial position of this widget in either pixels or factor.
-    :param relative: Whether to use pixels or factor for size or pos; example: `{'pos': True, 'size': True}`.
-    :param text: Initial text for this label.
-    :param font: Font name.
-    :param font_color: Color in RGBA.
+    Extends :class:`~uplogic.ui.label.Label` with keyboard input capture and
+    a blinking cursor.  When :attr:`edit` is ``True`` all keyboard events are
+    consumed and reflected in :attr:`text`.
+
+    :param pos: Position in pixels or factor.
+    :param relative: Relative positioning/sizing flags.
+    :param text: Initial text content.
+    :param font: Font file path.
+    :param font_color: RGBA text colour.
     :param font_size: Font size in pt or factor.
-    :param line_height: Total line height relative to character size (1 is same as character height).
-    :param shadow: Draw a shadow behind the text.
-    :param shadow_offset: Relative position of the shadow in px.
-    :param shadow_color: Shadow color in RGBA.
-    :param halign: Horizontal alignment of the widget, can be (`left`, `center`, `right`).
-    :param valign: Vertical alignment of the widget, can be (`bottom`, `center`, `top`).
-    :param wrap: Split lines that are too long for the containing widget.
-    :param multiline: Allow paragraphs. If `False`, pressing enter will exit edit mode.
-    :param angle: Rotation in degrees of this widget around the pivot defined by the alignment.'''
+    :param line_height: Line spacing factor.
+    :param shadow: Enable drop shadow.
+    :param shadow_offset: ``[x, y]`` shadow offset in pixels.
+    :param shadow_color: RGBA shadow colour.
+    :param halign: Widget horizontal alignment.
+    :param valign: Widget vertical alignment.
+    :param wrap: Break long lines to fit inside the parent's width.
+    :param multiline: Allow multi-line input.  When ``False``, pressing Enter
+        calls :meth:`on_enter` (default: exit edit mode).
+    :param angle: Rotation in degrees.
+    '''
 
     def __init__(
         self,
@@ -65,10 +71,14 @@ class TextInput(Label):
         self.character_index = 0
 
     def on_enter(self):
+        '''Called when Enter is pressed in single-line mode.  Default exits edit mode.  Override to customise.'''
         self.edit = False
 
     @property
     def edit(self):
+        '''When ``True`` the widget captures keyboard events and shows the blinking cursor.
+        Setting to ``True`` also moves the cursor to the end of the text.
+        '''
         return self._edit
 
     @edit.setter
@@ -88,6 +98,9 @@ class TextInput(Label):
 
     @property
     def index(self):
+        '''Cursor insertion position in the full text string.
+        Setting also updates ``line_index`` and ``character_index``.
+        '''
         return self._index
 
     @index.setter
@@ -107,6 +120,7 @@ class TextInput(Label):
 
     @property
     def text(self):
+        '''Full text content.  Setting cancels the cursor blink timer and resets it if in edit mode.'''
         return self._text
 
     @text.setter
@@ -119,11 +133,16 @@ class TextInput(Label):
         self._text = str(val)
 
     def move_cursor_to_end(self):
+        '''Place the cursor after the last character and enter edit mode.'''
         line_length = len(self.lines[clamp(self.line_index, 0, len(self.lines) - 1)])
         self.index = len(self.text) #line_length - self.character_index
         self.edit = True
 
     def write(self, text):
+        '''Append *text* to the current content and advance the cursor.
+
+        :param text: String to append.
+        '''
         self.text += text
         self.index = len(self.text)
 
@@ -164,6 +183,7 @@ class TextInput(Label):
         self.cursor.width = 1
 
     def on_tab(self):
+        '''Called when Tab is pressed.  Default exits edit mode.  Override to customise.'''
         self.edit = False
 
     def _listen(self):

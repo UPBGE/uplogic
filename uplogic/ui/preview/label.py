@@ -61,6 +61,7 @@ class Label(Widget):
 
     @property
     def text(self):
+        '''Text content to display.  Always stored as a string.'''
         return self._text
 
     @text.setter
@@ -69,10 +70,12 @@ class Label(Widget):
 
     @property
     def pos_abs(self):
+        '''Absolute draw position in screen pixels.'''
         return self._draw_pos
 
     @property
     def font(self):
+        '''BLF font ID (integer).  Set by assigning a file path or a ``VectorFont``.'''
         return self._font
 
     @font.setter
@@ -83,6 +86,7 @@ class Label(Widget):
 
     @property
     def font_color(self):
+        '''RGBA text colour as a list of four floats.'''
         return self._font_color
 
     @font_color.setter
@@ -92,6 +96,7 @@ class Label(Widget):
 
     @property
     def color(self):
+        '''Alias for :attr:`font_color`.'''
         return self.font_color
 
     @color.setter
@@ -117,6 +122,11 @@ class Label(Widget):
 
     @property
     def dimensions(self):
+        '''Pixel dimensions ``(width, height)`` of the rendered text block.
+
+        Height accounts for all lines using a capital-plus-descender reference
+        character (``'Aj'``).
+        '''
         dim = blf.dimensions(self.font, self.text)
         lines = len(self.lines) or 1
         return (dim[0], blf.dimensions(self.font, 'Aj')[1] * lines)

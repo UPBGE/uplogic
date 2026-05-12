@@ -6,7 +6,32 @@ from uplogic.input.mouse import MOUSE
 from uplogic.utils.math import clamp, map_range
 
 
+'''Slider widgets for uplogic UI.'''
+
+
 class Slider(RelativeLayout):
+    '''Draggable slider with a bar and a knob.
+
+    The knob snaps to the mouse X (or Y for vertical) position when dragged.
+    Value is normalised to ``[0.0, 1.0]``.  Override :meth:`on_value` to
+    react to value changes.
+
+    :param pos: Position in pixels or factor.
+    :param size: Size ``[width, height]``.
+    :param relative: Relative positioning/sizing flags.
+    :param halign: Horizontal alignment.
+    :param valign: Vertical alignment.
+    :param orientation: ``'horizontal'`` or ``'vertical'``.
+    :param bar_width: Bar thickness as a fraction of the slider's minor dimension.
+    :param bar_color: Bar fill colour.
+    :param bar_hover_color: Bar colour while hovered.
+    :param knob_size: Knob size as a factor of the slider's minor dimension.
+    :param knob_color: Knob colour.
+    :param knob_hover_color: Knob colour while hovered.
+    :param steps: Number of discrete steps; ``-1`` = continuous.
+    :param allow_bar_click: Whether clicking the bar also moves the knob.
+    :param angle: Rotation in degrees.
+    '''
 
     def __init__(
         self,
@@ -62,6 +87,7 @@ class Slider(RelativeLayout):
 
     @property
     def bar_color(self):
+        '''Bar fill and click colour.'''
         return self.bar.bg_color
 
     @bar_color.setter
@@ -71,6 +97,7 @@ class Slider(RelativeLayout):
 
     @property
     def bar_hover_color(self):
+        '''Bar colour while the cursor is over it.'''
         return self.bar.hover_color
 
     @bar_hover_color.setter
@@ -79,6 +106,7 @@ class Slider(RelativeLayout):
 
     @property
     def knob_color(self):
+        '''Knob fill and click colour.'''
         return self.knob.bg_color
 
     @knob_color.setter
@@ -88,6 +116,7 @@ class Slider(RelativeLayout):
 
     @property
     def knob_hover_color(self):
+        '''Knob colour while the cursor is over it.'''
         return self.knob.hover_color
 
     @knob_hover_color.setter
@@ -135,8 +164,9 @@ class Slider(RelativeLayout):
 
     @property
     def value(self):
+        '''Normalised slider value in ``[0.0, 1.0]``.  Setting triggers :meth:`on_value`.'''
         return self._value
-    
+
     @value.setter
     def value(self, value):
         self.set_value(value, self.on_value)
@@ -154,6 +184,11 @@ class Slider(RelativeLayout):
         )
 
     def set_value(self, val, callback=None):
+        '''Set the slider value and reposition the knob.
+
+        :param val: New value; clamped to ``[0.0, 1.0]`` and snapped to steps.
+        :param callback: Optional callable invoked when the value changes.
+        '''
         newval = val
         if self.steps > 0:
             newval -= newval % (1 / self.steps)
@@ -170,19 +205,42 @@ class Slider(RelativeLayout):
         self.knob.size = (knob_width * self.knob_size[0] - self.border_width, knob_width if self.square_knob else knob_height * self.knob_size[1] - self.border_width)
 
     def on_hold(self, widget):
+        '''Override to react to a held mouse button on this slider.'''
         pass
 
     def on_release(self, widget):
+        '''Override to react to mouse button release.'''
         pass
 
     def on_hover(self, widget):
+        '''Override to react to cursor hover (fired every frame while hovered).'''
         pass
 
     def on_value(self, widget):
+        '''Override to react to value changes.  Receives this slider as *widget*.'''
         pass
 
 
 class FrameSlider(Slider):
+    '''A :class:`Slider` variant with a bordered frame instead of a floating bar.
+
+    The entire slider area is framed; the knob sits inside the border.
+
+    :param pos: Position in pixels or factor.
+    :param size: Size ``[width, height]``.
+    :param relative: Relative positioning/sizing flags.
+    :param halign: Horizontal alignment.
+    :param valign: Vertical alignment.
+    :param orientation: ``'horizontal'`` or ``'vertical'``.
+    :param border_width: Frame border thickness in pixels.
+    :param border_color: Frame border colour.
+    :param bg_color: Background colour inside the frame.
+    :param bar_color: Knob fill colour.
+    :param bar_hover_color: Bar hover tint.
+    :param steps: Discrete steps; ``-1`` = continuous.
+    :param allow_bar_click: Whether clicking the bar moves the knob.
+    :param angle: Rotation in degrees.
+    '''
 
     def __init__(
         self,
@@ -255,6 +313,11 @@ class FrameSlider(Slider):
 
 
 class ProgressSlider(FrameSlider):
+    '''A :class:`FrameSlider` that fills from the origin rather than using a moving knob.
+
+    The fill extends from the left (or bottom) edge to the current
+    :attr:`value`.  Suitable for progress bars or loading indicators.
+    '''
 
     def __init__(self, pos=[0, 0], size=[100, 10], relative={}, halign='left', valign='bottom', orientation='horizontal', border_width=1, border_color=(0.8, 0.8, 0.8, 1), bg_color=(0, 0, 0, 0), bar_color=(1, 1, 1, 1), bar_hover_color=(0.1, 0.1, 0.1, 0.3), steps=-1, allow_bar_click=True, angle=0):
         self.bar = None

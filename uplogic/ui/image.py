@@ -10,7 +10,11 @@ from uplogic.utils import clamp
 
 
 
+'''Image, sprite-sheet, and video widgets for uplogic UI.'''
+
+
 class _UV_Point(list):
+    '''Internal helper: a two-element list with named :attr:`lower` / :attr:`upper` accessors.'''
 
     @property
     def lower(self):
@@ -30,6 +34,11 @@ class _UV_Point(list):
 
 
 class _UV(list):
+    '''Internal UV coordinate container holding ``[x_range, y_range, owner_widget]``.
+
+    Setting ``x``, ``y``, or their ``min``/``max`` sub-properties triggers a
+    shader rebuild on the owning :class:`Image` widget.
+    '''
 
     @property
     def owner(self) -> Widget:
@@ -91,6 +100,24 @@ class _UV(list):
 
 
 class Image(Widget):
+    '''Widget that displays a texture image.
+
+    Uses a custom fragment shader that applies :attr:`opacity` (alpha) and
+    :attr:`saturation` (greyscale mix).  When :attr:`use_aspect_ratio` is
+    ``True`` the height is derived from the image's pixel aspect ratio so
+    the image is never stretched.
+
+    :param pos: Position in pixels or factor.
+    :param size: Size ``[width, height]``.
+    :param relative: Relative positioning/sizing flags.
+    :param texture: File path or ``bpy.types.Image`` name to display.
+    :param halign: Horizontal alignment.
+    :param valign: Vertical alignment.
+    :param use_aspect_ratio: Preserve the image's pixel aspect ratio.
+        Defaults to ``True``.
+    :param angle: Rotation in degrees.
+    :param show: Initial visibility.
+    '''
 
     vertex_in = [
         ('VEC2', 'texCoord'),
@@ -162,6 +189,7 @@ class Image(Widget):
 
     @property
     def saturation(self):
+        '''Colour saturation in ``[0.0, 1.0]``: ``0`` = greyscale, ``1`` = full colour.'''
         return self._saturation
 
     @saturation.setter
@@ -173,6 +201,7 @@ class Image(Widget):
 
     @property
     def uv(self):
+        '''Active :class:`_UV` mapping.  Setting this rebuilds the shader immediately.'''
         return self._uv
 
     @uv.setter
@@ -182,6 +211,7 @@ class Image(Widget):
 
     @property
     def image(self):
+        '''Underlying ``bpy.types.Image`` via the ``ImageHandler``, or ``None``.'''
         return self.image_handler.image
 
     def _load_image(self, texture):
@@ -198,14 +228,17 @@ class Image(Widget):
 
     @property
     def filepath(self):
+        '''File path of the loaded image.'''
         return self.image_handler.filepath
 
     @property
     def texture(self):
+        '''GPU texture object used by the shader.  Setting this reloads and re-sizes the image.'''
         return self.image_handler._texture
 
     @property
     def aspect_ratio(self):
+        '''``image.height / image.width``, or ``1.0`` when no image is loaded.'''
         if self.image is None:
             return 1
         return self.image.size[1] / self.image.size[0]
@@ -232,10 +265,12 @@ class Image(Widget):
         self.size = self.size
 
     def free(self):
+        '''Release the GPU texture via the ``ImageHandler``.'''
         self.image_handler.free()
 
     @property
     def frame(self):
+        '''Current animation frame index (delegates to ``ImageHandler``).'''
         return self.image_handler.frame
 
     @frame.setter
@@ -244,6 +279,7 @@ class Image(Widget):
 
     @property
     def max_frame(self):
+        '''Maximum animation frame index (delegates to ``ImageHandler``).'''
         return self.image_handler.max_frame
 
     @property
@@ -303,6 +339,23 @@ class Image(Widget):
 
 
 class Sprite(Image):
+    '''Widget that displays a single frame from a sprite sheet.
+
+    Subdivides the texture UV space into a *rows* × *cols* grid.  Setting
+    :attr:`idx` selects which cell to display (left-to-right, top-to-bottom).
+
+    :param pos: Position in pixels or factor.
+    :param size: Size ``[width, height]``.
+    :param relative: Relative positioning/sizing flags.
+    :param texture: Sprite-sheet image path.
+    :param idx: Zero-based cell index.
+    :param rows: Number of rows in the sprite sheet.
+    :param cols: Number of columns in the sprite sheet.
+    :param halign: Horizontal alignment.
+    :param valign: Vertical alignment.
+    :param use_aspect_ratio: Preserve per-cell aspect ratio.
+    :param show: Initial visibility.
+    '''
 
     def __init__(
         self,
@@ -326,6 +379,9 @@ class Sprite(Image):
 
     @property
     def idx(self):
+        '''Active sprite sheet cell index (zero-based, left-to-right/top-to-bottom).
+        Setting recalculates the UV coordinates.
+        '''
         return self._idx
 
     @idx.setter
@@ -353,6 +409,7 @@ class Sprite(Image):
 
     @property
     def rows(self):
+        '''Number of rows in the sprite sheet.  Setting updates the per-row UV step.'''
         return self._rows
 
     @rows.setter
@@ -364,6 +421,7 @@ class Sprite(Image):
 
     @property
     def cols(self):
+        '''Number of columns in the sprite sheet.  Setting updates the per-column UV step.'''
         return self._cols
 
     @cols.setter
@@ -374,6 +432,26 @@ class Sprite(Image):
         self._col_width = 1 / int(val)
 
 class Video(Image):
+    '''Widget that plays back a video file as an animated image.
+
+    Extends :class:`Image` with playback controls.  The ``ImageHandler``
+    drives frame advance and optional audio loading.
+
+    :param pos: Position in pixels or factor.
+    :param size: Size ``[width, height]``.
+    :param relative: Relative positioning/sizing flags.
+    :param texture: Video file path.
+    :param halign: Horizontal alignment.
+    :param valign: Vertical alignment.
+    :param use_aspect_ratio: Preserve aspect ratio.
+    :param fps: Playback frame rate.
+    :param min_frame: First frame to play.
+    :param max_frame: Last frame to play; ``None`` uses the full clip length.
+    :param load_audio: Whether to load the audio track alongside the video.
+    :param play_mode: Playback mode string passed to ``ImageHandler``.
+    :param angle: Rotation in degrees.
+    :param show: Initial visibility.
+    '''
 
     def __init__(self, pos=[0, 0], size=(100, 100), relative={}, texture=None, halign='left', valign='bottom', use_aspect_ratio = True, fps=60, min_frame=0, max_frame=None, load_audio=True, play_mode='play', angle=0, show=True):
         self._load_audio = load_audio
@@ -389,6 +467,7 @@ class Video(Image):
 
     @property
     def play_mode(self):
+        '''Playback mode string (e.g. ``'play'``, ``'loop'``).'''
         return self.image_handler.play_mode
 
     @play_mode.setter
@@ -397,6 +476,7 @@ class Video(Image):
 
     @property
     def texture(self):
+        '''GPU texture object; delegates to ``ImageHandler``.'''
         return self.image_handler.texture
 
     @texture.setter
@@ -405,6 +485,7 @@ class Video(Image):
 
     @property
     def fps(self):
+        '''Playback frame rate.'''
         return self.image_handler.fps
 
     @fps.setter
@@ -413,6 +494,7 @@ class Video(Image):
 
     @property
     def playback_position(self):
+        '''Current playback position in the video.'''
         return self.image_handler.playback_position
 
     @playback_position.setter
@@ -421,6 +503,7 @@ class Video(Image):
 
     @property
     def is_playing(self):
+        '''``True`` while the video is actively playing.'''
         return self.image_handler.is_playing
 
     @is_playing.setter
@@ -428,14 +511,21 @@ class Video(Image):
         self.image_handler.is_playing = val
 
     def play(self):
+        '''Start video playback.'''
         self.image_handler.play()
 
     def seek(self, position):
+        '''Jump to *position* in the video.
+
+        :param position: Target playback position.
+        '''
         self.image_handler.seek(position)
 
     def stop(self):
+        '''Stop video playback.'''
         self.image_handler.stop()
 
     def remove(self):
+        '''Free the GPU texture and remove this widget from its parent.'''
         self.free()
         return super().remove()
