@@ -4,12 +4,13 @@ import bpy
 
 
 class Canvas(Widget):
-    """The base class for UI layouts. This class has no visual representation
-    and spans the whole screen. It is intended to manage collections of widgets
-    more easily.
+    '''Root widget for the Blender-editor UI system.
 
-    A canvas cannot be attached to another widget and has its own update cycle.
-    """
+    Spans the full ``VIEW_3D`` area and drives the per-frame draw/evaluate
+    loop via ``SpaceView3D.draw_handler_add``.  Cannot be attached to another
+    widget.  Call :meth:`register` to activate the canvas and :meth:`remove`
+    (or :meth:`unregister`) to detach it.
+    '''
 
     _is_canvas = True
 
@@ -32,6 +33,7 @@ class Canvas(Widget):
         self.start()
     
     def register(self):
+        '''Attach this canvas to the ``VIEW_3D`` draw handler and request a redraw.'''
         self.handle = bpy.types.SpaceView3D.draw_handler_add(self.draw, (), 'WINDOW', 'POST_PIXEL')
         for area in bpy.context.window.screen.areas:
             if area.type == 'VIEW_3D':
@@ -40,13 +42,16 @@ class Canvas(Widget):
                         region.tag_redraw()
 
     def unregister(self):
+        '''Remove the draw handler, stopping all rendering.'''
         if self.handle:
             bpy.types.SpaceView3D.draw_handler_remove(self.handle, 'WINDOW')
 
     def remove(self):
+        '''Alias for :meth:`unregister`.'''
         self.unregister()
 
     def fetch_size(self):
+        '''Trigger a layout refresh on all children (called when the viewport is resized).'''
         for c in self.children:
             c.size = c.size
             c.pos = c.pos
@@ -124,13 +129,18 @@ class Canvas(Widget):
         pass
 
     def new_layer(self):
+        '''Create a new :class:`Layer`, add it to this canvas, and return it.'''
         layer = Layer()
         self.add_widget(layer)
         return layer
 
 
 class Layer(Widget):
-    pass
+    '''Full-viewport transparent widget used to group children on a separate draw plane.
+
+    Behaves identically to :class:`Canvas` in terms of coordinate space but
+    can only be parented to a :class:`Canvas`.
+    '''
 
     @property
     def _draw_pos(self):
@@ -170,7 +180,7 @@ class Layer(Widget):
 
     @property
     def parent(self):
-        """The widget whose position and size to use relatively."""
+        '''Parent widget (must be a :class:`Canvas`).'''
         return self._parent
 
     @parent.setter

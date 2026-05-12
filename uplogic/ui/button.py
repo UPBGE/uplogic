@@ -9,7 +9,30 @@ from uplogic.input.mouse import MOUSE_EVENTS, LMB, RMB
 from uplogic import console
 
 
+'''Button widgets for uplogic UI.'''
+
+
 class Button(Widget, HoverBehavior):
+    '''Clickable rectangular widget with hover, press, and release states.
+
+    Mixes :class:`~uplogic.ui.widget.Widget` and
+    :class:`~uplogic.ui.behaviors.HoverBehavior`.  Override the ``on_*``
+    methods to react to interaction events.
+
+    :param pos: Position in pixels or factor.
+    :param size: Size ``[width, height]``.
+    :param bg_color: Default background colour.
+    :param relative: Relative positioning/sizing flags.
+    :param border_width: Border thickness in pixels.
+    :param border_color: Border colour.
+    :param hover_color: Background colour while the cursor is over the widget.
+    :param click_color: Background colour while the mouse button is held.
+    :param halign: Horizontal alignment.
+    :param valign: Vertical alignment.
+    :param on_press: Optional callable assigned to :meth:`on_press` at construction.
+    :param angle: Rotation in degrees.
+    :param show: Initial visibility.
+    '''
 
     def __init__(
         self,
@@ -44,14 +67,17 @@ class Button(Widget, HoverBehavior):
 
     @property
     def clicked(self):
+        '''``True`` for one frame after an LMB press (and the widget is visible).'''
         return self._clicked and self.show
 
     @property
     def in_focus(self):
+        '''``True`` while the cursor hovers over this widget.'''
         return self._hover and self.show
 
     @property
     def released(self):
+        '''``True`` for one frame after the mouse button is released.'''
         return self._released and self.show
 
     @property
@@ -72,6 +98,7 @@ class Button(Widget, HoverBehavior):
 
     @property
     def hover_color(self):
+        '''Background colour displayed while the cursor is over the widget.'''
         return self._hover_color
 
     @hover_color.setter
@@ -80,6 +107,7 @@ class Button(Widget, HoverBehavior):
 
     @property
     def current_color(self):
+        '''Active background colour: ``click_color`` when pressed, ``hover_color`` when focused, else ``bg_color``.'''
         return self.click_color if self._clicked or self._down else (self.hover_color if self._in_focus else self.bg_color).copy()
 
     def draw(self):
@@ -127,43 +155,69 @@ class Button(Widget, HoverBehavior):
         self.override_color = None
 
     def on_enter(self, widget):
-        """Override this method to react to this event. Signature `def on_enter(self, widget)`."""
+        '''Override to react to the cursor entering the widget area.'''
         pass
 
     def on_exit(self, widget):
-        """Override this method to react to this event. Signature `def on_exit(self, widget)`."""
+        '''Override to react to the cursor leaving the widget area.'''
         pass
 
     def on_right_click(self, widget):
-        """Override this method to react to this event. Signature `def on_click(self, widget)`."""
+        '''Override to react to an initial RMB press over this widget.'''
         pass
 
     def on_right_press(self, widget):
-        """Override this method to react to this event. Signature `def on_press(self, widget)`."""
+        '''Override to react to an RMB press (fired on the same frame as :meth:`on_right_click`).'''
         pass
 
     def on_click(self, widget):
-        """Override this method to react to this event. Signature `def on_click(self, widget)`."""
+        '''Override to react to an initial LMB press over this widget.'''
         pass
 
     def on_press(self, widget):
-        """Override this method to react to this event. Signature `def on_press(self, widget)`."""
+        '''Override to react to an LMB press (fired on the same frame as :meth:`on_click`).'''
         pass
 
     def on_hold(self, widget):
-        """Override this method to react to this event. Signature `def on_hold(self, widget)`."""
+        '''Override to react to a held LMB while focused (fired every frame).'''
         pass
 
     def on_release(self, widget):
-        """Override this method to react to this event. Signature `def on_release(self, widget)`."""
+        '''Override to react to LMB release.'''
         pass
 
     def on_hover(self, widget):
-        """Override this method to react to this event. Signature `def on_hover(self, widget)`."""
+        '''Override to react to the cursor hovering over this widget (fired every frame).'''
         pass
 
 
 class LabelButton(Button, HoverBehavior):
+    '''A :class:`Button` with an embedded :class:`~uplogic.ui.label.Label` child.
+
+    All label-related attributes delegate to the internal ``label`` widget.
+
+    :param pos: Position in pixels or factor.
+    :param size: Size ``[width, height]``.
+    :param relative: Relative positioning/sizing flags.
+    :param bg_color: Background colour.
+    :param border_width: Border thickness in pixels.
+    :param border_color: Border colour.
+    :param hover_color: Hover background colour.
+    :param click_color: Click background colour.
+    :param text: Button label text.
+    :param text_pos: Relative position ``[x, y]`` of the label within the button.
+    :param font: Font file path.
+    :param font_size: Font size in pt.
+    :param font_color: Label text colour.
+    :param line_height: Label line height factor.
+    :param halign: Widget horizontal alignment.
+    :param valign: Widget vertical alignment.
+    :param halign_text: Label horizontal text alignment.
+    :param valign_text: Label vertical text alignment.
+    :param on_press: Optional press callback.
+    :param angle: Rotation in degrees.
+    :param show: Initial visibility.
+    '''
 
     def __init__(
         self,
@@ -286,6 +340,24 @@ class LabelButton(Button, HoverBehavior):
 
 
 class ImageButton(Button, HoverBehavior):
+    '''A :class:`Button` that displays a texture and swaps textures on hover/click.
+
+    :param pos: Position in pixels or factor.
+    :param size: Size ``[width, height]``.
+    :param bg_color: Background colour.
+    :param border_color: Border colour.
+    :param hover_color: Hover tint colour.
+    :param click_color: Click tint colour.
+    :param relative: Relative positioning/sizing flags.
+    :param halign: Horizontal alignment.
+    :param valign: Vertical alignment.
+    :param on_press: Optional press callback.
+    :param texture: Default (idle) texture path.
+    :param hover_texture: Texture shown while hovered (defaults to *texture*).
+    :param click_texture: Texture shown while clicked (defaults to *texture*).
+    :param angle: Rotation in degrees.
+    :param show: Initial visibility.
+    '''
 
     def __init__(
         self,
@@ -325,6 +397,7 @@ class ImageButton(Button, HoverBehavior):
 
     @property
     def current_texture(self):
+        '''Active texture path: ``click_texture`` when pressed, ``hover_texture`` when hovered, else ``idle_texture``.'''
         return self.click_texture if self._clicked else (
             self.hover_texture if self._hover else self.idle_texture
         )
@@ -337,6 +410,26 @@ class ImageButton(Button, HoverBehavior):
 
 
 class SpriteButton(Button, HoverBehavior):
+    '''A :class:`Button` using a :class:`~uplogic.ui.image.Sprite` sheet with optional texture swaps on hover/click.
+
+    :param pos: Position in pixels or factor.
+    :param size: Size ``[width, height]``.
+    :param bg_color: Background colour.
+    :param border_color: Border colour.
+    :param hover_color: Hover colour.
+    :param relative: Relative positioning/sizing flags.
+    :param halign: Horizontal alignment.
+    :param valign: Vertical alignment.
+    :param texture: Sprite sheet image path.
+    :param hover_texture: Texture on hover (defaults to *texture*).
+    :param click_texture: Texture on click (defaults to *texture*).
+    :param idx: Initial sprite sheet cell index.
+    :param rows: Sprite sheet rows.
+    :param cols: Sprite sheet columns.
+    :param on_press: Optional press callback.
+    :param angle: Rotation in degrees.
+    :param show: Initial visibility.
+    '''
 
     def __init__(
         self,

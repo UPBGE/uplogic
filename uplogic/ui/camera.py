@@ -1,3 +1,5 @@
+'''BGE camera viewport widget for uplogic UI.'''
+
 from bge.types import KX_Camera
 from gpu.types import GPUOffScreen
 from uplogic.ui.widget import Widget
@@ -8,6 +10,20 @@ import gpu
 
 
 class Camera(Widget):
+    '''Widget that positions and sizes a ``KX_Camera`` viewport to match its
+    pixel bounds on the canvas.
+
+    When the widget is visible and attached to a parent ``useViewport`` is
+    enabled on the camera and ``setViewport`` is called to keep the camera
+    framed to the widget area.  Hiding the widget disables the camera viewport.
+
+    :param pos: Position in pixels or factor.
+    :param size: Size ``[width, height]`` in pixels or factor.
+    :param relative: Relative positioning/sizing flags.
+    :param camera: The ``KX_Camera`` to control.
+    :param halign: Horizontal alignment.
+    :param valign: Vertical alignment.
+    '''
 
     def __init__(self, pos=[0, 0], size=(100, 100), relative={}, camera=None, halign='left', valign='bottom') -> None:
         self.camera = camera
@@ -16,7 +32,7 @@ class Camera(Widget):
 
     @property
     def parent(self):
-        """The widget whose position and size to use relatively."""
+        '''The widget whose position and size to use relatively.'''
         return self._parent
 
     @parent.setter
@@ -33,6 +49,7 @@ class Camera(Widget):
 
     @property
     def camera(self) -> KX_Camera:
+        '''The ``KX_Camera`` controlled by this widget.'''
         return self._camera
 
     @camera.setter

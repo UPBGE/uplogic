@@ -6,17 +6,17 @@ from ..widget import rotate2d
 
 
 class Layout(Widget):
-    '''The Layout class allows you to arrange widgets in a specified area.
+    '''Rectangular widget with an optional border for the Blender-editor UI.
 
-    :param pos`: Initial position of this widget in either pixels or factor.
-    :param size`: Initial size of this widget in either pixels or factor.
-    :param bg_color`: Color to draw in the area of the widget.
-    :param relative`: Whether to use pixels or factor for size or pos; example: `{'pos': True, 'size': True}`.
-    :param border_width`: Width (in pixels) of the border drawn around the area of the widget.
-    :param border_color`: Color to use for drawing the border.
-    :param halign`: Horizontal alignment of the widget, can be (`left`, `center`, `right`).
-    :param valign`: Vertical alignment of the widget, can be (`bottom`, `center`, `top`).
-    :param angle`: Rotation in degrees of this widget around the pivot defined by the alignment.
+    :param pos: Position in pixels or factor.
+    :param size: Size ``[width, height]`` in pixels or factor.
+    :param bg_color: Background fill colour.
+    :param relative: Coordinate interpretation flags, e.g. ``{'pos': True, 'size': True}``.
+    :param border_width: Border thickness in pixels (minimum 1).
+    :param border_color: Border colour.
+    :param halign: Horizontal alignment: ``'left'``, ``'center'``, or ``'right'``.
+    :param valign: Vertical alignment: ``'bottom'``, ``'center'``, or ``'top'``.
+    :param angle: Rotation in degrees around the alignment pivot.
     '''
 
     def __init__(
@@ -119,7 +119,11 @@ class FloatLayout(Layout):
 
 
 class ArrangedLayout(Layout):
-    """Metaclass"""
+    '''Base class for layouts that automatically position their children.
+
+    Subclasses must implement :meth:`arrange`, which is called whenever a
+    child is added or removed, the parent changes, or visibility toggles.
+    '''
 
     @property
     def parent(self):
@@ -161,6 +165,7 @@ class ArrangedLayout(Layout):
         self.arrange()
 
     def arrange(self):
+        '''Reposition all children according to this layout's rules.  Must be overridden.'''
         raise NotImplementedError
 
 

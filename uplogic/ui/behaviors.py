@@ -6,8 +6,19 @@ from uplogic.utils.math import rotate2d
 
 
 class HoverBehavior():
+    '''Mixin that adds pixel-accurate hover detection to a widget.
+
+    Converts the normalised mouse position to pixel space, corrects for the
+    widget's accumulated rotation, and checks against ``pos_pixel`` /
+    ``size_pixel``.  The result is ``False`` if the canvas has already
+    consumed the hover event for this frame.
+    '''
+
     @property
     def hover(self):
+        '''``True`` when the cursor is inside this widget's pixel bounds and no
+        other widget has already consumed the hover event this frame.
+        '''
         if not self.active:
             return False
         screen_size = [render.getWindowWidth(), render.getWindowHeight()]
@@ -25,13 +36,26 @@ class HoverBehavior():
 
 
 class MouseListener():
-    """Mixin class for widgets that need mouse input.
+    '''Mixin class for widgets that need global mouse input.
 
-    You will need to call `MouseListener.evaluate(self)` to update the behavior state.\n
-    This data is independent of hovering, it just gives generic mouse button information.
-    """
+    Call ``MouseListener.evaluate(self)`` each frame to update the state
+    flags.  Unlike :class:`HoverBehavior`, this mixin reacts to LMB events
+    regardless of cursor position.
+
+    State flags reset to ``False`` at the start of each :meth:`evaluate`
+    call:
+
+    - ``clicked`` — ``True`` for one frame on initial LMB press
+    - ``released`` — ``True`` for one frame when LMB is released
+    - ``hold`` — ``True`` while LMB is held after the initial press
+    '''
 
     def evaluate(self):
+        '''Update click/release/hold state flags and fire event callbacks.
+
+        Must be called manually each frame (e.g. from the widget's own
+        ``evaluate`` override).
+        '''
         self.clicked = False
         self.released = False
         self.hold = False
@@ -49,13 +73,17 @@ class MouseListener():
             self.on_hold(self)
 
     def on_click(self, widget):
+        '''Override to react to an initial LMB press.'''
         pass
 
     def on_press(self, widget):
+        '''Override to react to an LMB press (fired on the same frame as :meth:`on_click`).'''
         pass
 
     def on_release(self, widget):
+        '''Override to react to LMB release.'''
         pass
 
     def on_hold(self, widget):
+        '''Override to react to a held LMB (fired every frame while held).'''
         pass

@@ -3,6 +3,28 @@ from .layout import RelativeLayout
 
 
 class SliderPreview(RelativeLayout):
+    '''Blender-editor variant of :class:`~uplogic.ui.slider.Slider`.
+
+    Displays a draggable knob on a bar.  Value is normalised to ``[0.0, 1.0]``.
+    Unlike the BGE slider, this variant does not read mouse input — set
+    :attr:`value` programmatically from an operator or panel.
+
+    :param pos: Position in pixels or factor.
+    :param size: Size ``[width, height]``.
+    :param relative: Coordinate interpretation flags.
+    :param halign: Horizontal alignment.
+    :param valign: Vertical alignment.
+    :param orientation: ``'horizontal'`` or ``'vertical'``.
+    :param bar_width: Bar thickness as a fraction of the minor dimension.
+    :param bar_color: Bar fill colour.
+    :param bar_hover_color: Bar hover colour (not interactive in preview).
+    :param knob_size: Knob size factor.
+    :param knob_color: Knob fill colour.
+    :param knob_hover_color: Knob hover colour (not interactive in preview).
+    :param steps: Discrete steps; ``-1`` = continuous.
+    :param allow_bar_click: Unused in preview context.
+    :param angle: Rotation in degrees.
+    '''
 
     def __init__(
         self,
@@ -44,6 +66,7 @@ class SliderPreview(RelativeLayout):
 
     @property
     def bar_width(self):
+        '''Thickness of the bar as a relative factor of the minor dimension.'''
         return self.bar.height if self.is_horizontal else self.bar.width
 
     @bar_width.setter
@@ -53,6 +76,7 @@ class SliderPreview(RelativeLayout):
 
     @property
     def value(self):
+        '''Normalised slider position in ``[0.0, 1.0]``.  Setting repositions the knob.'''
         return self._value
 
     @value.setter
@@ -62,6 +86,7 @@ class SliderPreview(RelativeLayout):
 
     @property
     def bar_color(self):
+        '''Bar fill colour.'''
         return self.bar.bg_color
 
     @bar_color.setter
@@ -71,6 +96,7 @@ class SliderPreview(RelativeLayout):
 
     @property
     def bar_hover_color(self):
+        '''Bar hover colour (unused in preview context; kept for API compatibility).'''
         return self.bar.hover_color
 
     @bar_hover_color.setter
@@ -79,6 +105,7 @@ class SliderPreview(RelativeLayout):
 
     @property
     def knob_color(self):
+        '''Knob fill colour.'''
         return self.knob.bg_color
 
     @knob_color.setter
@@ -88,6 +115,7 @@ class SliderPreview(RelativeLayout):
 
     @property
     def knob_hover_color(self):
+        '''Knob hover colour (unused in preview context; kept for API compatibility).'''
         return self.knob.hover_color
 
     @knob_hover_color.setter
@@ -96,6 +124,7 @@ class SliderPreview(RelativeLayout):
 
     @property
     def knob_size(self):
+        '''Knob size in pixels (square).'''
         return self.knob.size[0]
 
     @knob_size.setter
@@ -105,6 +134,7 @@ class SliderPreview(RelativeLayout):
 
     @property
     def border_width(self):
+        '''Always ``0`` for the floating-bar slider variant.'''
         return 0
 
     @border_width.setter
@@ -113,6 +143,7 @@ class SliderPreview(RelativeLayout):
 
     @property
     def border_color(self):
+        '''Border colour (always transparent for this variant).'''
         return self.bar.border_color
 
     @border_color.setter
@@ -121,8 +152,9 @@ class SliderPreview(RelativeLayout):
 
     @property
     def orientation(self):
+        '''Slider orientation: ``'horizontal'`` or ``'vertical'``.'''
         return self._orientation
-    
+
     @orientation.setter
     def orientation(self, val):
         self.bar_width = self._bar_width
@@ -130,6 +162,7 @@ class SliderPreview(RelativeLayout):
 
     @property
     def is_horizontal(self):
+        '''``True`` when :attr:`orientation` is not ``'vertical'``.'''
         return self.orientation != 'vertical'
 
     @property
@@ -155,6 +188,26 @@ class SliderPreview(RelativeLayout):
 
 
 class FrameSliderPreview(SliderPreview):
+    '''Blender-editor variant of :class:`~uplogic.ui.slider.FrameSlider`.
+
+    The entire slider area is surrounded by a visible border; the knob sits
+    inside it.  Value is normalised to ``[0.0, 1.0]``.
+
+    :param pos: Position in pixels or factor.
+    :param size: Size ``[width, height]``.
+    :param relative: Coordinate interpretation flags.
+    :param halign: Horizontal alignment.
+    :param valign: Vertical alignment.
+    :param orientation: ``'horizontal'`` or ``'vertical'``.
+    :param border_width: Frame border thickness in pixels.
+    :param border_color: Frame border colour.
+    :param bg_color: Background colour inside the frame.
+    :param bar_color: Knob fill colour.
+    :param bar_hover_color: Hover tint (unused in preview).
+    :param steps: Discrete steps; ``-1`` = continuous.
+    :param allow_bar_click: Unused in preview context.
+    :param angle: Rotation in degrees.
+    '''
 
     def __init__(
         self,
@@ -232,6 +285,11 @@ class FrameSliderPreview(SliderPreview):
 
 
 class ProgressSliderPreview(FrameSliderPreview):
+    '''Blender-editor variant of :class:`~uplogic.ui.slider.ProgressSlider`.
+
+    Fills from the origin edge to the current :attr:`value` rather than
+    moving a knob.  Suitable for progress bars and loading indicators.
+    '''
 
     def __init__(self, pos=[0, 0], size=[100, 10], relative={}, halign='left', valign='bottom', orientation='horizontal', border_width=1, border_color=(0.8, 0.8, 0.8, 1), bg_color=(0, 0, 0, 0), bar_color=(1, 1, 1, 1), bar_hover_color=(0.1, 0.1, 0.1, 0.3), steps=-1, allow_bar_click=True, angle=0):
         self.bar = None

@@ -1,3 +1,10 @@
+'''Layout widgets for the uplogic UI system.
+
+Provides a hierarchy of container widgets that position and size their
+children automatically.  All layouts derive from :class:`Layout`, which
+itself derives from :class:`~uplogic.ui.widget.Widget`.
+'''
+
 from .widget import Widget
 import gpu
 from bge import render
@@ -129,19 +136,27 @@ class FloatLayout(Layout):
 
 
 class ArrangedLayout(RelativeLayout):
-    """Metaclass"""
+    '''Base class for layouts that reposition their children automatically.
+
+    Subclasses must implement :meth:`arrange`.  Adding/removing children and
+    changes to ``parent`` or ``show`` all trigger a re-arrange automatically.
+    '''
 
     @property
     def inverted(self):
+        '''When ``True``, the arrangement order is reversed.  Setting triggers re-arrange.'''
         return self._inverted
 
     @inverted.setter
     def inverted(self, val):
         self._inverted = val
         self.arrange()
-    
+
     @property
     def arrange_event(self) -> ScheduledEvent:
+        '''Pending :class:`~uplogic.events.ScheduledEvent` for a deferred arrange call.
+        Setting cancels any previously pending event before storing the new one.
+        '''
         return getattr(self, '_arrange_evt', None)
 
     @arrange_event.setter
@@ -201,6 +216,7 @@ class ArrangedLayout(RelativeLayout):
         self.arrange()
 
     def arrange(self):
+        '''Reposition children.  Must be implemented by subclasses.'''
         raise NotImplementedError
 
 
@@ -247,6 +263,9 @@ class BoxLayout(ArrangedLayout):
 
     @property
     def arrange_offset(self):
+        '''Pixel offset added to every child's position along the layout axis.
+        Setting a new value triggers a re-arrange.
+        '''
         return self._arrange_offset
 
     @arrange_offset.setter
@@ -257,7 +276,7 @@ class BoxLayout(ArrangedLayout):
         self.arrange()
 
     def arrange(self):
-        '''Arrange the widgets according to the specified orientation.'''
+        '''Schedule a deferred child re-arrangement for the next :meth:`evaluate` call.'''
         self._do_arrange = True
 
     def _arrange(self):
@@ -299,12 +318,31 @@ class BoxLayout(ArrangedLayout):
         self._rebuild = True
 
     def evaluate(self):
+        '''Flush the pending arrange call, then clear the flag.'''
         if self._do_arrange:
             self._arrange()
         self._do_arrange = False
 
 
 class ScrollBoxLayout(BoxLayout):
+    '''A :class:`BoxLayout` variant that clips its children and supports mouse-wheel scrolling.
+
+    ``use_clipping`` is read-only and always ``True``.
+
+    :param orientation: ``'horizontal'`` or ``'vertical'``.
+    :param pos: Position.
+    :param size: Size ``[width, height]``.
+    :param bg_color: Background colour.
+    :param relative: Relative positioning/sizing flags.
+    :param border_width: Border thickness in pixels.
+    :param border_color: Border colour.
+    :param inverted: Reverse the arrangement direction.
+    :param spacing: Pixel gap between children.
+    :param halign: Horizontal alignment.
+    :param valign: Vertical alignment.
+    :param angle: Rotation in degrees.
+    :param show: Initial visibility.
+    '''
 
     def __init__(self, orientation: str = 'horizontal', pos: list = [0, 0], size: list = [100, 100], bg_color: list = (0, 0, 0, 0), relative: dict = {}, border_width: int = 1, border_color: list = (0, 0, 0, 0), inverted: bool = False, spacing: int = 5, halign: str = 'left', valign: str = 'bottom', angle=0, show=True):
         self._c_count = 0
@@ -326,10 +364,12 @@ class ScrollBoxLayout(BoxLayout):
 
     @property
     def scroll_position_actual(self):
+        '''Current animated scroll position in ``[0.0, 1.0]`` (0 = top, 1 = bottom).'''
         return map_range(self._arrange_offset, 0, self._height_diff, 1, 0) if self._height_diff > 0 else 0
 
     @property
     def scroll_position(self):
+        '''Target scroll position in ``[0.0, 1.0]``.  Setting jumps the target without animating.'''
         return map_range(self._arrange_offset_target, 0, self._height_diff, 1, 0) if self._height_diff > 0 else 0
 
     @scroll_position.setter
@@ -337,6 +377,10 @@ class ScrollBoxLayout(BoxLayout):
         self._arrange_offset_target = map_range(clamp(val), 1, 0, 0, self._height_diff) if self._height_diff > 0 else 0
 
     def scroll(self, difference):
+        '''Advance the scroll target by ``difference * scroll_speed`` pixels, clamped to content bounds.
+
+        :param difference: Signed scroll delta (positive = scroll down).
+        '''
         self._arrange_offset_target = clamp(self._arrange_offset_target - difference * self.scroll_speed, 0, self._height_diff)
 
     def _arrange(self):
@@ -413,6 +457,7 @@ class GridLayout(BoxLayout):
         )
 
     def add_widget(self, widget):
+        '''Add *widget* as a child, capped at ``rows * cols`` total children.'''
         max = self.rows * self.cols
         if len(self.children) < max:
             super().add_widget(widget)
@@ -499,6 +544,9 @@ class PolarLayout(ArrangedLayout):
 
     @property
     def starting_angle(self):
+        '''Angle in degrees of the first child (0 = right, 90 = up, 180 = left, 270 = down).
+        Setting triggers re-arrange.
+        '''
         return self._starting_angle
 
     @starting_angle.setter
@@ -508,6 +556,7 @@ class PolarLayout(ArrangedLayout):
 
     @property
     def radius(self):
+        '''Distance in pixels from the layout centre to each child.  Setting triggers re-arrange.'''
         return self._radius
 
     @radius.setter

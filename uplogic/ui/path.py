@@ -6,14 +6,20 @@ import gpu
 
 
 class Path(Widget):
-    '''Widget for displaying a path.
+    '''Widget for drawing a polyline on the canvas.
 
-    :param pos: Initial position of this widget in either pixels or factor.
-    :param points: List of points in screen coordinates (0-1).
-    :param relative: Whether to use pixels or factor for size or pos; example: `{'pos': True, 'points': True}`.
-    :param line_width: Thickness of the line.
-    :param line_color: Color to draw the path with.
-    :param angle: Rotation in degrees of this widget around first point defined by the alignment.
+    Points are given in the coordinate space selected by *relative*: raw
+    pixels when ``relative['points']`` is falsy, or as a factor of the
+    parent's draw size when ``True``.
+
+    :param pos: Widget origin position (pixels or factor).
+    :param points: List of ``[x, y]`` waypoints.
+    :param relative: Flags dict; ``'pos'`` and ``'points'`` keys control
+        coordinate interpretation.
+    :param line_width: Stroke thickness in pixels.
+    :param line_color: RGBA draw colour.
+    :param angle: Rotation in degrees around the widget origin.
+    :param show: Initial visibility.
     '''
 
     def __init__(
@@ -34,6 +40,7 @@ class Path(Widget):
 
     @property
     def line_color(self) -> list:
+        '''RGBA draw colour for the line.  Setting this rebuilds the shader.'''
         return self._line_color
 
     @line_color.setter
@@ -43,6 +50,7 @@ class Path(Widget):
 
     @property
     def line_width(self) -> float:
+        '''Stroke thickness in pixels.  Setting this rebuilds the shader.'''
         return self._line_width
 
     @line_width.setter
@@ -52,6 +60,7 @@ class Path(Widget):
 
     @property
     def points(self) -> list:
+        '''List of waypoints.  Setting this rebuilds the shader.'''
         return self._points
 
     @points.setter
@@ -78,6 +87,7 @@ class Path(Widget):
         self._batch_line = batch_for_shader(self._shader, 'LINE_STRIP', {"pos": vertices})
 
     def draw(self):
+        '''Set line-width GPU state and draw the ``LINE_STRIP`` batch.'''
         self._setup_draw()
         gpu.state.line_width_set(self.line_width)
         col = self.line_color.copy()

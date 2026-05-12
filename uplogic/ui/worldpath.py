@@ -1,3 +1,8 @@
+'''World-space and object-edge path widgets for uplogic UI.
+
+:class:`WorldPath` and :class:`ObjectPath` project 3-D geometry into screen
+space each frame and draw them as line widgets on the canvas.
+'''
 
 from .widget import Widget
 from .path import Path
@@ -10,6 +15,16 @@ import gpu
 
 
 class WorldPath(Path):
+    '''Path widget whose points are given in 3-D world space.
+
+    Each frame all points are projected to screen space via
+    :func:`~uplogic.utils.scene.world_to_screen` and scaled to pixel
+    coordinates before drawing.
+
+    :param points: List of world-space :class:`~mathutils.Vector` waypoints.
+    :param line_width: Stroke thickness in pixels.
+    :param line_color: RGBA draw colour.
+    '''
 
     def __init__(
         self,
@@ -22,7 +37,7 @@ class WorldPath(Path):
         self.line_color = line_color
         self.line_width = line_width
         self.start()
-    
+
     def _build_shader(self, force=False):
         if self.parent is None:
             return
@@ -40,6 +55,17 @@ class WorldPath(Path):
 
 
 class ObjectPath(Path):
+    '''Path widget that draws the projected screen-space edges of a game object's mesh.
+
+    Each frame every edge in the object's ``blenderObject.data`` mesh is
+    transformed by ``worldTransform``, projected to screen space, and drawn
+    as individual line segments.
+
+    :param object: The ``KX_GameObject`` whose mesh edges to draw.
+    :param line_width: Stroke thickness in pixels.
+    :param line_color: RGBA draw colour.
+    '''
+
     def __init__(
         self,
         object=None,
