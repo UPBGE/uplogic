@@ -82,9 +82,9 @@ class Widget():
         ('VEC2', "resolution"),
         ('VEC4', "color"),
         ('VEC4', "border_color"),
-        ('FLOAT', "border_width")
+        ('VEC2', "border_params"),   # x = border_width, y = corner_radius
     ]
-    '''Push-constant uniforms: widget resolution, fill colour, border colour, and border width.'''
+    '''Push-constant uniforms: resolution, fill colour, border colour, and border_params (x=border_width, y=corner_radius).'''
 
     ubo_constants: list[tuple[str, str]] = []
     '''Uniform-buffer uniforms declared as a ``WidgetUBO`` struct in the shader.
@@ -112,16 +112,29 @@ class Widget():
     fragment_shader: str = '''
         void main()
         {
-            float x_border = border_width / resolution.x;
-            float y_border = border_width / resolution.y;
-            if (uv.x < x_border || uv.x > 1-x_border || uv.y < y_border || uv.y > 1-y_border){
-                FragColor = mix(color, border_color, border_color.a);
-                return;
-            }
-            FragColor = color;
+            float border_width  = border_params.x;
+            float corner_radius = border_params.y;
+
+            vec2 p = (uv - 0.5) * resolution;
+            vec2 b = resolution * 0.5;
+
+            vec2 q = abs(p) - b + corner_radius;
+            float d = length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - corner_radius;
+
+            float outer_a = 1.0 - smoothstep(-1.0, 1.0, d);
+            if (outer_a <= 0.0) discard;
+
+            float r_inner = max(corner_radius - border_width, 0.0);
+            vec2  q2 = abs(p) - (b - border_width) + r_inner;
+            float d2 = length(max(q2, 0.0)) + min(max(q2.x, q2.y), 0.0) - r_inner;
+
+            float in_border = smoothstep(-1.0, 1.0, d2);
+            vec4 col = mix(color, mix(color, border_color, border_color.a), in_border);
+
+            FragColor = vec4(col.rgb, col.a * outer_a);
         }
     '''
-    '''GLSL fragment shader: solid fill with an optional inset border.'''
+    '''GLSL fragment shader: solid fill with an optional inset border and rounded corners.'''
 
     _is_canvas = False
 
@@ -142,6 +155,7 @@ class Widget():
         self.child_offset = [0, 0]
         self.border_color = Vector((0, 0, 0, 0))
         self.border_width = 0
+        self._corner_radius = 0
 
         self.halign = halign
         self.valign = valign
@@ -403,6 +417,16 @@ class Widget():
     def border_color(self, val):
         val = Vector(val)
         self._border_color = val
+
+    @property
+    def corner_radius(self) -> float:
+        '''Corner rounding radius in screen pixels.  ``0`` = sharp corners (default).'''
+        return self._corner_radius
+
+    @corner_radius.setter
+    def corner_radius(self, val):
+        self._corner_radius = max(0, val)
+        self._rebuild = True
 
     @property
     def parent(self) -> 'Widget':
@@ -834,9 +858,9 @@ class Widget():
         border_color = self.border_color.copy()
         bg_color[3] *= self.opacity
         border_color[3] *= self.opacity
-        self._shader.uniform_float("resolution", (self.width_pixel, self.height_pixel))
+        self._shader.uniform_float("resolution", (abs(self.width_pixel), abs(self.height_pixel)))
         self._shader.uniform_float("border_color", border_color)
-        self._shader.uniform_float("border_width", int(self.border_width))
+        self._shader.uniform_float("border_params", (float(self.border_width), self._corner_radius))
         self._shader.uniform_float("color", bg_color)
 
     def _get_shader(self):
