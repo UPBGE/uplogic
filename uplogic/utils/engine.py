@@ -33,6 +33,36 @@ class classproperty(object):
         '''
         return self.f(owner)
 
+
+def add_pre_draw_setup_handler(handler):
+    bge.logic.getCurrentScene().pre_draw_setup.append(handler)
+
+
+def remove_pre_draw_setup_handler(handler):
+    handlers = bge.logic.getCurrentScene().pre_draw_setup
+    if handler in handlers:
+        handlers.remove(handler)
+
+
+def add_pre_draw_handler(handler):
+    bge.logic.getCurrentScene().pre_draw.append(handler)
+
+
+def remove_pre_draw_handler(handler):
+    handlers = bge.logic.getCurrentScene().pre_draw
+    if handler in handlers:
+        handlers.remove(handler)
+
+
+def add_post_draw_handler(handler):
+    bge.logic.getCurrentScene().post_draw.append(handler)
+
+
+def remove_post_draw_handler(handler):
+    handlers = bge.logic.getCurrentScene().post_draw
+    if handler in handlers:
+        handlers.remove(handler)
+
 # class Engine(object):
 
 #     _pre_draw = None

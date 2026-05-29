@@ -8,6 +8,7 @@ live GPU texture regardless of the BGE render loop speed.
 from bge import logic
 import bpy
 import gpu
+import numpy as np
 from math import floor
 from os.path import isfile
 from uplogic import console
@@ -51,9 +52,13 @@ class ImageHandler:
         if texture is None:
             max_frame=1000
             return
-        if texture is not None and texture not in bpy.data.images and isfile(texture):
+        # print(self.image)
+        if isinstance(texture, bpy.types.Image):
+            self.image = texture
+            self.texture = texture.name
+        elif texture is not None and texture not in bpy.data.images and isfile(texture):
             self.image = bpy.data.images.load(texture)
-        self.texture = texture
+            self.texture = texture
 
         self.min_frame = min_frame
         self.max_frame = self.image.frame_duration
@@ -119,16 +124,31 @@ class ImageHandler:
         '''
         return self._texture
 
+    def _premultiply_image(self, image):
+        if image is None or image.alpha_mode == 'PREMUL':
+            return
+        count = len(image.pixels)
+        px = np.empty(count, dtype=np.float32)
+        image.pixels.foreach_get(px)
+        px = px.reshape(-1, 4)
+        px[:, :3] *= px[:, 3:4]
+        image.pixels.foreach_set(px.ravel())
+        image.alpha_mode = 'PREMUL'
+
     @texture.setter
     def texture(self, val):
         if val is None:
             self._texture = None
             return
+        if isinstance(val, bpy.types.Image):
+            val = val.name
         texture = bpy.data.images.get(val, None)
         if not texture:
             texture = bpy.data.images.load(val, check_existing=True)
         self.image = texture
+        self._premultiply_image(texture)
         self._texture = gpu.texture.from_image(texture)
+        # self._texture.extend_mode = 'EXTEND'
         self.max_frame = self.image.frame_duration
         if self.load_audio:
             if self.sound is not None:
@@ -185,7 +205,6 @@ class ImageHandler:
         if not self._flushed:
             self.image.gl_free()
             self.image.gl_load(frame=self.frame)
-
             self._texture = gpu.texture.from_image(self.image)
             self.image.update_tag()
 

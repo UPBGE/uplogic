@@ -129,9 +129,13 @@ class Image(Widget):
         ('VEC2', 'uv')
     ]
 
-    constants = [
-        ('FLOAT', 'alpha'),
-        ('FLOAT', 'saturation')
+    constants = []
+
+    ubo_constants = [
+        ('VEC4', 'image_params'),   # x=alpha  y=saturation  z=brightness  w=blur
+        ('VEC4', 'multiply_color'),
+        ('VEC4', 'size_params'),    # xy=tex_size  zw=shadow_offset_uv (pre-converted from screen pixels)
+        ('VEC4', 'shadow_color'),
     ]
 
     samplers = [
@@ -152,8 +156,38 @@ class Image(Widget):
 
     void main()
     {
-        vec4 color = texture(image, uv);
-        
+        float alpha         = ubo.image_params.x;
+        float saturation    = ubo.image_params.y;
+        float brightness    = ubo.image_params.z;
+        float blur          = ubo.image_params.w;
+        vec2  tex_size      = ubo.size_params.xy;
+        vec2  shadow_offset = ubo.size_params.zw;
+
+        vec2 texel = 1.0 / tex_size;
+        vec2 half_texel = 0.5 * texel;
+
+        vec4 color;
+        if (blur < 0.5) {
+            color = texture(image, clamp(uv, half_texel, 1.0 - half_texel));
+        } else {
+            int r = int(blur + 0.5);
+            float sigma = blur * 0.5;
+            float inv_sigma2 = 0.5 / (sigma * sigma);
+            float total = 0.0;
+            color = vec4(0.0);
+            for (int x = -r; x <= r; x++) {
+                for (int y = -r; y <= r; y++) {
+                    float d2 = float(x * x + y * y);
+                    if (d2 > float(r * r)) continue;
+                    float w = exp(-d2 * inv_sigma2);
+                    vec2 target_uv = uv + vec2(float(x), float(y)) * texel;
+                    color += texture(image, clamp(target_uv, half_texel, 1.0 - half_texel)) * w;
+                    total += w;
+                }
+            }
+            color /= total;
+        }
+
         float power = clamp(saturation, 0.0, 1.0);
 
         float grey = (color.r + color.g + color.b) * .33;
@@ -163,7 +197,15 @@ class Image(Widget):
             color.b * power + grey * (1.0 - power),
             color.a * alpha
         );
-        FragColor = pow(color, vec4(0.5));
+        vec4 main_out = vec4(pow(color.rgb, vec3(0.5)), color.a) * ubo.multiply_color * brightness;
+
+        vec2 shadow_uv = uv - shadow_offset;
+        float s_alpha = 0.0;
+        if (shadow_uv.x >= 0.0 && shadow_uv.x <= 1.0 && shadow_uv.y >= 0.0 && shadow_uv.y <= 1.0) {
+            s_alpha = texture(image, clamp(shadow_uv, half_texel, 1.0 - half_texel)).a * ubo.shadow_color.a * alpha;
+        }
+        vec4 shadow_px = vec4(ubo.shadow_color.rgb, s_alpha);
+        FragColor = main_out + shadow_px * (1.0 - main_out.a);
     }
     """
 
@@ -177,15 +219,26 @@ class Image(Widget):
         valign='bottom',
         use_aspect_ratio: bool = True,
         angle=0,
+        shadow_offset=(0, 0),
+        shadow_color=(0., 0., 0., 0.),
         show=True
     ):
         self._texture = None
         self.use_aspect_ratio = use_aspect_ratio
-        self._uv: _UV[_UV_Point] = _UV((_UV_Point((0.01, .99)), _UV_Point((0.01, .99)), self))
+        self._uv: _UV[_UV_Point] = _UV((_UV_Point((0.0, 1)), _UV_Point((0.0, 1)), self))
         self._opacity = 1
         self._saturation = 1
+        self._multiply_color = Vector((1, 1, 1, 1))
+        self._brightness = 1
+        self._blur_radius = 0
+        self._shadow_offset = Vector(shadow_offset)
+        self._shadow_color = Vector(shadow_color)
+        self._ubo = None
+        self._ubo_data = bytes(64)
         self._load_image(texture)
         super().__init__(pos, size, relative=relative, halign=halign, valign=valign, angle=angle, show=show)
+            # import bge
+            # bge.logic.endGame()
 
     @property
     def saturation(self):
@@ -197,6 +250,69 @@ class Image(Widget):
         if val == self._saturation:
             return
         self._saturation = clamp(val, 0, 1)
+        self._rebuild = True
+
+    @property
+    def multiply_color(self) -> Vector:
+        '''Color multiplier for the GPU texture with 4 components (r, g, b, a).'''
+        return self._multiply_color
+
+    @multiply_color.setter
+    def multiply_color(self, val):
+        if val == self._multiply_color:
+            return
+        self._multiply_color = Vector(val)
+        self._rebuild = True
+
+    @property
+    def brightness(self) -> Vector:
+        '''Brightness  in ``[0.0, 1.0]``: ``0`` = black, ``1`` = full brightness.'''
+        return self._brightness
+
+    @brightness.setter
+    def brightness(self, val):
+        if val == self._brightness:
+            return
+        self._brightness = val
+        self._rebuild = True
+
+    @property
+    def blur_radius(self):
+        '''Gaussian blur radius in pixels. ``0`` = no blur.'''
+        return self._blur_radius
+
+    @blur_radius.setter
+    def blur_radius(self, val):
+        val = max(0, val)
+        if val == self._blur_radius:
+            return
+        self._blur_radius = val
+        self._rebuild = True
+
+    @property
+    def shadow_offset(self) -> Vector:
+        '''Drop shadow offset in screen pixels ``[x, y]``. Set :attr:`shadow_color` alpha > 0 to enable.'''
+        return self._shadow_offset
+
+    @shadow_offset.setter
+    def shadow_offset(self, val):
+        val = Vector(val)
+        if val == self._shadow_offset:
+            return
+        self._shadow_offset = val
+        self._rebuild = True
+
+    @property
+    def shadow_color(self) -> Vector:
+        '''RGBA colour of the drop shadow. Set alpha > 0 to make the shadow visible.'''
+        return self._shadow_color
+
+    @shadow_color.setter
+    def shadow_color(self, val):
+        val = Vector(val)
+        if val == self._shadow_color:
+            return
+        self._shadow_color = val
         self._rebuild = True
 
     @property
@@ -323,8 +439,24 @@ class Image(Widget):
         )
     
     def _set_uniforms(self):
-        self._shader.uniform_float("alpha", self.opacity)
-        self._shader.uniform_float("saturation", self.saturation)
+        import struct
+        img = self.image
+        tex_size = img.size[:2] if img else (1.0, 1.0)
+        uv = self.uv
+        draw_size = self._draw_size
+        w = max(draw_size[0], 1)
+        h = max(draw_size[1], 1)
+        shadow_uv = (
+            self._shadow_offset[0] * (uv.x[1] - uv.x[0]) / w,
+            self._shadow_offset[1] * (uv.y[1] - uv.y[0]) / h,
+        )
+        self._ubo_data = struct.pack(
+            '16f',
+            self.opacity, self.saturation, self.brightness, self._blur_radius,
+            *self.multiply_color,
+            *tex_size, *shadow_uv,
+            *self._shadow_color,
+        )
 
     def draw(self):
         gpu.state.blend_set("ALPHA")
@@ -332,6 +464,11 @@ class Image(Widget):
         if self.texture is None:
             super().draw()
             return
+        if self._ubo is None:
+            self._ubo = gpu.types.GPUUniformBuf(self._ubo_data)
+        else:
+            self._ubo.update(self._ubo_data)
+        self._shader.uniform_block("ubo", self._ubo)
         self._shader.uniform_sampler("image", self.texture)
         self._shader.bind()
         self._batch.draw(self._shader)

@@ -33,6 +33,7 @@ class Label(Widget):
     :param halign: Horizontal widget alignment: ``'left'``, ``'center'``, ``'right'``.
     :param valign: Vertical widget alignment: ``'bottom'``, ``'center'``, ``'top'``.
     :param wrap: Break long lines to fit inside the parent's width.
+    :param padding: Additional spacing on both axes.
     :param angle: Rotation in degrees around the alignment pivot.
     :param show: Initial visibility.
     '''
@@ -52,6 +53,7 @@ class Label(Widget):
         halign='left',
         valign='bottom',
         wrap=False,
+        padding=(0, 0),
         angle=0,
         show=True
     ):
@@ -67,6 +69,7 @@ class Label(Widget):
         self.font_color = font_color
         self.font = font
         self.wrap = wrap
+        self.padding = padding
         self.lines = []
         Widget.__init__(self, pos, (0, 0), (0, 0, 0, 0), relative, angle=angle, show=show)
         self.text_halign = halign
@@ -148,7 +151,7 @@ class Label(Widget):
             text = max(self.lines, key=len)
         dim = blf.dimensions(self.font, text)
         lines = len(self.lines) or 1
-        return Vector((dim[0], blf.dimensions(self.font, 'A')[1] * lines * self.line_height - self.line_height))
+        return Vector((dim[0] + 2 * self.padding[0], (blf.dimensions(self.font, 'A')[1] * lines * self.line_height - self.line_height) + 2 * self.padding[1]))
 
     @property
     def _draw_size(self):
@@ -249,6 +252,7 @@ class Label(Widget):
             blf.shadow_offset(font, int(self.shadow_offset[0]), int(self.shadow_offset[1]))
         txt = self._wrap(parsize) if self.wrap else self.text
         lines = txt.split('\n')
+        padding = self.padding
         if len(lines) > 1:
             for i, txt in enumerate(lines):
                 pos = self._draw_pos.copy()
@@ -266,7 +270,7 @@ class Label(Widget):
                     pos[1] += (lheight * (len(lines) -1))
                 if self.parent and self.parent._draw_angle:
                     pos = rotate2d(pos, self.pivot, self.parent.angle)
-                blf.position(font, pos[0], pos[1] - (charsize[1] * (i) * self.line_height), 0)
+                blf.position(font, pos[0] + padding[0], pos[1] + padding[1] - (charsize[1] * (i) * self.line_height), 0)
                 blf.draw(font, txt)
         else:
             dimensions = blf.dimensions(font, self.text)
@@ -282,7 +286,7 @@ class Label(Widget):
                 pos[1] -= (.5 * charsize[1])
             if self.parent and self.parent._draw_angle:
                 pos = rotate2d(pos, self.pivot, self.parent.angle)
-            blf.position(font, pos[0], pos[1], 0)
+            blf.position(font, pos[0] + padding[0], pos[1] + padding[1], 0)
             blf.draw(font, self.text)
 
         super().draw()

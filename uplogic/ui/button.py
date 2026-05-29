@@ -7,6 +7,7 @@ from .image import Sprite
 import gpu
 from uplogic.input.mouse import MOUSE_EVENTS, LMB, RMB
 from uplogic import console
+from mathutils import Vector
 
 
 '''Button widgets for uplogic UI.'''
@@ -51,10 +52,10 @@ class Button(Widget, HoverBehavior):
         show=True
     ):
         super().__init__(pos, size, bg_color, relative, halign=halign, valign=valign, angle=angle, show=show)
-        self.hover_color = hover_color
+        self.hover_color = Vector(hover_color)
         self.border_width = border_width
-        self.border_color = border_color
-        self.click_color = click_color
+        self.border_color = Vector(border_color)
+        self.click_color = Vector(click_color)
         self.override_color = None
         self._clicked = False
         self._released = False

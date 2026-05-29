@@ -86,6 +86,16 @@ class Widget():
     ]
     '''Push-constant uniforms: widget resolution, fill colour, border colour, and border width.'''
 
+    ubo_constants: list[tuple[str, str]] = []
+    '''Uniform-buffer uniforms declared as a ``WidgetUBO`` struct in the shader.
+
+    Subclasses that need more uniform data than the 128-byte push-constant
+    budget allows can list their uniforms here instead of in :attr:`constants`.
+    Each entry is ``(glsl_type, name)`` using the same type tokens as
+    :attr:`constants` (``'FLOAT'``, ``'VEC2'``, ``'VEC4'``, …).  The base
+    Widget class leaves this empty so push-constant shaders are unaffected.
+    '''
+
     samplers: list[tuple[str, str]] = []
     '''Texture sampler declarations (none for the base Widget).'''
 
@@ -130,7 +140,7 @@ class Widget():
         self._halign = ALIGNMENTS.get('left')
         self._valign = ALIGNMENTS.get('bottom')
         self.child_offset = [0, 0]
-        self.border_color = (0, 0, 0, 0)
+        self.border_color = Vector((0, 0, 0, 0))
         self.border_width = 0
 
         self.halign = halign
@@ -140,7 +150,7 @@ class Widget():
         self._size = list(size)
         # self.pos = pos
         self._pos = list(pos)
-        self.bg_color = bg_color
+        self.bg_color = Vector(bg_color)
         self.angle = angle
         self._shader = None
         self._get_shader()
@@ -316,8 +326,8 @@ class Widget():
         v = self._vertices
         if v is None:
             return Vector((0, 0))
-        x0 = Vector(v[0])
-        x1 = Vector(v[1])
+        x1 = Vector(v[0])
+        x0 = Vector(v[1])
         y1 = Vector(v[2])
         y0 = Vector(v[3])
         return Vector(self._get_pivot(x0, x1, y0, y1))
@@ -375,14 +385,24 @@ class Widget():
         return [c for c in self._children if c.show]
 
     @property
-    def bg_color(self):
+    def bg_color(self) -> Vector:
         '''RGBA background fill colour for the full rectangular area of this widget.'''
         return self._bg_color
 
     @bg_color.setter
     def bg_color(self, val):
-        val = list(val)
+        val = Vector(val)
         self._bg_color = val
+
+    @property
+    def border_color(self) -> Vector:
+        '''RGBA background fill colour for the full rectangular area of this widget.'''
+        return self._border_color
+
+    @border_color.setter
+    def border_color(self, val):
+        val = Vector(val)
+        self._border_color = val
 
     @property
     def parent(self) -> 'Widget':
@@ -635,21 +655,21 @@ class Widget():
     @property
     def next_widget(self):
         '''Next visible sibling in the parent's draw order, or ``None``.'''
-        if self.parent is not None and self in self.parent.children_visible:
-            idx = self.parent.children_visible.index(self)
-            if idx == len(self.parent.children_visible) - 1:
+        if self.parent is not None and self in self.parent.children:
+            idx = self.parent.children.index(self)
+            if idx == len(self.parent.children) - 1:
                 return None
-            return self.parent.children_visible[idx + 1]
+            return self.parent.children[idx + 1]
         return None
 
     @property
     def previous_widget(self):
         '''Previous visible sibling in the parent's draw order, or ``None``.'''
-        if self.parent is not None and self in self.parent.children_visible:
-            idx = self.parent.children_visible.index(self)
+        if self.parent is not None and self in self.parent.children:
+            idx = self.parent.children.index(self)
             if idx == 0:
                 return None
-            return self.parent.children_visible[idx - 1]
+            return self.parent.children[idx - 1]
         return None
 
     # @property
@@ -833,6 +853,14 @@ class Widget():
 
             for constant in self.constants:
                 shader_info.push_constant(constant[0], constant[1])
+
+            if self.ubo_constants:
+                _GLSL = {'FLOAT': 'float', 'VEC2': 'vec2', 'VEC3': 'vec3', 'VEC4': 'vec4', 'MAT4': 'mat4'}
+                struct_src = "struct WidgetUBO {\n" + "".join(
+                    f"    {_GLSL[t]} {n};\n" for t, n in self.ubo_constants
+                ) + "};"
+                shader_info.typedef_source(struct_src)
+                shader_info.uniform_buf(0, "WidgetUBO", "ubo")
 
             for i, sampler in enumerate(self.samplers):
                 shader_info.sampler(i, sampler[0], sampler[1])
