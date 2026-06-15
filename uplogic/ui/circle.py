@@ -106,5 +106,6 @@ class Circle(Widget):
     def draw(self):
         self._setup_draw()
         self._set_uniforms()
-        self._batch.draw(self._shader)
+        if self.segment_angle > 0:
+            self._batch.draw(self._shader)
         super().draw()

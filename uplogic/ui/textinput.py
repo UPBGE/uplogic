@@ -57,7 +57,7 @@ class TextInput(Label):
         self.cursor_evt = None
         self.cursor = Layout(bg_color=(1, 1, 1, 1), size=(0, 0), relative={'pos': False})
         self.cursor_flash_time = .5
-        Label.__init__(self, pos, relative, text, font, font_color, font_size, line_height, shadow, shadow_offset, shadow_color, halign, valign, wrap, angle)
+        Label.__init__(self, pos=pos, relative=relative, text=text, font=font, font_color=font_color, font_size=font_size, line_height=line_height, shadow=shadow, shadow_offset=shadow_offset, shadow_color=shadow_color, halign=halign, valign=valign, wrap=wrap, angle=angle)
         self.add_widget(self.cursor)
         self.cursor.show = False
         self._key_evts = {}

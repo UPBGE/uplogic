@@ -938,7 +938,7 @@ class Widget():
         '''Override to add per-frame update logic (called every frame regardless of visibility).'''
         ...
 
-    def add_widget(self, widget):
+    def add_widget(self, widget: 'Widget'):
         '''Attach *widget* as a child of this widget.
 
         :param widget: The :class:`Widget` to add.
@@ -950,6 +950,8 @@ class Widget():
             if self.canvas is not None:
                 self.canvas._set_z(-1)
         self.children = sorted(self.children, key=lambda widget: widget._z, reverse=False)
+        self._rebuild = True
+        widget._rebuild = True
         return widget
 
     def sort_children(self, key=lambda widget: widget._z, reverse=False):
@@ -961,7 +963,7 @@ class Widget():
         self.children.sort(key=key, reverse=reverse)
         self._set_z(self._z - 1)
 
-    def add_widgets(self, *widgets):
+    def add_widgets(self, *widgets: list['Widget']):
         '''Attach multiple widgets as children in one call.
 
         :param widgets: Any number of :class:`Widget` instances to add.
@@ -980,7 +982,7 @@ class Widget():
             _z = c._set_z(_z)
         return _z
 
-    def remove_widget(self, widget):
+    def remove_widget(self, widget: 'Widget'):
         '''Detach *widget* from this widget's children list.
 
         :param widget: The :class:`Widget` to remove.  No-op if not a child.

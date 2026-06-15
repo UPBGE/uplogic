@@ -69,12 +69,25 @@ class Label(Widget):
         self.font_color = font_color
         self.font = font
         self.wrap = wrap
+        if padding == 0:
+            print(padding, text, '##########')
         self.padding = padding
         self.lines = []
+        self._wrap_cache = None
+        self._wrap_key = None
         Widget.__init__(self, pos, (0, 0), (0, 0, 0, 0), relative, angle=angle, show=show)
         self.text_halign = halign
         self.text_valign = valign
         self.start()
+
+    # @property
+    # def padding(self):
+    #     return self._padding
+
+    # @padding.setter
+    # def padding(self, val):
+    #     print(val)
+    #     self._padding = val
 
     @property
     def text(self):
@@ -151,6 +164,7 @@ class Label(Widget):
             text = max(self.lines, key=len)
         dim = blf.dimensions(self.font, text)
         lines = len(self.lines) or 1
+        # self.padding = (0, 0)
         return Vector((dim[0] + 2 * self.padding[0], (blf.dimensions(self.font, 'A')[1] * lines * self.line_height - self.line_height) + 2 * self.padding[1]))
 
     @property
@@ -168,24 +182,33 @@ class Label(Widget):
         return self
 
     def _wrap(self, parsize):
-        # if self.dimensions[0] < parsize[0]:
-            # print(self.text)
-            # return self.text
         offset = parsize[0] * self.pos[0] if self.relative.get('pos') else self.pos[0]
         max_width = int(parsize[0] - offset)
-        text = ''
-        words = self.text.split(' ')
+        relative = self.relative.get('font_size', False)
+        font_size = parsize[1] * self.font_size if relative else self.font_size
 
-        for i, w in enumerate(words):
-            line = text.split('\n')[-1]
-            blf.size(self.font, self.font_size)
-            dim = blf.dimensions(self.font, line + w)
-            too_long = dim[0] >= max_width
-            if too_long:
-                w = f'\n{w}'
-            text = ' '.join([text, w])
-        # print(text)
-        return text[1:]
+        key = (self.text, font_size, self.font, max_width)
+        if key == self._wrap_key:
+            return self._wrap_cache
+
+        blf.size(self.font, font_size)
+        lines = []
+        current_line = ''
+        for word in self.text.split(' '):
+            candidate = current_line + ' ' + word if current_line else word
+            if blf.dimensions(self.font, candidate)[0] >= max_width:
+                if current_line:
+                    lines.append(current_line)
+                current_line = word
+            else:
+                current_line = candidate
+        if current_line:
+            lines.append(current_line)
+
+        result = '\n'.join(lines)
+        self._wrap_key = key
+        self._wrap_cache = result
+        return result
 
     def _get_shader(self):
         import gpu

@@ -117,7 +117,7 @@ class EventManager:
     callback queue. Not intended for direct use — prefer the module-level
     helper functions (:func:`send`, :func:`receive`, :func:`bind`, etc.).
     '''
-    events = {}
+    events: dict[str, 'Event'] = {}
     bindings = []
     scheduled = []
     done = []
@@ -156,11 +156,13 @@ class EventManager:
             cb()
 
     @classmethod
-    def log(cls):
+    def log(cls, id=None):
         '''Print all currently registered events and their content to stdout.'''
         if cls.events:
-            print('Events:')
+            # print('Events:')
             for evt in cls.events:
+                if id and id != evt:
+                    continue
                 print(f'\t{evt}:\t{cls.events[evt].content}')
 
     @classmethod
