@@ -167,6 +167,8 @@ class Widget():
         self.bg_color = Vector(bg_color)
         self.angle = angle
         self._shader = None
+        self._cached_draw_pos = None
+        self._cached_draw_size = None
         self._get_shader()
         self._build_shader()
         self.use_clipping = False
@@ -702,6 +704,8 @@ class Widget():
 
     @property
     def _draw_pos(self):
+        if self._cached_draw_pos is not None:
+            return self._cached_draw_pos
         if self.parent is None:
             return [0, 0]
         inherit_pos = self.parent._draw_pos if self.parent else [0, 0]
@@ -725,13 +729,16 @@ class Widget():
         elif self.valign == ALIGN_TOP:
             offset[1] += dsize[1]
         pos = [pos[0] + inherit_pos[0] - offset[0], pos[1] + inherit_pos[1] - offset[1]]
+        self._cached_draw_pos = pos
         return pos
 
     @property
     def _draw_size(self):
+        if self._cached_draw_size is not None:
+            return self._cached_draw_size
         size = self.size
         if self.parent is None:
-            return self.size
+            return size
         if self.relative.get('size'):
             pdsize = self.parent._draw_size
             size = [
@@ -742,6 +749,7 @@ class Widget():
             size[1] = size[0]
         elif self.copy_height:
             size[0] = size[1]
+        self._cached_draw_size = size
         return size
 
     @property
@@ -909,9 +917,13 @@ class Widget():
 
     def _rebuild_tree(self):
         if self.parent:
+            self._cached_draw_pos = None
+            self._cached_draw_size = None
             self._build_shader()
             for c in self.children:
                 c._rebuild = False
+                c._cached_draw_pos = None
+                c._cached_draw_size = None
                 c._rebuild_tree()
 
     @property

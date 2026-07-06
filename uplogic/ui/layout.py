@@ -210,6 +210,11 @@ class ArrangedLayout(RelativeLayout):
         self._rebuild = False
 
     def _rebuild_tree(self):
+        self._cached_draw_pos = None
+        self._cached_draw_size = None
+        for c in self.children:
+            c._cached_draw_pos = None
+            c._cached_draw_size = None
         self.arrange()
         super()._rebuild_tree()
 

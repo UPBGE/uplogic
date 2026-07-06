@@ -168,6 +168,7 @@ class Label(Widget):
         else:
             self._text = val
             self._spans = None
+        self._cached_draw_pos = None
 
     @property
     def text_halign(self):
@@ -203,6 +204,7 @@ class Label(Widget):
         if isinstance(val, VectorFont):
             val = val.filepath.replace('\\', '/')
         self._font = (val if isinstance(val, int) else blf.load(val)) if val else 0
+        self._cached_draw_pos = None
 
     @property
     def font_color(self):
