@@ -204,10 +204,10 @@ class FileLoader():
             schedule(self.scale_loading_bar)
             self.on_progress(self._status)
             return
-        # XXX: Remove when crashing!
+        # NOTE: Remove when crashing!
         self.object.endObject()
 
-        # XXX: 5.1 need to remove all pointers before removing
+        # TODO: 5.1 need to remove all pointers before removing
             # bpy.data.materials.remove(self.temp_map)
             # bpy.data.meshes.remove(self.bmesh)
             # bpy.data.objects.remove(self.bobj)

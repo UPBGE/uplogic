@@ -46,7 +46,7 @@ class Layout(Widget):
         self._inverted = False
         super().__init__(pos, size, bg_color, relative, halign=halign, valign=valign, angle=angle, show=show)
         self.border_width = border_width
-        self.border_color = border_color
+        self.border_color = Vector(border_color)
         self.start()
 
     @property
@@ -141,6 +141,7 @@ class ArrangedLayout(RelativeLayout):
     Subclasses must implement :meth:`arrange`.  Adding/removing children and
     changes to ``parent`` or ``show`` all trigger a re-arrange automatically.
     '''
+    padding: list
 
     @property
     def inverted(self):
@@ -184,6 +185,12 @@ class ArrangedLayout(RelativeLayout):
         self.arrange()
 
     @property
+    def arranged_size(self):
+        content_size = [self.content_width, self.content_height]
+        padding = self.padding
+        return [content_size[0] + padding[0], content_size[1] + padding[1]]
+
+    @property
     def show(self):
         return self._show
 
@@ -203,6 +210,11 @@ class ArrangedLayout(RelativeLayout):
         self._rebuild = False
 
     def _rebuild_tree(self):
+        self._cached_draw_pos = None
+        self._cached_draw_size = None
+        for c in self.children:
+            c._cached_draw_pos = None
+            c._cached_draw_size = None
         self.arrange()
         super()._rebuild_tree()
 
@@ -234,6 +246,7 @@ class BoxLayout(ArrangedLayout):
     :param spacing: Pixels in between child widgets.
     :param halign: Horizontal alignment of the widget, can be (`left`, `center`, `right`).
     :param valign: Vertical alignment of the widget, can be (`bottom`, `center`, `top`).
+    :param padding: Additional spacing on both axes.
     :param angle: Rotation in degrees of this widget around the pivot defined by the alignment.
     '''
     def __init__(
@@ -250,12 +263,14 @@ class BoxLayout(ArrangedLayout):
         halign: str = 'left',
         valign: str = 'bottom',
         angle=0,
+        padding: list = [0, 0],
         show=True
     ):
         self._arrange_offset = 0
         self._do_arrange = False
         self.orientation = orientation
         self.spacing = spacing
+        self.padding = padding
         self.children_align = ['left', 'bottom']
         super().__init__(pos, size, bg_color, relative, border_width, border_color, halign=halign, valign=valign, angle=angle, show=show)
         self.inverted = inverted
@@ -293,29 +308,53 @@ class BoxLayout(ArrangedLayout):
         }
         xalign = self.children_align[0]
         yalign = self.children_align[1]
+        spacing = self.spacing
+        padding = self.padding
         if self.orientation == 'horizontal':
-            offset = dsize[0] if inverted else 0
+            offset = dsize[0] + spacing if inverted else 0 - spacing
             for widget in filter(lambda widget: widget.show is True, self.children):
                 widget.halign = xalign
                 widget.valign = yalign
                 widget.relative['pos'] = False
                 widget.pos = [offset, dsize[1] - (widget._draw_size[1] * arrange_factor[yalign])]
                 if inverted:
-                    offset -= widget._draw_size[0] + self.spacing
+                    offset -= widget._draw_size[0] + spacing
                 else:
-                    offset += widget._draw_size[0] + self.spacing
+                    offset += widget._draw_size[0] + spacing
         if self.orientation == 'vertical':
-            offset = 0 if inverted else dsize[1]
+            offset = 0 + spacing if inverted else dsize[1] - spacing
             for widget in filter(lambda widget: widget.show is True, self.children):
                 widget.halign = xalign
                 widget.valign = yalign
                 widget.relative['pos'] = False
-                widget.pos = [arrange_factor[xalign] * dsize[0], offset + self._arrange_offset]
+                widget.pos = [arrange_factor[xalign] * dsize[0] + padding[0], offset + self._arrange_offset]
                 if inverted:
-                    offset += widget._draw_size[1] + self.spacing
+                    offset += widget._draw_size[1] + spacing
                 else:
-                    offset -= widget._draw_size[1] + self.spacing
+                    offset -= widget._draw_size[1] + spacing
         self._rebuild = True
+
+    # @property
+    # def size_pixel(self):
+    #     size = super().size_pixel
+    #     if self.orientation == 'horizontal':
+    #         size[0] += self.spacing
+    #     if self.orientation == 'vertical':
+    #         size[1] += self.spacing
+    #     return size
+
+    @property
+    def content_height(self):
+        height = super().content_height
+        height += self.padding[1]
+        return height
+
+    @property
+    def content_width(self):
+        width = super().content_width
+        width += self.padding[0]
+        return width
+
 
     def evaluate(self):
         '''Flush the pending arrange call, then clear the flag.'''

@@ -23,6 +23,7 @@ See :mod:`uplogic.ui.preview` for Blender-editor (bpy) viewport variants.
 try:
     from .button import Button, LabelButton, SpriteButton, ImageButton
     from .cursor import Cursor, remove_custom_cursor, set_custom_cursor
+    from .circle import Circle
     from .image import Image
     from .image import Sprite
     from .image import Video

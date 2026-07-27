@@ -465,8 +465,8 @@ class MouseLook():
             if self.reset_factor < 1:
                 self.obj.localOrientation = self.obj.localOrientation.lerp(self._defaults[0], factor)
                 self.head.localOrientation = self.head.localOrientation.lerp(self._defaults[1], factor)
-                self.reset_factor = interpolate(self.reset_factor, 1, factor)
-                schedule_callback(self.reset, arg=factor)
+                self.reset_factor = interpolate(self.reset_factor, 1, factor, threshold=.0)
+                # schedule_callback(self.reset, arg=factor)
             else:
                 self.reset_factor = 0
                 self.reset()

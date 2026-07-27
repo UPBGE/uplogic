@@ -82,9 +82,19 @@ class Widget():
         ('VEC2', "resolution"),
         ('VEC4', "color"),
         ('VEC4', "border_color"),
-        ('FLOAT', "border_width")
+        ('VEC2', "border_params"),   # x = border_width, y = corner_radius
     ]
-    '''Push-constant uniforms: widget resolution, fill colour, border colour, and border width.'''
+    '''Push-constant uniforms: resolution, fill colour, border colour, and border_params (x=border_width, y=corner_radius).'''
+
+    ubo_constants: list[tuple[str, str]] = []
+    '''Uniform-buffer uniforms declared as a ``WidgetUBO`` struct in the shader.
+
+    Subclasses that need more uniform data than the 128-byte push-constant
+    budget allows can list their uniforms here instead of in :attr:`constants`.
+    Each entry is ``(glsl_type, name)`` using the same type tokens as
+    :attr:`constants` (``'FLOAT'``, ``'VEC2'``, ``'VEC4'``, …).  The base
+    Widget class leaves this empty so push-constant shaders are unaffected.
+    '''
 
     samplers: list[tuple[str, str]] = []
     '''Texture sampler declarations (none for the base Widget).'''
@@ -102,16 +112,29 @@ class Widget():
     fragment_shader: str = '''
         void main()
         {
-            float x_border = border_width / resolution.x;
-            float y_border = border_width / resolution.y;
-            if (uv.x < x_border || uv.x > 1-x_border || uv.y < y_border || uv.y > 1-y_border){
-                FragColor = mix(color, border_color, border_color.a);
-                return;
-            }
-            FragColor = color;
+            float border_width  = border_params.x;
+            float corner_radius = border_params.y;
+
+            vec2 p = (uv - 0.5) * resolution;
+            vec2 b = resolution * 0.5;
+
+            vec2 q = abs(p) - b + corner_radius;
+            float d = length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - corner_radius;
+
+            float outer_a = 1.0 - smoothstep(-1.0, 1.0, d);
+            if (outer_a <= 0.0) discard;
+
+            float r_inner = max(corner_radius - border_width, 0.0);
+            vec2  q2 = abs(p) - (b - border_width) + r_inner;
+            float d2 = length(max(q2, 0.0)) + min(max(q2.x, q2.y), 0.0) - r_inner;
+
+            float in_border = smoothstep(-1.0, 1.0, d2);
+            vec4 col = mix(color, mix(color, border_color, border_color.a), in_border);
+
+            FragColor = vec4(col.rgb, col.a * outer_a);
         }
     '''
-    '''GLSL fragment shader: solid fill with an optional inset border.'''
+    '''GLSL fragment shader: solid fill with an optional inset border and rounded corners.'''
 
     _is_canvas = False
 
@@ -130,8 +153,9 @@ class Widget():
         self._halign = ALIGNMENTS.get('left')
         self._valign = ALIGNMENTS.get('bottom')
         self.child_offset = [0, 0]
-        self.border_color = (0, 0, 0, 0)
+        self.border_color = Vector((0, 0, 0, 0))
         self.border_width = 0
+        self._corner_radius = 0
 
         self.halign = halign
         self.valign = valign
@@ -140,9 +164,11 @@ class Widget():
         self._size = list(size)
         # self.pos = pos
         self._pos = list(pos)
-        self.bg_color = bg_color
+        self.bg_color = Vector(bg_color)
         self.angle = angle
         self._shader = None
+        self._cached_draw_pos = None
+        self._cached_draw_size = None
         self._get_shader()
         self._build_shader()
         self.use_clipping = False
@@ -316,8 +342,8 @@ class Widget():
         v = self._vertices
         if v is None:
             return Vector((0, 0))
-        x0 = Vector(v[0])
-        x1 = Vector(v[1])
+        x1 = Vector(v[0])
+        x0 = Vector(v[1])
         y1 = Vector(v[2])
         y0 = Vector(v[3])
         return Vector(self._get_pivot(x0, x1, y0, y1))
@@ -375,14 +401,34 @@ class Widget():
         return [c for c in self._children if c.show]
 
     @property
-    def bg_color(self):
+    def bg_color(self) -> Vector:
         '''RGBA background fill colour for the full rectangular area of this widget.'''
         return self._bg_color
 
     @bg_color.setter
     def bg_color(self, val):
-        val = list(val)
+        val = Vector(val)
         self._bg_color = val
+
+    @property
+    def border_color(self) -> Vector:
+        '''RGBA background fill colour for the full rectangular area of this widget.'''
+        return self._border_color
+
+    @border_color.setter
+    def border_color(self, val):
+        val = Vector(val)
+        self._border_color = val
+
+    @property
+    def corner_radius(self) -> float:
+        '''Corner rounding radius in screen pixels.  ``0`` = sharp corners (default).'''
+        return self._corner_radius
+
+    @corner_radius.setter
+    def corner_radius(self, val):
+        self._corner_radius = max(0, val)
+        self._rebuild = True
 
     @property
     def parent(self) -> 'Widget':
@@ -635,21 +681,21 @@ class Widget():
     @property
     def next_widget(self):
         '''Next visible sibling in the parent's draw order, or ``None``.'''
-        if self.parent is not None and self in self.parent.children_visible:
-            idx = self.parent.children_visible.index(self)
-            if idx == len(self.parent.children_visible) - 1:
+        if self.parent is not None and self in self.parent.children:
+            idx = self.parent.children.index(self)
+            if idx == len(self.parent.children) - 1:
                 return None
-            return self.parent.children_visible[idx + 1]
+            return self.parent.children[idx + 1]
         return None
 
     @property
     def previous_widget(self):
         '''Previous visible sibling in the parent's draw order, or ``None``.'''
-        if self.parent is not None and self in self.parent.children_visible:
-            idx = self.parent.children_visible.index(self)
+        if self.parent is not None and self in self.parent.children:
+            idx = self.parent.children.index(self)
             if idx == 0:
                 return None
-            return self.parent.children_visible[idx - 1]
+            return self.parent.children[idx - 1]
         return None
 
     # @property
@@ -658,6 +704,8 @@ class Widget():
 
     @property
     def _draw_pos(self):
+        if self._cached_draw_pos is not None:
+            return self._cached_draw_pos
         if self.parent is None:
             return [0, 0]
         inherit_pos = self.parent._draw_pos if self.parent else [0, 0]
@@ -681,13 +729,16 @@ class Widget():
         elif self.valign == ALIGN_TOP:
             offset[1] += dsize[1]
         pos = [pos[0] + inherit_pos[0] - offset[0], pos[1] + inherit_pos[1] - offset[1]]
+        self._cached_draw_pos = pos
         return pos
 
     @property
     def _draw_size(self):
+        if self._cached_draw_size is not None:
+            return self._cached_draw_size
         size = self.size
         if self.parent is None:
-            return self.size
+            return size
         if self.relative.get('size'):
             pdsize = self.parent._draw_size
             size = [
@@ -698,6 +749,7 @@ class Widget():
             size[1] = size[0]
         elif self.copy_height:
             size[0] = size[1]
+        self._cached_draw_size = size
         return size
 
     @property
@@ -814,9 +866,9 @@ class Widget():
         border_color = self.border_color.copy()
         bg_color[3] *= self.opacity
         border_color[3] *= self.opacity
-        self._shader.uniform_float("resolution", (self.width_pixel, self.height_pixel))
+        self._shader.uniform_float("resolution", (abs(self.width_pixel), abs(self.height_pixel)))
         self._shader.uniform_float("border_color", border_color)
-        self._shader.uniform_float("border_width", int(self.border_width))
+        self._shader.uniform_float("border_params", (float(self.border_width), self._corner_radius))
         self._shader.uniform_float("color", bg_color)
 
     def _get_shader(self):
@@ -833,6 +885,14 @@ class Widget():
 
             for constant in self.constants:
                 shader_info.push_constant(constant[0], constant[1])
+
+            if self.ubo_constants:
+                _GLSL = {'FLOAT': 'float', 'VEC2': 'vec2', 'VEC3': 'vec3', 'VEC4': 'vec4', 'MAT4': 'mat4'}
+                struct_src = "struct WidgetUBO {\n" + "".join(
+                    f"    {_GLSL[t]} {n};\n" for t, n in self.ubo_constants
+                ) + "};"
+                shader_info.typedef_source(struct_src)
+                shader_info.uniform_buf(0, "WidgetUBO", "ubo")
 
             for i, sampler in enumerate(self.samplers):
                 shader_info.sampler(i, sampler[0], sampler[1])
@@ -857,9 +917,13 @@ class Widget():
 
     def _rebuild_tree(self):
         if self.parent:
+            self._cached_draw_pos = None
+            self._cached_draw_size = None
             self._build_shader()
             for c in self.children:
                 c._rebuild = False
+                c._cached_draw_pos = None
+                c._cached_draw_size = None
                 c._rebuild_tree()
 
     @property
@@ -886,7 +950,7 @@ class Widget():
         '''Override to add per-frame update logic (called every frame regardless of visibility).'''
         ...
 
-    def add_widget(self, widget):
+    def add_widget(self, widget: 'Widget'):
         '''Attach *widget* as a child of this widget.
 
         :param widget: The :class:`Widget` to add.
@@ -898,6 +962,8 @@ class Widget():
             if self.canvas is not None:
                 self.canvas._set_z(-1)
         self.children = sorted(self.children, key=lambda widget: widget._z, reverse=False)
+        self._rebuild = True
+        widget._rebuild = True
         return widget
 
     def sort_children(self, key=lambda widget: widget._z, reverse=False):
@@ -909,7 +975,7 @@ class Widget():
         self.children.sort(key=key, reverse=reverse)
         self._set_z(self._z - 1)
 
-    def add_widgets(self, *widgets):
+    def add_widgets(self, *widgets: list['Widget']):
         '''Attach multiple widgets as children in one call.
 
         :param widgets: Any number of :class:`Widget` instances to add.
@@ -928,7 +994,7 @@ class Widget():
             _z = c._set_z(_z)
         return _z
 
-    def remove_widget(self, widget):
+    def remove_widget(self, widget: 'Widget'):
         '''Detach *widget* from this widget's children list.
 
         :param widget: The :class:`Widget` to remove.  No-op if not a child.

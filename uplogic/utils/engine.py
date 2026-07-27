@@ -1,6 +1,10 @@
 '''Engine-level descriptor utilities for uplogic.
 '''
 import bge, bpy
+from bge import logic
+from ..events import schedule
+from .math import lerp
+import os
 
 
 class classproperty(object):
@@ -32,6 +36,37 @@ class classproperty(object):
         :returns: The return value of ``self.f(owner)``.
         '''
         return self.f(owner)
+
+
+def add_pre_draw_setup_handler(handler):
+    bge.logic.getCurrentScene().pre_draw_setup.append(handler)
+
+
+def remove_pre_draw_setup_handler(handler):
+    handlers = bge.logic.getCurrentScene().pre_draw_setup
+    if handler in handlers:
+        handlers.remove(handler)
+
+
+def add_pre_draw_handler(handler):
+    bge.logic.getCurrentScene().pre_draw.append(handler)
+
+
+def remove_pre_draw_handler(handler):
+    handlers = bge.logic.getCurrentScene().pre_draw
+    if handler in handlers:
+        handlers.remove(handler)
+
+
+def add_post_draw_handler(handler):
+    bge.logic.getCurrentScene().post_draw.append(handler)
+
+
+def remove_post_draw_handler(handler):
+    handlers = bge.logic.getCurrentScene().post_draw
+    if handler in handlers:
+        handlers.remove(handler)
+
 
 # class Engine(object):
 

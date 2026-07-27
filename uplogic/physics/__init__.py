@@ -18,6 +18,15 @@ Typical usage::
     car = physics.Vehicle(body_obj, stiffness=60, drive=physics.RWD)
     car.accelerate(0.8)
 
+    # motorized vehicle with engine and transmission simulation
+    car = physics.MotorizedVehicle(
+        body_obj,
+        engine=physics.Engine(horsepower=200, displacement=3.0),
+        transmission=physics.Transmission(gears=[3.5, 2.1, 1.4, 1.0, 0.8]),
+        drive=physics.RWD
+    )
+    car.accelerate(0.8)
+
     # collision callback
     physics.on_collision(player, on_hit, prop='Enemy')
 '''
@@ -29,6 +38,9 @@ from .vehicle import FOURWD  # noqa
 from .vehicle import FWD  # noqa
 from .vehicle import RWD  # noqa
 from .vehicle import ULVehicle, Vehicle  # noqa
+from .vehicle import Engine  # noqa
+from .vehicle import Transmission  # noqa
+from .vehicle import MotorizedVehicle  # noqa
 from .character import ULCharacter, Character  # noqa
 from .constraints import create_constraint  # noqa
 from .constraints import remove_constraint  # noqa

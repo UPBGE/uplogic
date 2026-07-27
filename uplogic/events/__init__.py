@@ -46,22 +46,22 @@ def on_post_draw(callback):
     EventManager.update_on.append(callback)
 
 
-class _DeferredCallback:
-    '''Executes *callback* once on the next post-draw tick, then removes
-    itself from the scene's post-draw list automatically.
-    '''
+# class _DeferredCallback:
+#     '''Executes *callback* once on the next post-draw tick, then removes
+#     itself from the scene's post-draw list automatically.
+#     '''
 
-    def callback(self):
-        ...
+#     def callback(self):
+#         ...
 
-    def __init__(self, callback) -> None:
-        self.callback = callback
-        logic.getCurrentScene().post_draw.append(self._call)
+#     def __init__(self, callback) -> None:
+#         self.callback = callback
+#         logic.getCurrentScene().post_draw.append(self._call)
 
-    def _call(self):
-        self.callback()
-        if self._call in logic.getCurrentScene().post_draw:
-            logic.getCurrentScene().post_draw.remove(self._call)
+#     def _call(self):
+#         self.callback()
+#         if self._call in logic.getCurrentScene().post_draw:
+#             logic.getCurrentScene().post_draw.remove(self._call)
 
 
 def later(callback):
@@ -117,7 +117,7 @@ class EventManager:
     callback queue. Not intended for direct use — prefer the module-level
     helper functions (:func:`send`, :func:`receive`, :func:`bind`, etc.).
     '''
-    events = {}
+    events: dict[str, 'Event'] = {}
     bindings = []
     scheduled = []
     done = []
@@ -156,11 +156,13 @@ class EventManager:
             cb()
 
     @classmethod
-    def log(cls):
+    def log(cls, id=None):
         '''Print all currently registered events and their content to stdout.'''
         if cls.events:
-            print('Events:')
+            # print('Events:')
             for evt in cls.events:
+                if id and id != evt:
+                    continue
                 print(f'\t{evt}:\t{cls.events[evt].content}')
 
     @classmethod

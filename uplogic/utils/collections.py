@@ -27,6 +27,30 @@ def assign(game_object: bge.types.KX_GameObject, collection: BColl, exclusive=Tr
     game_object.blenderObject.update_tag()
 
 
+def spawn(name, position=None, rotation=None, scale=None, transform=None, parent_collection=None):
+    inst: bpy.types.Object = bpy.data.objects.new(name=name, object_data=None)
+    if position is not None:
+        inst.location = position
+    if rotation is not None:
+        inst.rotation_euler = rotation
+    if scale is not None:
+        inst.scale = scale
+    if transform is not None:
+        inst.matrix_world = transform
+    inst.instance_type = 'COLLECTION'
+    inst.instance_collection = bpy.data.collections.get(name, None)
+    if inst.instance_collection is None:
+        bpy.data.objects.remove(inst)
+        return
+    parent_collection = parent_collection if parent_collection is not None else bpy.context.collection
+    parent_collection.objects.link(inst)
+    game_obj = logic.getCurrentScene().convertBlenderObject(inst)
+    inst.instance_collection = None
+    inst.instance_type = 'NONE'
+    parent_collection.objects.unlink(inst)
+    return game_obj
+
+
 class Collection:
     '''Wraps a ``bpy.types.Collection`` to provide group-level visibility, physics
     toggling, and state save/restore for all objects in the collection.

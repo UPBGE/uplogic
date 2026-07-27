@@ -68,11 +68,11 @@ class Cursor(Sprite):
     def __init__(self, texture=None, size=(30,30), offset=(0, 0), rows=1, cols=1, idx=0):
         self.offset = offset
         self._idx = idx
-        super().__init__(MOUSE.position, size, cols=cols, rows=rows, idx=idx)
-        remove_custom_cursor()
         self._texture = None
+        super().__init__(MOUSE.position, size, texture=texture, cols=cols, rows=rows, idx=idx)
+        remove_custom_cursor()
         self._shader = None
-        self.texture = texture
+        # self.texture = texture
         self.pos = MOUSE.position
         bge.logic.getCurrentScene().post_draw.append(self._draw_custom_cursor)
         self.start()
@@ -90,6 +90,11 @@ class Cursor(Sprite):
         if self.texture is None:
             super().draw()
             return
+        if self._ubo is None:
+            self._ubo = gpu.types.GPUUniformBuf(self._ubo_data)
+        else:
+            self._ubo.update(self._ubo_data)
+        self._shader.uniform_block("ubo", self._ubo)
         self._shader.uniform_sampler("image", self.texture)
         self._shader.bind()
         self._batch.draw(self._shader)

@@ -84,6 +84,12 @@ from .constants import WHITE
 from .constants import BLACK
 from .constants import ORANGE
 from .constants import GREY
+from .engine import add_pre_draw_setup_handler
+from .engine import add_pre_draw_handler
+from .engine import add_post_draw_handler
+from .engine import remove_pre_draw_setup_handler
+from .engine import remove_pre_draw_handler
+from .engine import remove_post_draw_handler
 from .constants import FPS_FACTOR
 from .constants import DELTA_TIME
 from bge import logic

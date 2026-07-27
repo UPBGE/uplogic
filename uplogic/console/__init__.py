@@ -141,7 +141,7 @@ COLORS = {
 
 class CommandLabel(Label):
     '''Label variant used to render command-echo lines in the console overlay.'''
-    pass
+    ...
 
 
 def set_log_level(level: int = 2) -> None:
@@ -149,6 +149,7 @@ def set_log_level(level: int = 2) -> None:
 
     Messages below the given level are silently discarded.
 
+    ~~~~~~~~
     ====  ==========
     0     No restrictions (all messages)
     1     Debug and above
@@ -157,6 +158,7 @@ def set_log_level(level: int = 2) -> None:
     4     Error and above
     5     Critical only
     ====  ==========
+    ~~~~~~~~
 
     :param level: Log level in the range ``[0, 5]``.
     '''

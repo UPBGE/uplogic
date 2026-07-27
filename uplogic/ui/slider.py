@@ -4,6 +4,7 @@ from .layout import RelativeLayout
 from bge import render
 from uplogic.input.mouse import MOUSE
 from uplogic.utils.math import clamp, map_range
+from mathutils import Vector
 
 
 '''Slider widgets for uplogic UI.'''
@@ -137,7 +138,7 @@ class Slider(RelativeLayout):
 
     @border_color.setter
     def border_color(self, val):
-        self.bar.border_color = (0, 0, 0, 0)
+        self.bar.border_color = val
 
     @property
     def parent(self):
@@ -271,13 +272,13 @@ class FrameSlider(Slider):
             valign='center',
             halign='center',
             relative={'size': True, 'pos': True},
-            border_color=border_color,
+            border_color=Vector(border_color),
             bg_color=bg_color,
             click_color=bg_color,
             border_width=border_width,
             hover_color=bar_hover_color
         )
-        self.border_color = border_color
+        self.border_color = Vector(border_color)
         self.border_width = border_width
         self._slide_axis = 0 if self._horiz else 1
         self._up_axis = 1 if self._horiz else 0
