@@ -25,7 +25,7 @@ Version string is exposed as :data:`__version__` and can be checked
 programmatically with :func:`check_version`.
 '''
 
-__version__ = '5.1.2'
+__version__ = '5.2'
 
 try:
     from . import console

@@ -268,16 +268,16 @@ class Label(Widget):
 
         blf.size(self.font, font_size)
         lines = []
-        current_line = ''
-        for word in self.text.split(' '):
-            candidate = current_line + ' ' + word if current_line else word
-            if blf.dimensions(self.font, candidate)[0] >= max_width:
-                if current_line:
-                    lines.append(current_line)
-                current_line = word
-            else:
-                current_line = candidate
-        if current_line:
+        for paragraph in self.text.split('\n'):
+            current_line = ''
+            for word in paragraph.split(' '):
+                candidate = current_line + ' ' + word if current_line else word
+                if blf.dimensions(self.font, candidate)[0] >= max_width:
+                    if current_line:
+                        lines.append(current_line)
+                    current_line = word
+                else:
+                    current_line = candidate
             lines.append(current_line)
 
         result = '\n'.join(lines)
@@ -307,16 +307,36 @@ class Label(Widget):
         if key == self._wrap_spans_key:
             return self._wrap_spans_cache
 
+        # A token is one "word": a list of (text, color, fid) sub-runs. Word
+        # breaks only happen on an actual space/newline in the source text,
+        # not on a span (tag) boundary — so a colored word immediately
+        # followed by uncoloured punctuation (e.g. "[color=...]shelter[/color],")
+        # stays glued into a single token instead of gaining a spurious gap
+        # when rendered (previously: "shelter" + "," became two tokens, and
+        # the renderer inserts a space between every token, producing
+        # "shelter , greenery" instead of "shelter, greenery").
         tokens = []
+        current_token = []
+
+        def _flush_token():
+            if current_token:
+                tokens.append(list(current_token))
+                current_token.clear()
+
         for span in self._spans:
             fid = span[2] if len(span) > 2 else font
             color = span[1]
             for pi, paragraph in enumerate(span[0].split('\n')):
                 if pi > 0:
+                    _flush_token()
                     tokens.append(None)
-                for word in paragraph.split(' '):
-                    if word:
-                        tokens.append((word, color, fid))
+                parts = paragraph.split(' ')
+                for i, part in enumerate(parts):
+                    if i > 0:
+                        _flush_token()
+                    if part:
+                        current_token.append((part, color, fid))
+        _flush_token()
 
         lines = []
         current_line = []
@@ -329,8 +349,7 @@ class Label(Widget):
                 current_line = []
                 current_w = 0.0
                 continue
-            t, color, fid = token
-            w = blf.dimensions(fid, t)[0]
+            w = sum(blf.dimensions(fid, t)[0] for t, _color, fid in token)
             gap = space_w if current_line else 0.0
             if current_w + gap + w >= max_width and current_line:
                 lines.append(current_line)
@@ -353,9 +372,11 @@ class Label(Widget):
         space_w = blf.dimensions(font, ' ')[0]
         opacity = self.opacity
 
+        def _token_width(token):
+            return sum(blf.dimensions(fid, t)[0] for t, _color, fid in token)
+
         for i, line_tokens in enumerate(lines):
-            total_w = sum(blf.dimensions(t[2] if len(t) > 2 else font, t[0])[0]
-                          for t in line_tokens)
+            total_w = sum(_token_width(tok) for tok in line_tokens)
             total_w += space_w * max(len(line_tokens) - 1, 0)
 
             pos = self._draw_pos.copy()
@@ -381,23 +402,24 @@ class Label(Widget):
             angle_rad = math.radians(self._draw_angle)
             cos_a = math.cos(angle_rad)
             sin_a = math.sin(angle_rad)
-            for j, (word, color, fid) in enumerate(line_tokens):
+            for j, token in enumerate(line_tokens):
                 if j > 0:
                     x += space_w * cos_a
                     y += space_w * sin_a
-                if fid != font:
-                    blf.size(fid, font_size)
-                blf.color(fid, color[0], color[1], color[2], color[3] * opacity)
-                if rotate:
-                    blf.enable(fid, blf.ROTATION)
-                    blf.rotation(fid, angle_rad)
-                blf.position(fid, x, y, 0)
-                blf.draw(fid, word)
-                w = blf.dimensions(fid, word)[0]
-                x += w * cos_a
-                y += w * sin_a
-                if fid != font:
-                    blf.size(font, font_size)
+                for word, color, fid in token:
+                    if fid != font:
+                        blf.size(fid, font_size)
+                    blf.color(fid, color[0], color[1], color[2], color[3] * opacity)
+                    if rotate:
+                        blf.enable(fid, blf.ROTATION)
+                        blf.rotation(fid, angle_rad)
+                    blf.position(fid, x, y, 0)
+                    blf.draw(fid, word)
+                    w = blf.dimensions(fid, word)[0]
+                    x += w * cos_a
+                    y += w * sin_a
+                    if fid != font:
+                        blf.size(font, font_size)
 
     def _draw_spans(self, font, font_size, charsize, padding):
         total_width = sum(
@@ -473,7 +495,7 @@ class Label(Widget):
             if self.wrap:
                 wrapped = self._wrap_spans(parsize, font, font_size)
                 self._draw_wrapped_spans(wrapped, font, font_size, charsize, padding)
-                self.lines = [' '.join(t[0] for t in line) for line in wrapped]
+                self.lines = [' '.join(''.join(sub[0] for sub in tok) for tok in line) for line in wrapped]
             else:
                 self._draw_spans(font, font_size, charsize, padding)
                 self.lines = [self.text]

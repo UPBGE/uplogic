@@ -478,8 +478,8 @@ class MouseLook():
         '''Initialise screen-centre coordinates from the current window dimensions. Not intended for manual use.'''
         self.mouse = logic.mouse
         if self.center_mouse:
-            self.x = render.getWindowWidth()//2
-            self.y = render.getWindowHeight()//2
+            self.x = int(render.getWindowWidth()//2)
+            self.y = int(render.getWindowHeight()//2)
             self.screen_center = (
                 self.x / render.getWindowWidth(),
                 self.y / render.getWindowHeight()
@@ -553,9 +553,12 @@ class MouseLook():
         rot[1-self.front] = offset.y
         if not self.axis_lock[1]:
             game_object_y.applyRotation((*rot, ), True)
-        if self.center_mouse and self.active and (Vector(self.mouse.position) - Vector(self.screen_center)).length > .00001:
+        if self.center_mouse and self.active:# and (Vector(self.mouse.position) - Vector(self.screen_center)).length > .00001:
             self.mouse.position = self.screen_center
             self._old_mouse_pos = self.mouse.position
+            # print(self.screen_center)
+            # print(self.mouse.position)
+            # print('###############')
         elif not self.center_mouse:
             mpos = list(self.mouse.position)
             opos = self._old_mouse_pos

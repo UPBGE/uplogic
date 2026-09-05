@@ -131,20 +131,20 @@ class Button(Widget, HoverBehavior):
         self._hover = self.hover
         if self._hover:
             self._in_focus = True
-            self.on_hover(self)
             self.canvas._hover_consumed = True
+            self.on_hover(self)
         else:
             self._in_focus = False
         if self._in_focus and MOUSE_EVENTS[LMB].active and not self.canvas._click_consumed and not self._down:
+            self.canvas._click_consumed = True
             self.on_click(self)
             self.on_press(self)
             self._clicked = True
-            self.canvas._click_consumed = True
             self._down = True
         elif self._in_focus and MOUSE_EVENTS[RMB].active and not self.canvas._click_consumed and not self._down:
+            self.canvas._click_consumed = True
             self.on_right_click(self)
             self.on_right_press(self)
-            self.canvas._click_consumed = True
             self._down = True
         elif not MOUSE_EVENTS[LMB].active and not MOUSE_EVENTS[RMB].active and self._down:
             self.on_release(self)

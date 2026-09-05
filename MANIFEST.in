@@ -1,5 +1,6 @@
 include *.md
 recursive-include uplogic *
-recursive-exclude src *.pyc *.pyo
+recursive-exclude uplogic *.pyc *.pyo
+recursive-exclude uplogic __pycache__
 prune tests
 prune docs
