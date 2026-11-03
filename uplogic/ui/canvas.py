@@ -54,7 +54,6 @@ class Canvas(Widget):
         self._click_consumed = False
         self._old_width = bge.render.getWindowWidth()
         self._old_height = bge.render.getWindowHeight()
-        self._to_evaluate: list[Widget] = []
         super().__init__((0, 0), (0, 0), show=show)
         self.use_clipping = False
         bge.logic.getCurrentScene().onRemove.append(self.unregister)
@@ -62,12 +61,18 @@ class Canvas(Widget):
         self.start()
 
     def register(self):
-        '''Register :meth:`draw` at the front of the scene ``post_draw`` list.'''
-        # bge.logic.getCurrentScene().pre_draw.insert(0, self.draw)
+        '''Register :meth:`tick` on ``pre_draw`` and :meth:`draw` at the front
+        of the scene ``post_draw`` list.
+        '''
+        bge.logic.getCurrentScene().pre_draw.append(self.tick)
         bge.logic.getCurrentScene().post_draw.insert(0, self.draw)
 
     def unregister(self):
-        '''Remove all references to :meth:`draw` from the scene ``post_draw`` list.'''
+        '''Remove all references to :meth:`tick`/:meth:`draw` from the scene
+        ``pre_draw``/``post_draw`` lists.
+        '''
+        while self.tick in bge.logic.getCurrentScene().pre_draw:
+            bge.logic.getCurrentScene().pre_draw.remove(self.tick)
         while self.draw in bge.logic.getCurrentScene().post_draw:
             bge.logic.getCurrentScene().post_draw.remove(self.draw)
 
@@ -131,14 +136,36 @@ class Canvas(Widget):
     def parent(self, val):
         self._parent = None
 
+    def tick(self):
+        '''Frame entry point registered in ``pre_draw``.
+
+        Walks the widget tree (see :meth:`Widget.walk`), runs
+        :meth:`Widget.evaluate` on every visible widget (hover/click/hold/drag
+        handling), calls :meth:`update` on the canvas itself, then calls
+        :meth:`Widget.update` on every widget. Running this ahead of
+        :meth:`draw` means any ``pos``/``size`` mutation made here (dragging,
+        mouse-follow, world-to-screen tracking, ...) is already current by the
+        time this same frame is rendered, instead of lagging a frame behind.
+        '''
+        if not self.show:
+            return
+        self._hover_consumed = False
+        self._click_consumed = False
+        to_evaluate = list(self.walk())
+        for w in reversed(to_evaluate):
+            if w.parent:
+                w.evaluate()
+        self.update()
+        for w in reversed(to_evaluate):
+            if w.parent:
+                w.update()
+
     def draw(self):
         '''Frame entry point registered in ``post_draw``.
 
         Detects window resizes (calls :meth:`fetch_size` when needed), then
-        iterates the widget tree: calls :meth:`Widget.draw` on each widget,
-        runs :meth:`Widget.evaluate` on all widgets that queued themselves,
-        calls :meth:`update` on the canvas itself, then calls
-        :meth:`Widget.update` on each queued widget in reverse draw order.
+        draws the widget tree (see :meth:`Widget.draw`). Attribute mutation
+        (evaluate/update) happens earlier, in :meth:`tick`.
         '''
         if not self.show:
             return
@@ -150,16 +177,6 @@ class Canvas(Widget):
         self._old_height = height
         gpu.state.blend_set('ALPHA')
         super().draw()
-        self._hover_consumed = False
-        self._click_consumed = False
-        for w in self._to_evaluate.__reversed__():
-            if w.parent:
-                w.evaluate()
-        self.update()
-        while self._to_evaluate:
-            w = self._to_evaluate.pop()
-            if w.parent:
-                w.update()
 
     def update(self):
         '''Override to add per-frame canvas-level logic.'''

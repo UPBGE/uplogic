@@ -1,4 +1,4 @@
-from mathutils import Vector
+from mathutils import Vector, Matrix
 from uplogic.nodes import ULActionNode
 from uplogic.utils.objects import rotate_to
 from uplogic.utils.objects import move_to
@@ -57,7 +57,7 @@ class ULFollowPath(ULActionNode):
             return
         moving_object = self.get_input(self.moving_object)
         rotating_object = self.get_input(self.rotating_object)
-        path_points = self.get_input(self.path_points)
+        path_points: list[Matrix] = self.get_input(self.path_points)
         navmesh_object = self.get_input(self.navmesh_object)
         move_dynamic = self.get_input(self.move_dynamic)
         linear_speed = self.get_input(self.linear_speed)
@@ -96,7 +96,7 @@ class ULFollowPath(ULActionNode):
                 if not has_more:
                     self._done = True
 
-    def generate_path(self, start_position, path_points, navmesh_object, loop):
+    def generate_path(self, start_position, path_points: list[Matrix], navmesh_object, loop):
         if not path_points:
             return self._motion_path.points.clear()
         path = ULFollowPath.MotionPath()
@@ -108,7 +108,7 @@ class ULFollowPath(ULActionNode):
             if loop:
                 path.loop_start = 1
             for p in path_points:
-                points.append(Vector(p))
+                points.append(Vector(p.to_translation()))
         else:
             last = path_points[-1]
             mark_loop_position = loop

@@ -89,6 +89,7 @@ class Layout(Widget):
         # bcol = self.border_color.copy()
         # bcol[3] *= self.opacity
         # self._shader.uniform_float("color", col)
+        self._push_uniforms()
         self._batch.draw(self._shader)
         # self._shader.uniform_float("color", bcol)
         # self._batch_line.draw(self._shader)
@@ -197,6 +198,7 @@ class ArrangedLayout(RelativeLayout):
     @show.setter
     def show(self, val):
         if val != self._show:
+            # print(self.children)
             self._show = val
             if val:
                 for child in self.children_visible:
@@ -205,6 +207,8 @@ class ArrangedLayout(RelativeLayout):
 
     def _setup_draw(self):
         if self._rebuild:
+            self._cached_draw_pos = None
+            self._cached_draw_size = None
             self._build_shader()
             self.arrange()
         self._rebuild = False
@@ -221,10 +225,23 @@ class ArrangedLayout(RelativeLayout):
     def add_widget(self, widget) -> 'Widget':
         super().add_widget(widget)
         self.arrange()
+        self._rebuild = True
         return widget
     
     def remove_widget(self, widget):
         super().remove_widget(widget)
+        self.arrange()
+        self._rebuild = True
+
+    def on_size(self):
+        '''Re-run :meth:`arrange` whenever this layout's own size changes.
+
+        Without this, resizing a layout directly (e.g. ``self.height =
+        self.content_height`` every frame) only updates ``self._size`` and
+        schedules a shader rebuild — it never repositions children, since
+        :meth:`arrange` is otherwise only triggered by add/remove/parent/show
+        changes.
+        '''
         self.arrange()
 
     def arrange(self):
@@ -272,6 +289,7 @@ class BoxLayout(ArrangedLayout):
         self.spacing = spacing
         self.padding = padding
         self.children_align = ['left', 'bottom']
+        self.auto_scale_mode = 0  # 0 = None, 1 = self, 2 = children
         super().__init__(pos, size, bg_color, relative, border_width, border_color, halign=halign, valign=valign, angle=angle, show=show)
         self.inverted = inverted
         self.use_clipping = False
@@ -293,6 +311,18 @@ class BoxLayout(ArrangedLayout):
     def arrange(self):
         '''Schedule a deferred child re-arrangement for the next :meth:`evaluate` call.'''
         self._do_arrange = True
+
+    def _auto_scale(self):
+        if self.auto_scale_mode == 0:
+            return
+        children = self.children_visible
+        scale_factor = 1 / len(children) if len(children) else 1
+        for widget in children:
+            if self.auto_scale_mode == 2:
+                widget.relative['size'] = False
+                px = self.size_pixel
+                widget.width = px[0] * (scale_factor if self.orientation == 'horizontal' else 1)
+                widget.height = px[1] * (scale_factor if self.orientation == 'vertical' else 1)
 
     def _arrange(self):
         inverted = self.inverted
@@ -317,6 +347,7 @@ class BoxLayout(ArrangedLayout):
                 widget.valign = yalign
                 widget.relative['pos'] = False
                 widget.pos = [offset, dsize[1] - (widget._draw_size[1] * arrange_factor[yalign])]
+                widget._rebuild = True
                 if inverted:
                     offset -= widget._draw_size[0] + spacing
                 else:
@@ -328,20 +359,13 @@ class BoxLayout(ArrangedLayout):
                 widget.valign = yalign
                 widget.relative['pos'] = False
                 widget.pos = [arrange_factor[xalign] * dsize[0] + padding[0], offset + self._arrange_offset]
+                widget._rebuild = True
                 if inverted:
                     offset += widget._draw_size[1] + spacing
                 else:
                     offset -= widget._draw_size[1] + spacing
+        self._auto_scale()
         self._rebuild = True
-
-    # @property
-    # def size_pixel(self):
-    #     size = super().size_pixel
-    #     if self.orientation == 'horizontal':
-    #         size[0] += self.spacing
-    #     if self.orientation == 'vertical':
-    #         size[1] += self.spacing
-    #     return size
 
     @property
     def content_height(self):
@@ -354,7 +378,6 @@ class BoxLayout(ArrangedLayout):
         width = super().content_width
         width += self.padding[0]
         return width
-
 
     def evaluate(self):
         '''Flush the pending arrange call, then clear the flag.'''
@@ -503,7 +526,7 @@ class GridLayout(BoxLayout):
             self.arrange()
 
     def arrange(self):
-        dsize = self.size_pixel
+        dsize = self.size
         idx = 0
         _widget_sizes = []
         if self.orientation == 'horizontal':
@@ -515,6 +538,7 @@ class GridLayout(BoxLayout):
                 widget.relative['pos'] = False
                 wsize = widget._draw_size
                 widget.pos = [offset, dsize[1] - wsize[1] - offset_y]
+                widget._rebuild = True
                 _widget_sizes.append(widget._draw_size[1])
                 offset += wsize[0] + self.spacing
                 idx += 1
@@ -533,6 +557,7 @@ class GridLayout(BoxLayout):
                 widget.relative['pos'] = False
                 wsize = widget._draw_size
                 widget.pos = [offset_x, dsize[1] - wsize[1] - offset]
+                widget._rebuild = True
                 _widget_sizes.append(widget._draw_size[0])
                 offset += wsize[1] + self.spacing
                 idx += 1
@@ -542,7 +567,6 @@ class GridLayout(BoxLayout):
                     _offset_x = max(_widget_sizes)
                     _widget_sizes = []
                     offset = 0
-        self._rebuild = True
 
 
 class PolarLayout(ArrangedLayout):

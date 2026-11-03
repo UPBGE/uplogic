@@ -56,6 +56,7 @@ class ImageHandler:
         if isinstance(texture, bpy.types.Image):
             self.image = texture
             self.texture = texture.name
+            
         elif texture is not None and texture not in bpy.data.images and isfile(texture):
             self.image = bpy.data.images.load(texture)
             self.texture = texture
@@ -244,8 +245,9 @@ class ImageHandler:
         the loaded image.  Call before discarding the handler to avoid GPU
         memory leaks.
         '''
-        self.image.gl_free()
-        self.image.buffers_free()
+        if self.image is not None:
+            self.image.gl_free()
+            self.image.buffers_free()
 
     def stop(self):
         '''Stop playback, free GPU/CPU image buffers, and stop the audio track.'''

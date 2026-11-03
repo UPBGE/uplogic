@@ -62,6 +62,7 @@ class Layout(Widget):
         col[3] *= self.opacity
         bcol = self.border_color.copy()
         bcol[3] *= self.opacity
+        self._push_uniforms()
         self._shader.uniform_float("color", col)
         self._batch.draw(self._shader)
         self._shader.uniform_float("color", bcol)

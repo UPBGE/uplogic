@@ -121,7 +121,8 @@ def draw_box(origin: Vector, width: float, length: float, height: float, color: 
         origin = origin.worldPosition.copy()
         origin -= obj.worldPosition
         centered = True
-    else:
+    elif not isinstance(origin, Vector):
+        print(origin)
         origin = Vector(origin)
     if centered:
         origin = origin.copy() - Vector((width * .5, length * .5, height * .5))

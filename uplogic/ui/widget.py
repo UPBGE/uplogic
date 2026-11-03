@@ -47,6 +47,16 @@ ALIGNMENTS = {
 '''Mapping from alignment name strings to their integer constants.'''
 
 
+_SHADER_CACHE = {}
+'''Compiled widget shaders, keyed by shader definition.
+
+Widgets with identical shader definitions share one compiled shader, so
+uniforms are per shader rather than per widget: each widget stores its own
+values (see :meth:`Widget._set_uniforms`) and re-pushes them before drawing
+(see :meth:`Widget._push_uniforms`).
+'''
+
+
 class Widget():
     '''Base class for all uplogic UI elements.
 
@@ -167,6 +177,7 @@ class Widget():
         self.bg_color = Vector(bg_color)
         self.angle = angle
         self._shader = None
+        self._uniforms = None
         self._cached_draw_pos = None
         self._cached_draw_size = None
         self._get_shader()
@@ -822,7 +833,7 @@ class Widget():
             y0 = rotate2d(y0, pivot, self._draw_angle)
             y1 = rotate2d(y1, pivot, self._draw_angle)
         vertices = [x1, x0, y1, y0]
-        if self.parent and self.parent.use_clipping:
+        if self.parent and self.use_clipping:
             clip = self.clipping
             for vert in vertices:
                 if vert[0] < clip[0]:
@@ -866,13 +877,41 @@ class Widget():
         border_color = self.border_color.copy()
         bg_color[3] *= self.opacity
         border_color[3] *= self.opacity
-        self._shader.uniform_float("resolution", (abs(self.width_pixel), abs(self.height_pixel)))
-        self._shader.uniform_float("border_color", border_color)
-        self._shader.uniform_float("border_params", (float(self.border_width), self._corner_radius))
-        self._shader.uniform_float("color", bg_color)
+        self._uniforms = (
+            ("resolution", (abs(self.width_pixel), abs(self.height_pixel))),
+            ("border_color", tuple(border_color)),
+            ("border_params", (float(self.border_width), self._corner_radius)),
+            ("color", tuple(bg_color)),
+        )
+        self._push_uniforms()
+
+    def _push_uniforms(self):
+        '''Upload the uniform values stored by :meth:`_set_uniforms` to the
+        (shared) shader.  Call right before drawing this widget's batch.'''
+        if self._uniforms is None:
+            return
+        shader = self._shader
+        for name, value in self._uniforms:
+            shader.uniform_float(name, value)
+
+    def _shader_key(self):
+        return (
+            tuple(map(tuple, self.vertex_in)),
+            tuple(map(tuple, self.interfaces)),
+            tuple(map(tuple, self.constants)),
+            tuple(map(tuple, self.ubo_constants)),
+            tuple(map(tuple, self.samplers)),
+            self.vertex_shader,
+            self.fragment_shader,
+        )
 
     def _get_shader(self):
         if self._shader is None:
+            key = self._shader_key()
+            shader = _SHADER_CACHE.get(key)
+            if shader is not None:
+                return shader
+
             shader_info = gpu.types.GPUShaderCreateInfo()
 
             for i, vertex_in in enumerate(self.vertex_in):
@@ -907,6 +946,7 @@ class Widget():
 
             matrix = gpu.matrix.get_projection_matrix()
             shader.uniform_float("ModelViewProjectionMatrix", matrix)
+            _SHADER_CACHE[key] = shader
             return shader
         return self._shader
 
@@ -937,10 +977,22 @@ class Widget():
         Calling it manually is valid but increases per-frame GPU work.
         '''
         gpu.state.blend_set('ALPHA')
-        self.canvas._to_evaluate.append(self)
         for widget in self.children:
             if widget.show:
                 widget.draw()
+
+    def walk(self):
+        '''Depth-first, self-before-children traversal of this widget and its
+        visible descendants.
+
+        Mirrors the order in which :meth:`draw` visits the tree, without
+        performing any GPU work — used by :class:`~uplogic.ui.canvas.Canvas`
+        to run :meth:`evaluate`/:meth:`update` ahead of drawing.
+        '''
+        yield self
+        for c in self.children:
+            if c.show:
+                yield from c.walk()
 
     def evaluate(self):
         '''Override to add per-frame logic that runs after the draw call (e.g. input handling).'''

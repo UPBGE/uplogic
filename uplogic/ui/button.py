@@ -113,38 +113,39 @@ class Button(Widget, HoverBehavior):
 
     def draw(self):
         self._setup_draw()
-        self._released = False
         col = self.override_color if self.override_color is not None else self.current_color
         col[3] *= self.opacity
+        self._push_uniforms()
         self._shader.uniform_float("color", col)
-        self._clicked = False
         self._batch.draw(self._shader)
         super().draw()
 
     def evaluate(self):
+        self._clicked = False
+        self._released = False
         is_hover = self.hover
         was_hover = self._hover
         if is_hover and not was_hover:
             self.on_enter(self)
         elif was_hover and not is_hover:
             self.on_exit(self)
-        self._hover = self.hover
+        self._hover = is_hover
         if self._hover:
             self._in_focus = True
-            self.on_hover(self)
             self.canvas._hover_consumed = True
+            self.on_hover(self)
         else:
             self._in_focus = False
         if self._in_focus and MOUSE_EVENTS[LMB].active and not self.canvas._click_consumed and not self._down:
+            self.canvas._click_consumed = True
             self.on_click(self)
             self.on_press(self)
             self._clicked = True
-            self.canvas._click_consumed = True
             self._down = True
         elif self._in_focus and MOUSE_EVENTS[RMB].active and not self.canvas._click_consumed and not self._down:
+            self.canvas._click_consumed = True
             self.on_right_click(self)
             self.on_right_press(self)
-            self.canvas._click_consumed = True
             self._down = True
         elif not MOUSE_EVENTS[LMB].active and not MOUSE_EVENTS[RMB].active and self._down:
             self.on_release(self)
@@ -379,9 +380,10 @@ class ImageButton(Button, HoverBehavior):
         show=True
     ):
         super().__init__(pos, size, bg_color, relative, halign=halign, valign=valign, angle=angle, on_press=on_press, hover_color=hover_color, border_color=border_color, click_color=click_color, show=show)
-        self.image = Image(relative={'size': True}, size=(1, 1), texture=texture)
+        self.image = Image(texture=texture, halign='center', valign='center', relative={'pos': True}, pos=(.5, .5))
         self._texture_name = texture
         self.idle_texture = texture
+        self.texture_size = 1
         self.hover_texture = hover_texture if hover_texture else texture
         self.click_texture = click_texture if click_texture else texture
         self.add_widget(self.image)
@@ -406,6 +408,8 @@ class ImageButton(Button, HoverBehavior):
     def evaluate(self):
         super().evaluate()
         tex = self.current_texture
+        side = min(self.size_pixel) * self.texture_size
+        self.image.size = [side, side]
         if self._texture_name != tex:
             self.texture = tex
 

@@ -185,11 +185,11 @@ class Filter2D():
         '''Enable the filter and register the :meth:`update` post-draw callback.
 
         Sets ``self._filter.enabled`` to ``True`` and appends :meth:`update`
-        to the current scene's ``post_draw`` list when uniforms are present.
+        to the current scene's ``pre_draw`` list when uniforms are present.
         '''
         self._filter.enabled = True
         if self._uniforms.keys():
-            logic.getCurrentScene().post_draw.append(self.update)
+            logic.getCurrentScene().pre_draw.append(self.update)
 
     def update(self):
         '''Push current uniform values to the shader each frame.
@@ -205,11 +205,11 @@ class Filter2D():
         '''Disable the filter and unregister the :meth:`update` post-draw callback.
 
         Sets ``self._filter.enabled`` to ``False`` and removes :meth:`update`
-        from the current scene's ``post_draw`` list if present.
+        from the current scene's ``pre_draw`` list if present.
         '''
         self._filter.enabled = False
-        if self.update in logic.getCurrentScene().post_draw:
-            logic.getCurrentScene().post_draw.remove(self.update)
+        if self.update in logic.getCurrentScene().pre_draw:
+            logic.getCurrentScene().pre_draw.remove(self.update)
 
     def shutdown(self):
         '''Disable the filter, remove it from the manager and the registry.
