@@ -35,4 +35,4 @@ class DistributeCurvePointsNode(ULActionNode):
             self._done = True
         if self.debug:
             for x in self._points:
-                draw_cube(x, centered=True, width=.2)
+                draw_cube(x.to_translation(), centered=True, width=.2)

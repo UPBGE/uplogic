@@ -9,7 +9,6 @@ from uplogic.handlers.imagehandler import ImageHandler
 from uplogic.utils import clamp
 
 
-
 '''Image, sprite-sheet, and video widgets for uplogic UI.'''
 
 

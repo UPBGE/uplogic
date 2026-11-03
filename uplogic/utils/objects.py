@@ -975,7 +975,7 @@ class Curve(GameObject):
         eval_obj = self.eval_obj
         self.blenderObject.data.eval_time = self.path_duration * factor
         bpy.context.view_layer.update()
-        matrix = eval_obj.matrix_local
+        matrix = eval_obj.matrix_local.copy()
         if not self.use_evaluate:
             bpy.data.objects.remove(eval_obj)
         self.blenderObject.data.eval_time = time

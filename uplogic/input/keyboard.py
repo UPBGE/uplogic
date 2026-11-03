@@ -24,16 +24,20 @@ class DummyInput:
     released = False
 
 
-def key_event(key: str) -> SCA_InputEvent:
+def key_event(key: str, force=False) -> SCA_InputEvent:
     '''Look up and return the raw ``SCA_InputEvent`` for *key*.
 
     Not intended for direct use; call :func:`key_tap`, :func:`key_down`, etc. instead.
 
     :param key: Key name string (e.g. ``'A'``, ``'SPACE'``, ``'F12'``) or a
         ``bge.events`` integer constant.
+    :param force: If True, input ignores active consoles.
     :returns: The :class:`~bge.types.SCA_InputEvent` for the key, or ``0`` if
         the key name is not recognised.
     '''
+    _console = console.get_console()
+    if _console is not None and not force and _console.active:
+        return DummyInput()
     if isinstance(key, int):
         key = KEYBOARD_EVENTS.get(key, DummyInput())
     else:
@@ -85,57 +89,62 @@ def pad_event(key: str) -> bool:
         return 0
 
 
-def key_tap(key: str) -> bool:
+def key_tap(key: str, force=False) -> bool:
     '''Return ``True`` on the single frame a key is first pressed.
 
     :param key: Key name string (e.g. ``'A'``, ``'SPACE'``, ``'F12'``) or a
         ``bge.events`` integer constant.
+    :param force: If True, input ignores active consoles.
     :returns: ``True`` on the activation frame, ``False`` otherwise.
     '''
-    return key_event(key).activated
+    return key_event(key, force=force).activated
 
 
-def key_down(key: str) -> bool:
+def key_down(key: str, force=False) -> bool:
     '''Return ``True`` while a key is held down (including the first frame).
 
     :param key: Key name string or ``bge.events`` integer constant.
+    :param force: If True, input ignores active consoles.
     :returns: ``True`` while the key is active or activated.
     '''
-    key = key_event(key)
+    key = key_event(key, force=force)
     return key.active or key.activated
 
 
-def key_press(key: str, down=False):
+def key_press(key: str, down=False, force=False):
     '''Return ``True`` when a key is tapped, or (when *down* is ``True``) also
     while it is held.
 
     :param key: Key name string or ``bge.events`` integer constant.
     :param down: When ``True``, also return ``True`` while the key is held.
+    :param force: If True, input ignores active consoles.
     :returns: ``True`` on activation, or while active when *down* is ``True``.
     '''
-    key = key_event(key)
+    key = key_event(key, force=force)
     return key.active or key.activated if down else key.activated
 
 
 
-def key_up(key: str) -> bool:
+def key_up(key: str, force=False) -> bool:
     '''Return ``True`` on the single frame a key is released.
 
     :param key: Key name string or ``bge.events`` integer constant.
+    :param force: If True, input ignores active consoles.
     :returns: ``True`` on the release frame, ``False`` otherwise.
     '''
-    return key_event(key).released
+    return key_event(key, force=force).released
 
 
-def key_pulse(key: str, time: float = .4) -> bool:
+def key_pulse(key: str, time: float = .4, force=False) -> bool:
     '''Return ``True`` on the first press and again once the key has been held
     for more than *time* seconds (useful for auto-repeat, e.g. scrolling).
 
     :param key: Key name string or ``bge.events`` integer constant.
     :param time: Hold duration in seconds before continuous activation begins.
+    :param force: If True, input ignores active consoles.
     :returns: ``True`` on the tap frame or while held past *time*.
     '''
-    evt = key_event(key)
+    evt = key_event(key, force=force)
     if evt.activated:
         _keys_active[key] = 0
         return True

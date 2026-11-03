@@ -8,7 +8,7 @@ def read_file(name):
         return f.read()
 
 
-version = '5.1.2'
+version = '5.2'
 shortdesc = "Uplogic utility for UPBGE."
 longdesc = '\n\n'.join([read_file(name) for name in [
     'README.md',
@@ -22,7 +22,6 @@ setup(
     description=shortdesc,
     long_description=longdesc,
     classifiers=[
-        'License :: OSI Approved :: GNU General Public License v2 (GPLv2)',
         'Intended Audience :: Developers',
         'Topic :: Multimedia :: Graphics',
         'Programming Language :: Python',
@@ -32,7 +31,7 @@ setup(
     author_email='lauersperg@gmx.at',
     url='https://github.com/UPBGE/uplogic',
     download_url=f'https://github.com/UPBGE/uplogic/archive/refs/tags/{version}.tar.gz',
-    license='GPLv2',
+    license='GPL-2.0-only',
     packages=[
         'uplogic',
         'uplogic.ai',

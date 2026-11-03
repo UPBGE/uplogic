@@ -21,7 +21,7 @@ The module is enabled automatically when the ``bge_netlogic`` add-on is
 present and ``use_screen_console`` is set on the scene.
 '''
 
-from bge import logic, render
+from bge import logic, render, events
 from io import StringIO
 from uplogic.ui.canvas import Canvas
 from uplogic.ui.layout import RelativeLayout
@@ -433,8 +433,8 @@ class ConsoleLayout(Canvas):
         '''
         if self.input.edit != self.show:
             self.input.edit = self.show
-        move_goback = key_pulse('UPARROW') - key_pulse('DOWNARROW')
-        if key_down(self.toggle_key):
+        move_goback = key_pulse('UPARROW', force=True) - key_pulse('DOWNARROW', force=True)
+        if key_down(self.toggle_key, force=True):
             self.toggle()
         elif not self.show:
             self._toggle_key = False

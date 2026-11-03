@@ -10,6 +10,48 @@ from uplogic.events import schedule
 import time
 
 
+_VERTEX_SOURCE = '''
+    void main()
+    {
+        vec4 tpos = vec4(particle_transform + position, 1.0f);
+        pos = tpos.xyz;
+        gl_Position = viewProjectionMatrix * tpos;
+    }
+'''
+
+_FRAGMENT_SOURCE = '''
+    void main()
+    {
+        fragColor = vec4(0.7);
+    }
+'''
+
+_shader = None
+'''Shader shared by all particles (each draw sets its own uniforms).
+
+Compiled once and never freed: dropping a ``GPUShader`` that is still bound
+leaves the GPU context pointing at freed memory, which crashes in Blender 5.2+
+the next time an image texture generates mipmaps.
+'''
+
+
+def _get_shader():
+    global _shader
+    if _shader is None:
+        info = gpu.types.GPUShaderCreateInfo()
+        info.vertex_in(0, 'VEC3', 'position')
+        pos_out = gpu.types.GPUStageInterfaceInfo('particle_interface')
+        pos_out.smooth('VEC3', 'pos')
+        info.vertex_out(pos_out)
+        info.push_constant('MAT4', 'viewProjectionMatrix')
+        info.push_constant('VEC3', 'particle_transform')
+        info.fragment_out(0, 'VEC4', 'fragColor')
+        info.vertex_source(_VERTEX_SOURCE)
+        info.fragment_source(_FRAGMENT_SOURCE)
+        _shader = gpu.shader.create_from_info(info)
+    return _shader
+
+
 def batch_for_shader(shader, type, content, *, indices=None):
     """
     Return a batch already configured and compatible with the shader.
@@ -85,40 +127,7 @@ class Particle:
     def __init__(self, system):
         self.system = system
 
-        vert_out = gpu.types.GPUStageInterfaceInfo("my_interface")
-        vert_out.smooth('VEC3', "pos")
-
-        self.vertex_shader = """
-        
-        in vec3 position;
-        
-        uniform mat4 viewProjectionMatrix;
-        uniform vec3 particle_transform;
-
-        out vec3 pos;
-
-        void main()
-        {
-            vec4 tpos = vec4(particle_transform + position, 1.0f);
-            gl_Position = viewProjectionMatrix * tpos;
-        }
-        """
-
-        self.fragment_shader = """
-        out vec4 fragColor;
-
-        void main()
-        {
-            fragColor = vec4(0.7);
-        }
-        """
-
-        self.shader = gpu.types.GPUShader(self.vertex_shader, self.fragment_shader)
-        self.shader.bind()
-
-        # self.shader = gpu.shader.create_from_info(shader_info)
-        # del vert_out
-        # del shader_info
+        self.shader = _get_shader()
 
         scale = uniform(system.size - system.size_random, system.size + system.size_random) * .5
         self.life_random = uniform(-system.life, system.life)

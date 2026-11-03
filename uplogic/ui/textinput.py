@@ -9,6 +9,17 @@ import math
 from uplogic.events import schedule
 
 
+class _Cursor(Layout):
+
+    @property
+    def use_clipping(self):
+        return False
+
+    @use_clipping.setter
+    def use_clipping(self, val):
+        self._use_clipping = False
+
+
 class TextInput(Label):
     '''Editable text widget.
 
@@ -55,9 +66,12 @@ class TextInput(Label):
         self._edit = False
         self.lines = None
         self.cursor_evt = None
-        self.cursor = Layout(bg_color=(1, 1, 1, 1), size=(0, 0), relative={'pos': False})
+        self.cursor = _Cursor(bg_color=(1, 1, 1, 1), size=(0, 0), relative={'pos': False})
         self.cursor_flash_time = .5
         Label.__init__(self, pos=pos, relative=relative, text=text, font=font, font_color=font_color, font_size=font_size, line_height=line_height, shadow=shadow, shadow_offset=shadow_offset, shadow_color=shadow_color, halign=halign, valign=valign, wrap=wrap, angle=angle)
+        self.relative = {**relative, 'size': True}
+        self.size = [1, 1]
+        # self.cursor.draw = self.cudraw
         self.add_widget(self.cursor)
         self.cursor.show = False
         self._key_evts = {}
@@ -83,6 +97,8 @@ class TextInput(Label):
 
     @edit.setter
     def edit(self, val):
+        if val == self._edit:
+            return
         if val:
             if not self._edit:
                 self.index = len(self.text)
@@ -109,7 +125,7 @@ class TextInput(Label):
         character_index = val
         line_index = 0
         for line in self.lines:
-            if character_index > len(line) and (line != '' or line_index != len(self.lines)):
+            if character_index > len(line) + 1 and (line != '' or line_index != len(self.lines)):
                 line_index += 1
                 character_index -= len(line) + 1
             else:
@@ -167,6 +183,8 @@ class TextInput(Label):
 
     def _set_cursor_position(self):
         dsize = self._current_char_pos
+        if not len(self.lines):
+            return
         dim = blf.dimensions(self.font, self.lines[self.line_index])
         charsize = blf.dimensions(self.font, 'A')
         if self.text_halign == 'center':
@@ -178,7 +196,7 @@ class TextInput(Label):
         if self.text_valign == 'top':
             dsize[1] *= -1
         self.cursor.pos[0] = dsize[0]
-        self.cursor.pos[1] = 0
+        self.cursor.pos[1] = -dsize[1] * .5
         self.cursor.height = self.font_size * .9
         self.cursor.width = 1
 
@@ -257,8 +275,11 @@ class TextInput(Label):
     def move_cursor(self, line, position):
         raise NotImplementedError
 
-    def draw(self):
+    def walk(self):
         if self.edit:
             self._listen()
-        super().draw()
         self._set_cursor_position()
+        return super().walk()
+
+    def draw(self):
+        super().draw()
